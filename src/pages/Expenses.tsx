@@ -20,6 +20,15 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { he } from 'date-fns/locale';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { 
+  Table, 
+  TableBody, 
+  TableCaption, 
+  TableCell, 
+  TableHead, 
+  TableHeader, 
+  TableRow
+} from '@/components/ui/table';
 
 // Define form schema
 const formSchema = z.object({
@@ -121,7 +130,7 @@ const Expenses = () => {
   const totalExpenses = expenses.reduce((total, expense) => total + parseFloat(expense.amount), 0);
 
   return (
-    <div className="space-y-6" dir="rtl">
+    <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">ניהול הוצאות</h1>
         <div className="flex gap-2">
@@ -311,73 +320,71 @@ const Expenses = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-lg">סה"כ הוצאות</CardTitle>
-            <CardDescription>סה"כ ההוצאות החודשיות</CardDescription>
+            <CardTitle className="text-lg text-right">סה"כ הוצאות</CardTitle>
+            <CardDescription className="text-right">סה"כ ההוצאות החודשיות</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">₪{totalExpenses.toFixed(2)}</div>
+            <div className="text-2xl font-bold text-right">₪{totalExpenses.toFixed(2)}</div>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-lg">קטגוריה מובילה</CardTitle>
-            <CardDescription>קטגוריית ההוצאה הגבוהה ביותר</CardDescription>
+            <CardTitle className="text-lg text-right">קטגוריה מובילה</CardTitle>
+            <CardDescription className="text-right">קטגוריית ההוצאה הגבוהה ביותר</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">שכירות</div>
+            <div className="text-2xl font-bold text-right">שכירות</div>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-lg">חשבוניות שהועלו</CardTitle>
-            <CardDescription>מספר החשבוניות שהועלו למערכת</CardDescription>
+            <CardTitle className="text-lg text-right">חשבוניות שהועלו</CardTitle>
+            <CardDescription className="text-right">מספר החשבוניות שהועלו למערכת</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{expenses.filter(e => e.hasInvoice).length}</div>
+            <div className="text-2xl font-bold text-right">{expenses.filter(e => e.hasInvoice).length}</div>
           </CardContent>
         </Card>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>הוצאות אחרונות</CardTitle>
-          <CardDescription>רשימת ההוצאות האחרונות של העסק</CardDescription>
+          <CardTitle className="text-right">הוצאות אחרונות</CardTitle>
+          <CardDescription className="text-right">רשימת ההוצאות האחרונות של העסק</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="relative overflow-x-auto">
-            <table className="w-full text-sm text-right">
-              <thead className="text-xs uppercase bg-muted">
-                <tr>
-                  <th scope="col" className="px-6 py-3">תאריך</th>
-                  <th scope="col" className="px-6 py-3">ספק</th>
-                  <th scope="col" className="px-6 py-3">קטגוריה</th>
-                  <th scope="col" className="px-6 py-3">תיאור</th>
-                  <th scope="col" className="px-6 py-3">סכום</th>
-                  <th scope="col" className="px-6 py-3">חשבונית</th>
-                </tr>
-              </thead>
-              <tbody>
-                {expenses.map((expense) => (
-                  <tr key={expense.id} className="bg-card border-b">
-                    <td className="px-6 py-4">{format(expense.date, "dd/MM/yyyy")}</td>
-                    <td className="px-6 py-4">{expense.vendor}</td>
-                    <td className="px-6 py-4">{expense.category}</td>
-                    <td className="px-6 py-4">{expense.description || "—"}</td>
-                    <td className="px-6 py-4 font-medium">₪{parseFloat(expense.amount).toFixed(2)}</td>
-                    <td className="px-6 py-4">
-                      {expense.hasInvoice ? (
-                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                          <FileText className="h-4 w-4" />
-                        </Button>
-                      ) : (
-                        <span className="text-muted-foreground">אין</span>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="text-right">תאריך</TableHead>
+                <TableHead className="text-right">ספק</TableHead>
+                <TableHead className="text-right">קטגוריה</TableHead>
+                <TableHead className="text-right">תיאור</TableHead>
+                <TableHead className="text-right">סכום</TableHead>
+                <TableHead className="text-right">חשבונית</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {expenses.map((expense) => (
+                <TableRow key={expense.id}>
+                  <TableCell className="text-right">{format(expense.date, "dd/MM/yyyy")}</TableCell>
+                  <TableCell className="text-right">{expense.vendor}</TableCell>
+                  <TableCell className="text-right">{expense.category}</TableCell>
+                  <TableCell className="text-right">{expense.description || "—"}</TableCell>
+                  <TableCell className="text-right font-medium">₪{parseFloat(expense.amount).toFixed(2)}</TableCell>
+                  <TableCell className="text-right">
+                    {expense.hasInvoice ? (
+                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                        <FileText className="h-4 w-4" />
+                      </Button>
+                    ) : (
+                      <span className="text-muted-foreground">אין</span>
+                    )}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         </CardContent>
       </Card>
     </div>
