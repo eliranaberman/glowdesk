@@ -1,8 +1,9 @@
-
 import { CalendarClock, Users, DollarSign, TrendingUp } from 'lucide-react';
 import StatCard from '../components/dashboard/StatCard';
 import DailySummary from '../components/dashboard/DailySummary';
 import RecentAppointments from '../components/dashboard/RecentAppointments';
+import { Link } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
 
 const Dashboard = () => {
   // Dummy data
@@ -75,6 +76,22 @@ const Dashboard = () => {
             <h3 className="font-medium">עדכון מלאי</h3>
             <p className="text-sm text-muted-foreground">רישום מוצרים חדשים או חוסרים</p>
           </div>
+        </div>
+      </div>
+
+      <div className="bg-purple-50 border border-purple-200 rounded-lg p-6">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between">
+          <div className="mb-4 md:mb-0">
+            <h2 className="text-xl font-semibold text-purple-800 mb-2">מערכת קביעת פגישות אונליין</h2>
+            <p className="text-muted-foreground">
+              אפשרו ללקוחות שלכם לקבוע פגישות אונליין בקלות, והתראות יסונכרנו ישירות ללוח השנה שלכם.
+            </p>
+          </div>
+          <Link to="/online-booking">
+            <Button className="bg-purple-600 hover:bg-purple-700">
+              קביעת פגישות אונליין
+            </Button>
+          </Link>
         </div>
       </div>
     </div>

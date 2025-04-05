@@ -1,6 +1,7 @@
 
 import { useState } from 'react';
 import GanttChart from '../components/scheduling/GanttChart';
+import CalendarSync from '../components/scheduling/CalendarSync';
 
 const Scheduling = () => {
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -76,11 +77,15 @@ const Scheduling = () => {
         ניהול הפגישות שלך וארגון היום בצורה יעילה.
       </p>
 
-      <GanttChart
-        appointments={appointments}
-        date={selectedDate}
-        onDateChange={setSelectedDate}
-      />
+      <div className="space-y-6">
+        <CalendarSync />
+        
+        <GanttChart
+          appointments={appointments}
+          date={selectedDate}
+          onDateChange={setSelectedDate}
+        />
+      </div>
     </div>
   );
 };

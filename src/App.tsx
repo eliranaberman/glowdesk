@@ -11,6 +11,7 @@ import Scheduling from "./pages/Scheduling";
 import Reports from "./pages/Reports";
 import Inventory from "./pages/Inventory";
 import Tasks from "./pages/Tasks";
+import OnlineBooking from "./pages/OnlineBooking";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -50,6 +51,11 @@ const App = () => (
           <Route path="/tasks" element={
             <Layout>
               <Tasks />
+            </Layout>
+          } />
+          <Route path="/online-booking" element={
+            <Layout>
+              <OnlineBooking />
             </Layout>
           } />
           <Route path="*" element={<NotFound />} />
