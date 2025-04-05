@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,6 +62,20 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				// Custom nail business colors
+				nail: {
+					50: "#FCF7FD",
+					100: "#F5E6F8",
+					200: "#E8C8EF",
+					300: "#D99FE3",
+					400: "#C671D3",
+					500: "#B54BC2",
+					600: "#9C3DA7",
+					700: "#793085",
+					800: "#562362",
+					900: "#331541",
+					950: "#1F0C27"
 				}
 			},
 			borderRadius: {
@@ -84,11 +99,26 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'fade-in': {
+					from: { opacity: '0' },
+					to: { opacity: '1' }
+				},
+				'fade-out': {
+					from: { opacity: '1' },
+					to: { opacity: '0' }
+				},
+				'slide-in': {
+					from: { transform: 'translateX(-100%)' },
+					to: { transform: 'translateX(0)' }
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'fade-in': 'fade-in 0.3s ease-in',
+				'fade-out': 'fade-out 0.3s ease-out',
+				'slide-in': 'slide-in 0.3s ease-out'
 			}
 		}
 	},
