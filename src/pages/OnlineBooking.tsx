@@ -72,18 +72,18 @@ const OnlineBooking = () => {
         בחרו תאריך ושעה מתאימים לפגישה שלכם.
       </p>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="md:col-span-1">
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+        <Card className="md:col-span-5 lg:col-span-4">
           <CardHeader>
             <CardTitle>בחירת תאריך</CardTitle>
             <CardDescription>בחרו תאריך לפגישה</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="flex justify-center">
             <Calendar
               mode="single"
               selected={selectedDate}
               onSelect={setSelectedDate}
-              className="rounded-md border pointer-events-auto"
+              className="rounded-md border pointer-events-auto mx-auto"
               disabled={(date) => {
                 // Disable past dates and Saturdays (day 6)
                 return date < new Date() || date.getDay() === 6;
@@ -92,7 +92,7 @@ const OnlineBooking = () => {
           </CardContent>
         </Card>
 
-        <Card className="md:col-span-2">
+        <Card className="md:col-span-7 lg:col-span-8">
           <CardHeader>
             <CardTitle>שעות זמינות</CardTitle>
             <CardDescription>
@@ -100,7 +100,7 @@ const OnlineBooking = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 h-full">
               {availableTimeSlots.map((time) => (
                 <Button
                   key={time}
