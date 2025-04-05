@@ -1,3 +1,4 @@
+
 import { CalendarClock, Users, DollarSign, TrendingUp } from 'lucide-react';
 import StatCard from '../components/dashboard/StatCard';
 import DailySummary from '../components/dashboard/DailySummary';
@@ -10,7 +11,7 @@ const Dashboard = () => {
   const stats = [
     { title: 'סך הכל לקוחות', value: '176', icon: <Users className="h-5 w-5 text-primary" />, change: { value: '12%', positive: true } },
     { title: 'פגישות חודשיות', value: '126', icon: <CalendarClock className="h-5 w-5 text-primary" />, change: { value: '5%', positive: true } },
-    { title: 'הכנסה חודשית', value: '₪10,680', icon: <DollarSign className="h-5 w-5 text-primary" />, change: { value: '8%', positive: true } },
+    { title: 'הכנסה חודשית', value: '₪15,120', icon: <DollarSign className="h-5 w-5 text-primary" />, change: { value: '8%', positive: true } },
     { title: 'ערך ממוצע לשירות', value: '₪120', icon: <TrendingUp className="h-5 w-5 text-primary" />, change: { value: '3%', positive: false } },
   ];
   
