@@ -4,6 +4,7 @@ import { useLocation } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Header from './Header';
 import { cn } from '@/lib/utils';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -12,6 +13,7 @@ interface LayoutProps {
 const Layout = ({ children }: LayoutProps) => {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const location = useLocation();
+  const isMobile = useIsMobile();
 
   // Get page title based on current route (in Hebrew)
   const getPageTitle = (): string => {
@@ -75,12 +77,15 @@ const Layout = ({ children }: LayoutProps) => {
       </div>
 
       {/* Main Content */}
-      <div className="flex flex-col flex-1 overflow-hidden">
+      <div className="flex flex-col flex-1 overflow-hidden w-full">
         <Header 
           pageTitle={getPageTitle()} 
           toggleMobileSidebar={toggleMobileSidebar} 
         />
-        <main className="flex-1 overflow-y-auto p-4 md:p-6 text-center">
+        <main className={cn(
+          "flex-1 overflow-y-auto p-3 md:p-6 text-center",
+          isMobile ? "pb-20" : ""
+        )}>
           {children}
         </main>
       </div>

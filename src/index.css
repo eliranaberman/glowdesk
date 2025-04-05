@@ -93,6 +93,7 @@
   body {
     @apply bg-background text-foreground;
     text-align: center;
+    -webkit-text-size-adjust: 100%;
   }
 }
 
@@ -106,7 +107,7 @@
   }
   
   .stat-card {
-    @apply p-5 rounded-lg bg-card border shadow-sm hover:shadow-md transition-shadow duration-200 text-center;
+    @apply p-4 md:p-5 rounded-lg bg-card border shadow-sm hover:shadow-md transition-shadow duration-200 text-center;
   }
   
   .fade-in {
@@ -155,5 +156,44 @@
   /* Center all text by default */
   h1, h2, h3, h4, h5, h6, p, span, div, a, button, input, select, textarea, label, li {
     text-align: center;
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 640px) {
+    .stat-card {
+      @apply p-3;
+    }
+
+    .card-title {
+      @apply text-sm;
+    }
+    
+    .card-value {
+      @apply text-base md:text-lg;
+    }
+    
+    button, a.button {
+      @apply text-sm px-2 py-1;
+    }
+  }
+}
+
+/* Mobile specific optimizations */
+@media (max-width: 768px) {
+  /* Adjust dropdown positioning for mobile */
+  [data-radix-popper-content-wrapper] {
+    max-width: 90vw !important;
+    transform: translateX(-50%) !important;
+    left: 50% !important;
+  }
+  
+  /* Ensure dialogs are properly centered on mobile */
+  [role="dialog"] {
+    @apply p-3;
+  }
+  
+  /* Fix potential overflow issues in mobile views */
+  .overflow-auto {
+    -webkit-overflow-scrolling: touch;
   }
 }
