@@ -50,9 +50,20 @@ const navItems = [
   }
 ];
 
-const Sidebar = () => {
+interface SidebarProps {
+  onLinkClick?: () => void;
+}
+
+const Sidebar = ({ onLinkClick }: SidebarProps) => {
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
+
+  // Handle link click - notify parent component
+  const handleLinkClick = () => {
+    if (onLinkClick) {
+      onLinkClick();
+    }
+  };
 
   return (
     <div
@@ -100,6 +111,7 @@ const Sidebar = () => {
                     collapsed && "justify-center"
                   )
                 }
+                onClick={handleLinkClick}
               >
                 {item.icon}
                 {!collapsed && <span>{item.name}</span>}
@@ -123,6 +135,7 @@ const Sidebar = () => {
                   collapsed && "justify-center"
                 )
               }
+              onClick={handleLinkClick}
             >
               <Bell className="w-5 h-5" />
               {!collapsed && <span>התראות</span>}
@@ -138,6 +151,7 @@ const Sidebar = () => {
                   collapsed && "justify-center"
                 )
               }
+              onClick={handleLinkClick}
             >
               <Settings className="w-5 h-5" />
               {!collapsed && <span>הגדרות</span>}
@@ -153,8 +167,8 @@ const Sidebar = () => {
               {/* Profile image would go here */}
             </div>
             <div className="mr-2 truncate">
-              <p className="text-sm font-medium">טכנאית ציפורניים</p>
-              <p className="text-xs text-muted-foreground">מנהלת</p>
+              <p className="text-sm font-medium">חן מזרחי</p>
+              <p className="text-xs text-muted-foreground">בעלים</p>
             </div>
           </div>
         )}

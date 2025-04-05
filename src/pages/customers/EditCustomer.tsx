@@ -1,6 +1,6 @@
 
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -8,14 +8,35 @@ import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { ArrowRight } from 'lucide-react';
 
-const NewCustomer = () => {
+const EditCustomer = () => {
   const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>();
   const [customerData, setCustomerData] = useState({
     name: '',
     email: '',
     phone: '',
     notes: ''
   });
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // Simulate fetching customer data
+    // In a real app, this would be an API call
+    setTimeout(() => {
+      // Mock data based on ID
+      const mockCustomers = {
+        '1': { name: 'שרה כהן', email: 'sarah.j@example.com', phone: '(555) 123-4567', notes: 'לקוחה ותיקה' },
+        '2': { name: 'אמילי דייויס', email: 'emily.d@example.com', phone: '(555) 987-6543', notes: 'מעדיפה מניקור בלבד' },
+        '3': { name: 'ליאת ונג', email: 'lisa.w@example.com', phone: '(555) 456-7890', notes: 'אלרגית ללק מסוג X' },
+        '4': { name: 'מריה גארסיה', email: 'maria.g@example.com', phone: '(555) 234-5678', notes: '' },
+        '5': { name: 'ג\'ניפר מילר', email: 'jennifer.m@example.com', phone: '(555) 876-5432', notes: 'מגיעה תמיד בזמן' },
+      };
+
+      const customer = mockCustomers[id as keyof typeof mockCustomers] || { name: '', email: '', phone: '', notes: '' };
+      setCustomerData(customer);
+      setIsLoading(false);
+    }, 500);
+  }, [id]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -25,10 +46,18 @@ const NewCustomer = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // In a real application, you would save the customer data to your backend
-    toast.success('לקוח חדש נוצר בהצלחה');
+    // In a real application, you would save the updated customer data to your backend
+    toast.success('פרטי לקוח עודכנו בהצלחה');
     navigate('/customers');
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
     <div dir="rtl" className="max-w-2xl mx-auto">
@@ -41,7 +70,7 @@ const NewCustomer = () => {
           <ArrowRight className="h-4 w-4 mr-1" />
           חזור
         </Button>
-        <h1 className="text-2xl font-bold">הוספת לקוח חדש</h1>
+        <h1 className="text-2xl font-bold">עריכת פרטי לקוח</h1>
       </div>
       
       <Card>
@@ -101,7 +130,7 @@ const NewCustomer = () => {
             <Button variant="outline" type="button" onClick={() => navigate('/customers')}>
               ביטול
             </Button>
-            <Button type="submit">שמור לקוח</Button>
+            <Button type="submit">שמור שינויים</Button>
           </CardFooter>
         </form>
       </Card>
@@ -109,4 +138,4 @@ const NewCustomer = () => {
   );
 };
 
-export default NewCustomer;
+export default EditCustomer;

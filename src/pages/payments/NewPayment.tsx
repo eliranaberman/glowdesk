@@ -1,22 +1,23 @@
 
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
+import { ArrowRight } from 'lucide-react';
 
 const NewPayment = () => {
   const navigate = useNavigate();
   const [paymentData, setPaymentData] = useState({
     customer: '',
-    service: '',
     amount: '',
+    service: '',
     date: new Date().toISOString().split('T')[0],
     paymentMethod: '',
-    notes: ''
+    notes: '',
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -30,8 +31,6 @@ const NewPayment = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // In a real application, you would save the payment data to your backend
     toast.success('תשלום נרשם בהצלחה');
     navigate('/');
   };
@@ -54,17 +53,27 @@ const NewPayment = () => {
     { id: '5', name: 'בניית ציפורניים', price: '220' }
   ];
 
-  // Mock payment methods
+  // Payment methods
   const paymentMethods = [
     { id: 'cash', name: 'מזומן' },
     { id: 'credit', name: 'כרטיס אשראי' },
     { id: 'transfer', name: 'העברה בנקאית' },
-    { id: 'bit', name: 'ביט/פייבוקס' }
+    { id: 'bit', name: 'ביט/פייבוקס' },
   ];
 
   return (
     <div dir="rtl" className="max-w-2xl mx-auto">
-      <h1 className="text-2xl font-bold mb-6">רישום תשלום חדש</h1>
+      <div className="flex items-center mb-6">
+        <Button 
+          variant="ghost" 
+          onClick={() => navigate(-1)}
+          className="mr-2"
+        >
+          <ArrowRight className="h-4 w-4 mr-1" />
+          חזור
+        </Button>
+        <h1 className="text-2xl font-bold">רישום תשלום חדש</h1>
+      </div>
       
       <Card>
         <form onSubmit={handleSubmit}>
@@ -129,35 +138,35 @@ const NewPayment = () => {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="paymentMethod">אמצעי תשלום</Label>
-                <Select 
-                  value={paymentData.paymentMethod} 
-                  onValueChange={(value) => handleSelectChange('paymentMethod', value)}
-                >
-                  <SelectTrigger id="paymentMethod">
-                    <SelectValue placeholder="בחר אמצעי תשלום" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {paymentMethods.map((method) => (
-                      <SelectItem key={method.id} value={method.id}>
-                        {method.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Label htmlFor="date">תאריך</Label>
+                <Input
+                  id="date"
+                  name="date"
+                  type="date"
+                  value={paymentData.date}
+                  onChange={handleChange}
+                  required
+                />
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="date">תאריך</Label>
-              <Input
-                id="date"
-                name="date"
-                type="date"
-                value={paymentData.date}
-                onChange={handleChange}
-                required
-              />
+              <Label htmlFor="paymentMethod">אמצעי תשלום</Label>
+              <Select 
+                value={paymentData.paymentMethod} 
+                onValueChange={(value) => handleSelectChange('paymentMethod', value)}
+              >
+                <SelectTrigger id="paymentMethod">
+                  <SelectValue placeholder="בחר אמצעי תשלום" />
+                </SelectTrigger>
+                <SelectContent>
+                  {paymentMethods.map((method) => (
+                    <SelectItem key={method.id} value={method.id}>
+                      {method.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="space-y-2">
@@ -167,7 +176,7 @@ const NewPayment = () => {
                 name="notes"
                 value={paymentData.notes}
                 onChange={handleChange}
-                placeholder="הערות לגבי התשלום"
+                placeholder="הערות נוספות לתשלום"
               />
             </div>
           </CardContent>
@@ -175,7 +184,7 @@ const NewPayment = () => {
             <Button variant="outline" type="button" onClick={() => navigate('/')}>
               ביטול
             </Button>
-            <Button type="submit">שמור תשלום</Button>
+            <Button type="submit">רשום תשלום</Button>
           </CardFooter>
         </form>
       </Card>

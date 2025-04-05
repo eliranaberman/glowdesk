@@ -20,8 +20,10 @@ const Layout = ({ children }: LayoutProps) => {
     if (path === '/') return 'דשבורד';
     if (path === '/customers') return 'לקוחות';
     if (path === '/customers/new') return 'הוספת לקוח';
+    if (path.startsWith('/customers/edit/')) return 'עריכת לקוח';
     if (path === '/scheduling') return 'יומן';
     if (path === '/scheduling/new') return 'פגישה חדשה';
+    if (path.startsWith('/scheduling/edit/')) return 'עריכת פגישה';
     if (path === '/reports') return 'דוחות';
     if (path === '/inventory') return 'מלאי';
     if (path === '/inventory/new') return 'הוספת פריט';
@@ -33,6 +35,11 @@ const Layout = ({ children }: LayoutProps) => {
 
     return 'דשבורד'; // Default
   };
+
+  // Auto-close sidebar when route changes
+  if (mobileSidebarOpen && location.key) {
+    setMobileSidebarOpen(false);
+  }
 
   return (
     <div className="flex h-screen overflow-hidden" dir="rtl">
@@ -56,7 +63,7 @@ const Layout = ({ children }: LayoutProps) => {
           "absolute right-0 top-0 z-50 h-full w-64 animate-slide-in",
           !mobileSidebarOpen && "transform translate-x-full"
         )}>
-          <Sidebar />
+          <Sidebar onLinkClick={() => setMobileSidebarOpen(false)} />
         </div>
       </div>
 

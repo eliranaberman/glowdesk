@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils';
 import { Calendar as CalendarIcon, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { format, addDays, startOfWeek, endOfWeek, addMonths, startOfMonth, endOfMonth, isWithinInterval, isSameDay } from 'date-fns';
+import { useNavigate } from 'react-router-dom';
 
 interface Appointment {
   id: string;
@@ -23,17 +24,18 @@ interface GanttChartProps {
   onDateChange: (date: Date) => void;
 }
 
-const HOURS = Array.from({ length: 11 }, (_, i) => i + 8); // 8 AM to 6 PM
+const HOURS = Array.from({ length: 16 }, (_, i) => i + 8); // 8:00 to 23:00
 const CELL_HEIGHT = 60; // Height of appointment cell in pixels
 
 const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
   const [view, setView] = useState<'day' | 'week' | 'month'>('day');
+  const navigate = useNavigate();
   
   // Helper function to calculate position and height based on time
   const getAppointmentStyle = (startTime: string, duration: number) => {
     const [hours, minutes] = startTime.split(':').map(Number);
     const startHour = hours + minutes / 60;
-    const startPosition = (startHour - 8) * CELL_HEIGHT; // 8 AM is the start time
+    const startPosition = (startHour - 8) * CELL_HEIGHT; // 8:00 is the start time
     const height = (duration / 60) * CELL_HEIGHT;
     
     return {
@@ -140,6 +142,16 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
     }
   };
 
+  // Format hours in 24-hour format
+  const formatHour = (hour: number) => {
+    return `${hour.toString().padStart(2, '0')}:00`;
+  };
+
+  // Handle appointment click
+  const handleAppointmentClick = (id: string) => {
+    navigate(`/scheduling/edit/${id}`);
+  };
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between pb-2" dir="rtl">
@@ -203,7 +215,7 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
                 <div className="hours-header flex border-b">
                   {HOURS.map((hour) => (
                     <div key={hour} className="hour-cell flex-1 text-center py-2 text-xs font-medium">
-                      {hour > 12 ? `${hour - 12} PM` : `${hour} AM`}
+                      {formatHour(hour)}
                     </div>
                   ))}
                 </div>
@@ -216,7 +228,7 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
                       <div 
                         key={hour} 
                         className="absolute border-l h-full"
-                        style={{left: `${(hour - 8) * (100 / 10)}%`}}
+                        style={{left: `${(hour - 8) * (100 / (HOURS.length - 1))}%`}}
                       ></div>
                     ))}
                   </div>
@@ -224,21 +236,22 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
                   {/* Appointments */}
                   {filteredAppointments.map((appointment, index) => {
                     const style = getAppointmentStyle(appointment.startTime, appointment.duration);
-                    // Calculate left position to avoid overlapping (for appointments at the same time)
-                    const overlapAdjustment = index % 3 * 3; // Adjust each appointment by a small percentage
+                    // Calculate horizontal positioning to avoid overlaps
+                    const column = index % 3;
+                    const width = Math.min(30, 90 / Math.min(filteredAppointments.length, 3));
                     
                     return (
                       <div
                         key={appointment.id}
-                        className="absolute left-0 right-0 mx-1 rounded-md p-2 transition-all hover:ring-2 hover:ring-primary cursor-pointer"
+                        className="absolute rounded-md p-2 transition-all hover:ring-2 hover:ring-primary cursor-pointer"
                         style={{
                           ...style,
                           backgroundColor: appointment.color || 'var(--nail-200)',
-                          // Stagger appointments to avoid overlap
-                          right: `${overlapAdjustment}%`,
-                          left: `${overlapAdjustment}%`,
+                          left: `${column * width}%`,
+                          width: `${width}%`,
                           zIndex: 10 - index, // Higher index, lower z-index
                         }}
+                        onClick={() => handleAppointmentClick(appointment.id)}
                       >
                         <p className="font-medium text-sm truncate">{appointment.customer}</p>
                         <p className="text-xs truncate">{appointment.service}</p>
@@ -269,6 +282,7 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
                           style={{
                             backgroundColor: appointment.color || 'var(--nail-200)',
                           }}
+                          onClick={() => handleAppointmentClick(appointment.id)}
                         >
                           <p className="font-medium text-sm truncate">{appointment.customer}</p>
                           <p className="text-xs truncate">{appointment.service}</p>
@@ -329,6 +343,10 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
                               key={app.id}
                               className="text-xs p-1 rounded mb-1 truncate" 
                               style={{ backgroundColor: app.color || 'var(--nail-200)' }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleAppointmentClick(app.id);
+                              }}
                             >
                               {app.customer}
                             </div>

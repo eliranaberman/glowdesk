@@ -8,8 +8,10 @@ import Layout from "./components/layout/Layout";
 import Dashboard from "./pages/Dashboard";
 import Customers from "./pages/Customers";
 import NewCustomer from "./pages/customers/NewCustomer";
+import EditCustomer from "./pages/customers/EditCustomer";
 import Scheduling from "./pages/Scheduling";
 import NewAppointment from "./pages/scheduling/NewAppointment";
+import EditAppointment from "./pages/scheduling/EditAppointment";
 import Reports from "./pages/Reports";
 import Inventory from "./pages/Inventory";
 import NewInventoryItem from "./pages/inventory/NewInventoryItem";
@@ -44,6 +46,11 @@ const App = () => (
               <NewCustomer />
             </Layout>
           } />
+          <Route path="/customers/edit/:id" element={
+            <Layout>
+              <EditCustomer />
+            </Layout>
+          } />
           <Route path="/scheduling" element={
             <Layout>
               <Scheduling />
@@ -52,6 +59,11 @@ const App = () => (
           <Route path="/scheduling/new" element={
             <Layout>
               <NewAppointment />
+            </Layout>
+          } />
+          <Route path="/scheduling/edit/:id" element={
+            <Layout>
+              <EditAppointment />
             </Layout>
           } />
           <Route path="/reports" element={

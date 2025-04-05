@@ -1,6 +1,6 @@
 
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,17 +9,86 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { toast } from 'sonner';
 import { ArrowRight } from 'lucide-react';
 
-const NewAppointment = () => {
+const EditAppointment = () => {
   const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>();
+  const [isLoading, setIsLoading] = useState(true);
   const [appointmentData, setAppointmentData] = useState({
     customer: '',
     service: '',
     date: '',
     time: '',
-    duration: '60',
+    duration: '',
     price: '',
     notes: ''
   });
+
+  useEffect(() => {
+    // Simulate fetching appointment data
+    setTimeout(() => {
+      // Mock data based on ID
+      const mockAppointments = {
+        '1': { 
+          customer: '1', 
+          service: '1', 
+          date: '2025-04-10', 
+          time: '10:00', 
+          duration: '60', 
+          price: '120', 
+          notes: 'לקוחה ותיקה' 
+        },
+        '2': { 
+          customer: '2', 
+          service: '2', 
+          date: '2025-04-10', 
+          time: '12:30', 
+          duration: '90', 
+          price: '180', 
+          notes: '' 
+        },
+        '3': { 
+          customer: '3', 
+          service: '3', 
+          date: '2025-04-10', 
+          time: '14:00', 
+          duration: '75', 
+          price: '140', 
+          notes: 'רגישה לחומרים מסוימים' 
+        },
+        '4': { 
+          customer: '4', 
+          service: '4', 
+          date: '2025-04-11', 
+          time: '11:00', 
+          duration: '45', 
+          price: '100', 
+          notes: '' 
+        },
+        '5': { 
+          customer: '5', 
+          service: '5', 
+          date: '2025-04-11', 
+          time: '13:00', 
+          duration: '120', 
+          price: '220', 
+          notes: 'לקוחה חדשה' 
+        },
+      };
+
+      const appointment = mockAppointments[id as keyof typeof mockAppointments] || {
+        customer: '',
+        service: '',
+        date: '',
+        time: '',
+        duration: '',
+        price: '',
+        notes: ''
+      };
+      
+      setAppointmentData(appointment);
+      setIsLoading(false);
+    }, 500);
+  }, [id]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -33,8 +102,7 @@ const NewAppointment = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // In a real application, you would save the appointment data to your backend
-    toast.success('פגישה נוצרה בהצלחה');
+    toast.success('פגישה עודכנה בהצלחה');
     navigate('/scheduling');
   };
 
@@ -56,6 +124,14 @@ const NewAppointment = () => {
     { id: '5', name: 'רחל גולן' }
   ];
 
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
   return (
     <div dir="rtl" className="max-w-2xl mx-auto">
       <div className="flex items-center mb-6">
@@ -67,7 +143,7 @@ const NewAppointment = () => {
           <ArrowRight className="h-4 w-4 mr-1" />
           חזור
         </Button>
-        <h1 className="text-2xl font-bold">יצירת פגישה חדשה</h1>
+        <h1 className="text-2xl font-bold">עריכת פגישה</h1>
       </div>
       
       <Card>
@@ -186,7 +262,7 @@ const NewAppointment = () => {
             <Button variant="outline" type="button" onClick={() => navigate('/scheduling')}>
               ביטול
             </Button>
-            <Button type="submit">צור פגישה</Button>
+            <Button type="submit">עדכן פגישה</Button>
           </CardFooter>
         </form>
       </Card>
@@ -194,4 +270,4 @@ const NewAppointment = () => {
   );
 };
 
-export default NewAppointment;
+export default EditAppointment;

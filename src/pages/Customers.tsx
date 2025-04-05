@@ -15,7 +15,7 @@ const Customers = () => {
       phone: '(555) 123-4567',
       lastAppointment: '2023-04-01',
       totalVisits: 8,
-      totalSpent: 320,
+      totalSpent: 960,
       status: 'active' as const,
     },
     {
@@ -25,7 +25,7 @@ const Customers = () => {
       phone: '(555) 987-6543',
       lastAppointment: '2023-03-25',
       totalVisits: 12,
-      totalSpent: 560,
+      totalSpent: 1440,
       status: 'active' as const,
     },
     {
@@ -35,7 +35,7 @@ const Customers = () => {
       phone: '(555) 456-7890',
       lastAppointment: '2023-04-02',
       totalVisits: 5,
-      totalSpent: 210,
+      totalSpent: 600,
       status: 'active' as const,
     },
     {
@@ -45,7 +45,7 @@ const Customers = () => {
       phone: '(555) 234-5678',
       lastAppointment: '2023-02-15',
       totalVisits: 3,
-      totalSpent: 120,
+      totalSpent: 360,
       status: 'inactive' as const,
     },
     {
@@ -55,14 +55,13 @@ const Customers = () => {
       phone: '(555) 876-5432',
       lastAppointment: '2023-03-10',
       totalVisits: 7,
-      totalSpent: 290,
+      totalSpent: 840,
       status: 'active' as const,
     },
   ]);
 
   const handleEditCustomer = (id: string) => {
-    // In a real application, this would open a modal or navigate to an edit page
-    toast(`עריכת לקוח עם מזהה: ${id}`);
+    navigate(`/customers/edit/${id}`);
   };
 
   const handleDeleteCustomer = (id: string) => {

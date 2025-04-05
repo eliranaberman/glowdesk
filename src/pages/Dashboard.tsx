@@ -7,26 +7,26 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 
 const Dashboard = () => {
-  // Dummy data
+  // Updated data with correct currency values
   const stats = [
     { title: 'סך הכל לקוחות', value: '127', icon: <Users className="h-5 w-5 text-primary" />, change: { value: '12%', positive: true } },
     { title: 'פגישות חודשיות', value: '89', icon: <CalendarClock className="h-5 w-5 text-primary" />, change: { value: '5%', positive: true } },
-    { title: 'הכנסה חודשית', value: '₪3,248', icon: <DollarSign className="h-5 w-5 text-primary" />, change: { value: '8%', positive: true } },
-    { title: 'ערך ממוצע לשירות', value: '₪42', icon: <TrendingUp className="h-5 w-5 text-primary" />, change: { value: '3%', positive: false } },
+    { title: 'הכנסה חודשית', value: '₪10,680', icon: <DollarSign className="h-5 w-5 text-primary" />, change: { value: '8%', positive: true } },
+    { title: 'ערך ממוצע לשירות', value: '₪120', icon: <TrendingUp className="h-5 w-5 text-primary" />, change: { value: '3%', positive: false } },
   ];
   
   const appointments = [
-    { id: '1', customer: 'שרה כהן', service: 'מניקור ג\'ל', time: 'היום, 10:00', price: 35, status: 'upcoming' as const },
-    { id: '2', customer: 'אמילי לוי', service: 'אקריליק מלא', time: 'היום, 12:30', price: 65, status: 'upcoming' as const },
-    { id: '3', customer: 'ליאת ונג', service: 'פדיקור', time: 'היום, 14:00', price: 45, status: 'upcoming' as const },
-    { id: '4', customer: 'מריה אברהם', service: 'עיצוב ציפורניים', time: 'אתמול, 11:00', price: 55, status: 'completed' as const },
-    { id: '5', customer: 'ג\'ניפר מילר', service: 'מניקור', time: 'אתמול, 15:30', price: 30, status: 'cancelled' as const },
+    { id: '1', customer: 'שרה כהן', service: 'מניקור ג\'ל', time: 'היום, 10:00', price: 120, status: 'upcoming' as const },
+    { id: '2', customer: 'אמילי לוי', service: 'אקריליק מלא', time: 'היום, 12:30', price: 180, status: 'upcoming' as const },
+    { id: '3', customer: 'ליאת ונג', service: 'פדיקור', time: 'היום, 14:00', price: 140, status: 'upcoming' as const },
+    { id: '4', customer: 'מריה אברהם', service: 'עיצוב ציפורניים', time: 'אתמול, 11:00', price: 120, status: 'completed' as const },
+    { id: '5', customer: 'ג\'ניפר מילר', service: 'מניקור', time: 'אתמול, 15:30', price: 100, status: 'cancelled' as const },
   ];
   
   const dailyData = {
     customers: 8,
     hours: 7.5,
-    revenue: 320,
+    revenue: 960,
     deficiencies: [
       'אצטון - בקבוק אחד נשאר',
       'לק לבן - כמות נמוכה',

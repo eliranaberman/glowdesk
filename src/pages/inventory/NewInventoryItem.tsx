@@ -1,12 +1,13 @@
 
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
+import { ArrowRight } from 'lucide-react';
 
 const NewInventoryItem = () => {
   const navigate = useNavigate();
@@ -31,31 +32,31 @@ const NewInventoryItem = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // In a real application, you would save the item data to your backend
-    toast.success('פריט חדש נוסף למלאי');
+    toast.success('פריט נוסף בהצלחה למלאי');
     navigate('/inventory');
   };
 
-  // Mock categories
   const categories = [
-    { id: 'gel', name: 'לקים ג\'ל' },
-    { id: 'acrylic', name: 'חומרי אקריליק' },
-    { id: 'tools', name: 'כלי עבודה' },
-    { id: 'polish', name: 'לקים רגילים' },
-    { id: 'misc', name: 'שונות' }
-  ];
-
-  // Mock suppliers
-  const suppliers = [
-    { id: '1', name: 'ספק א\'' },
-    { id: '2', name: 'ספק ב\'' },
-    { id: '3', name: 'ספק ג\'' }
+    { id: '1', name: 'לקים' },
+    { id: '2', name: 'חומרי בנייה' },
+    { id: '3', name: 'כלי עבודה' },
+    { id: '4', name: 'מוצרי טיפוח' },
+    { id: '5', name: 'אביזרים' }
   ];
 
   return (
     <div dir="rtl" className="max-w-2xl mx-auto">
-      <h1 className="text-2xl font-bold mb-6">הוספת פריט חדש למלאי</h1>
+      <div className="flex items-center mb-6">
+        <Button 
+          variant="ghost" 
+          onClick={() => navigate(-1)}
+          className="mr-2"
+        >
+          <ArrowRight className="h-4 w-4 mr-1" />
+          חזור
+        </Button>
+        <h1 className="text-2xl font-bold">הוספת פריט למלאי</h1>
+      </div>
       
       <Card>
         <form onSubmit={handleSubmit}>
@@ -119,36 +120,27 @@ const NewInventoryItem = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="price">מחיר (₪)</Label>
-                <Input
-                  id="price"
-                  name="price"
-                  type="number"
-                  value={itemData.price}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="supplier">ספק</Label>
-                <Select 
-                  value={itemData.supplier} 
-                  onValueChange={(value) => handleSelectChange('supplier', value)}
-                >
-                  <SelectTrigger id="supplier">
-                    <SelectValue placeholder="בחר ספק" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {suppliers.map((supplier) => (
-                      <SelectItem key={supplier.id} value={supplier.id}>
-                        {supplier.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="price">מחיר רכישה (₪)</Label>
+              <Input
+                id="price"
+                name="price"
+                type="number"
+                value={itemData.price}
+                onChange={handleChange}
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="supplier">ספק</Label>
+              <Input
+                id="supplier"
+                name="supplier"
+                value={itemData.supplier}
+                onChange={handleChange}
+                placeholder="שם הספק"
+              />
             </div>
 
             <div className="space-y-2">
@@ -158,7 +150,7 @@ const NewInventoryItem = () => {
                 name="notes"
                 value={itemData.notes}
                 onChange={handleChange}
-                placeholder="הערות נוספות לגבי הפריט"
+                placeholder="הערות נוספות"
               />
             </div>
           </CardContent>
@@ -166,7 +158,7 @@ const NewInventoryItem = () => {
             <Button variant="outline" type="button" onClick={() => navigate('/inventory')}>
               ביטול
             </Button>
-            <Button type="submit">הוסף פריט</Button>
+            <Button type="submit">הוסף למלאי</Button>
           </CardFooter>
         </form>
       </Card>
