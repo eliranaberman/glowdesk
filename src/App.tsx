@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -28,93 +27,95 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={
-            <Layout>
-              <Dashboard />
-            </Layout>
-          } />
-          <Route path="/customers" element={
-            <Layout>
-              <Customers />
-            </Layout>
-          } />
-          <Route path="/customers/new" element={
-            <Layout>
-              <NewCustomer />
-            </Layout>
-          } />
-          <Route path="/customers/edit/:id" element={
-            <Layout>
-              <EditCustomer />
-            </Layout>
-          } />
-          <Route path="/scheduling" element={
-            <Layout>
-              <Scheduling />
-            </Layout>
-          } />
-          <Route path="/scheduling/new" element={
-            <Layout>
-              <NewAppointment />
-            </Layout>
-          } />
-          <Route path="/scheduling/edit/:id" element={
-            <Layout>
-              <EditAppointment />
-            </Layout>
-          } />
-          <Route path="/reports" element={
-            <Layout>
-              <Reports />
-            </Layout>
-          } />
-          <Route path="/inventory" element={
-            <Layout>
-              <Inventory />
-            </Layout>
-          } />
-          <Route path="/inventory/new" element={
-            <Layout>
-              <NewInventoryItem />
-            </Layout>
-          } />
-          <Route path="/expenses" element={
-            <Layout>
-              <Expenses />
-            </Layout>
-          } />
-          <Route path="/tasks" element={
-            <Layout>
-              <Tasks />
-            </Layout>
-          } />
-          <Route path="/online-booking" element={
-            <Layout>
-              <OnlineBooking />
-            </Layout>
-          } />
-          <Route path="/settings" element={
-            <Layout>
-              <Settings />
-            </Layout>
-          } />
-          <Route path="/notifications" element={
-            <Layout>
-              <Notifications />
-            </Layout>
-          } />
-          <Route path="/payments/new" element={
-            <Layout>
-              <NewPayment />
-            </Layout>
-          } />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
+      <div className="rtl text-right">
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={
+              <Layout>
+                <Dashboard />
+              </Layout>
+            } />
+            <Route path="/customers" element={
+              <Layout>
+                <Customers />
+              </Layout>
+            } />
+            <Route path="/customers/new" element={
+              <Layout>
+                <NewCustomer />
+              </Layout>
+            } />
+            <Route path="/customers/edit/:id" element={
+              <Layout>
+                <EditCustomer />
+              </Layout>
+            } />
+            <Route path="/scheduling" element={
+              <Layout>
+                <Scheduling />
+              </Layout>
+            } />
+            <Route path="/scheduling/new" element={
+              <Layout>
+                <NewAppointment />
+              </Layout>
+            } />
+            <Route path="/scheduling/edit/:id" element={
+              <Layout>
+                <EditAppointment />
+              </Layout>
+            } />
+            <Route path="/reports" element={
+              <Layout>
+                <Reports />
+              </Layout>
+            } />
+            <Route path="/inventory" element={
+              <Layout>
+                <Inventory />
+              </Layout>
+            } />
+            <Route path="/inventory/new" element={
+              <Layout>
+                <NewInventoryItem />
+              </Layout>
+            } />
+            <Route path="/expenses" element={
+              <Layout>
+                <Expenses />
+              </Layout>
+            } />
+            <Route path="/tasks" element={
+              <Layout>
+                <Tasks />
+              </Layout>
+            } />
+            <Route path="/online-booking" element={
+              <Layout>
+                <OnlineBooking />
+              </Layout>
+            } />
+            <Route path="/settings" element={
+              <Layout>
+                <Settings />
+              </Layout>
+            } />
+            <Route path="/notifications" element={
+              <Layout>
+                <Notifications />
+              </Layout>
+            } />
+            <Route path="/payments/new" element={
+              <Layout>
+                <NewPayment />
+              </Layout>
+            } />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </div>
     </TooltipProvider>
   </QueryClientProvider>
 );

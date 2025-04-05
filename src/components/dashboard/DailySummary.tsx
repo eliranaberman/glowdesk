@@ -18,7 +18,7 @@ interface DailySummaryProps {
 const DailySummary = ({ customers, hours, revenue, deficiencies }: DailySummaryProps) => {
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="text-right">
         <CardTitle>סיכום יומי</CardTitle>
         <CardDescription>מבט סיכום על הפעילות היומית</CardDescription>
       </CardHeader>
@@ -43,14 +43,14 @@ const DailySummary = ({ customers, hours, revenue, deficiencies }: DailySummaryP
 
         <div>
           <div className="flex items-center mb-2">
-            <AlertCircle className="h-4 w-4 text-amber-500 mr-2" />
-            <h3 className="text-sm font-medium">חוסרים וצרכים דחופים</h3>
+            <AlertCircle className="h-4 w-4 text-amber-500 ml-2" />
+            <h3 className="text-sm font-medium text-right">חוסרים וצרכים דחופים</h3>
           </div>
           <ul className="space-y-1 text-sm">
             {deficiencies.map((item, i) => (
               <li key={i} className="flex items-center">
-                <span className="h-1.5 w-1.5 rounded-full bg-amber-500 mr-2"></span>
-                <span>{item}</span>
+                <span className="h-1.5 w-1.5 rounded-full bg-amber-500 ml-2"></span>
+                <span className="text-right">{item}</span>
               </li>
             ))}
           </ul>

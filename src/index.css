@@ -111,4 +111,31 @@
   .fade-in {
     @apply animate-fade-in;
   }
+
+  .rtl {
+    direction: rtl;
+  }
+  
+  .rtl .text-left {
+    text-align: right;
+  }
+  
+  .rtl .text-right {
+    text-align: left;
+  }
+  
+  .rtl .mr-auto {
+    margin-right: 0;
+    margin-left: auto;
+  }
+  
+  .rtl .ml-auto {
+    margin-left: 0;
+    margin-right: auto;
+  }
+  
+  .rtl .chart-title {
+    text-align: right;
+  }
 }
+

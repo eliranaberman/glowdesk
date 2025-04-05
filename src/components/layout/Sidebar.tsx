@@ -120,7 +120,7 @@ const Sidebar = ({ onLinkClick }: SidebarProps) => {
                 onClick={handleLinkClick}
               >
                 {item.icon}
-                {!collapsed && <span>{item.name}</span>}
+                {!collapsed && <span className="text-right">{item.name}</span>}
               </NavLink>
             </li>
           ))}
@@ -144,7 +144,7 @@ const Sidebar = ({ onLinkClick }: SidebarProps) => {
               onClick={handleLinkClick}
             >
               <Bell className="w-5 h-5" />
-              {!collapsed && <span>התראות</span>}
+              {!collapsed && <span className="text-right">התראות</span>}
             </NavLink>
           </li>
           <li>
@@ -160,7 +160,7 @@ const Sidebar = ({ onLinkClick }: SidebarProps) => {
               onClick={handleLinkClick}
             >
               <Settings className="w-5 h-5" />
-              {!collapsed && <span>הגדרות</span>}
+              {!collapsed && <span className="text-right">הגדרות</span>}
             </NavLink>
           </li>
         </ul>
@@ -172,7 +172,7 @@ const Sidebar = ({ onLinkClick }: SidebarProps) => {
             <div className="w-8 h-8 rounded-full bg-nail-300">
               {/* Profile image would go here */}
             </div>
-            <div className="mr-2 truncate">
+            <div className="mr-2 truncate text-right">
               <p className="text-sm font-medium">חן מזרחי</p>
               <p className="text-xs text-muted-foreground">בעלים</p>
             </div>

@@ -36,7 +36,7 @@ const Header = ({ pageTitle, toggleMobileSidebar }: HeaderProps) => {
           >
             <Menu className="h-5 w-5" />
           </Button>
-          <h1 className="text-xl font-semibold">{pageTitle}</h1>
+          <h1 className="text-xl font-semibold text-right">{pageTitle}</h1>
         </div>
 
         <div className="hidden md:flex items-center max-w-sm flex-1 mx-4">
@@ -44,7 +44,7 @@ const Header = ({ pageTitle, toggleMobileSidebar }: HeaderProps) => {
             <Search className="absolute right-2 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="חיפוש..."
-              className="pr-8 rounded-full bg-secondary border-none"
+              className="pr-8 rounded-full bg-secondary border-none text-right"
               dir="rtl"
             />
           </div>
@@ -63,23 +63,23 @@ const Header = ({ pageTitle, toggleMobileSidebar }: HeaderProps) => {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-80 text-right">
-              <DropdownMenuLabel>התראות</DropdownMenuLabel>
+              <DropdownMenuLabel className="text-right">התראות</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <div className="max-h-[300px] overflow-y-auto">
                 <DropdownMenuItem onClick={() => navigate("/notifications")}>
-                  <div className="flex flex-col gap-1">
+                  <div className="flex flex-col gap-1 text-right w-full">
                     <p className="text-sm font-medium">נקבעה פגישה חדשה</p>
                     <p className="text-xs text-muted-foreground">רחל כהן - היום, 14:00</p>
                   </div>
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => navigate("/inventory")}>
-                  <div className="flex flex-col gap-1">
+                  <div className="flex flex-col gap-1 text-right w-full">
                     <p className="text-sm font-medium">התראת מלאי נמוך</p>
                     <p className="text-xs text-muted-foreground">לק ג'ל אדום (נותרו 2)</p>
                   </div>
                 </DropdownMenuItem>
                 <DropdownMenuItem>
-                  <div className="flex flex-col gap-1">
+                  <div className="flex flex-col gap-1 text-right w-full">
                     <p className="text-sm font-medium">תזכורת</p>
                     <p className="text-xs text-muted-foreground">להזמין מלאי חדש</p>
                   </div>
@@ -103,12 +103,12 @@ const Header = ({ pageTitle, toggleMobileSidebar }: HeaderProps) => {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="text-right">
-              <DropdownMenuLabel>החשבון שלי</DropdownMenuLabel>
+              <DropdownMenuLabel className="text-right">החשבון שלי</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>פרופיל</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => navigate("/settings")}>הגדרות</DropdownMenuItem>
+              <DropdownMenuItem className="text-right">פרופיל</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate("/settings")} className="text-right">הגדרות</DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>התנתק</DropdownMenuItem>
+              <DropdownMenuItem className="text-right">התנתק</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

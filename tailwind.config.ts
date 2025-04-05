@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -63,7 +62,6 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				// Custom nail business colors
 				nail: {
 					50: "#FCF7FD",
 					100: "#F5E6F8",
@@ -119,6 +117,11 @@ export default {
 				'fade-in': 'fade-in 0.3s ease-in',
 				'fade-out': 'fade-out 0.3s ease-out',
 				'slide-in': 'slide-in 0.3s ease-out'
+			},
+			textAlign: {
+				'right': 'right',
+				'left': 'left',
+				'center': 'center',
 			}
 		}
 	},
