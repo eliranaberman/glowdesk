@@ -1,5 +1,4 @@
 
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -93,12 +92,13 @@
 
   body {
     @apply bg-background text-foreground;
+    text-align: center;
   }
 }
 
 @layer components {
   .nav-link {
-    @apply flex items-center gap-2 p-2 rounded-md hover:bg-accent transition-colors duration-200;
+    @apply flex items-center gap-2 p-2 rounded-md hover:bg-accent transition-colors duration-200 justify-center;
   }
   
   .nav-link.active {
@@ -106,7 +106,7 @@
   }
   
   .stat-card {
-    @apply p-5 rounded-lg bg-card border shadow-sm hover:shadow-md transition-shadow duration-200;
+    @apply p-5 rounded-lg bg-card border shadow-sm hover:shadow-md transition-shadow duration-200 text-center;
   }
   
   .fade-in {
@@ -115,39 +115,45 @@
 
   .rtl {
     direction: rtl;
+    text-align: center;
   }
   
   .rtl .text-left {
-    text-align: right;
+    text-align: center;
   }
   
   .rtl .text-right {
-    text-align: left;
+    text-align: center;
   }
   
   .rtl .mr-auto {
-    margin-right: 0;
+    margin-right: auto;
     margin-left: auto;
   }
   
   .rtl .ml-auto {
-    margin-left: 0;
+    margin-left: auto;
     margin-right: auto;
   }
   
   .rtl .chart-title {
-    text-align: right;
+    text-align: center;
   }
   
   /* Enhanced RTL for tables */
   .rtl th, 
   .rtl td {
-    text-align: right;
+    text-align: center;
   }
   
   /* Make shadcn Table component work better with RTL */
-  .rtl [class*="text-left"] {
-    text-align: right;
+  .rtl [class*="text-left"],
+  .rtl [class*="text-right"] {
+    text-align: center;
+  }
+  
+  /* Center all text by default */
+  h1, h2, h3, h4, h5, h6, p, span, div, a, button, input, select, textarea, label, li {
+    text-align: center;
   }
 }
-
