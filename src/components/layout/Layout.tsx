@@ -27,6 +27,7 @@ const Layout = ({ children }: LayoutProps) => {
     if (path === '/reports') return 'דוחות';
     if (path === '/inventory') return 'מלאי';
     if (path === '/inventory/new') return 'הוספת פריט';
+    if (path === '/expenses') return 'הוצאות';
     if (path === '/tasks') return 'משימות';
     if (path === '/notifications') return 'התראות';
     if (path === '/settings') return 'הגדרות';

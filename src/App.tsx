@@ -21,6 +21,7 @@ import NotFound from "./pages/NotFound";
 import Settings from "./pages/Settings";
 import Notifications from "./pages/Notifications";
 import NewPayment from "./pages/payments/NewPayment";
+import Expenses from "./pages/Expenses";
 
 const queryClient = new QueryClient();
 
@@ -79,6 +80,11 @@ const App = () => (
           <Route path="/inventory/new" element={
             <Layout>
               <NewInventoryItem />
+            </Layout>
+          } />
+          <Route path="/expenses" element={
+            <Layout>
+              <Expenses />
             </Layout>
           } />
           <Route path="/tasks" element={

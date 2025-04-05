@@ -15,6 +15,7 @@ import {
   Settings,
   ChevronLeft,
   ChevronRight,
+  Receipt,
 } from 'lucide-react';
 
 const navItems = [
@@ -37,6 +38,11 @@ const navItems = [
     name: 'דוחות', 
     path: '/reports', 
     icon: <BarChart className="w-5 h-5" /> 
+  },
+  { 
+    name: 'הוצאות',
+    path: '/expenses', 
+    icon: <Receipt className="w-5 h-5" />
   },
   { 
     name: 'מלאי', 
