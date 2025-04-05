@@ -32,6 +32,7 @@ const Header = ({ pageTitle, toggleMobileSidebar }: HeaderProps) => {
             size="icon"
             className="lg:hidden"
             onClick={toggleMobileSidebar}
+            type="button"
           >
             <Menu className="h-5 w-5" />
           </Button>

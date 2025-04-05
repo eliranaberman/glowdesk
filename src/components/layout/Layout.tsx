@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Header from './Header';
@@ -36,10 +36,16 @@ const Layout = ({ children }: LayoutProps) => {
     return 'דשבורד'; // Default
   };
 
-  // Auto-close sidebar when route changes
-  if (mobileSidebarOpen && location.key) {
-    setMobileSidebarOpen(false);
-  }
+  // Effect to close sidebar when route changes
+  useEffect(() => {
+    if (mobileSidebarOpen) {
+      setMobileSidebarOpen(false);
+    }
+  }, [location.pathname]);
+
+  const toggleMobileSidebar = () => {
+    setMobileSidebarOpen(prev => !prev);
+  };
 
   return (
     <div className="flex h-screen overflow-hidden" dir="rtl">
@@ -60,7 +66,7 @@ const Layout = ({ children }: LayoutProps) => {
           onClick={() => setMobileSidebarOpen(false)}
         />
         <div className={cn(
-          "absolute right-0 top-0 z-50 h-full w-64 animate-slide-in",
+          "absolute right-0 top-0 z-50 h-full w-64 animate-slide-in bg-background",
           !mobileSidebarOpen && "transform translate-x-full"
         )}>
           <Sidebar onLinkClick={() => setMobileSidebarOpen(false)} />
@@ -71,7 +77,7 @@ const Layout = ({ children }: LayoutProps) => {
       <div className="flex flex-col flex-1 overflow-hidden">
         <Header 
           pageTitle={getPageTitle()} 
-          toggleMobileSidebar={() => setMobileSidebarOpen(!mobileSidebarOpen)} 
+          toggleMobileSidebar={toggleMobileSidebar} 
         />
         <main className="flex-1 overflow-y-auto p-4 md:p-6">
           {children}
