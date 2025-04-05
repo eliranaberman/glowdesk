@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { DollarSign, Upload, FileText, FileImage } from 'lucide-react';
+import { DollarSign, Upload, FileText, FileImage, Trash2 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -29,6 +29,7 @@ import {
   TableHeader, 
   TableRow
 } from '@/components/ui/table';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 
 // Define form schema
 const formSchema = z.object({
@@ -124,6 +125,15 @@ const Expenses = () => {
       });
       setOpenUploadDialog(false);
     }
+  };
+
+  // Delete expense function
+  const deleteExpense = (id: string) => {
+    setExpenses(expenses.filter(expense => expense.id !== id));
+    toast({
+      title: "הוצאה נמחקה",
+      description: "ההוצאה נמחקה בהצלחה",
+    });
   };
 
   // Calculate total expenses
@@ -362,6 +372,7 @@ const Expenses = () => {
                 <TableHead className="text-right">תיאור</TableHead>
                 <TableHead className="text-right">סכום</TableHead>
                 <TableHead className="text-right">חשבונית</TableHead>
+                <TableHead className="text-right">פעולות</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -380,6 +391,29 @@ const Expenses = () => {
                     ) : (
                       <span className="text-muted-foreground">אין</span>
                     )}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-destructive hover:text-destructive/90 hover:bg-destructive/10">
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>האם אתה בטוח?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            פעולה זו לא ניתנת לביטול. ההוצאה תימחק לצמיתות מרשימת ההוצאות שלך.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>ביטול</AlertDialogCancel>
+                          <AlertDialogAction onClick={() => deleteExpense(expense.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                            מחק
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   </TableCell>
                 </TableRow>
               ))}
