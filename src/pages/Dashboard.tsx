@@ -5,8 +5,11 @@ import DailySummary from '../components/dashboard/DailySummary';
 import RecentAppointments from '../components/dashboard/RecentAppointments';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { useToast } from "@/hooks/use-toast";
 
 const Dashboard = () => {
+  const { toast } = useToast();
+  
   // Updated data with correct numbers and currency values
   const stats = [
     { title: 'סך הכל לקוחות', value: '176', icon: <Users className="h-5 w-5 text-primary" />, change: { value: '12%', positive: true } },
@@ -34,8 +37,18 @@ const Dashboard = () => {
     ]
   };
 
+  // Show a notification example for demonstration purposes
+  const showNotification = () => {
+    toast({
+      title: "התראה חדשה",
+      description: "פגישה חדשה נקבעה בעוד 30 דקות",
+      variant: "default",
+    });
+  };
+
   return (
-    <div className="space-y-6" dir="rtl">
+    <div className="space-y-8" dir="rtl">
+      {/* Key metrics section with enhanced styling */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((stat) => (
           <StatCard
@@ -48,7 +61,8 @@ const Dashboard = () => {
         ))}
       </div>
       
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* Main data panels with improved spacing and consistency */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <DailySummary 
           customers={dailyData.customers}
           hours={dailyData.hours}
@@ -58,41 +72,54 @@ const Dashboard = () => {
         <RecentAppointments appointments={appointments} />
       </div>
       
-      <div className="border rounded-lg p-6">
-        <h2 className="text-lg font-semibold mb-2">פעולות מהירות</h2>
+      {/* Quick actions section with enhanced visual styling */}
+      <div className="border rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow duration-300">
+        <h2 className="text-lg font-semibold mb-4 flex items-center">
+          <span className="bg-primary/10 w-1 h-6 rounded mr-2"></span>
+          פעולות מהירות
+        </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          <Link to="/scheduling/new" className="bg-secondary hover:bg-secondary/80 p-4 rounded-lg cursor-pointer transition-colors">
-            <h3 className="font-medium">פגישה חדשה</h3>
-            <p className="text-sm text-muted-foreground">תזמון פגישה ללקוח חדש</p>
+          <Link to="/scheduling/new" className="bg-secondary hover:bg-secondary/80 p-4 rounded-lg cursor-pointer transition-colors duration-200 shadow-sm hover:shadow-md flex flex-col">
+            <h3 className="font-medium text-primary">פגישה חדשה</h3>
+            <p className="text-sm text-muted-foreground mt-1">תזמון פגישה ללקוח חדש</p>
           </Link>
-          <Link to="/customers/new" className="bg-secondary hover:bg-secondary/80 p-4 rounded-lg cursor-pointer transition-colors">
-            <h3 className="font-medium">הוספת לקוח</h3>
-            <p className="text-sm text-muted-foreground">יצירת פרופיל לקוח חדש</p>
+          <Link to="/customers/new" className="bg-secondary hover:bg-secondary/80 p-4 rounded-lg cursor-pointer transition-colors duration-200 shadow-sm hover:shadow-md flex flex-col">
+            <h3 className="font-medium text-primary">הוספת לקוח</h3>
+            <p className="text-sm text-muted-foreground mt-1">יצירת פרופיל לקוח חדש</p>
           </Link>
-          <Link to="/payments/new" className="bg-secondary hover:bg-secondary/80 p-4 rounded-lg cursor-pointer transition-colors">
-            <h3 className="font-medium">רישום תשלום</h3>
-            <p className="text-sm text-muted-foreground">תיעוד עסקה חדשה</p>
+          <Link to="/payments/new" className="bg-secondary hover:bg-secondary/80 p-4 rounded-lg cursor-pointer transition-colors duration-200 shadow-sm hover:shadow-md flex flex-col">
+            <h3 className="font-medium text-primary">רישום תשלום</h3>
+            <p className="text-sm text-muted-foreground mt-1">תיעוד עסקה חדשה</p>
           </Link>
-          <Link to="/inventory/new" className="bg-secondary hover:bg-secondary/80 p-4 rounded-lg cursor-pointer transition-colors">
-            <h3 className="font-medium">עדכון מלאי</h3>
-            <p className="text-sm text-muted-foreground">רישום מוצרים חדשים או חוסרים</p>
+          <Link to="/inventory/new" className="bg-secondary hover:bg-secondary/80 p-4 rounded-lg cursor-pointer transition-colors duration-200 shadow-sm hover:shadow-md flex flex-col">
+            <h3 className="font-medium text-primary">עדכון מלאי</h3>
+            <p className="text-sm text-muted-foreground mt-1">רישום מוצרים חדשים או חוסרים</p>
           </Link>
         </div>
       </div>
 
-      <div className="bg-purple-50 border border-purple-200 rounded-lg p-6">
+      {/* Promotional section with enhanced visual appeal */}
+      <div className="bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200 rounded-lg p-6 shadow-sm">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between">
           <div className="mb-4 md:mb-0">
             <h2 className="text-xl font-semibold text-purple-800 mb-2">מערכת קביעת פגישות אונליין</h2>
-            <p className="text-muted-foreground">
+            <p className="text-muted-foreground max-w-2xl">
               אפשרו ללקוחות שלכם לקבוע פגישות אונליין בקלות, והתראות יסונכרנו ישירות ללוח השנה שלכם.
             </p>
           </div>
-          <Link to="/online-booking">
-            <Button className="bg-purple-600 hover:bg-purple-700">
-              קביעת פגישות אונליין
+          <div className="flex gap-4">
+            <Button 
+              className="bg-purple-600 hover:bg-purple-700"
+              onClick={showNotification}
+            >
+              הדגמת התראה
             </Button>
-          </Link>
+            <Link to="/online-booking">
+              <Button className="bg-purple-600 hover:bg-purple-700">
+                קביעת פגישות אונליין
+              </Button>
+            </Link>
+          </div>
         </div>
       </div>
     </div>
