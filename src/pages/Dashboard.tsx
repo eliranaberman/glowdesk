@@ -7,18 +7,18 @@ import RecentAppointments from '../components/dashboard/RecentAppointments';
 const Dashboard = () => {
   // Dummy data
   const stats = [
-    { title: 'Total Customers', value: '127', icon: <Users className="h-5 w-5 text-primary" />, change: { value: '12%', positive: true } },
-    { title: 'Monthly Appointments', value: '89', icon: <CalendarClock className="h-5 w-5 text-primary" />, change: { value: '5%', positive: true } },
-    { title: 'Monthly Revenue', value: '$3,248', icon: <DollarSign className="h-5 w-5 text-primary" />, change: { value: '8%', positive: true } },
-    { title: 'Avg. Service Value', value: '$42', icon: <TrendingUp className="h-5 w-5 text-primary" />, change: { value: '3%', positive: false } },
+    { title: 'סך הכל לקוחות', value: '127', icon: <Users className="h-5 w-5 text-primary" />, change: { value: '12%', positive: true } },
+    { title: 'פגישות חודשיות', value: '89', icon: <CalendarClock className="h-5 w-5 text-primary" />, change: { value: '5%', positive: true } },
+    { title: 'הכנסה חודשית', value: '₪3,248', icon: <DollarSign className="h-5 w-5 text-primary" />, change: { value: '8%', positive: true } },
+    { title: 'ערך ממוצע לשירות', value: '₪42', icon: <TrendingUp className="h-5 w-5 text-primary" />, change: { value: '3%', positive: false } },
   ];
   
   const appointments = [
-    { id: '1', customer: 'Sarah Johnson', service: 'Gel Manicure', time: 'Today, 10:00 AM', price: 35, status: 'upcoming' as const },
-    { id: '2', customer: 'Emily Davis', service: 'Full Set Acrylic', time: 'Today, 12:30 PM', price: 65, status: 'upcoming' as const },
-    { id: '3', customer: 'Lisa Wong', service: 'Pedicure', time: 'Today, 2:00 PM', price: 45, status: 'upcoming' as const },
-    { id: '4', customer: 'Maria Garcia', service: 'Nail Art', time: 'Yesterday, 11:00 AM', price: 55, status: 'completed' as const },
-    { id: '5', customer: 'Jennifer Miller', service: 'Manicure', time: 'Yesterday, 3:30 PM', price: 30, status: 'cancelled' as const },
+    { id: '1', customer: 'שרה כהן', service: 'מניקור ג\'ל', time: 'היום, 10:00', price: 35, status: 'upcoming' as const },
+    { id: '2', customer: 'אמילי לוי', service: 'אקריליק מלא', time: 'היום, 12:30', price: 65, status: 'upcoming' as const },
+    { id: '3', customer: 'ליאת ונג', service: 'פדיקור', time: 'היום, 14:00', price: 45, status: 'upcoming' as const },
+    { id: '4', customer: 'מריה אברהם', service: 'עיצוב ציפורניים', time: 'אתמול, 11:00', price: 55, status: 'completed' as const },
+    { id: '5', customer: 'ג\'ניפר מילר', service: 'מניקור', time: 'אתמול, 15:30', price: 30, status: 'cancelled' as const },
   ];
   
   const dailyData = {
@@ -26,14 +26,14 @@ const Dashboard = () => {
     hours: 7.5,
     revenue: 320,
     deficiencies: [
-      'Acetone - 1 bottle left',
-      'White polish - running low',
-      'UV lamp needs cleaning',
+      'אצטון - בקבוק אחד נשאר',
+      'לק לבן - כמות נמוכה',
+      'מנורת UV זקוקה לניקוי',
     ]
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" dir="rtl">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((stat) => (
           <StatCard
@@ -57,23 +57,23 @@ const Dashboard = () => {
       </div>
       
       <div className="border rounded-lg p-6">
-        <h2 className="text-lg font-semibold mb-2">Quick Actions</h2>
+        <h2 className="text-lg font-semibold mb-2">פעולות מהירות</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           <div className="bg-secondary hover:bg-secondary/80 p-4 rounded-lg cursor-pointer transition-colors">
-            <h3 className="font-medium">New Appointment</h3>
-            <p className="text-sm text-muted-foreground">Schedule a new client</p>
+            <h3 className="font-medium">פגישה חדשה</h3>
+            <p className="text-sm text-muted-foreground">תזמון פגישה ללקוח חדש</p>
           </div>
           <div className="bg-secondary hover:bg-secondary/80 p-4 rounded-lg cursor-pointer transition-colors">
-            <h3 className="font-medium">Add Customer</h3>
-            <p className="text-sm text-muted-foreground">Create a new customer profile</p>
+            <h3 className="font-medium">הוספת לקוח</h3>
+            <p className="text-sm text-muted-foreground">יצירת פרופיל לקוח חדש</p>
           </div>
           <div className="bg-secondary hover:bg-secondary/80 p-4 rounded-lg cursor-pointer transition-colors">
-            <h3 className="font-medium">Record Payment</h3>
-            <p className="text-sm text-muted-foreground">Log a new transaction</p>
+            <h3 className="font-medium">רישום תשלום</h3>
+            <p className="text-sm text-muted-foreground">תיעוד עסקה חדשה</p>
           </div>
           <div className="bg-secondary hover:bg-secondary/80 p-4 rounded-lg cursor-pointer transition-colors">
-            <h3 className="font-medium">Update Inventory</h3>
-            <p className="text-sm text-muted-foreground">Log new products or deficiencies</p>
+            <h3 className="font-medium">עדכון מלאי</h3>
+            <p className="text-sm text-muted-foreground">רישום מוצרים חדשים או חוסרים</p>
           </div>
         </div>
       </div>

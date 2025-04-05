@@ -8,6 +8,9 @@ import Layout from "./components/layout/Layout";
 import Dashboard from "./pages/Dashboard";
 import Customers from "./pages/Customers";
 import Scheduling from "./pages/Scheduling";
+import Reports from "./pages/Reports";
+import Inventory from "./pages/Inventory";
+import Tasks from "./pages/Tasks";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -32,6 +35,21 @@ const App = () => (
           <Route path="/scheduling" element={
             <Layout>
               <Scheduling />
+            </Layout>
+          } />
+          <Route path="/reports" element={
+            <Layout>
+              <Reports />
+            </Layout>
+          } />
+          <Route path="/inventory" element={
+            <Layout>
+              <Inventory />
+            </Layout>
+          } />
+          <Route path="/tasks" element={
+            <Layout>
+              <Tasks />
             </Layout>
           } />
           <Route path="*" element={<NotFound />} />
