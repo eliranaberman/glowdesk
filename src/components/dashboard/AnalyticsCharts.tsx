@@ -154,7 +154,7 @@ const AnalyticsCharts = ({
                       <XAxis type="number" />
                       <YAxis type="category" dataKey="name" />
                       <Tooltip />
-                      <Bar dataKey="value" nameKey="name">
+                      <Bar dataKey="value" name="הזמנות">
                         {servicesData.map((entry, index) => (
                           <Cell key={`cell-${index}`} fill={entry.color} />
                         ))}
