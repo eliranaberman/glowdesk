@@ -7,14 +7,18 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Layout from "./components/layout/Layout";
 import Dashboard from "./pages/Dashboard";
 import Customers from "./pages/Customers";
+import NewCustomer from "./pages/customers/NewCustomer";
 import Scheduling from "./pages/Scheduling";
+import NewAppointment from "./pages/scheduling/NewAppointment";
 import Reports from "./pages/Reports";
 import Inventory from "./pages/Inventory";
+import NewInventoryItem from "./pages/inventory/NewInventoryItem";
 import Tasks from "./pages/Tasks";
 import OnlineBooking from "./pages/OnlineBooking";
 import NotFound from "./pages/NotFound";
 import Settings from "./pages/Settings";
 import Notifications from "./pages/Notifications";
+import NewPayment from "./pages/payments/NewPayment";
 
 const queryClient = new QueryClient();
 
@@ -35,9 +39,19 @@ const App = () => (
               <Customers />
             </Layout>
           } />
+          <Route path="/customers/new" element={
+            <Layout>
+              <NewCustomer />
+            </Layout>
+          } />
           <Route path="/scheduling" element={
             <Layout>
               <Scheduling />
+            </Layout>
+          } />
+          <Route path="/scheduling/new" element={
+            <Layout>
+              <NewAppointment />
             </Layout>
           } />
           <Route path="/reports" element={
@@ -48,6 +62,11 @@ const App = () => (
           <Route path="/inventory" element={
             <Layout>
               <Inventory />
+            </Layout>
+          } />
+          <Route path="/inventory/new" element={
+            <Layout>
+              <NewInventoryItem />
             </Layout>
           } />
           <Route path="/tasks" element={
@@ -68,6 +87,11 @@ const App = () => (
           <Route path="/notifications" element={
             <Layout>
               <Notifications />
+            </Layout>
+          } />
+          <Route path="/payments/new" element={
+            <Layout>
+              <NewPayment />
             </Layout>
           } />
           <Route path="*" element={<NotFound />} />

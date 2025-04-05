@@ -1,3 +1,4 @@
+
 import { CalendarClock, Users, DollarSign, TrendingUp } from 'lucide-react';
 import StatCard from '../components/dashboard/StatCard';
 import DailySummary from '../components/dashboard/DailySummary';
@@ -60,22 +61,22 @@ const Dashboard = () => {
       <div className="border rounded-lg p-6">
         <h2 className="text-lg font-semibold mb-2">פעולות מהירות</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          <div className="bg-secondary hover:bg-secondary/80 p-4 rounded-lg cursor-pointer transition-colors">
+          <Link to="/scheduling/new" className="bg-secondary hover:bg-secondary/80 p-4 rounded-lg cursor-pointer transition-colors">
             <h3 className="font-medium">פגישה חדשה</h3>
             <p className="text-sm text-muted-foreground">תזמון פגישה ללקוח חדש</p>
-          </div>
-          <div className="bg-secondary hover:bg-secondary/80 p-4 rounded-lg cursor-pointer transition-colors">
+          </Link>
+          <Link to="/customers/new" className="bg-secondary hover:bg-secondary/80 p-4 rounded-lg cursor-pointer transition-colors">
             <h3 className="font-medium">הוספת לקוח</h3>
             <p className="text-sm text-muted-foreground">יצירת פרופיל לקוח חדש</p>
-          </div>
-          <div className="bg-secondary hover:bg-secondary/80 p-4 rounded-lg cursor-pointer transition-colors">
+          </Link>
+          <Link to="/payments/new" className="bg-secondary hover:bg-secondary/80 p-4 rounded-lg cursor-pointer transition-colors">
             <h3 className="font-medium">רישום תשלום</h3>
             <p className="text-sm text-muted-foreground">תיעוד עסקה חדשה</p>
-          </div>
-          <div className="bg-secondary hover:bg-secondary/80 p-4 rounded-lg cursor-pointer transition-colors">
+          </Link>
+          <Link to="/inventory/new" className="bg-secondary hover:bg-secondary/80 p-4 rounded-lg cursor-pointer transition-colors">
             <h3 className="font-medium">עדכון מלאי</h3>
             <p className="text-sm text-muted-foreground">רישום מוצרים חדשים או חוסרים</p>
-          </div>
+          </Link>
         </div>
       </div>
 

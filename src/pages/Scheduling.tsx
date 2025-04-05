@@ -2,6 +2,9 @@
 import { useState } from 'react';
 import GanttChart from '../components/scheduling/GanttChart';
 import CalendarSync from '../components/scheduling/CalendarSync';
+import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom';
+import { CalendarPlus } from 'lucide-react';
 
 const Scheduling = () => {
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -78,7 +81,15 @@ const Scheduling = () => {
 
   return (
     <div dir="rtl">
-      <h1 className="text-2xl font-bold mb-4">לוח פגישות</h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">לוח פגישות</h1>
+        <Link to="/scheduling/new">
+          <Button>
+            <CalendarPlus className="h-4 w-4 ml-2" />
+            פגישה חדשה
+          </Button>
+        </Link>
+      </div>
       <p className="text-muted-foreground mb-6">
         ניהול הפגישות שלך וארגון היום בצורה יעילה.
       </p>

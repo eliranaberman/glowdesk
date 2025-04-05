@@ -19,13 +19,17 @@ const Layout = ({ children }: LayoutProps) => {
     
     if (path === '/') return 'דשבורד';
     if (path === '/customers') return 'לקוחות';
+    if (path === '/customers/new') return 'הוספת לקוח';
     if (path === '/scheduling') return 'יומן';
+    if (path === '/scheduling/new') return 'פגישה חדשה';
     if (path === '/reports') return 'דוחות';
     if (path === '/inventory') return 'מלאי';
+    if (path === '/inventory/new') return 'הוספת פריט';
     if (path === '/tasks') return 'משימות';
     if (path === '/notifications') return 'התראות';
     if (path === '/settings') return 'הגדרות';
     if (path === '/online-booking') return 'קביעת פגישה אונליין';
+    if (path === '/payments/new') return 'רישום תשלום';
 
     return 'דשבורד'; // Default
   };

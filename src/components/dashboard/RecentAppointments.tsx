@@ -8,6 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { Link } from 'react-router-dom';
 
 interface Appointment {
   id: string;
@@ -36,11 +37,24 @@ const RecentAppointments = ({ appointments }: RecentAppointmentsProps) => {
     }
   };
 
+  const getStatusText = (status: Appointment['status']) => {
+    switch (status) {
+      case 'completed':
+        return 'הושלם';
+      case 'upcoming':
+        return 'מתוכנן';
+      case 'cancelled':
+        return 'בוטל';
+      default:
+        return status;
+    }
+  };
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Recent Appointments</CardTitle>
-        <CardDescription>Your latest customer appointments</CardDescription>
+        <CardTitle>פגישות אחרונות</CardTitle>
+        <CardDescription>הפגישות האחרונות של הלקוחות שלך</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
@@ -55,22 +69,24 @@ const RecentAppointments = ({ appointments }: RecentAppointmentsProps) => {
                   <div className="flex items-center gap-2">
                     <span className="text-sm">{appointment.time}</span>
                     <span className={`text-xs px-2 py-1 rounded-full ${getStatusClass(appointment.status)}`}>
-                      {appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1)}
+                      {getStatusText(appointment.status)}
                     </span>
                   </div>
-                  <p className="text-sm font-semibold mt-1">${appointment.price}</p>
+                  <p className="text-sm font-semibold mt-1">₪{appointment.price}</p>
                 </div>
               </div>
             ))
           ) : (
-            <p className="text-center text-muted-foreground py-4">No recent appointments</p>
+            <p className="text-center text-muted-foreground py-4">אין פגישות אחרונות</p>
           )}
         </div>
       </CardContent>
       <CardFooter className="border-t bg-muted/50 px-6 py-4">
-        <Button variant="ghost" className="w-full">
-          View all appointments
-        </Button>
+        <Link to="/scheduling">
+          <Button variant="ghost" className="w-full">
+            צפה בכל הפגישות
+          </Button>
+        </Link>
       </CardFooter>
     </Card>
   );

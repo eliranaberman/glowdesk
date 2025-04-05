@@ -28,12 +28,14 @@ interface CustomerTableProps {
   customers: Customer[];
   onEditCustomer: (id: string) => void;
   onDeleteCustomer: (id: string) => void;
+  onAddCustomer: () => void;
 }
 
 const CustomerTable = ({
   customers,
   onEditCustomer,
   onDeleteCustomer,
+  onAddCustomer,
 }: CustomerTableProps) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortField, setSortField] = useState<keyof Customer>('name');
@@ -67,20 +69,24 @@ const CustomerTable = ({
     }
   };
 
+  const getStatusText = (status: 'active' | 'inactive') => {
+    return status === 'active' ? 'פעיל' : 'לא פעיל';
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
         <div className="relative w-full sm:max-w-xs">
-          <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute right-3 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search customers..."
+            placeholder="חיפוש לקוחות..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
+            className="pr-10"
           />
         </div>
-        <Button>
-          Add Customer
+        <Button onClick={onAddCustomer}>
+          הוספת לקוח
         </Button>
       </div>
 
@@ -92,33 +98,33 @@ const CustomerTable = ({
                 onClick={() => handleSort('name')}
                 className="cursor-pointer hover:bg-muted"
               >
-                Customer
+                לקוח
               </TableHead>
               <TableHead 
                 onClick={() => handleSort('lastAppointment')}
                 className="cursor-pointer hover:bg-muted"
               >
-                Last Appointment
+                תור אחרון
               </TableHead>
               <TableHead 
                 onClick={() => handleSort('totalVisits')}
                 className="cursor-pointer hover:bg-muted text-right"
               >
-                Total Visits
+                סה"כ ביקורים
               </TableHead>
               <TableHead 
                 onClick={() => handleSort('totalSpent')}
                 className="cursor-pointer hover:bg-muted text-right"
               >
-                Total Spent
+                סה"כ תשלום
               </TableHead>
               <TableHead 
                 onClick={() => handleSort('status')}
                 className="cursor-pointer hover:bg-muted"
               >
-                Status
+                סטטוס
               </TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead className="text-right">פעולות</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -130,11 +136,11 @@ const CustomerTable = ({
                       <p className="font-medium">{customer.name}</p>
                       <div className="flex flex-col xs:flex-row gap-2 text-xs text-muted-foreground mt-1">
                         <div className="flex items-center">
-                          <Mail className="h-3 w-3 mr-1" />
+                          <Mail className="h-3 w-3 ml-1" />
                           <span>{customer.email}</span>
                         </div>
                         <div className="flex items-center">
-                          <Phone className="h-3 w-3 mr-1" />
+                          <Phone className="h-3 w-3 ml-1" />
                           <span>{customer.phone}</span>
                         </div>
                       </div>
@@ -142,22 +148,22 @@ const CustomerTable = ({
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center">
-                      <Calendar className="h-3 w-3 mr-1 text-muted-foreground" />
+                      <Calendar className="h-3 w-3 ml-1 text-muted-foreground" />
                       <span>{customer.lastAppointment}</span>
                     </div>
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end">
-                      <Clock className="h-3 w-3 mr-1 text-muted-foreground" />
+                      <Clock className="h-3 w-3 ml-1 text-muted-foreground" />
                       <span>{customer.totalVisits}</span>
                     </div>
                   </TableCell>
                   <TableCell className="text-right font-medium">
-                    ${customer.totalSpent}
+                    ₪{customer.totalSpent}
                   </TableCell>
                   <TableCell>
                     <Badge variant={customer.status === 'active' ? 'default' : 'secondary'}>
-                      {customer.status.charAt(0).toUpperCase() + customer.status.slice(1)}
+                      {getStatusText(customer.status)}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right">
@@ -168,7 +174,7 @@ const CustomerTable = ({
                         onClick={() => onEditCustomer(customer.id)}
                       >
                         <Edit className="h-4 w-4" />
-                        <span className="sr-only">Edit</span>
+                        <span className="sr-only">עריכה</span>
                       </Button>
                       <Button
                         variant="ghost"
@@ -176,7 +182,7 @@ const CustomerTable = ({
                         onClick={() => onDeleteCustomer(customer.id)}
                       >
                         <Trash className="h-4 w-4" />
-                        <span className="sr-only">Delete</span>
+                        <span className="sr-only">מחיקה</span>
                       </Button>
                     </div>
                   </TableCell>
@@ -185,7 +191,7 @@ const CustomerTable = ({
             ) : (
               <TableRow>
                 <TableCell colSpan={6} className="text-center py-10 text-muted-foreground">
-                  No customers found
+                  לא נמצאו לקוחות
                 </TableCell>
               </TableRow>
             )}

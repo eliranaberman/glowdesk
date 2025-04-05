@@ -61,7 +61,7 @@ const Header = ({ pageTitle, toggleMobileSidebar }: HeaderProps) => {
                 )}
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-80" dir="rtl">
+            <DropdownMenuContent align="end" className="w-80 text-right">
               <DropdownMenuLabel>התראות</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <div className="max-h-[300px] overflow-y-auto">
@@ -101,7 +101,7 @@ const Header = ({ pageTitle, toggleMobileSidebar }: HeaderProps) => {
                 </div>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" dir="rtl">
+            <DropdownMenuContent align="end" className="text-right">
               <DropdownMenuLabel>החשבון שלי</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem>פרופיל</DropdownMenuItem>

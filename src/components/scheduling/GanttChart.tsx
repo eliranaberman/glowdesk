@@ -14,6 +14,7 @@ interface Appointment {
   duration: number; // Duration in minutes
   color?: string;
   date?: Date; // Optional date field for week/month views
+  price?: string;
 }
 
 interface GanttChartProps {
@@ -221,8 +222,10 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
                   </div>
 
                   {/* Appointments */}
-                  {filteredAppointments.map((appointment) => {
+                  {filteredAppointments.map((appointment, index) => {
                     const style = getAppointmentStyle(appointment.startTime, appointment.duration);
+                    // Calculate left position to avoid overlapping (for appointments at the same time)
+                    const overlapAdjustment = index % 3 * 3; // Adjust each appointment by a small percentage
                     
                     return (
                       <div
@@ -231,11 +234,16 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
                         style={{
                           ...style,
                           backgroundColor: appointment.color || 'var(--nail-200)',
+                          // Stagger appointments to avoid overlap
+                          right: `${overlapAdjustment}%`,
+                          left: `${overlapAdjustment}%`,
+                          zIndex: 10 - index, // Higher index, lower z-index
                         }}
                       >
                         <p className="font-medium text-sm truncate">{appointment.customer}</p>
                         <p className="text-xs truncate">{appointment.service}</p>
                         <p className="text-xs opacity-70">{appointment.startTime} ({appointment.duration} דקות)</p>
+                        {appointment.price && <p className="text-xs font-semibold">{appointment.price}</p>}
                       </div>
                     );
                   })}

@@ -2,13 +2,15 @@
 import { useState } from 'react';
 import CustomerTable from '../components/customers/CustomerTable';
 import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
 
 const Customers = () => {
+  const navigate = useNavigate();
   // Mock customer data
   const [customers] = useState([
     {
       id: '1',
-      name: 'Sarah Johnson',
+      name: 'שרה כהן',
       email: 'sarah.j@example.com',
       phone: '(555) 123-4567',
       lastAppointment: '2023-04-01',
@@ -18,7 +20,7 @@ const Customers = () => {
     },
     {
       id: '2',
-      name: 'Emily Davis',
+      name: 'אמילי דייויס',
       email: 'emily.d@example.com',
       phone: '(555) 987-6543',
       lastAppointment: '2023-03-25',
@@ -28,7 +30,7 @@ const Customers = () => {
     },
     {
       id: '3',
-      name: 'Lisa Wong',
+      name: 'ליאת ונג',
       email: 'lisa.w@example.com',
       phone: '(555) 456-7890',
       lastAppointment: '2023-04-02',
@@ -38,7 +40,7 @@ const Customers = () => {
     },
     {
       id: '4',
-      name: 'Maria Garcia',
+      name: 'מריה גארסיה',
       email: 'maria.g@example.com',
       phone: '(555) 234-5678',
       lastAppointment: '2023-02-15',
@@ -48,7 +50,7 @@ const Customers = () => {
     },
     {
       id: '5',
-      name: 'Jennifer Miller',
+      name: 'ג\'ניפר מילר',
       email: 'jennifer.m@example.com',
       phone: '(555) 876-5432',
       lastAppointment: '2023-03-10',
@@ -60,25 +62,30 @@ const Customers = () => {
 
   const handleEditCustomer = (id: string) => {
     // In a real application, this would open a modal or navigate to an edit page
-    toast(`Editing customer with ID: ${id}`);
+    toast(`עריכת לקוח עם מזהה: ${id}`);
   };
 
   const handleDeleteCustomer = (id: string) => {
     // In a real application, this would prompt for confirmation before deletion
-    toast(`Deleting customer with ID: ${id}`);
+    toast(`מחיקת לקוח עם מזהה: ${id}`);
+  };
+
+  const handleAddCustomer = () => {
+    navigate('/customers/new');
   };
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold mb-4">Customer Management</h1>
+    <div dir="rtl">
+      <h1 className="text-2xl font-bold mb-4">ניהול לקוחות</h1>
       <p className="text-muted-foreground mb-6">
-        View and manage all your customers in one place.
+        צפה ונהל את כל הלקוחות שלך במקום אחד.
       </p>
 
       <CustomerTable
         customers={customers}
         onEditCustomer={handleEditCustomer}
         onDeleteCustomer={handleDeleteCustomer}
+        onAddCustomer={handleAddCustomer}
       />
     </div>
   );
