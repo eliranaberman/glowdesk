@@ -74,18 +74,34 @@ const AnalyticsCharts = ({
               <CardDescription>סקירת הביצועים הפיננסיים של העסק</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="h-[300px]">
-                <ChartContainer config={chartConfig} className="w-full">
-                  <AreaChart data={monthlyData} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
+              <div className="h-[400px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={monthlyData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
+                    <XAxis dataKey="name" padding={{ left: 30, right: 30 }} />
                     <YAxis />
-                    <ChartTooltip content={<ChartTooltipContent />} />
-                    <Area type="monotone" dataKey="income" name="income" stroke="var(--color-income)" fill="var(--color-income)" fillOpacity={0.3} />
-                    <Area type="monotone" dataKey="expenses" name="expenses" stroke="var(--color-expenses)" fill="var(--color-expenses)" fillOpacity={0.3} />
-                    <Legend />
+                    <Tooltip contentStyle={{textAlign: 'right', direction: 'rtl'}} />
+                    <Legend layout="horizontal" verticalAlign="top" align="right" />
+                    <Area 
+                      type="monotone" 
+                      dataKey="income" 
+                      name="הכנסה" 
+                      stroke="#9b87f5" 
+                      fill="#9b87f5" 
+                      fillOpacity={0.3}
+                      stackId="1"
+                    />
+                    <Area 
+                      type="monotone" 
+                      dataKey="expenses" 
+                      name="הוצאות" 
+                      stroke="#f87171" 
+                      fill="#f87171" 
+                      fillOpacity={0.3}
+                      stackId="2"
+                    />
                   </AreaChart>
-                </ChartContainer>
+                </ResponsiveContainer>
               </div>
             </CardContent>
           </Card>

@@ -77,15 +77,6 @@ const Dashboard = () => {
     { name: '30', value: 4 },
   ];
 
-  // Show a notification example for demonstration purposes
-  const showNotification = () => {
-    toast({
-      title: "התראה חדשה",
-      description: "פגישה חדשה נקבעה בעוד 30 דקות",
-      variant: "default",
-    });
-  };
-
   return (
     <div className="space-y-8" dir="rtl">
       {/* Key metrics section with enhanced styling */}
@@ -158,12 +149,6 @@ const Dashboard = () => {
             </p>
           </div>
           <div className="flex gap-4">
-            <Button 
-              className="bg-purple-600 hover:bg-purple-700"
-              onClick={showNotification}
-            >
-              הדגמת התראה
-            </Button>
             <Link to="/online-booking">
               <Button className="bg-purple-600 hover:bg-purple-700">
                 קביעת פגישות אונליין
