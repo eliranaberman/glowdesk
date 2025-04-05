@@ -3,12 +3,15 @@ import { CalendarClock, Users, DollarSign, TrendingUp } from 'lucide-react';
 import StatCard from '../components/dashboard/StatCard';
 import DailySummary from '../components/dashboard/DailySummary';
 import RecentAppointments from '../components/dashboard/RecentAppointments';
+import AnalyticsCharts from '../components/dashboard/AnalyticsCharts';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useToast } from "@/hooks/use-toast";
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const Dashboard = () => {
   const { toast } = useToast();
+  const isMobile = useIsMobile();
   
   // Updated data with correct numbers and currency values
   const stats = [
@@ -37,6 +40,43 @@ const Dashboard = () => {
     ]
   };
 
+  // Analytics chart data
+  const monthlyData = [
+    { name: 'ינואר', income: 10500, expenses: 6200 },
+    { name: 'פברואר', income: 11200, expenses: 6800 },
+    { name: 'מרץ', income: 12800, expenses: 7100 },
+    { name: 'אפריל', income: 13400, expenses: 7300 },
+    { name: 'מאי', income: 14200, expenses: 7400 },
+    { name: 'יוני', income: 15120, expenses: 7600 },
+  ];
+
+  const retentionData = [
+    { name: 'ינואר', value: 65 },
+    { name: 'פברואר', value: 68 },
+    { name: 'מרץ', value: 72 },
+    { name: 'אפריל', value: 75 },
+    { name: 'מאי', value: 79 },
+    { name: 'יוני', value: 82 },
+  ];
+
+  const servicesData = [
+    { name: 'מניקור ג\'ל', value: 35, color: '#9b87f5' },
+    { name: 'פדיקור', value: 25, color: '#38bdf8' },
+    { name: 'אקריליק', value: 20, color: '#f87171' },
+    { name: 'לק', value: 15, color: '#34d399' },
+    { name: 'עיצוב', value: 5, color: '#fbbf24' },
+  ];
+
+  const bookingsData = [
+    { name: '01', value: 3 },
+    { name: '05', value: 5 },
+    { name: '10', value: 8 },
+    { name: '15', value: 6 },
+    { name: '20', value: 9 },
+    { name: '25', value: 7 },
+    { name: '30', value: 4 },
+  ];
+
   // Show a notification example for demonstration purposes
   const showNotification = () => {
     toast({
@@ -59,6 +99,16 @@ const Dashboard = () => {
             change={stat.change}
           />
         ))}
+      </div>
+      
+      {/* Analytics Charts Section */}
+      <div className="mb-8">
+        <AnalyticsCharts 
+          monthlyData={monthlyData}
+          retentionData={retentionData}
+          servicesData={servicesData}
+          bookingsData={bookingsData}
+        />
       </div>
       
       {/* Main data panels with improved spacing and consistency */}
