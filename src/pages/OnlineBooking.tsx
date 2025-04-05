@@ -25,7 +25,7 @@ const OnlineBooking = () => {
     '15:00', '15:30', '16:00', '16:30', '17:00', '17:30'
   ];
 
-  // Sample services
+  // Sample services with prices in ILS (₪)
   const services = [
     { id: '1', name: 'מניקור ג\'ל', duration: 60, price: 120 },
     { id: '2', name: 'אקריליק מלא', duration: 90, price: 180 },

@@ -22,6 +22,7 @@ const Scheduling = () => {
       duration: 60,
       color: 'rgba(198, 113, 211, 0.3)', // Light purple
       date: today,
+      price: '₪120',
     },
     {
       id: '2',
@@ -31,6 +32,7 @@ const Scheduling = () => {
       duration: 90,
       color: 'rgba(181, 75, 194, 0.3)', // Medium purple
       date: today,
+      price: '₪180',
     },
     {
       id: '3',
@@ -40,6 +42,7 @@ const Scheduling = () => {
       duration: 75,
       color: 'rgba(156, 61, 167, 0.3)', // Dark purple
       date: today,
+      price: '₪140',
     },
     {
       id: '4',
@@ -49,6 +52,7 @@ const Scheduling = () => {
       duration: 45,
       color: 'rgba(198, 113, 211, 0.3)',
       date: tomorrow,
+      price: '₪100',
     },
     {
       id: '5',
@@ -58,6 +62,7 @@ const Scheduling = () => {
       duration: 120,
       color: 'rgba(181, 75, 194, 0.3)',
       date: tomorrow,
+      price: '₪220',
     },
     {
       id: '6',
@@ -67,6 +72,7 @@ const Scheduling = () => {
       duration: 90,
       color: 'rgba(156, 61, 167, 0.3)',
       date: dayAfterTomorrow,
+      price: '₪160',
     },
   ];
 

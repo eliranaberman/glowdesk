@@ -4,6 +4,7 @@ import { Bell, Search, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
+import { useNavigate } from 'react-router-dom';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,6 +21,7 @@ interface HeaderProps {
 
 const Header = ({ pageTitle, toggleMobileSidebar }: HeaderProps) => {
   const [notificationCount] = useState(3); // Example notification count
+  const navigate = useNavigate();
 
   return (
     <header className="w-full bg-background sticky top-0 z-10 border-b border-border">
@@ -38,10 +40,11 @@ const Header = ({ pageTitle, toggleMobileSidebar }: HeaderProps) => {
 
         <div className="hidden md:flex items-center max-w-sm flex-1 mx-4">
           <div className="relative w-full">
-            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Search className="absolute right-2 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search..."
-              className="pl-8 rounded-full bg-secondary border-none"
+              placeholder="חיפוש..."
+              className="pr-8 rounded-full bg-secondary border-none"
+              dir="rtl"
             />
           </div>
         </div>
@@ -49,7 +52,7 @@ const Header = ({ pageTitle, toggleMobileSidebar }: HeaderProps) => {
         <div className="flex items-center gap-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="relative">
+              <Button variant="ghost" size="icon" className="relative" onClick={() => navigate("/notifications")}>
                 <Bell className="h-5 w-5" />
                 {notificationCount > 0 && (
                   <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] text-primary-foreground">
@@ -58,32 +61,32 @@ const Header = ({ pageTitle, toggleMobileSidebar }: HeaderProps) => {
                 )}
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-80">
-              <DropdownMenuLabel>Notifications</DropdownMenuLabel>
+            <DropdownMenuContent align="end" className="w-80" dir="rtl">
+              <DropdownMenuLabel>התראות</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <div className="max-h-[300px] overflow-y-auto">
-                <DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate("/notifications")}>
                   <div className="flex flex-col gap-1">
-                    <p className="text-sm font-medium">New appointment booked</p>
-                    <p className="text-xs text-muted-foreground">Jane Doe - Today, 2:00 PM</p>
+                    <p className="text-sm font-medium">נקבעה פגישה חדשה</p>
+                    <p className="text-xs text-muted-foreground">רחל כהן - היום, 14:00</p>
+                  </div>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate("/inventory")}>
+                  <div className="flex flex-col gap-1">
+                    <p className="text-sm font-medium">התראת מלאי נמוך</p>
+                    <p className="text-xs text-muted-foreground">לק ג'ל אדום (נותרו 2)</p>
                   </div>
                 </DropdownMenuItem>
                 <DropdownMenuItem>
                   <div className="flex flex-col gap-1">
-                    <p className="text-sm font-medium">Low inventory alert</p>
-                    <p className="text-xs text-muted-foreground">Nail polish - Red (2 left)</p>
-                  </div>
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <div className="flex flex-col gap-1">
-                    <p className="text-sm font-medium">Reminder</p>
-                    <p className="text-xs text-muted-foreground">Order new supplies</p>
+                    <p className="text-sm font-medium">תזכורת</p>
+                    <p className="text-xs text-muted-foreground">להזמין מלאי חדש</p>
                   </div>
                 </DropdownMenuItem>
               </div>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="justify-center font-medium text-primary">
-                View all notifications
+              <DropdownMenuItem className="justify-center font-medium text-primary" onClick={() => navigate("/notifications")}>
+                צפה בכל ההתראות
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -94,17 +97,17 @@ const Header = ({ pageTitle, toggleMobileSidebar }: HeaderProps) => {
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                 <div className="h-8 w-8 rounded-full bg-nail-300 flex items-center justify-center text-primary-foreground">
-                  NT
+                  CM
                 </div>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>My Account</DropdownMenuLabel>
+            <DropdownMenuContent align="end" dir="rtl">
+              <DropdownMenuLabel>החשבון שלי</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>Profile</DropdownMenuItem>
-              <DropdownMenuItem>Settings</DropdownMenuItem>
+              <DropdownMenuItem>פרופיל</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate("/settings")}>הגדרות</DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>Sign out</DropdownMenuItem>
+              <DropdownMenuItem>התנתק</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

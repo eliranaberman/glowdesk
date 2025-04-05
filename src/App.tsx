@@ -13,6 +13,8 @@ import Inventory from "./pages/Inventory";
 import Tasks from "./pages/Tasks";
 import OnlineBooking from "./pages/OnlineBooking";
 import NotFound from "./pages/NotFound";
+import Settings from "./pages/Settings";
+import Notifications from "./pages/Notifications";
 
 const queryClient = new QueryClient();
 
@@ -56,6 +58,16 @@ const App = () => (
           <Route path="/online-booking" element={
             <Layout>
               <OnlineBooking />
+            </Layout>
+          } />
+          <Route path="/settings" element={
+            <Layout>
+              <Settings />
+            </Layout>
+          } />
+          <Route path="/notifications" element={
+            <Layout>
+              <Notifications />
             </Layout>
           } />
           <Route path="*" element={<NotFound />} />

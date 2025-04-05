@@ -19,32 +19,32 @@ import {
 
 const navItems = [
   { 
-    name: 'Dashboard', 
+    name: 'דשבורד', 
     path: '/', 
     icon: <LayoutDashboard className="w-5 h-5" /> 
   },
   { 
-    name: 'Customers', 
+    name: 'לקוחות', 
     path: '/customers', 
     icon: <Users className="w-5 h-5" /> 
   },
   { 
-    name: 'Scheduling', 
+    name: 'יומן', 
     path: '/scheduling', 
     icon: <Calendar className="w-5 h-5" /> 
   },
   { 
-    name: 'Reports', 
+    name: 'דוחות', 
     path: '/reports', 
     icon: <BarChart className="w-5 h-5" /> 
   },
   { 
-    name: 'Inventory', 
+    name: 'מלאי', 
     path: '/inventory', 
     icon: <Package className="w-5 h-5" /> 
   },
   { 
-    name: 'Tasks', 
+    name: 'משימות', 
     path: '/tasks', 
     icon: <ClipboardList className="w-5 h-5" /> 
   }
@@ -57,29 +57,30 @@ const Sidebar = () => {
   return (
     <div
       className={cn(
-        "flex flex-col h-screen bg-sidebar border-r border-border transition-all duration-300",
+        "flex flex-col h-screen bg-sidebar border-l border-border transition-all duration-300",
         collapsed ? "w-16" : "w-64"
       )}
+      dir="rtl"
     >
       <div className="flex items-center justify-between p-4">
         {!collapsed && (
           <div className="flex items-center">
             <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold">
-              NZ
+              CM
             </div>
-            <h1 className="ml-2 font-bold text-lg">Nail Zenith</h1>
+            <h1 className="mr-2 font-bold text-lg">By Chen Mizrahi</h1>
           </div>
         )}
         <Button
           variant="ghost"
           size="icon"
           onClick={() => setCollapsed(!collapsed)}
-          className="ml-auto"
+          className="mr-auto"
         >
           {collapsed ? (
-            <ChevronRight className="h-4 w-4" />
-          ) : (
             <ChevronLeft className="h-4 w-4" />
+          ) : (
+            <ChevronRight className="h-4 w-4" />
           )}
         </Button>
       </div>
@@ -124,7 +125,7 @@ const Sidebar = () => {
               }
             >
               <Bell className="w-5 h-5" />
-              {!collapsed && <span>Notifications</span>}
+              {!collapsed && <span>התראות</span>}
             </NavLink>
           </li>
           <li>
@@ -139,7 +140,7 @@ const Sidebar = () => {
               }
             >
               <Settings className="w-5 h-5" />
-              {!collapsed && <span>Settings</span>}
+              {!collapsed && <span>הגדרות</span>}
             </NavLink>
           </li>
         </ul>
@@ -151,9 +152,9 @@ const Sidebar = () => {
             <div className="w-8 h-8 rounded-full bg-nail-300">
               {/* Profile image would go here */}
             </div>
-            <div className="ml-2 truncate">
-              <p className="text-sm font-medium">Nail Tech</p>
-              <p className="text-xs text-muted-foreground">Admin</p>
+            <div className="mr-2 truncate">
+              <p className="text-sm font-medium">טכנאית ציפורניים</p>
+              <p className="text-xs text-muted-foreground">מנהלת</p>
             </div>
           </div>
         )}

@@ -13,24 +13,25 @@ const Layout = ({ children }: LayoutProps) => {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const location = useLocation();
 
-  // Get page title based on current route
+  // Get page title based on current route (in Hebrew)
   const getPageTitle = (): string => {
     const path = location.pathname;
     
-    if (path === '/') return 'Dashboard';
-    if (path === '/customers') return 'Customers';
-    if (path === '/scheduling') return 'Scheduling';
-    if (path === '/reports') return 'Reports';
-    if (path === '/inventory') return 'Inventory';
-    if (path === '/tasks') return 'Tasks';
-    if (path === '/notifications') return 'Notifications';
-    if (path === '/settings') return 'Settings';
+    if (path === '/') return 'דשבורד';
+    if (path === '/customers') return 'לקוחות';
+    if (path === '/scheduling') return 'יומן';
+    if (path === '/reports') return 'דוחות';
+    if (path === '/inventory') return 'מלאי';
+    if (path === '/tasks') return 'משימות';
+    if (path === '/notifications') return 'התראות';
+    if (path === '/settings') return 'הגדרות';
+    if (path === '/online-booking') return 'קביעת פגישה אונליין';
 
-    return 'Dashboard'; // Default
+    return 'דשבורד'; // Default
   };
 
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="flex h-screen overflow-hidden" dir="rtl">
       {/* Desktop Sidebar */}
       <div className="hidden lg:block">
         <Sidebar />
@@ -48,8 +49,8 @@ const Layout = ({ children }: LayoutProps) => {
           onClick={() => setMobileSidebarOpen(false)}
         />
         <div className={cn(
-          "absolute left-0 top-0 z-50 h-full w-64 animate-slide-in",
-          !mobileSidebarOpen && "transform -translate-x-full"
+          "absolute right-0 top-0 z-50 h-full w-64 animate-slide-in",
+          !mobileSidebarOpen && "transform translate-x-full"
         )}>
           <Sidebar />
         </div>
