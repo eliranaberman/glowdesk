@@ -82,10 +82,10 @@ const SocialMedia = () => {
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full" dir="rtl">
         <TabsList className="grid grid-cols-4 mb-6">
-          <TabsTrigger value="dashboard">דשבורד</TabsTrigger>
-          <TabsTrigger value="inbox">תיבת הודעות</TabsTrigger>
-          <TabsTrigger value="posts">פרסום פוסטים</TabsTrigger>
-          <TabsTrigger value="analytics">אנליטיקס</TabsTrigger>
+          <TabsTrigger value="dashboard" className="text-xs md:text-base">דשבורד</TabsTrigger>
+          <TabsTrigger value="inbox" className="text-xs md:text-base">תיבת הודעות</TabsTrigger>
+          <TabsTrigger value="posts" className="text-xs md:text-base">פרסום פוסטים</TabsTrigger>
+          <TabsTrigger value="analytics" className="text-xs md:text-base">אנליטיקס</TabsTrigger>
         </TabsList>
 
         {/* Dashboard Tab */}

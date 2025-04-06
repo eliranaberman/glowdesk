@@ -47,6 +47,16 @@ const Layout = ({ children }: LayoutProps) => {
     }
   }, [location.pathname]);
 
+  // Effect to handle body overflow when mobile sidebar is open
+  useEffect(() => {
+    if (isMobile) {
+      document.body.style.overflow = mobileSidebarOpen ? 'hidden' : '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [mobileSidebarOpen, isMobile]);
+
   const toggleMobileSidebar = () => {
     setMobileSidebarOpen(prev => !prev);
   };
@@ -84,7 +94,7 @@ const Layout = ({ children }: LayoutProps) => {
           toggleMobileSidebar={toggleMobileSidebar} 
         />
         <main className={cn(
-          "flex-1 overflow-y-auto p-4 md:p-6 text-center bg-gradient-to-b from-warmBeige/10 to-background",
+          "flex-1 overflow-y-auto p-3 md:p-6 text-center bg-gradient-to-b from-warmBeige/10 to-background",
           isMobile ? "pb-20" : ""
         )}>
           {children}

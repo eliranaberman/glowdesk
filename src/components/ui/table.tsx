@@ -12,7 +12,7 @@ const Table = React.forwardRef<
   return (
     <div className={cn(
       "relative w-full overflow-auto rounded-xl border border-border/30",
-      isMobile ? "overflow-x-auto" : ""
+      isMobile ? "overflow-x-auto pb-4" : ""
     )}>
       <table
         ref={ref}
@@ -95,7 +95,7 @@ const TableHead = React.forwardRef<
       ref={ref}
       className={cn(
         "h-12 px-3 md:px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0",
-        isMobile ? "text-xs whitespace-nowrap" : "text-sm",
+        isMobile ? "text-xs whitespace-nowrap py-3" : "text-sm",
         className
       )}
       {...props}
@@ -115,7 +115,7 @@ const TableCell = React.forwardRef<
       ref={ref}
       className={cn(
         "p-3 md:p-4 align-middle [&:has([role=checkbox])]:pr-0", 
-        isMobile ? "text-xs whitespace-pre-wrap" : "text-sm",
+        isMobile ? "text-xs py-3 break-words" : "text-sm",
         className
       )}
       {...props}

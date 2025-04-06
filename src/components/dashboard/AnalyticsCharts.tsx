@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -79,7 +78,7 @@ const AnalyticsCharts = ({
     retention: { label: "שימור לקוחות", theme: { light: "#38bdf8", dark: "#38bdf8" } },
   };
 
-  // Custom tooltip formatter for the income chart
+  // Custom tooltip formatter for the income chart - FIXED LABELS HERE
   const incomeTooltipFormatter = (value: number, name: string) => {
     const formattedValue = new Intl.NumberFormat('he-IL', {
       style: 'currency',
@@ -87,8 +86,9 @@ const AnalyticsCharts = ({
       minimumFractionDigits: 0
     }).format(value);
     
-    // Fix the label here - "income" should be "הכנסה" not "הוצאות"
-    return [formattedValue, name === 'income' ? 'הכנסה' : 'הוצאות'];
+    // Corrected - properly map the field names to Hebrew labels
+    const hebrewName = name === 'income' ? 'הכנסה' : 'הוצאות';
+    return [formattedValue, hebrewName];
   };
 
   const handleInfoClick = () => {
@@ -189,7 +189,7 @@ const AnalyticsCharts = ({
                     <Area 
                       type="monotone" 
                       dataKey="income" 
-                      name="הכנסה" 
+                      name="income" 
                       stroke={incomeColor} 
                       strokeWidth={3}
                       fill={`url(#${incomeGradientId})`}
@@ -199,7 +199,7 @@ const AnalyticsCharts = ({
                     <Area 
                       type="monotone" 
                       dataKey="expenses" 
-                      name="הוצאות" 
+                      name="expenses" 
                       stroke={expensesColor} 
                       strokeWidth={3}
                       fill={`url(#${expenseGradientId})`}
@@ -253,9 +253,13 @@ const AnalyticsCharts = ({
               <CardDescription>אחוז הלקוחות החוזרים לאורך החודשים</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="h-[300px]">
+              {/* Reduced chart height to make room for the average display */}
+              <div className="h-[250px]">
                 <ChartContainer config={chartConfig} className="w-full">
-                  <LineChart data={retentionData} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
+                  <LineChart 
+                    data={retentionData} 
+                    margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
+                  >
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="name" />
                     <YAxis domain={[0, 100]} />
@@ -271,12 +275,14 @@ const AnalyticsCharts = ({
                   </LineChart>
                 </ChartContainer>
               </div>
-              <div className="mt-4 flex justify-between items-center rounded-lg bg-secondary/10 p-3 border border-border/30">
+              
+              {/* Moved this outside the chart for better visibility */}
+              <div className="mt-6 flex justify-between items-center rounded-lg bg-secondary/10 p-4 border border-border/30">
                 <div>
-                  <p className="font-medium">ממוצע שימור חודשי</p>
+                  <p className="font-medium text-lg">ממוצע שימור חודשי</p>
                   <p className="text-sm text-muted-foreground">שישה חודשים אחרונים</p>
                 </div>
-                <div className="text-2xl font-semibold text-primary">{(retentionData.reduce((acc, item) => acc + item.value, 0) / retentionData.length).toFixed(1)}%</div>
+                <div className="text-3xl font-semibold text-primary">{(retentionData.reduce((acc, item) => acc + item.value, 0) / retentionData.length).toFixed(1)}%</div>
               </div>
             </CardContent>
           </Card>
