@@ -8,6 +8,15 @@ import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { ArrowRight } from 'lucide-react';
 
+// Mock database of customers that will persist between renders
+const mockCustomers = {
+  '1': { name: 'שרה כהן', email: 'sarah.j@example.com', phone: '(555) 123-4567', notes: 'לקוחה ותיקה' },
+  '2': { name: 'אמילי דייויס', email: 'emily.d@example.com', phone: '(555) 987-6543', notes: 'מעדיפה מניקור בלבד' },
+  '3': { name: 'ליאת ונג', email: 'lisa.w@example.com', phone: '(555) 456-7890', notes: 'אלרגית ללק מסוג X' },
+  '4': { name: 'מריה גארסיה', email: 'maria.g@example.com', phone: '(555) 234-5678', notes: '' },
+  '5': { name: 'ג\'ניפר מילר', email: 'jennifer.m@example.com', phone: '(555) 876-5432', notes: 'מגיעה תמיד בזמן' },
+};
+
 const EditCustomer = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
@@ -21,17 +30,7 @@ const EditCustomer = () => {
 
   useEffect(() => {
     // Simulate fetching customer data
-    // In a real app, this would be an API call
     setTimeout(() => {
-      // Mock data based on ID
-      const mockCustomers = {
-        '1': { name: 'שרה כהן', email: 'sarah.j@example.com', phone: '(555) 123-4567', notes: 'לקוחה ותיקה' },
-        '2': { name: 'אמילי דייויס', email: 'emily.d@example.com', phone: '(555) 987-6543', notes: 'מעדיפה מניקור בלבד' },
-        '3': { name: 'ליאת ונג', email: 'lisa.w@example.com', phone: '(555) 456-7890', notes: 'אלרגית ללק מסוג X' },
-        '4': { name: 'מריה גארסיה', email: 'maria.g@example.com', phone: '(555) 234-5678', notes: '' },
-        '5': { name: 'ג\'ניפר מילר', email: 'jennifer.m@example.com', phone: '(555) 876-5432', notes: 'מגיעה תמיד בזמן' },
-      };
-
       const customer = mockCustomers[id as keyof typeof mockCustomers] || { name: '', email: '', phone: '', notes: '' };
       setCustomerData(customer);
       setIsLoading(false);
@@ -46,9 +45,24 @@ const EditCustomer = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // In a real application, you would save the updated customer data to your backend
-    toast.success('פרטי לקוח עודכנו בהצלחה');
-    navigate('/customers');
+    // Save the updated customer data to our mock database
+    if (id) {
+      mockCustomers[id as keyof typeof mockCustomers] = { ...customerData };
+      
+      // Update the customers list in localStorage to persist between page refreshes
+      try {
+        const customersJSON = JSON.stringify(mockCustomers);
+        localStorage.setItem('mockCustomers', customersJSON);
+      } catch (error) {
+        console.error('Error saving to localStorage:', error);
+      }
+      
+      // Show success message
+      toast.success('פרטי לקוח עודכנו בהצלחה');
+      
+      // Navigate back to customers list
+      navigate('/customers');
+    }
   };
 
   if (isLoading) {

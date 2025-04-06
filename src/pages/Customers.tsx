@@ -1,13 +1,38 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import CustomerTable from '../components/customers/CustomerTable';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 
-const Customers = () => {
-  const navigate = useNavigate();
-  // Mock customer data
-  const [customers] = useState([
+// Import the mock customers from localStorage if available
+const getInitialCustomers = () => {
+  try {
+    const savedCustomers = localStorage.getItem('mockCustomers');
+    if (savedCustomers) {
+      // We have saved customer data, use it to hydrate our customer list
+      const customerData = JSON.parse(savedCustomers);
+      
+      // Convert to the format our component expects
+      return Object.keys(customerData).map(id => {
+        const customer = customerData[id];
+        return {
+          id,
+          name: customer.name,
+          email: customer.email,
+          phone: customer.phone,
+          lastAppointment: '2023-04-01',
+          totalVisits: 8,
+          totalSpent: 960,
+          status: 'active' as const,
+        };
+      });
+    }
+  } catch (error) {
+    console.error('Error loading customers from localStorage:', error);
+  }
+  
+  // Fallback to default customers if no saved data or error
+  return [
     {
       id: '1',
       name: 'שרה כהן',
@@ -58,7 +83,26 @@ const Customers = () => {
       totalSpent: 840,
       status: 'active' as const,
     },
-  ]);
+  ];
+};
+
+const Customers = () => {
+  const navigate = useNavigate();
+  const [customers, setCustomers] = useState(getInitialCustomers());
+
+  // Effect to refresh the customers list when localStorage changes
+  useEffect(() => {
+    const handleStorageChange = () => {
+      setCustomers(getInitialCustomers());
+    };
+
+    // Listen for storage events
+    window.addEventListener('storage', handleStorageChange);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, []);
 
   const handleEditCustomer = (id: string) => {
     navigate(`/customers/edit/${id}`);
