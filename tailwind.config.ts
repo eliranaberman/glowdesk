@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -18,6 +19,10 @@ export default {
 			}
 		},
 		extend: {
+			fontFamily: {
+				sans: ['Inter var', 'Inter', 'system-ui', 'sans-serif'],
+				display: ['Poppins', 'system-ui', 'sans-serif'],
+			},
 			colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
@@ -62,6 +67,11 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
+				warmBeige: '#F5F0EB',
+				softRose: '#EFCFD4',
+				mutedPeach: '#FAD8C3',
+				deepNavy: '#2B2E4A',
+				charcoal: '#3A3A3C',
 				nail: {
 					50: "#FCF7FD",
 					100: "#F5E6F8",
@@ -109,6 +119,10 @@ export default {
 				'slide-in': {
 					from: { transform: 'translateX(-100%)' },
 					to: { transform: 'translateX(0)' }
+				},
+				'pulse-subtle': {
+					'0%, 100%': { opacity: '1' },
+					'50%': { opacity: '0.8' }
 				}
 			},
 			animation: {
@@ -116,13 +130,19 @@ export default {
 				'accordion-up': 'accordion-up 0.2s ease-out',
 				'fade-in': 'fade-in 0.3s ease-in',
 				'fade-out': 'fade-out 0.3s ease-out',
-				'slide-in': 'slide-in 0.3s ease-out'
+				'slide-in': 'slide-in 0.3s ease-out',
+				'pulse-subtle': 'pulse-subtle 2s ease-in-out infinite'
 			},
 			textAlign: {
 				'right': 'right',
 				'left': 'left',
 				'center': 'center',
-			}
+			},
+			boxShadow: {
+				'soft': '0 4px 20px 0 rgba(0, 0, 0, 0.05)',
+				'soft-lg': '0 10px 30px 0 rgba(0, 0, 0, 0.05)',
+				'button': '0 2px 6px 0 rgba(0, 0, 0, 0.05)',
+			},
 		}
 	},
 	plugins: [require("tailwindcss-animate")],

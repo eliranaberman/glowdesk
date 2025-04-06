@@ -12,12 +12,12 @@ const Table = React.forwardRef<
 
   return (
     <div className={cn(
-      "relative w-full overflow-auto",
+      "relative w-full overflow-auto rounded-xl",
       isMobile ? "overflow-x-auto" : ""
     )}>
       <table
         ref={ref}
-        className={cn("w-full caption-bottom text-sm text-center", className)}
+        className={cn("w-full caption-bottom text-sm text-center bg-card shadow-soft", className)}
         {...props}
       />
     </div>
@@ -29,7 +29,7 @@ const TableHeader = React.forwardRef<
   HTMLTableSectionElement,
   React.HTMLAttributes<HTMLTableSectionElement>
 >(({ className, ...props }, ref) => (
-  <thead ref={ref} className={cn("[&_tr]:border-b text-center", className)} {...props} />
+  <thead ref={ref} className={cn("[&_tr]:border-b text-center bg-secondary/30", className)} {...props} />
 ))
 TableHeader.displayName = "TableHeader"
 
@@ -52,7 +52,7 @@ const TableFooter = React.forwardRef<
   <tfoot
     ref={ref}
     className={cn(
-      "border-t bg-muted/50 font-medium [&>tr]:last:border-b-0 text-center",
+      "border-t bg-muted/30 font-medium [&>tr]:last:border-b-0 text-center",
       className
     )}
     {...props}
@@ -67,7 +67,7 @@ const TableRow = React.forwardRef<
   <tr
     ref={ref}
     className={cn(
-      "border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted text-center",
+      "border-b transition-colors hover:bg-muted/30 data-[state=selected]:bg-muted text-center",
       className
     )}
     {...props}

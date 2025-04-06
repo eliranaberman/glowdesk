@@ -60,11 +60,11 @@ const Dashboard = () => {
   ];
 
   const servicesData = [
-    { name: 'מניקור ג\'ל', value: 35, color: '#9b87f5' },
-    { name: 'פדיקור', value: 25, color: '#38bdf8' },
-    { name: 'אקריליק', value: 20, color: '#f87171' },
-    { name: 'לק', value: 15, color: '#34d399' },
-    { name: 'עיצוב', value: 5, color: '#fbbf24' },
+    { name: 'מניקור ג\'ל', value: 35, color: '#EFCFD4' },
+    { name: 'פדיקור', value: 25, color: '#FAD8C3' },
+    { name: 'אקריליק', value: 20, color: '#F5F0EB' },
+    { name: 'לק', value: 15, color: '#D8E2DC' },
+    { name: 'עיצוב', value: 5, color: '#FFE5D9' },
   ];
 
   const bookingsData = [
@@ -103,7 +103,7 @@ const Dashboard = () => {
         <RecentAppointments appointments={appointments} />
       </div>
       
-      {/* Analytics Charts Section - Moved below the daily summary and recent appointments */}
+      {/* Analytics Charts Section - Below the daily summary and recent appointments */}
       <div className="mb-8">
         <AnalyticsCharts 
           monthlyData={monthlyData}
@@ -114,43 +114,43 @@ const Dashboard = () => {
       </div>
       
       {/* Quick actions section with enhanced visual styling */}
-      <div className="border rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow duration-300">
-        <h2 className="text-lg font-semibold mb-4 flex items-center">
-          <span className="bg-primary/10 w-1 h-6 rounded mr-2"></span>
+      <div className="border rounded-xl p-6 shadow-soft hover:shadow-soft-lg transition-all duration-300 bg-warmBeige/10">
+        <h2 className="text-lg font-display font-medium mb-6 flex items-center">
+          <span className="bg-softRose/40 w-1 h-6 rounded mr-2"></span>
           פעולות מהירות
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          <Link to="/scheduling/new" className="bg-secondary hover:bg-secondary/80 p-4 rounded-lg cursor-pointer transition-colors duration-200 shadow-sm hover:shadow-md flex flex-col">
-            <h3 className="font-medium text-primary">פגישה חדשה</h3>
+          <Link to="/scheduling/new" className="bg-card hover:bg-accent/20 p-5 rounded-xl cursor-pointer transition-all duration-300 shadow-soft hover:shadow-soft-lg flex flex-col transform hover:-translate-y-1">
+            <h3 className="font-medium text-primary mb-1">פגישה חדשה</h3>
             <p className="text-sm text-muted-foreground mt-1">תזמון פגישה ללקוח חדש</p>
           </Link>
-          <Link to="/customers/new" className="bg-secondary hover:bg-secondary/80 p-4 rounded-lg cursor-pointer transition-colors duration-200 shadow-sm hover:shadow-md flex flex-col">
-            <h3 className="font-medium text-primary">הוספת לקוח</h3>
+          <Link to="/customers/new" className="bg-card hover:bg-accent/20 p-5 rounded-xl cursor-pointer transition-all duration-300 shadow-soft hover:shadow-soft-lg flex flex-col transform hover:-translate-y-1">
+            <h3 className="font-medium text-primary mb-1">הוספת לקוח</h3>
             <p className="text-sm text-muted-foreground mt-1">יצירת פרופיל לקוח חדש</p>
           </Link>
-          <Link to="/payments/new" className="bg-secondary hover:bg-secondary/80 p-4 rounded-lg cursor-pointer transition-colors duration-200 shadow-sm hover:shadow-md flex flex-col">
-            <h3 className="font-medium text-primary">רישום תשלום</h3>
+          <Link to="/payments/new" className="bg-card hover:bg-accent/20 p-5 rounded-xl cursor-pointer transition-all duration-300 shadow-soft hover:shadow-soft-lg flex flex-col transform hover:-translate-y-1">
+            <h3 className="font-medium text-primary mb-1">רישום תשלום</h3>
             <p className="text-sm text-muted-foreground mt-1">תיעוד עסקה חדשה</p>
           </Link>
-          <Link to="/inventory/new" className="bg-secondary hover:bg-secondary/80 p-4 rounded-lg cursor-pointer transition-colors duration-200 shadow-sm hover:shadow-md flex flex-col">
-            <h3 className="font-medium text-primary">עדכון מלאי</h3>
+          <Link to="/inventory/new" className="bg-card hover:bg-accent/20 p-5 rounded-xl cursor-pointer transition-all duration-300 shadow-soft hover:shadow-soft-lg flex flex-col transform hover:-translate-y-1">
+            <h3 className="font-medium text-primary mb-1">עדכון מלאי</h3>
             <p className="text-sm text-muted-foreground mt-1">רישום מוצרים חדשים או חוסרים</p>
           </Link>
         </div>
       </div>
 
       {/* Promotional section with enhanced visual appeal */}
-      <div className="bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200 rounded-lg p-6 shadow-sm">
+      <div className="bg-gradient-to-r from-warmBeige to-softRose/20 border border-softRose/20 rounded-xl p-6 shadow-soft">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between">
           <div className="mb-4 md:mb-0">
-            <h2 className="text-xl font-semibold text-purple-800 mb-2">מערכת קביעת פגישות אונליין</h2>
+            <h2 className="text-xl font-display font-medium text-deepNavy mb-2">מערכת קביעת פגישות אונליין</h2>
             <p className="text-muted-foreground max-w-2xl">
               אפשרו ללקוחות שלכם לקבוע פגישות אונליין בקלות, והתראות יסונכרנו ישירות ללוח השנה שלכם.
             </p>
           </div>
           <div className="flex gap-4">
             <Link to="/online-booking">
-              <Button className="bg-purple-600 hover:bg-purple-700">
+              <Button variant="warm" size="lg" className="font-display">
                 קביעת פגישות אונליין
               </Button>
             </Link>

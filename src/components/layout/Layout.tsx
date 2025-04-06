@@ -51,7 +51,7 @@ const Layout = ({ children }: LayoutProps) => {
   };
 
   return (
-    <div className="flex h-screen overflow-hidden" dir="rtl">
+    <div className="flex h-screen overflow-hidden bg-background" dir="rtl">
       {/* Desktop Sidebar */}
       <div className="hidden lg:block">
         <Sidebar />
@@ -65,7 +65,7 @@ const Layout = ({ children }: LayoutProps) => {
         )}
       >
         <div 
-          className="absolute inset-0 bg-black/50" 
+          className="absolute inset-0 bg-deepNavy/20 backdrop-blur-sm" 
           onClick={() => setMobileSidebarOpen(false)}
         />
         <div className={cn(
@@ -83,7 +83,7 @@ const Layout = ({ children }: LayoutProps) => {
           toggleMobileSidebar={toggleMobileSidebar} 
         />
         <main className={cn(
-          "flex-1 overflow-y-auto p-3 md:p-6 text-center",
+          "flex-1 overflow-y-auto p-4 md:p-6 text-center bg-gradient-to-b from-warmBeige/10 to-background",
           isMobile ? "pb-20" : ""
         )}>
           {children}

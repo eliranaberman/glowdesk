@@ -74,7 +74,7 @@ const Sidebar = ({ onLinkClick }: SidebarProps) => {
   return (
     <div
       className={cn(
-        "flex flex-col h-screen bg-sidebar border-l border-border transition-all duration-300",
+        "flex flex-col h-screen bg-sidebar border-l border-border transition-all duration-300 shadow-soft",
         collapsed ? "w-16" : "w-64"
       )}
       dir="rtl"
@@ -82,17 +82,17 @@ const Sidebar = ({ onLinkClick }: SidebarProps) => {
       <div className="flex items-center justify-between p-4">
         {!collapsed && (
           <div className="flex items-center">
-            <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold">
+            <div className="w-9 h-9 rounded-full bg-gradient-to-r from-softRose to-mutedPeach flex items-center justify-center text-deepNavy font-medium">
               CM
             </div>
-            <h1 className="mr-2 font-bold text-lg">By Chen Mizrahi</h1>
+            <h1 className="mr-2 font-display font-medium text-lg">Chen Mizrahi</h1>
           </div>
         )}
         <Button
           variant="ghost"
           size="icon"
           onClick={() => setCollapsed(!collapsed)}
-          className="mr-auto"
+          className="mr-auto hover:bg-accent/30"
         >
           {collapsed ? (
             <ChevronLeft className="h-4 w-4" />
@@ -102,7 +102,7 @@ const Sidebar = ({ onLinkClick }: SidebarProps) => {
         </Button>
       </div>
 
-      <Separator />
+      <Separator className="bg-border/30" />
 
       <nav className="flex-1 p-2">
         <ul className="space-y-1">
@@ -113,7 +113,7 @@ const Sidebar = ({ onLinkClick }: SidebarProps) => {
                 className={({ isActive }) => 
                   cn(
                     "nav-link",
-                    isActive && "active",
+                    isActive ? "bg-accent/50 font-medium text-primary shadow-soft" : "hover:bg-accent/30",
                     collapsed && "justify-center"
                   )
                 }
@@ -127,7 +127,7 @@ const Sidebar = ({ onLinkClick }: SidebarProps) => {
         </ul>
       </nav>
 
-      <Separator />
+      <Separator className="bg-border/30" />
 
       <div className="p-2">
         <ul className="space-y-1">
@@ -137,7 +137,7 @@ const Sidebar = ({ onLinkClick }: SidebarProps) => {
               className={({ isActive }) => 
                 cn(
                   "nav-link",
-                  isActive && "active",
+                  isActive ? "bg-accent/50 font-medium text-primary shadow-soft" : "hover:bg-accent/30",
                   collapsed && "justify-center"
                 )
               }
@@ -153,7 +153,7 @@ const Sidebar = ({ onLinkClick }: SidebarProps) => {
               className={({ isActive }) => 
                 cn(
                   "nav-link",
-                  isActive && "active",
+                  isActive ? "bg-accent/50 font-medium text-primary shadow-soft" : "hover:bg-accent/30",
                   collapsed && "justify-center"
                 )
               }
@@ -169,7 +169,7 @@ const Sidebar = ({ onLinkClick }: SidebarProps) => {
       <div className="p-4">
         {!collapsed && (
           <div className="flex items-center">
-            <div className="w-8 h-8 rounded-full bg-nail-300">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-r from-softRose/70 to-mutedPeach/70">
               {/* Profile image would go here */}
             </div>
             <div className="mr-2 truncate text-right">
