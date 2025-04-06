@@ -7,10 +7,13 @@ import DashboardContent from "@/components/social-media/DashboardContent";
 import InboxContent from "@/components/social-media/InboxContent";
 import PostCreationPanel from "@/components/social-media/PostCreationPanel";
 import AnalyticsContent from "@/components/social-media/AnalyticsContent";
+import ConnectionModal from "@/components/social-media/ConnectionModal";
+import { Message, ConnectedAccountsMap } from "@/components/social-media/types";
 
 const SocialMedia = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
-  const [connectedAccounts, setConnectedAccounts] = useState<{[key: string]: boolean}>({
+  const [isConnectionModalOpen, setIsConnectionModalOpen] = useState(false);
+  const [connectedAccounts, setConnectedAccounts] = useState<ConnectedAccountsMap>({
     instagram: false,
     facebook: false,
     twitter: false,
@@ -49,8 +52,7 @@ const SocialMedia = () => {
   ];
 
   const connectPlatform = (platform: string) => {
-    // In a real implementation, this would open the OAuth flow
-    // For demonstration, we're just toggling the state
+    // Toggle the connection state for the platform
     setConnectedAccounts(prev => ({
       ...prev,
       [platform]: !prev[platform]
@@ -63,13 +65,19 @@ const SocialMedia = () => {
   };
 
   return (
-    <div className="space-y-6 text-center">
+    <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <Button variant="soft" size="sm" className="flex items-center gap-1">
+        <Button 
+          variant="soft" 
+          size="sm" 
+          className="flex items-center gap-1"
+          onClick={() => setIsConnectionModalOpen(true)}
+        >
           <Plus size={16} />
           חבר חשבון
         </Button>
         <h1 className="text-2xl font-medium text-center mx-auto">מדיה חברתית ושיווק</h1>
+        <div className="w-[85px]" /> {/* Spacer for visual balance */}
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full" dir="rtl">
@@ -105,6 +113,13 @@ const SocialMedia = () => {
           <AnalyticsContent />
         </TabsContent>
       </Tabs>
+      
+      <ConnectionModal
+        open={isConnectionModalOpen}
+        onOpenChange={setIsConnectionModalOpen}
+        connectedAccounts={connectedAccounts}
+        onConnect={connectPlatform}
+      />
     </div>
   );
 };
