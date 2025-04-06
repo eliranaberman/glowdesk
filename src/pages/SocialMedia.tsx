@@ -58,6 +58,11 @@ const SocialMedia = () => {
     }));
   };
 
+  const handleOpenInbox = () => {
+    // Change the active tab to the inbox
+    document.querySelector('[data-state="inactive"][value="inbox"]')?.click();
+  };
+
   return (
     <div className="space-y-6 text-center">
       <div className="flex justify-between items-center">
@@ -65,7 +70,7 @@ const SocialMedia = () => {
           <Plus size={16} />
           חבר חשבון
         </Button>
-        <h1 className="text-2xl font-medium">מדיה חברתית ושיווק</h1>
+        <h1 className="text-2xl font-medium w-full">מדיה חברתית ושיווק</h1>
       </div>
 
       <Tabs defaultValue="dashboard" className="w-full" dir="rtl">
@@ -86,7 +91,7 @@ const SocialMedia = () => {
               <CardContent>
                 <div className="space-y-3">
                   <div className="flex flex-row-reverse justify-between items-center border-b pb-2">
-                    <div className="text-center">
+                    <div className="text-right">
                       <span className="font-medium">אינסטגרם</span>
                     </div>
                     <Button 
@@ -100,7 +105,7 @@ const SocialMedia = () => {
                   </div>
                   
                   <div className="flex flex-row-reverse justify-between items-center border-b pb-2">
-                    <div className="text-center">
+                    <div className="text-right">
                       <span className="font-medium">פייסבוק</span>
                     </div>
                     <Button 
@@ -114,7 +119,7 @@ const SocialMedia = () => {
                   </div>
                   
                   <div className="flex flex-row-reverse justify-between items-center border-b pb-2">
-                    <div className="text-center">
+                    <div className="text-right">
                       <span className="font-medium">טיקטוק</span>
                     </div>
                     <Button variant="outline" className="gap-2">
@@ -126,7 +131,7 @@ const SocialMedia = () => {
                   </div>
                   
                   <div className="flex flex-row-reverse justify-between items-center pb-2">
-                    <div className="text-center">
+                    <div className="text-right">
                       <span className="font-medium">טוויטר / X</span>
                     </div>
                     <Button variant="outline" className="gap-2">
@@ -147,19 +152,29 @@ const SocialMedia = () => {
               <CardContent>
                 <div className="space-y-4">
                   <div className="flex flex-row-reverse justify-between items-center">
-                    <span className="font-medium">הודעות חדשות</span>
+                    <div className="text-right">
+                      <span className="font-medium">הודעות חדשות</span>
+                    </div>
                     <Badge variant="soft">2 לא נקראו</Badge>
                   </div>
-                  <div className="flex justify-between items-center text-center">
+                  <div className="flex flex-row-reverse justify-between items-center">
+                    <div className="text-right">
+                      <span className="font-medium">זמן תגובה ממוצע</span>
+                    </div>
                     <span>1.2 שעות</span>
-                    <span className="font-medium">זמן תגובה ממוצע</span>
                   </div>
-                  <div className="flex justify-between items-center text-center">
+                  <div className="flex flex-row-reverse justify-between items-center">
+                    <div className="text-right">
+                      <span className="font-medium">שיעור מענה</span>
+                    </div>
                     <span>92%</span>
-                    <span className="font-medium">שיעור מענה</span>
                   </div>
                   
-                  <Button variant="warm" className="w-full mt-2">
+                  <Button 
+                    variant="warm" 
+                    className="w-full mt-2"
+                    onClick={handleOpenInbox}
+                  >
                     <MessageSquare size={16} />
                     פתח תיבת הודעות
                   </Button>
@@ -170,10 +185,10 @@ const SocialMedia = () => {
           
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-lg mx-auto">הודעות אחרונות</CardTitle>
               <Button variant="outline" size="sm">
                 טען עוד
               </Button>
-              <CardTitle className="text-lg mx-auto">הודעות אחרונות</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -187,7 +202,7 @@ const SocialMedia = () => {
                         {!message.read && (
                           <Badge variant="soft" className="h-2 w-2 p-0 rounded-full" />
                         )}
-                        <span className="font-medium">{message.sender}</span>
+                        <span className="font-medium">{message.sender} ({message.platform})</span>
                         <span className="text-sm text-muted-foreground">{message.time}</span>
                       </div>
                       <p className="text-sm">{message.message}</p>
