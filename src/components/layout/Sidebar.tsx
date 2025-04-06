@@ -36,6 +36,11 @@ const navItems = [
     icon: <Calendar className="w-5 h-5" /> 
   },
   { 
+    name: 'מדיה חברתית', 
+    path: '/social-media', 
+    icon: <Share2 className="w-5 h-5" /> 
+  },
+  { 
     name: 'דוחות', 
     path: '/reports', 
     icon: <BarChart className="w-5 h-5" /> 
@@ -55,11 +60,6 @@ const navItems = [
     path: '/tasks', 
     icon: <ClipboardList className="w-5 h-5" /> 
   },
-  { 
-    name: 'מדיה חברתית', 
-    path: '/social-media', 
-    icon: <Share2 className="w-5 h-5" /> 
-  }
 ];
 
 interface SidebarProps {
