@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -41,9 +40,9 @@ const navItems = [
     icon: <Share2 className="w-5 h-5" /> 
   },
   { 
-    name: 'דוחות', 
-    path: '/reports', 
-    icon: <BarChart className="w-5 h-5" /> 
+    name: 'משימות', 
+    path: '/tasks', 
+    icon: <ClipboardList className="w-5 h-5" /> 
   },
   { 
     name: 'הוצאות',
@@ -56,9 +55,9 @@ const navItems = [
     icon: <Package className="w-5 h-5" /> 
   },
   { 
-    name: 'משימות', 
-    path: '/tasks', 
-    icon: <ClipboardList className="w-5 h-5" /> 
+    name: 'דוחות', 
+    path: '/reports', 
+    icon: <BarChart className="w-5 h-5" /> 
   },
 ];
 
@@ -70,7 +69,6 @@ const Sidebar = ({ onLinkClick }: SidebarProps) => {
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
 
-  // Handle link click - notify parent component
   const handleLinkClick = () => {
     if (onLinkClick) {
       onLinkClick();
