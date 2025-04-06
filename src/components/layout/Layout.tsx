@@ -31,6 +31,7 @@ const Layout = ({ children }: LayoutProps) => {
     if (path === '/inventory/new') return 'הוספת פריט';
     if (path === '/expenses') return 'הוצאות';
     if (path === '/tasks') return 'משימות';
+    if (path === '/social-media') return 'מדיה חברתית ושיווק';
     if (path === '/notifications') return 'התראות';
     if (path === '/settings') return 'הגדרות';
     if (path === '/online-booking') return 'קביעת פגישה אונליין';

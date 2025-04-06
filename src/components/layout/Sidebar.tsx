@@ -16,6 +16,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Receipt,
+  Share2,
 } from 'lucide-react';
 
 const navItems = [
@@ -53,6 +54,11 @@ const navItems = [
     name: 'משימות', 
     path: '/tasks', 
     icon: <ClipboardList className="w-5 h-5" /> 
+  },
+  { 
+    name: 'מדיה חברתית', 
+    path: '/social-media', 
+    icon: <Share2 className="w-5 h-5" /> 
   }
 ];
 
