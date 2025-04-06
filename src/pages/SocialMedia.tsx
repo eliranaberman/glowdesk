@@ -59,8 +59,8 @@ const SocialMedia = () => {
   };
 
   const handleOpenInbox = () => {
-    // Change the active tab to the inbox
-    document.querySelector('[data-state="inactive"][value="inbox"]')?.click();
+    // Change the active tab to the inbox using the state instead of DOM manipulation
+    setActiveTab("inbox");
   };
 
   return (
@@ -70,10 +70,10 @@ const SocialMedia = () => {
           <Plus size={16} />
           חבר חשבון
         </Button>
-        <h1 className="text-2xl font-medium w-full">מדיה חברתית ושיווק</h1>
+        <h1 className="text-2xl font-medium text-center w-full">מדיה חברתית ושיווק</h1>
       </div>
 
-      <Tabs defaultValue="dashboard" className="w-full" dir="rtl">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full" dir="rtl">
         <TabsList className="grid grid-cols-4 mb-6">
           <TabsTrigger value="dashboard">דשבורד</TabsTrigger>
           <TabsTrigger value="inbox">תיבת הודעות</TabsTrigger>
@@ -86,14 +86,11 @@ const SocialMedia = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-lg w-full text-center">פלטפורמות מחוברות</CardTitle>
+                <CardTitle className="text-lg text-center w-full">פלטפורמות מחוברות</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  <div className="flex flex-row-reverse justify-between items-center border-b pb-2">
-                    <div className="text-right">
-                      <span className="font-medium">אינסטגרם</span>
-                    </div>
+                  <div className="flex justify-between items-center border-b pb-2">
                     <Button 
                       variant={connectedAccounts.instagram ? "soft" : "outline"} 
                       className="gap-2"
@@ -102,12 +99,12 @@ const SocialMedia = () => {
                       <Instagram size={16} />
                       {connectedAccounts.instagram ? "מחובר" : "חבר חשבון"}
                     </Button>
+                    <div className="text-right">
+                      <span className="font-medium">אינסטגרם</span>
+                    </div>
                   </div>
                   
-                  <div className="flex flex-row-reverse justify-between items-center border-b pb-2">
-                    <div className="text-right">
-                      <span className="font-medium">פייסבוק</span>
-                    </div>
+                  <div className="flex justify-between items-center border-b pb-2">
                     <Button 
                       variant={connectedAccounts.facebook ? "soft" : "outline"} 
                       className="gap-2"
@@ -116,30 +113,33 @@ const SocialMedia = () => {
                       <Facebook size={16} />
                       {connectedAccounts.facebook ? "מחובר" : "חבר חשבון"}
                     </Button>
+                    <div className="text-right">
+                      <span className="font-medium">פייסבוק</span>
+                    </div>
                   </div>
                   
-                  <div className="flex flex-row-reverse justify-between items-center border-b pb-2">
-                    <div className="text-right">
-                      <span className="font-medium">טיקטוק</span>
-                    </div>
+                  <div className="flex justify-between items-center border-b pb-2">
                     <Button variant="outline" className="gap-2">
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M9 20l3-4 3 4M10 4.5h4c3.771 0 5.657 0 6.828 1.172C22 6.843 22 8.729 22 12.5s0 5.657-1.172 6.828C19.657 20.5 17.771 20.5 14 20.5h-4c-3.771 0-5.657 0-6.828-1.172C2 18.157 2 16.271 2 12.5s0-5.657 1.172-6.828C4.343 4.5 6.229 4.5 10 4.5z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                       </svg>
                       חבר חשבון
                     </Button>
+                    <div className="text-right">
+                      <span className="font-medium">טיקטוק</span>
+                    </div>
                   </div>
                   
-                  <div className="flex flex-row-reverse justify-between items-center pb-2">
-                    <div className="text-right">
-                      <span className="font-medium">טוויטר / X</span>
-                    </div>
+                  <div className="flex justify-between items-center pb-2">
                     <Button variant="outline" className="gap-2">
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                       </svg>
                       חבר חשבון
                     </Button>
+                    <div className="text-right">
+                      <span className="font-medium">טוויטר / X</span>
+                    </div>
                   </div>
                 </div>
               </CardContent>
@@ -147,27 +147,27 @@ const SocialMedia = () => {
             
             <Card>
               <CardHeader className="flex flex-row items-center justify-center pb-2">
-                <CardTitle className="text-lg">סטטוס הודעות</CardTitle>
+                <CardTitle className="text-lg text-center">סטטוס הודעות</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  <div className="flex flex-row-reverse justify-between items-center">
+                  <div className="flex justify-between items-center">
+                    <Badge variant="soft">2 לא נקראו</Badge>
                     <div className="text-right">
                       <span className="font-medium">הודעות חדשות</span>
                     </div>
-                    <Badge variant="soft">2 לא נקראו</Badge>
                   </div>
-                  <div className="flex flex-row-reverse justify-between items-center">
+                  <div className="flex justify-between items-center">
+                    <span>1.2 שעות</span>
                     <div className="text-right">
                       <span className="font-medium">זמן תגובה ממוצע</span>
                     </div>
-                    <span>1.2 שעות</span>
                   </div>
-                  <div className="flex flex-row-reverse justify-between items-center">
+                  <div className="flex justify-between items-center">
+                    <span>92%</span>
                     <div className="text-right">
                       <span className="font-medium">שיעור מענה</span>
                     </div>
-                    <span>92%</span>
                   </div>
                   
                   <Button 
@@ -185,15 +185,15 @@ const SocialMedia = () => {
           
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-lg mx-auto">הודעות אחרונות</CardTitle>
               <Button variant="outline" size="sm">
                 טען עוד
               </Button>
+              <CardTitle className="text-lg text-center mx-auto">הודעות אחרונות</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 {messages.map((message) => (
-                  <div key={message.id} className="flex gap-3 items-center border-b pb-3 last:border-0">
+                  <div key={message.id} className="flex gap-3 items-center border-b pb-3 last:border-0 text-center">
                     <div className="w-8 h-8 rounded-full overflow-hidden">
                       <img src={message.avatar} alt={message.sender} className="w-full h-full object-cover" />
                     </div>
@@ -240,7 +240,7 @@ const SocialMedia = () => {
                 <Upload className="ml-2" size={16} />
                 העלה מדיה
               </Button>
-              <CardTitle className="mx-auto">פרסום פוסטים</CardTitle>
+              <CardTitle className="mx-auto text-center">פרסום פוסטים</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
