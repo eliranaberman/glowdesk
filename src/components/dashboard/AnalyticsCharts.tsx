@@ -79,7 +79,7 @@ const AnalyticsCharts = ({
     retention: { label: "שימור לקוחות", theme: { light: "#38bdf8", dark: "#38bdf8" } },
   };
 
-  // Custom tooltip formatter for the income chart - FIXED LABELS HERE
+  // Custom tooltip formatter for the income chart
   const incomeTooltipFormatter = (value: number, name: string) => {
     const formattedValue = new Intl.NumberFormat('he-IL', {
       style: 'currency',
@@ -87,8 +87,8 @@ const AnalyticsCharts = ({
       minimumFractionDigits: 0
     }).format(value);
     
-    // Fixed: Correctly map field names to Hebrew labels
-    const hebrewName = name === 'income' ? 'הכנסה' : name === 'expenses' ? 'הוצאות' : name;
+    // Correctly map field names to Hebrew labels
+    const hebrewName = name === 'income' ? 'הכנסות' : name === 'expenses' ? 'הוצאות' : name;
     return [formattedValue, hebrewName];
   };
 
@@ -256,15 +256,15 @@ const AnalyticsCharts = ({
               </CardTitle>
               <CardDescription>אחוז הלקוחות החוזרים לאורך החודשים</CardDescription>
             </CardHeader>
-            <CardContent>
-              {/* Fixed layout: Two separate sections for chart and average info */}
+            <CardContent className="pt-0">
+              {/* Completely restructured layout with fixed height and clear separation */}
               <div className="flex flex-col space-y-6">
-                {/* Chart section with reduced height */}
-                <div className="h-[200px] w-full">
-                  <ChartContainer config={chartConfig} className="w-full">
+                {/* Chart container with strictly controlled height */}
+                <div className="h-[180px] w-full overflow-hidden">
+                  <ChartContainer config={chartConfig} className="w-full h-full">
                     <LineChart 
                       data={retentionData} 
-                      margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
+                      margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
                     >
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="name" />
@@ -282,8 +282,8 @@ const AnalyticsCharts = ({
                   </ChartContainer>
                 </div>
                 
-                {/* Average retention data card section - now clearly below the chart */}
-                <div className="flex justify-between items-center rounded-lg bg-secondary/10 p-4 border border-border/30">
+                {/* Completely separated average retention card - now clearly below with margin */}
+                <div className="flex justify-between items-center rounded-lg bg-secondary/10 p-4 border border-border/30 mt-4">
                   <div>
                     <p className="font-medium text-lg">ממוצע שימור חודשי</p>
                     <p className="text-sm text-muted-foreground">שישה חודשים אחרונים</p>
@@ -419,7 +419,6 @@ const AnalyticsCharts = ({
                       border: '1px solid #eaeaea'
                     }} />
                     <Bar dataKey="value" name="הזמנות" fill="#9b87f5">
-                      {/* Add hover effect by making each bar interactive */}
                       {bookingsData.map((entry, index) => (
                         <Cell 
                           key={`cell-${index}`} 
