@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Message } from "./types";
 import ReplyModal from "./ReplyModal";
+import { Instagram, Facebook, Twitter, MessageCircle } from "lucide-react";
 
 type RecentMessagesPanelProps = {
   messages: Message[];
@@ -19,39 +20,71 @@ const RecentMessagesPanel = ({ messages }: RecentMessagesPanelProps) => {
     setReplyModalOpen(true);
   };
 
+  // Helper function to get platform icon
+  const getPlatformIcon = (platform: string) => {
+    switch (platform.toLowerCase()) {
+      case "instagram":
+        return <Instagram size={16} className="text-pink-500" />;
+      case "facebook":
+        return <Facebook size={16} className="text-blue-600" />;
+      case "twitter":
+        return <Twitter size={16} className="text-blue-400" />;
+      default:
+        return <MessageCircle size={16} className="text-gray-500" />;
+    }
+  };
+
   return (
     <>
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <Button variant="outline" size="sm" className="mr-auto">
+      <Card className="shadow-soft hover:shadow-soft-lg transition-all duration-300">
+        <CardHeader className="flex flex-row items-center justify-between pb-2 border-b">
+          <Button variant="outline" size="sm">
             טען עוד
           </Button>
           <CardTitle className="text-lg text-center mx-auto">הודעות אחרונות</CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
+        <CardContent className="p-0">
+          <div className="divide-y">
             {messages.map((message) => (
-              <div key={message.id} className="flex gap-3 items-start border-b pb-3 last:border-0 text-right">
-                <div className="w-8 h-8 rounded-full overflow-hidden">
-                  <img src={message.avatar} alt={message.sender} className="w-full h-full object-cover" />
-                </div>
-                <div className="flex flex-col flex-1 gap-1 text-right">
-                  <div className="flex items-center gap-2 w-full">
-                    {!message.read && (
-                      <Badge variant="soft" className="h-2 w-2 p-0 rounded-full" />
-                    )}
-                    <span className="font-medium">{message.sender} ({message.platform})</span>
-                    <span className="text-sm text-muted-foreground mr-auto">{message.time}</span>
+              <div 
+                key={message.id} 
+                className="p-4 hover:bg-muted/20 transition-colors duration-200"
+              >
+                <div className="flex gap-3 items-start">
+                  <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
+                    <img 
+                      src={message.avatar} 
+                      alt={message.sender} 
+                      className="w-full h-full object-cover" 
+                    />
                   </div>
-                  <p className="text-sm text-right">{message.message}</p>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="self-start mt-1"
-                    onClick={() => handleReply(message)}
-                  >
-                    השב
-                  </Button>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="font-medium">
+                        {message.sender}
+                      </span>
+                      <div className="flex items-center text-xs text-muted-foreground gap-1">
+                        {getPlatformIcon(message.platform)}
+                        <span>({message.platform})</span>
+                      </div>
+                      {!message.read && (
+                        <Badge variant="soft" className="h-2 w-2 p-0 rounded-full ml-1" />
+                      )}
+                    </div>
+                    <p className="text-sm mb-2 text-muted-foreground">{message.message}</p>
+                    <div className="flex items-center justify-between">
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="p-0 h-auto hover:bg-transparent hover:underline text-xs text-muted-foreground"
+                        onClick={() => handleReply(message)}
+                      >
+                        <MessageCircle size={14} className="mr-1" />
+                        השב
+                      </Button>
+                      <span className="text-xs text-muted-foreground">{message.time}</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             ))}
