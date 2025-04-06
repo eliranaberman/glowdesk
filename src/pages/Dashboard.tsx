@@ -92,16 +92,6 @@ const Dashboard = () => {
         ))}
       </div>
       
-      {/* Analytics Charts Section */}
-      <div className="mb-8">
-        <AnalyticsCharts 
-          monthlyData={monthlyData}
-          retentionData={retentionData}
-          servicesData={servicesData}
-          bookingsData={bookingsData}
-        />
-      </div>
-      
       {/* Main data panels with improved spacing and consistency */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <DailySummary 
@@ -111,6 +101,16 @@ const Dashboard = () => {
           deficiencies={dailyData.deficiencies}
         />
         <RecentAppointments appointments={appointments} />
+      </div>
+      
+      {/* Analytics Charts Section - Moved below the daily summary and recent appointments */}
+      <div className="mb-8">
+        <AnalyticsCharts 
+          monthlyData={monthlyData}
+          retentionData={retentionData}
+          servicesData={servicesData}
+          bookingsData={bookingsData}
+        />
       </div>
       
       {/* Quick actions section with enhanced visual styling */}
