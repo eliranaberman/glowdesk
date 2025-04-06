@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -86,8 +87,8 @@ const AnalyticsCharts = ({
       minimumFractionDigits: 0
     }).format(value);
     
-    // Corrected - properly map the field names to Hebrew labels
-    const hebrewName = name === 'income' ? 'הכנסה' : 'הוצאות';
+    // Fixed: Correctly map field names to Hebrew labels
+    const hebrewName = name === 'income' ? 'הכנסה' : name === 'expenses' ? 'הוצאות' : name;
     return [formattedValue, hebrewName];
   };
 
@@ -97,6 +98,9 @@ const AnalyticsCharts = ({
       description: "הנתונים מציגים את ההכנסות וההוצאות החודשיות של העסק",
     });
   };
+  
+  // Calculate retention average
+  const retentionAverage = (retentionData.reduce((acc, item) => acc + item.value, 0) / retentionData.length).toFixed(1);
   
   return (
     <div className="space-y-6">
@@ -253,36 +257,39 @@ const AnalyticsCharts = ({
               <CardDescription>אחוז הלקוחות החוזרים לאורך החודשים</CardDescription>
             </CardHeader>
             <CardContent>
-              {/* Reduced chart height to make room for the average display */}
-              <div className="h-[250px]">
-                <ChartContainer config={chartConfig} className="w-full">
-                  <LineChart 
-                    data={retentionData} 
-                    margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
-                    <YAxis domain={[0, 100]} />
-                    <ChartTooltip content={<ChartTooltipContent />} />
-                    <Line 
-                      type="monotone" 
-                      dataKey="value" 
-                      name="retention" 
-                      stroke="var(--color-retention)" 
-                      strokeWidth={2} 
-                      activeDot={{ r: 8, strokeWidth: 0 }}
-                    />
-                  </LineChart>
-                </ChartContainer>
-              </div>
-              
-              {/* Moved this outside the chart for better visibility */}
-              <div className="mt-6 flex justify-between items-center rounded-lg bg-secondary/10 p-4 border border-border/30">
-                <div>
-                  <p className="font-medium text-lg">ממוצע שימור חודשי</p>
-                  <p className="text-sm text-muted-foreground">שישה חודשים אחרונים</p>
+              {/* Fixed layout: Two separate sections for chart and average info */}
+              <div className="flex flex-col space-y-6">
+                {/* Chart section with reduced height */}
+                <div className="h-[200px] w-full">
+                  <ChartContainer config={chartConfig} className="w-full">
+                    <LineChart 
+                      data={retentionData} 
+                      margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="name" />
+                      <YAxis domain={[0, 100]} />
+                      <ChartTooltip content={<ChartTooltipContent />} />
+                      <Line 
+                        type="monotone" 
+                        dataKey="value" 
+                        name="retention" 
+                        stroke="var(--color-retention)" 
+                        strokeWidth={2} 
+                        activeDot={{ r: 8, strokeWidth: 0 }}
+                      />
+                    </LineChart>
+                  </ChartContainer>
                 </div>
-                <div className="text-3xl font-semibold text-primary">{(retentionData.reduce((acc, item) => acc + item.value, 0) / retentionData.length).toFixed(1)}%</div>
+                
+                {/* Average retention data card section - now clearly below the chart */}
+                <div className="flex justify-between items-center rounded-lg bg-secondary/10 p-4 border border-border/30">
+                  <div>
+                    <p className="font-medium text-lg">ממוצע שימור חודשי</p>
+                    <p className="text-sm text-muted-foreground">שישה חודשים אחרונים</p>
+                  </div>
+                  <div className="text-3xl font-semibold text-primary">{retentionAverage}%</div>
+                </div>
               </div>
             </CardContent>
           </Card>
