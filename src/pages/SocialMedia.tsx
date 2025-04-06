@@ -59,7 +59,7 @@ const SocialMedia = () => {
   };
 
   const handleOpenInbox = () => {
-    // Change the active tab to the inbox using the state instead of DOM manipulation
+    // Change the active tab to the inbox using the state
     setActiveTab("inbox");
   };
 
@@ -70,7 +70,7 @@ const SocialMedia = () => {
           <Plus size={16} />
           חבר חשבון
         </Button>
-        <h1 className="text-2xl font-medium text-center w-full">מדיה חברתית ושיווק</h1>
+        <h1 className="text-2xl font-medium text-center mx-auto">מדיה חברתית ושיווק</h1>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full" dir="rtl">
@@ -84,13 +84,14 @@ const SocialMedia = () => {
         {/* Dashboard Tab */}
         <TabsContent value="dashboard" className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Swapped positions: Content Upload panel moved to left, Inbox panel moved to right */}
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-lg text-center w-full">פלטפורמות מחוברות</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  <div className="flex justify-between items-center border-b pb-2">
+                  <div className="flex flex-row-reverse justify-between items-center border-b pb-2">
                     <Button 
                       variant={connectedAccounts.instagram ? "soft" : "outline"} 
                       className="gap-2"
@@ -104,7 +105,7 @@ const SocialMedia = () => {
                     </div>
                   </div>
                   
-                  <div className="flex justify-between items-center border-b pb-2">
+                  <div className="flex flex-row-reverse justify-between items-center border-b pb-2">
                     <Button 
                       variant={connectedAccounts.facebook ? "soft" : "outline"} 
                       className="gap-2"
@@ -118,7 +119,7 @@ const SocialMedia = () => {
                     </div>
                   </div>
                   
-                  <div className="flex justify-between items-center border-b pb-2">
+                  <div className="flex flex-row-reverse justify-between items-center border-b pb-2">
                     <Button variant="outline" className="gap-2">
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M9 20l3-4 3 4M10 4.5h4c3.771 0 5.657 0 6.828 1.172C22 6.843 22 8.729 22 12.5s0 5.657-1.172 6.828C19.657 20.5 17.771 20.5 14 20.5h-4c-3.771 0-5.657 0-6.828-1.172C2 18.157 2 16.271 2 12.5s0-5.657 1.172-6.828C4.343 4.5 6.229 4.5 10 4.5z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -130,7 +131,7 @@ const SocialMedia = () => {
                     </div>
                   </div>
                   
-                  <div className="flex justify-between items-center pb-2">
+                  <div className="flex flex-row-reverse justify-between items-center pb-2">
                     <Button variant="outline" className="gap-2">
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -151,23 +152,23 @@ const SocialMedia = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <Badge variant="soft">2 לא נקראו</Badge>
+                  <div className="flex flex-row-reverse justify-between items-center">
                     <div className="text-right">
                       <span className="font-medium">הודעות חדשות</span>
                     </div>
+                    <Badge variant="soft">2 לא נקראו</Badge>
                   </div>
-                  <div className="flex justify-between items-center">
-                    <span>1.2 שעות</span>
+                  <div className="flex flex-row-reverse justify-between items-center">
                     <div className="text-right">
                       <span className="font-medium">זמן תגובה ממוצע</span>
                     </div>
+                    <span>1.2 שעות</span>
                   </div>
-                  <div className="flex justify-between items-center">
-                    <span>92%</span>
+                  <div className="flex flex-row-reverse justify-between items-center">
                     <div className="text-right">
                       <span className="font-medium">שיעור מענה</span>
                     </div>
+                    <span>92%</span>
                   </div>
                   
                   <Button 
@@ -175,7 +176,7 @@ const SocialMedia = () => {
                     className="w-full mt-2"
                     onClick={handleOpenInbox}
                   >
-                    <MessageSquare size={16} />
+                    <MessageSquare size={16} className="ml-2" />
                     פתח תיבת הודעות
                   </Button>
                 </div>
@@ -185,10 +186,10 @@ const SocialMedia = () => {
           
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-lg text-center mx-auto">הודעות אחרונות</CardTitle>
               <Button variant="outline" size="sm">
                 טען עוד
               </Button>
-              <CardTitle className="text-lg text-center mx-auto">הודעות אחרונות</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -232,18 +233,27 @@ const SocialMedia = () => {
           </Card>
         </TabsContent>
 
-        {/* Posts Tab */}
+        {/* Posts Tab - Swapped layout (upload panel on left) */}
         <TabsContent value="posts">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle className="mx-auto text-center">פרסום פוסטים</CardTitle>
               <Button variant="soft">
                 <Upload className="ml-2" size={16} />
                 העלה מדיה
               </Button>
-              <CardTitle className="mx-auto text-center">פרסום פוסטים</CardTitle>
             </CardHeader>
             <CardContent>
+              {/* Swapped layout - upload panel on left, text fields on right */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="bg-muted/30 rounded-lg flex items-center justify-center p-4 md:order-first">
+                  <div className="text-center">
+                    <Upload size={32} className="mx-auto mb-2 text-muted-foreground" />
+                    <p className="text-muted-foreground text-sm mb-2">גרור תמונות או וידאו לכאן</p>
+                    <Button variant="outline" size="sm">בחר קבצים</Button>
+                  </div>
+                </div>
+                
                 <div className="md:col-span-2">
                   <div className="space-y-4">
                     <div>
@@ -278,14 +288,6 @@ const SocialMedia = () => {
                         </Badge>
                       </div>
                     </div>
-                  </div>
-                </div>
-                
-                <div className="bg-muted/30 rounded-lg flex items-center justify-center p-4">
-                  <div className="text-center">
-                    <Upload size={32} className="mx-auto mb-2 text-muted-foreground" />
-                    <p className="text-muted-foreground text-sm mb-2">גרור תמונות או וידאו לכאן</p>
-                    <Button variant="outline" size="sm">בחר קבצים</Button>
                   </div>
                 </div>
               </div>
