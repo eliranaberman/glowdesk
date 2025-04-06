@@ -69,9 +69,13 @@ const AnalyticsCharts = ({
   const incomeGradientId = "incomeGradient";
   const expenseGradientId = "expenseGradient";
   
+  // Updated colors for income (green) and expenses (red)
+  const incomeColor = "#4ade80"; // A nice green color
+  const expensesColor = "#f87171"; // Keeping the existing red
+  
   const chartConfig = {
-    income: { label: "הכנסה", theme: { light: "#9b87f5", dark: "#9b87f5" } },
-    expenses: { label: "הוצאות", theme: { light: "#f87171", dark: "#f87171" } },
+    income: { label: "הכנסה", theme: { light: incomeColor, dark: incomeColor } },
+    expenses: { label: "הוצאות", theme: { light: expensesColor, dark: expensesColor } },
     retention: { label: "שימור לקוחות", theme: { light: "#38bdf8", dark: "#38bdf8" } },
   };
 
@@ -83,6 +87,7 @@ const AnalyticsCharts = ({
       minimumFractionDigits: 0
     }).format(value);
     
+    // Fix the label here - "income" should be "הכנסה" not "הוצאות"
     return [formattedValue, name === 'income' ? 'הכנסה' : 'הוצאות'];
   };
 
@@ -134,12 +139,12 @@ const AnalyticsCharts = ({
                   <AreaChart data={monthlyData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
                     <defs>
                       <linearGradient id={incomeGradientId} x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#9b87f5" stopOpacity={0.8}/>
-                        <stop offset="95%" stopColor="#9b87f5" stopOpacity={0.1}/>
+                        <stop offset="5%" stopColor={incomeColor} stopOpacity={0.8}/>
+                        <stop offset="95%" stopColor={incomeColor} stopOpacity={0.1}/>
                       </linearGradient>
                       <linearGradient id={expenseGradientId} x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#f87171" stopOpacity={0.8}/>
-                        <stop offset="95%" stopColor="#f87171" stopOpacity={0.1}/>
+                        <stop offset="5%" stopColor={expensesColor} stopOpacity={0.8}/>
+                        <stop offset="95%" stopColor={expensesColor} stopOpacity={0.1}/>
                       </linearGradient>
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" stroke="#eaeaea" />
@@ -172,11 +177,11 @@ const AnalyticsCharts = ({
                     />
                     <ReferenceLine 
                       y={averageIncome} 
-                      stroke="#8884d8" 
+                      stroke="#38bdf8" 
                       strokeDasharray="3 3" 
                       label={{ 
                         value: 'ממוצע הכנסות', 
-                        fill: '#8884d8', 
+                        fill: '#38bdf8', 
                         fontSize: 12,
                         position: 'right'
                       }} 
@@ -185,20 +190,20 @@ const AnalyticsCharts = ({
                       type="monotone" 
                       dataKey="income" 
                       name="הכנסה" 
-                      stroke="#9b87f5" 
+                      stroke={incomeColor} 
                       strokeWidth={3}
                       fill={`url(#${incomeGradientId})`}
-                      activeDot={{ r: 8, strokeWidth: 0, fill: '#9b87f5' }}
+                      activeDot={{ r: 8, strokeWidth: 0, fill: incomeColor }}
                       stackId="1"
                     />
                     <Area 
                       type="monotone" 
                       dataKey="expenses" 
                       name="הוצאות" 
-                      stroke="#f87171" 
+                      stroke={expensesColor} 
                       strokeWidth={3}
                       fill={`url(#${expenseGradientId})`}
-                      activeDot={{ r: 6, strokeWidth: 0, fill: '#f87171' }}
+                      activeDot={{ r: 6, strokeWidth: 0, fill: expensesColor }}
                       stackId="2"
                     />
                   </AreaChart>
