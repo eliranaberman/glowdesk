@@ -19,7 +19,7 @@ const Layout = ({ children }: LayoutProps) => {
   const getPageTitle = (): string => {
     const path = location.pathname;
     
-    if (path === '/') return 'דשבורד';
+    if (path === '/') return 'By Chen Mizrahi';
     if (path === '/customers') return 'לקוחות';
     if (path === '/customers/new') return 'הוספת לקוח';
     if (path.startsWith('/customers/edit/')) return 'עריכת לקוח';
@@ -37,7 +37,7 @@ const Layout = ({ children }: LayoutProps) => {
     if (path === '/online-booking') return 'קביעת פגישה אונליין';
     if (path === '/payments/new') return 'רישום תשלום';
 
-    return 'דשבורד'; // Default
+    return 'By Chen Mizrahi'; // Default
   };
 
   // Effect to close sidebar when route changes
