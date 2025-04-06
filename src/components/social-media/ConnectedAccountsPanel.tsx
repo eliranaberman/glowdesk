@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Instagram, Facebook, Twitter } from "lucide-react";
+import { Facebook, Instagram, Twitter } from "lucide-react";
 import { ConnectedAccountsMap } from "./types";
 import ConnectionModal from "./ConnectionModal";
 
@@ -72,8 +72,11 @@ const ConnectedAccountsPanel = ({ connectedAccounts, connectPlatform }: Connecte
                   {account.connected ? "מחובר" : "חבר חשבון"}
                 </Button>
                 <div className="flex flex-col text-right">
-                  <span className="font-medium">{account.name}</span>
-                  <span className="text-xs text-muted-foreground">{account.followers.toLocaleString()} עוקבים</span>
+                  <div className="flex items-center gap-1.5">
+                    {account.icon}
+                    <span className="font-medium">{account.name}</span>
+                  </div>
+                  <span className="text-xs text-muted-foreground">{account.followers.toLocaleString()} followers</span>
                 </div>
               </div>
             ))}
