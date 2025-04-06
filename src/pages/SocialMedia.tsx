@@ -7,6 +7,7 @@ import { Instagram, Facebook, MessageSquare, Plus, Upload } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
 
 const SocialMedia = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -58,7 +59,7 @@ const SocialMedia = () => {
   };
 
   return (
-    <div className="space-y-6 text-right">
+    <div className="space-y-6 text-center">
       <div className="flex justify-between items-center">
         <Button variant="soft" size="sm" className="flex items-center gap-1">
           <Plus size={16} />
@@ -80,11 +81,14 @@ const SocialMedia = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-lg">פלטפורמות מחוברות</CardTitle>
+                <CardTitle className="text-lg w-full text-center">פלטפורמות מחוברות</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  <div className="flex justify-between items-center border-b pb-2">
+                  <div className="flex flex-row-reverse justify-between items-center border-b pb-2">
+                    <div className="text-center">
+                      <span className="font-medium">אינסטגרם</span>
+                    </div>
                     <Button 
                       variant={connectedAccounts.instagram ? "soft" : "outline"} 
                       className="gap-2"
@@ -93,12 +97,12 @@ const SocialMedia = () => {
                       <Instagram size={16} />
                       {connectedAccounts.instagram ? "מחובר" : "חבר חשבון"}
                     </Button>
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium">אינסטגרם</span>
-                    </div>
                   </div>
                   
-                  <div className="flex justify-between items-center border-b pb-2">
+                  <div className="flex flex-row-reverse justify-between items-center border-b pb-2">
+                    <div className="text-center">
+                      <span className="font-medium">פייסבוק</span>
+                    </div>
                     <Button 
                       variant={connectedAccounts.facebook ? "soft" : "outline"} 
                       className="gap-2"
@@ -107,53 +111,50 @@ const SocialMedia = () => {
                       <Facebook size={16} />
                       {connectedAccounts.facebook ? "מחובר" : "חבר חשבון"}
                     </Button>
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium">פייסבוק</span>
-                    </div>
                   </div>
                   
-                  <div className="flex justify-between items-center border-b pb-2">
+                  <div className="flex flex-row-reverse justify-between items-center border-b pb-2">
+                    <div className="text-center">
+                      <span className="font-medium">טיקטוק</span>
+                    </div>
                     <Button variant="outline" className="gap-2">
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M9 20l3-4 3 4M10 4.5h4c3.771 0 5.657 0 6.828 1.172C22 6.843 22 8.729 22 12.5s0 5.657-1.172 6.828C19.657 20.5 17.771 20.5 14 20.5h-4c-3.771 0-5.657 0-6.828-1.172C2 18.157 2 16.271 2 12.5s0-5.657 1.172-6.828C4.343 4.5 6.229 4.5 10 4.5z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                       </svg>
                       חבר חשבון
                     </Button>
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium">טיקטוק</span>
-                    </div>
                   </div>
                   
-                  <div className="flex justify-between items-center pb-2">
+                  <div className="flex flex-row-reverse justify-between items-center pb-2">
+                    <div className="text-center">
+                      <span className="font-medium">טוויטר / X</span>
+                    </div>
                     <Button variant="outline" className="gap-2">
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                       </svg>
                       חבר חשבון
                     </Button>
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium">טוויטר / X</span>
-                    </div>
                   </div>
                 </div>
               </CardContent>
             </Card>
             
             <Card>
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardHeader className="flex flex-row items-center justify-center pb-2">
                 <CardTitle className="text-lg">סטטוס הודעות</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <Badge variant="soft">2 לא נקראו</Badge>
+                  <div className="flex flex-row-reverse justify-between items-center">
                     <span className="font-medium">הודעות חדשות</span>
+                    <Badge variant="soft">2 לא נקראו</Badge>
                   </div>
-                  <div className="flex justify-between items-center">
+                  <div className="flex justify-between items-center text-center">
                     <span>1.2 שעות</span>
                     <span className="font-medium">זמן תגובה ממוצע</span>
                   </div>
-                  <div className="flex justify-between items-center">
+                  <div className="flex justify-between items-center text-center">
                     <span>92%</span>
                     <span className="font-medium">שיעור מענה</span>
                   </div>
@@ -172,24 +173,24 @@ const SocialMedia = () => {
               <Button variant="outline" size="sm">
                 טען עוד
               </Button>
-              <CardTitle className="text-lg">הודעות אחרונות</CardTitle>
+              <CardTitle className="text-lg mx-auto">הודעות אחרונות</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 {messages.map((message) => (
-                  <div key={message.id} className="flex gap-3 items-start border-b pb-3 last:border-0">
-                    <div className="flex flex-col items-end flex-1 gap-1">
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm text-muted-foreground">{message.time}</span>
-                        <span className="font-medium">{message.sender}</span>
+                  <div key={message.id} className="flex gap-3 items-center border-b pb-3 last:border-0">
+                    <div className="w-8 h-8 rounded-full overflow-hidden">
+                      <img src={message.avatar} alt={message.sender} className="w-full h-full object-cover" />
+                    </div>
+                    <div className="flex flex-col items-center flex-1 gap-1 text-center">
+                      <div className="flex items-center gap-2 justify-center w-full">
                         {!message.read && (
                           <Badge variant="soft" className="h-2 w-2 p-0 rounded-full" />
                         )}
+                        <span className="font-medium">{message.sender}</span>
+                        <span className="text-sm text-muted-foreground">{message.time}</span>
                       </div>
                       <p className="text-sm">{message.message}</p>
-                    </div>
-                    <div className="w-8 h-8 rounded-full overflow-hidden">
-                      <img src={message.avatar} alt={message.sender} className="w-full h-full object-cover" />
                     </div>
                   </div>
                 ))}
@@ -202,7 +203,7 @@ const SocialMedia = () => {
         <TabsContent value="inbox">
           <Card>
             <CardHeader>
-              <CardTitle>תיבת הודעות</CardTitle>
+              <CardTitle className="text-center">תיבת הודעות</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="bg-muted/40 rounded-lg p-8 text-center">
@@ -224,30 +225,30 @@ const SocialMedia = () => {
                 <Upload className="ml-2" size={16} />
                 העלה מדיה
               </Button>
-              <CardTitle>פרסום פוסטים</CardTitle>
+              <CardTitle className="mx-auto">פרסום פוסטים</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="md:col-span-2">
                   <div className="space-y-4">
                     <div>
-                      <label className="block text-right mb-1 text-sm">טקסט הפוסט</label>
+                      <label className="block text-center mb-1 text-sm">טקסט הפוסט</label>
                       <Textarea 
                         placeholder="הזן את הטקסט שלך כאן..." 
                         className="min-h-[120px]" 
                       />
                     </div>
                     <div>
-                      <label className="block text-right mb-1 text-sm">האשטגים</label>
+                      <label className="block text-center mb-1 text-sm">האשטגים</label>
                       <Input placeholder="#nails #beauty #salon" />
                     </div>
                     <div>
-                      <label className="block text-right mb-1 text-sm">מיקום</label>
+                      <label className="block text-center mb-1 text-sm">מיקום</label>
                       <Input placeholder="הוסף מיקום (אופציונלי)" />
                     </div>
                     <div className="pt-2">
-                      <label className="block text-right mb-2 text-sm">פלטפורמות לפרסום</label>
-                      <div className="flex flex-wrap gap-2 justify-end">
+                      <label className="block text-center mb-2 text-sm">פלטפורמות לפרסום</label>
+                      <div className="flex flex-wrap gap-2 justify-center">
                         <Badge variant="outline" className="cursor-pointer hover:bg-accent p-2">
                           טוויטר / X
                         </Badge>
@@ -290,7 +291,7 @@ const SocialMedia = () => {
         <TabsContent value="analytics">
           <Card>
             <CardHeader>
-              <CardTitle>אנליטיקס</CardTitle>
+              <CardTitle className="text-center">אנליטיקס</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="bg-muted/40 rounded-lg p-8 text-center">
