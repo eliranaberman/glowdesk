@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { toast } from "@/hooks/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 const Settings = () => {
   const [businessInfo, setBusinessInfo] = useState({
@@ -31,6 +31,8 @@ const Settings = () => {
     smsNotifications: true,
     reminderHours: "24",
   });
+  
+  const { toast } = useToast();
 
   const handleBusinessInfoUpdate = () => {
     toast({

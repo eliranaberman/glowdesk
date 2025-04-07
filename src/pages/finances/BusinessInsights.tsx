@@ -98,7 +98,7 @@ const BusinessInsights = () => {
             <CardTitle className="text-lg">ביצועים עסקיים</CardTitle>
           </CardHeader>
           <CardContent>
-            <Tabs defaultValue="performance" value={activeTab} onValueChange={setActiveTab}>
+            <Tabs defaultValue={activeTab} value={activeTab} onValueChange={setActiveTab}>
               <TabsList className="grid grid-cols-2 mb-6">
                 <TabsTrigger value="performance" className="flex items-center gap-2">
                   <BarChartIcon className="h-4 w-4" />

@@ -5,7 +5,6 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Download, Calendar as CalendarIcon, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AnalyticsData, PostData } from "./types";
-import { ChartContainer } from "@/components/ui/chart";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, LineChart, Line } from "recharts";
 import {
   Table,
@@ -199,7 +198,7 @@ const AnalyticsContent = () => {
           <CardTitle className="text-center">ביצועים לפי פלטפורמה</CardTitle>
         </CardHeader>
         <CardContent>
-          <Tabs value={activePlatformTab} onValueChange={setActivePlatformTab} className="w-full">
+          <Tabs defaultValue={activePlatformTab} value={activePlatformTab} onValueChange={setActivePlatformTab} className="w-full">
             <TabsList className="grid grid-cols-5 mb-4">
               <TabsTrigger value="all">הכל</TabsTrigger>
               <TabsTrigger value="instagram">אינסטגרם</TabsTrigger>
@@ -209,7 +208,7 @@ const AnalyticsContent = () => {
             </TabsList>
             
             <div className="mb-6">
-              <Tabs value={metricView} onValueChange={setMetricView} className="w-full">
+              <Tabs defaultValue={metricView} value={metricView} onValueChange={setMetricView} className="w-full">
                 <TabsList className="w-full grid grid-cols-2 mb-4">
                   <TabsTrigger value="impressions">חשיפות</TabsTrigger>
                   <TabsTrigger value="engagement">מעורבות</TabsTrigger>

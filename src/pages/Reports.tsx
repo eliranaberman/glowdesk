@@ -2,14 +2,15 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Download, FileBarChart, FileText, Calendar, Users, DollarSign } from "lucide-react";
-import { toast } from "sonner";
+import { Download, FileText, Calendar, Users, DollarSign } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 import ReportGenerator from "../components/reports/ReportGenerator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const Reports = () => {
   const [selectedReport, setSelectedReport] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const { toast } = useToast();
 
   // Mock report data
   const recentReports = [
@@ -68,7 +69,10 @@ const Reports = () => {
     setTimeout(() => {
       setIsGenerating(false);
       setSelectedReport(null);
-      toast.success("הדו״ח הורד בהצלחה");
+      toast({
+        title: "הצלחה",
+        description: "הדו״ח הורד בהצלחה"
+      });
     }, 1500);
   };
 

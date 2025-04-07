@@ -9,7 +9,7 @@ import PostCreationPanel from "@/components/social-media/PostCreationPanel";
 import AnalyticsContent from "@/components/social-media/AnalyticsContent";
 import ConnectionModal from "@/components/social-media/ConnectionModal";
 import AIMarketingTools from "@/components/social-media/AIMarketingTools";
-import { Message, ConnectedAccountsMap } from "@/components/social-media/types";
+import { ConnectedAccountsMap } from "@/components/social-media/types";
 
 const SocialMedia = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -81,7 +81,7 @@ const SocialMedia = () => {
         <div className="w-[85px]" /> {/* Spacer for visual balance */}
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full" dir="rtl">
+      <Tabs defaultValue={activeTab} value={activeTab} onValueChange={setActiveTab} className="w-full" dir="rtl">
         <TabsList className="grid grid-cols-5 mb-6">
           <TabsTrigger value="dashboard" className="text-xs md:text-base">דשבורד</TabsTrigger>
           <TabsTrigger value="inbox" className="text-xs md:text-base">תיבת הודעות</TabsTrigger>

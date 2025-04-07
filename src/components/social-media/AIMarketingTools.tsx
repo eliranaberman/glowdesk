@@ -104,7 +104,7 @@ const AIMarketingTools = () => {
             
             <div className="space-y-2">
               <Label>פלטפורמה</Label>
-              <Tabs defaultValue="facebook" value={platform} onValueChange={setPlatform} className="w-full">
+              <Tabs defaultValue={platform} value={platform} onValueChange={setPlatform} className="w-full">
                 <TabsList className="grid grid-cols-3 w-full">
                   <TabsTrigger value="facebook" className="flex items-center gap-1">
                     <Facebook size={16} />
