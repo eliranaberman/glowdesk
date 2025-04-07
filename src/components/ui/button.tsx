@@ -21,7 +21,8 @@ const buttonVariants = cva(
         link: "text-primary underline-offset-4 hover:underline",
         soft: "bg-roseGold/20 text-deepNavy hover:bg-roseGold/30",
         warm: "bg-mutedPeach/40 text-primary hover:bg-mutedPeach/60",
-        success: "bg-oliveGreen text-white hover:bg-oliveGreen/90"
+        success: "bg-oliveGreen text-white hover:bg-oliveGreen/90",
+        back: "bg-softGray text-muted-foreground hover:bg-softGray/80 pr-2 pl-3" // New back button variant
       },
       size: {
         default: "h-10 px-5 py-2.5",

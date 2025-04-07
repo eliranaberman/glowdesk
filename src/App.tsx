@@ -102,14 +102,9 @@ const App = () => (
                 <SocialMedia />
               </Layout>
             } />
-            <Route path="/online-booking" element={
+            <Route path="/loyalty" element={
               <Layout>
-                <OnlineBooking />
-              </Layout>
-            } />
-            <Route path="/settings" element={
-              <Layout>
-                <Settings />
+                <LoyaltyPage />
               </Layout>
             } />
             <Route path="/notifications" element={
@@ -117,17 +112,22 @@ const App = () => (
                 <Notifications />
               </Layout>
             } />
+            <Route path="/settings" element={
+              <Layout>
+                <Settings />
+              </Layout>
+            } />
+            <Route path="/online-booking" element={
+              <Layout>
+                <OnlineBooking />
+              </Layout>
+            } />
             <Route path="/payments/new" element={
               <Layout>
                 <NewPayment />
               </Layout>
             } />
-            <Route path="/loyalty" element={
-              <Layout>
-                <LoyaltyPage />
-              </Layout>
-            } />
-            {/* New finance routes */}
+            {/* Financial pages */}
             <Route path="/finances/cash-flow" element={
               <Layout>
                 <CashFlow />
@@ -138,7 +138,11 @@ const App = () => (
                 <BusinessInsights />
               </Layout>
             } />
-            <Route path="*" element={<NotFound />} />
+            <Route path="*" element={
+              <Layout>
+                <NotFound />
+              </Layout>
+            } />
           </Routes>
         </BrowserRouter>
       </div>

@@ -1,10 +1,12 @@
 
 import { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Header from './Header';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { Button } from '@/components/ui/button';
+import { ArrowRight } from 'lucide-react';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -13,6 +15,7 @@ interface LayoutProps {
 const Layout = ({ children }: LayoutProps) => {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
   const isMobile = useIsMobile();
 
   // Get page title based on current route (in Hebrew)
@@ -36,8 +39,21 @@ const Layout = ({ children }: LayoutProps) => {
     if (path === '/settings') return 'הגדרות';
     if (path === '/online-booking') return 'קביעת פגישה אונליין';
     if (path === '/payments/new') return 'רישום תשלום';
+    if (path === '/finances/cash-flow') return 'תזרים מזומנים';
+    if (path === '/finances/insights') return 'תובנות עסקיות';
 
     return 'By Chen Mizrahi'; // Default
+  };
+  
+  // Determine if the current route should show the back button
+  const shouldShowBackButton = (): boolean => {
+    const path = location.pathname;
+    return path !== '/'; // Show back button on all pages except the dashboard
+  };
+
+  // Handle back button click
+  const handleBackClick = () => {
+    navigate(-1);
   };
 
   // Effect to close sidebar when route changes
@@ -93,6 +109,22 @@ const Layout = ({ children }: LayoutProps) => {
           pageTitle={getPageTitle()} 
           toggleMobileSidebar={toggleMobileSidebar} 
         />
+        
+        {/* Back button */}
+        {shouldShowBackButton() && (
+          <div className="px-4 pt-2 md:px-6 md:pt-3">
+            <Button 
+              variant="back" 
+              size="sm" 
+              onClick={handleBackClick}
+              className="flex items-center"
+            >
+              <ArrowRight className="mr-1 h-4 w-4" />
+              חזרה
+            </Button>
+          </div>
+        )}
+        
         <main className={cn(
           "flex-1 overflow-y-auto p-3 md:p-6 text-center bg-gradient-to-b from-warmBeige/10 to-background",
           isMobile ? "pb-20" : ""

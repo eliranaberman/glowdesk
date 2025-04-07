@@ -98,21 +98,22 @@ const Dashboard = () => {
         ))}
       </div>
 
-      {/* Rearranged: Daily Summary directly below stats */}
+      {/* Updated: Daily Summary and Latest Appointments */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
-        <DailySummary 
-          customers={dailyData.customers}
-          hours={dailyData.hours}
-          revenue={dailyData.revenue}
-          deficiencies={dailyData.deficiencies}
-        />
-        <RecentAppointments appointments={appointments} />
-      </div>
-      
-      {/* Business Insights and Cash Flow Forecast */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
-        <BusinessInsights />
-        <CashFlowForecast />
+        <div className="flex flex-col gap-6">
+          <DailySummary 
+            customers={dailyData.customers}
+            hours={dailyData.hours}
+            revenue={dailyData.revenue}
+            deficiencies={dailyData.deficiencies}
+          />
+          <RecentAppointments appointments={appointments} />
+        </div>
+        
+        <div className="flex flex-col gap-6">
+          <BusinessInsights />
+          <CashFlowForecast />
+        </div>
       </div>
       
       {/* Marketing and Loyalty */}
@@ -124,7 +125,7 @@ const Dashboard = () => {
       {/* Inactive Clients Alert */}
       <InactiveClientsAlert />
       
-      {/* Analytics Charts Section - Below the daily summary and recent appointments */}
+      {/* Analytics Charts Section */}
       <div className="mb-6 md:mb-8">
         <AnalyticsCharts 
           monthlyData={monthlyData}
@@ -134,7 +135,7 @@ const Dashboard = () => {
         />
       </div>
       
-      {/* Quick actions section with enhanced visual styling and better mobile layout */}
+      {/* Quick actions section */}
       <div className="border rounded-xl p-4 md:p-6 shadow-soft hover:shadow-soft-lg transition-all duration-300 bg-warmBeige/10">
         <h2 className="text-base md:text-lg font-display font-medium mb-4 md:mb-6 flex items-center">
           <span className="bg-softRose/40 w-1 h-6 rounded mr-2"></span>
@@ -160,7 +161,7 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Promotional section with enhanced visual appeal and improved mobile layout */}
+      {/* Promotional section */}
       <div className="bg-gradient-to-r from-warmBeige to-softRose/20 border border-softRose/20 rounded-xl p-4 md:p-6 shadow-soft">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 md:gap-0">
           <div className="mb-4 md:mb-0">

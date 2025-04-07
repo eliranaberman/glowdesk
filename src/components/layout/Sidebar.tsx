@@ -22,7 +22,7 @@ import {
   TrendingUp,
 } from 'lucide-react';
 
-// Updated order according to requirements
+// Updated order according to final requirements
 const navItems = [
   { 
     name: 'דשבורד', 
@@ -60,7 +60,7 @@ const financialItems = [
   }
 ];
 
-// Additional operational items
+// Additional operational items - updated order
 const operationalItems = [
   { 
     name: 'הוצאות',
@@ -104,7 +104,9 @@ const Sidebar = ({ onLinkClick }: SidebarProps) => {
     if (!collapsed && scrollAreaRef.current) {
       const activeElement = scrollAreaRef.current.querySelector('[data-state="active"]');
       if (activeElement) {
-        activeElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        setTimeout(() => {
+          activeElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 100);
       }
     }
   }, [collapsed, location.pathname]);
@@ -118,7 +120,7 @@ const Sidebar = ({ onLinkClick }: SidebarProps) => {
       dir="rtl"
     >
       {/* Header with Brand */}
-      <div className="flex items-center justify-between p-4 h-16">
+      <div className="flex items-center justify-between p-4 h-16 shrink-0">
         {!collapsed && (
           <div className="flex items-center">
             <div className="w-9 h-9 rounded-full bg-gradient-to-r from-roseGold to-mutedPeach flex items-center justify-center text-primary font-medium">
@@ -145,11 +147,10 @@ const Sidebar = ({ onLinkClick }: SidebarProps) => {
 
       {/* Improved scroll behavior with ScrollArea component */}
       <ScrollArea 
-        ref={scrollAreaRef} 
-        className="flex-1 pr-1 pl-3"
+        className="flex-1 pr-0 pl-1 overflow-y-auto overflow-x-hidden"
         scrollHideDelay={200}
       >
-        <div className="py-3 space-y-6">
+        <div className="py-3 space-y-6 px-2">
           {/* Main navigation items */}
           <div className="space-y-1">
             {navItems.map((item) => (
@@ -173,69 +174,69 @@ const Sidebar = ({ onLinkClick }: SidebarProps) => {
           </div>
 
           {/* Financial management category */}
-          {!collapsed && (
-            <div>
+          <div>
+            {!collapsed && (
               <h3 className="text-xs font-semibold text-muted-foreground px-2 py-1 text-right">
                 ניהול פיננסי
               </h3>
-              <div className="mt-1 space-y-1">
-                {financialItems.map((item) => (
-                  <NavLink
-                    key={item.name}
-                    to={item.path}
-                    className={({ isActive }) => 
-                      cn(
-                        "nav-link",
-                        isActive ? "bg-accent/50 font-medium text-primary shadow-card" : "hover:bg-accent/30",
-                        collapsed ? "justify-center" : "justify-start text-right"
-                      )
-                    }
-                    data-state={({ isActive }: {isActive: boolean}) => isActive ? "active" : "inactive"}
-                    onClick={handleLinkClick}
-                  >
-                    {item.icon}
-                    {!collapsed && <span className="text-right">{item.name}</span>}
-                  </NavLink>
-                ))}
-              </div>
+            )}
+            <div className="mt-1 space-y-1">
+              {financialItems.map((item) => (
+                <NavLink
+                  key={item.name}
+                  to={item.path}
+                  className={({ isActive }) => 
+                    cn(
+                      "nav-link",
+                      isActive ? "bg-accent/50 font-medium text-primary shadow-card" : "hover:bg-accent/30",
+                      collapsed ? "justify-center" : "justify-start text-right"
+                    )
+                  }
+                  data-state={({ isActive }: {isActive: boolean}) => isActive ? "active" : "inactive"}
+                  onClick={handleLinkClick}
+                >
+                  {item.icon}
+                  {!collapsed && <span className="text-right">{item.name}</span>}
+                </NavLink>
+              ))}
             </div>
-          )}
+          </div>
 
           {/* Operational items */}
-          {!collapsed && operationalItems.length > 0 && (
-            <div>
+          <div>
+            {!collapsed && (
               <h3 className="text-xs font-semibold text-muted-foreground px-2 py-1 text-right">
                 תפעול
               </h3>
-              <div className="mt-1 space-y-1">
-                {operationalItems.map((item) => (
-                  <NavLink
-                    key={item.name}
-                    to={item.path}
-                    className={({ isActive }) => 
-                      cn(
-                        "nav-link",
-                        isActive ? "bg-accent/50 font-medium text-primary shadow-card" : "hover:bg-accent/30",
-                        collapsed ? "justify-center" : "justify-start text-right"
-                      )
-                    }
-                    data-state={({ isActive }: {isActive: boolean}) => isActive ? "active" : "inactive"}
-                    onClick={handleLinkClick}
-                  >
-                    {item.icon}
-                    {!collapsed && <span className="text-right">{item.name}</span>}
-                  </NavLink>
-                ))}
-              </div>
+            )}
+            <div className="mt-1 space-y-1">
+              {operationalItems.map((item) => (
+                <NavLink
+                  key={item.name}
+                  to={item.path}
+                  className={({ isActive }) => 
+                    cn(
+                      "nav-link",
+                      isActive ? "bg-accent/50 font-medium text-primary shadow-card" : "hover:bg-accent/30",
+                      collapsed ? "justify-center" : "justify-start text-right"
+                    )
+                  }
+                  data-state={({ isActive }: {isActive: boolean}) => isActive ? "active" : "inactive"}
+                  onClick={handleLinkClick}
+                >
+                  {item.icon}
+                  {!collapsed && <span className="text-right">{item.name}</span>}
+                </NavLink>
+              ))}
             </div>
-          )}
+          </div>
         </div>
       </ScrollArea>
 
       <Separator className="bg-border/30" />
 
       {/* Bottom actions */}
-      <div className="p-2 space-y-1">
+      <div className="p-2 space-y-1 shrink-0">
         <NavLink
           to="/notifications"
           className={({ isActive }) => 
@@ -245,6 +246,7 @@ const Sidebar = ({ onLinkClick }: SidebarProps) => {
               collapsed ? "justify-center" : "justify-start text-right"
             )
           }
+          data-state={({ isActive }: {isActive: boolean}) => isActive ? "active" : "inactive"}
           onClick={handleLinkClick}
         >
           <Bell className="w-5 h-5" />
@@ -259,6 +261,7 @@ const Sidebar = ({ onLinkClick }: SidebarProps) => {
               collapsed ? "justify-center" : "justify-start text-right"
             )
           }
+          data-state={({ isActive }: {isActive: boolean}) => isActive ? "active" : "inactive"}
           onClick={handleLinkClick}
         >
           <Settings className="w-5 h-5" />
@@ -267,7 +270,7 @@ const Sidebar = ({ onLinkClick }: SidebarProps) => {
       </div>
 
       {/* Profile section */}
-      <div className="p-4">
+      <div className="p-4 shrink-0">
         {!collapsed && (
           <div className="flex items-center">
             <div className="w-8 h-8 rounded-full bg-gradient-to-r from-softRose/70 to-mutedPeach/70">

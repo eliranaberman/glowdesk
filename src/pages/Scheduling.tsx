@@ -10,95 +10,65 @@ const Scheduling = () => {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [filteredAppointments, setFilteredAppointments] = useState<any[]>([]);
 
-  // Mock appointments data with dates
-  const today = new Date();
-  const tomorrow = new Date();
-  tomorrow.setDate(today.getDate() + 1);
-  const dayAfterTomorrow = new Date();
-  dayAfterTomorrow.setDate(today.getDate() + 2);
-
-  const allAppointments = [
-    {
-      id: '1',
-      customer: 'שרה כהן',
-      service: 'מניקור ג\'ל',
-      startTime: '10:00',
-      duration: 60,
-      color: 'rgba(198, 113, 211, 0.3)', // Light purple
-      date: today,
-      price: '₪120',
-    },
-    {
-      id: '2',
-      customer: 'אמילי לוי',
-      service: 'אקריליק מלא',
-      startTime: '12:30',
-      duration: 90,
-      color: 'rgba(181, 75, 194, 0.3)', // Medium purple
-      date: today,
-      price: '₪180',
-    },
-    {
-      id: '3',
-      customer: 'ליאת ונג',
-      service: 'פדיקור',
-      startTime: '14:00',
-      duration: 75,
-      color: 'rgba(156, 61, 167, 0.3)', // Dark purple
-      date: today,
-      price: '₪140',
-    },
-    {
-      id: '4',
-      customer: 'מיכל אברהם',
-      service: 'לק ג\'ל',
-      startTime: '11:00',
-      duration: 45,
-      color: 'rgba(198, 113, 211, 0.3)',
-      date: tomorrow,
-      price: '₪100',
-    },
-    {
-      id: '5',
-      customer: 'רחל גולן',
-      service: 'בניית ציפורניים',
-      startTime: '13:00',
-      duration: 120,
-      color: 'rgba(181, 75, 194, 0.3)',
-      date: tomorrow,
-      price: '₪220',
-    },
-    {
-      id: '6',
-      customer: 'דנה ישראלי',
-      service: 'טיפול יופי',
-      startTime: '10:30',
-      duration: 90,
-      color: 'rgba(156, 61, 167, 0.3)',
-      date: dayAfterTomorrow,
-      price: '₪160',
-    },
-    {
-      id: '7',
-      customer: 'יעל מור',
-      service: 'מניקור ג\'ל',
-      startTime: '09:00',
-      duration: 60,
-      color: 'rgba(198, 113, 211, 0.3)',
-      date: new Date(today.getFullYear(), today.getMonth(), today.getDate() + 3),
-      price: '₪120',
-    },
-    {
-      id: '8',
-      customer: 'נופר דהן',
-      service: 'פדיקור',
-      startTime: '15:30',
-      duration: 75,
-      color: 'rgba(156, 61, 167, 0.3)',
-      date: new Date(today.getFullYear(), today.getMonth(), today.getDate() + 4),
-      price: '₪140',
-    },
-  ];
+  // Generate random appointments for the next 30 days
+  const generateRandomAppointments = () => {
+    const currentDate = new Date();
+    const appointments = [];
+    const clientNames = [
+      'שרה כהן', 'אמילי לוי', 'ליאת ונג', 'מיכל אברהם', 'רחל גולן',
+      'דנה ישראלי', 'יעל מור', 'נופר דהן', 'טלי ברק', 'מירי אלון',
+      'רוני שטרן', 'נועה אדלר', 'קרן לוי', 'דפנה גבאי', 'הילה שגיא'
+    ];
+    
+    const services = [
+      { name: 'מניקור ג\'ל', duration: 60, color: 'rgba(198, 113, 211, 0.3)', price: 120 },
+      { name: 'אקריליק מלא', duration: 90, color: 'rgba(181, 75, 194, 0.3)', price: 180 },
+      { name: 'פדיקור', duration: 75, color: 'rgba(156, 61, 167, 0.3)', price: 140 },
+      { name: 'לק ג\'ל', duration: 45, color: 'rgba(198, 113, 211, 0.3)', price: 100 },
+      { name: 'בניית ציפורניים', duration: 120, color: 'rgba(181, 75, 194, 0.3)', price: 220 },
+      { name: 'טיפול יופי', duration: 90, color: 'rgba(156, 61, 167, 0.3)', price: 160 }
+    ];
+    
+    const startTimes = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00'];
+    
+    // Create 30 days of random appointments
+    for (let i = 0; i < 30; i++) {
+      const appointmentDate = new Date(currentDate);
+      appointmentDate.setDate(currentDate.getDate() + i);
+      
+      // Random number of appointments per day (0-5)
+      const numAppointments = Math.floor(Math.random() * 6);
+      const usedTimes = new Set();
+      
+      for (let j = 0; j < numAppointments; j++) {
+        // Get unique time slots
+        let startTime;
+        do {
+          startTime = startTimes[Math.floor(Math.random() * startTimes.length)];
+        } while (usedTimes.has(startTime));
+        usedTimes.add(startTime);
+        
+        const service = services[Math.floor(Math.random() * services.length)];
+        const clientName = clientNames[Math.floor(Math.random() * clientNames.length)];
+        
+        appointments.push({
+          id: `${i}-${j}`,
+          customer: clientName,
+          service: service.name,
+          startTime: startTime,
+          duration: service.duration,
+          color: service.color,
+          date: new Date(appointmentDate),
+          price: `₪${service.price}`
+        });
+      }
+    }
+    
+    return appointments;
+  };
+  
+  // Mock appointments data
+  const allAppointments = generateRandomAppointments();
 
   // Filter appointments whenever the selected date changes
   useEffect(() => {

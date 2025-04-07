@@ -17,8 +17,8 @@ const CashFlow = () => {
         </div>
         
         <div className="flex gap-2">
-          {/* Date range buttons in RTL order */}
-          <div className="filter-button-group">
+          {/* Date range buttons in RTL order - Day on right, Month on left */}
+          <div className="filter-button-group flex">
             <Button 
               variant={activeRange === 'day' ? 'default' : 'ghost'} 
               size="sm" 
