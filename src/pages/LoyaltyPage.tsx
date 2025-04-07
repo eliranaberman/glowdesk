@@ -1,5 +1,6 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -16,9 +17,18 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
+import SendCouponForm from "@/components/loyalty/SendCouponForm";
 
 const LoyaltyPage = () => {
-  const [activeTab, setActiveTab] = useState("overview");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const initialTab = searchParams.get('tab') === 'send-coupon' ? 'send-coupon' : 'promotions';
+  const [activeTab, setActiveTab] = useState(initialTab);
+
+  useEffect(() => {
+    if (searchParams.get('tab') === 'send-coupon') {
+      setActiveTab('send-coupon');
+    }
+  }, [searchParams]);
 
   // Mock loyalty data
   const activePromotions = [
@@ -39,6 +49,20 @@ const LoyaltyPage = () => {
   const createPromotion = () => {
     toast.success("הקופון נוצר בהצלחה");
   };
+
+  const handleBack = () => {
+    setActiveTab('promotions');
+    setSearchParams({});
+  };
+
+  const handleSendCouponToSelectedClients = () => {
+    setActiveTab('send-coupon');
+    setSearchParams({ tab: 'send-coupon' });
+  };
+
+  if (activeTab === 'send-coupon') {
+    return <SendCouponForm onBack={handleBack} />;
+  }
 
   return (
     <div dir="rtl">
@@ -105,7 +129,7 @@ const LoyaltyPage = () => {
         </Card>
       </div>
 
-      <Tabs defaultValue="promotions" value={activeTab} onValueChange={setActiveTab}>
+      <Tabs defaultValue={activeTab} value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid grid-cols-3 mb-6">
           <TabsTrigger value="promotions">מבצעים וקופונים</TabsTrigger>
           <TabsTrigger value="clients">לקוחות מועדון</TabsTrigger>
@@ -182,8 +206,16 @@ const LoyaltyPage = () => {
         <TabsContent value="clients" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>לקוחות מובילים במועדון</CardTitle>
-              <CardDescription>הלקוחות עם הכי הרבה נקודות נאמנות</CardDescription>
+              <div className="flex justify-between items-center">
+                <div>
+                  <CardTitle>לקוחות מובילים במועדון</CardTitle>
+                  <CardDescription>הלקוחות עם הכי הרבה נקודות נאמנות</CardDescription>
+                </div>
+                <Button onClick={handleSendCouponToSelectedClients}>
+                  <Gift className="ml-2 h-4 w-4" />
+                  שלח קופונים ללקוחות
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
               <Table>

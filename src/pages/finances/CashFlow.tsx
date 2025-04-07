@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import CashFlowForecast from '@/components/dashboard/CashFlowForecast';
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 
 const CashFlow = () => {
   const [activeRange, setActiveRange] = useState('week');
@@ -44,6 +45,12 @@ const CashFlow = () => {
               חודש
             </Button>
           </div>
+          
+          <Link to="/finances/all-data">
+            <Button variant="default" size="sm">
+              לכל הנתונים הפיננסיים
+            </Button>
+          </Link>
         </div>
       </div>
 

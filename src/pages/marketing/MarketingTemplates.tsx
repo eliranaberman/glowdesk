@@ -1,5 +1,6 @@
 
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -12,6 +13,7 @@ const MarketingTemplates = () => {
   const [activeTab, setActiveTab] = useState('existing');
   const [newTemplate, setNewTemplate] = useState({ name: '', content: '' });
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   // Sample template data
   const templates = [
@@ -74,6 +76,32 @@ const MarketingTemplates = () => {
     });
   };
 
+  const handleEditTemplate = (templateId: string) => {
+    const template = templates.find(t => t.id === templateId);
+    if (template) {
+      setNewTemplate({
+        name: template.name,
+        content: template.content
+      });
+      setActiveTab('create');
+    }
+  };
+
+  const handleCopyTemplate = (templateId: string, templateName: string) => {
+    const template = templates.find(t => t.id === templateId);
+    if (template) {
+      setNewTemplate({
+        name: `עותק של ${template.name}`,
+        content: template.content
+      });
+      setActiveTab('create');
+      toast({
+        title: "הועתק בהצלחה",
+        description: `התבנית "${templateName}" הועתקה לעריכה`,
+      });
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -108,10 +136,20 @@ const MarketingTemplates = () => {
                       </span>
                     </h3>
                     <div className="flex gap-2">
-                      <Button variant="ghost" size="icon" className="h-8 w-8">
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-8 w-8"
+                        onClick={() => handleCopyTemplate(template.id, template.name)}
+                      >
                         <Copy className="h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8">
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-8 w-8"
+                        onClick={() => handleEditTemplate(template.id)}
+                      >
                         <Edit className="h-4 w-4" />
                       </Button>
                       <Button 
@@ -173,7 +211,7 @@ const MarketingTemplates = () => {
                 <div className="flex justify-end pt-4">
                   <Button onClick={handleCreateTemplate}>
                     <PlusCircle className="h-4 w-4 ml-2" />
-                    צור תבנית חדשה
+                    {newTemplate.name.startsWith('עותק של') || templates.some(t => t.name === newTemplate.name) ? 'שמור תבנית' : 'צור תבנית חדשה'}
                   </Button>
                 </div>
               </div>

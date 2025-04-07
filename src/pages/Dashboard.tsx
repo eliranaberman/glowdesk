@@ -14,10 +14,13 @@ import MarketingMessages from '@/components/dashboard/MarketingMessages';
 import BusinessInsights from '@/components/dashboard/BusinessInsights';
 import CashFlowForecast from '@/components/dashboard/CashFlowForecast';
 import InactiveClientsAlert from '@/components/dashboard/InactiveClientsAlert';
+import { Input } from '@/components/ui/input';
+import { Search } from 'lucide-react';
 
 const Dashboard = () => {
   const { toast } = useToast();
   const isMobile = useIsMobile();
+  const [searchQuery, setSearchQuery] = useState('');
   
   // Updated data with correct numbers and currency values
   const stats = [
@@ -83,8 +86,32 @@ const Dashboard = () => {
     { name: '30', value: 4 },
   ];
 
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      toast({
+        title: "חיפוש בוצע",
+        description: `מחפש: "${searchQuery}"`,
+      });
+    }
+  };
+
   return (
     <div className="space-y-6 md:space-y-8" dir="rtl">
+      {/* Search bar */}
+      <div className="relative mb-6">
+        <form onSubmit={handleSearch} className="relative">
+          <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            type="search"
+            placeholder="חיפוש לקוחות, שירותים..."
+            className="pr-10"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </form>
+      </div>
+
       {/* Key metrics section with enhanced styling */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         {stats.map((stat) => (

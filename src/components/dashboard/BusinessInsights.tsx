@@ -6,10 +6,11 @@ import { Lightbulb, ArrowRight, TrendingUp, TrendingDown, AlertTriangle, Clock }
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const BusinessInsights = () => {
   const [activeTab, setActiveTab] = useState('today');
+  const navigate = useNavigate();
 
   // Mock insights data
   const insights = {
@@ -87,6 +88,10 @@ const BusinessInsights = () => {
     }
   };
 
+  const handleMoreDetails = () => {
+    navigate('/finances/insights');
+  };
+
   return (
     <Card>
       <CardHeader className="pb-3">
@@ -100,7 +105,7 @@ const BusinessInsights = () => {
               המלצות ותובנות מבוססות נתונים לשיפור העסק
             </CardDescription>
           </div>
-          <Link to="/insights">
+          <Link to="/finances/insights">
             <Button variant="ghost" size="sm" className="gap-1">
               לכל התובנות
               <ArrowRight className="h-4 w-4 mr-1" />
@@ -148,6 +153,13 @@ const BusinessInsights = () => {
                 ))}
               </div>
             </div>
+            
+            <div className="flex justify-end">
+              <Button onClick={handleMoreDetails} variant="outline" className="gap-1">
+                לפרטים נוספים
+                <ArrowRight className="h-4 w-4 mr-1" />
+              </Button>
+            </div>
           </TabsContent>
           
           <TabsContent value="week" className="space-y-4">
@@ -182,6 +194,13 @@ const BusinessInsights = () => {
                   );
                 })}
               </div>
+            </div>
+            
+            <div className="flex justify-end">
+              <Button onClick={handleMoreDetails} variant="outline" className="gap-1">
+                לפרטים נוספים
+                <ArrowRight className="h-4 w-4 mr-1" />
+              </Button>
             </div>
           </TabsContent>
           
@@ -233,6 +252,13 @@ const BusinessInsights = () => {
                   </div>
                 </div>
               </div>
+            </div>
+            
+            <div className="flex justify-end">
+              <Button onClick={handleMoreDetails} variant="outline" className="gap-1">
+                לפרטים נוספים
+                <ArrowRight className="h-4 w-4 mr-1" />
+              </Button>
             </div>
           </TabsContent>
         </Tabs>

@@ -1,10 +1,16 @@
-
-import { useState } from 'react';
-import { Bell, Search, Menu } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { useNavigate } from 'react-router-dom';
-import { useToast } from '@/hooks/use-toast';
+import { useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,118 +18,204 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from "@/components/ui/dropdown-menu";
+import { useToast } from "@/hooks/use-toast";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { useAuth } from "@/hooks/use-auth";
+import { cn } from "@/lib/utils";
+import {
+  Menu,
+  Search,
+  Moon,
+  SunMedium,
+  Bell,
+  User,
+  HelpCircle,
+  Settings,
+  LogOut,
+} from "lucide-react";
 
-interface HeaderProps {
-  pageTitle: string;
-  toggleMobileSidebar: () => void;
+interface NavItem {
+  href: string;
+  label: string;
 }
 
-const Header = ({ pageTitle, toggleMobileSidebar }: HeaderProps) => {
-  const [notificationCount] = useState(3);
-  const [searchQuery, setSearchQuery] = useState('');
-  const navigate = useNavigate();
+const Header = () => {
+  const [isDarkTheme, setIsDarkTheme] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const { toast } = useToast();
+  const isMobile = useIsMobile();
+  const { pathname } = useLocation();
+  const navigate = useNavigate();
+  const { logout } = useAuth();
+
+  const toggleTheme = () => {
+    setIsDarkTheme((prev) => !prev);
+    // Implement theme persistence logic here (e.g., using localStorage)
+  };
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      // In a real app, this would perform an actual search
       toast({
-        title: "חיפוש",
+        title: "חיפוש בוצע",
         description: `מחפש: "${searchQuery}"`,
       });
-      
-      // For demo purposes, navigate to a relevant page based on search
-      if (searchQuery.toLowerCase().includes('לקוח') || 
-          searchQuery.toLowerCase().includes('client')) {
-        navigate('/customers');
-      } else if (searchQuery.toLowerCase().includes('פגיש') || 
-                searchQuery.toLowerCase().includes('appoint')) {
-        navigate('/scheduling');
-      } else if (searchQuery.toLowerCase().includes('שיווק') || 
-                searchQuery.toLowerCase().includes('market')) {
-        navigate('/social-media');
-      } else {
-        // Default search results page could be added here
-        toast({
-          title: "תוצאות חיפוש",
-          description: "לא נמצאו תוצאות התואמות לחיפוש שלך",
-          variant: "destructive",
-        });
-      }
-      
-      setSearchQuery('');
     }
   };
 
+  const handleLogout = async () => {
+    await logout();
+    navigate("/login");
+  };
+
+  const navItems: NavItem[] = [
+    { href: "/", label: "דשבורד" },
+    { href: "/customers", label: "לקוחות" },
+    { href: "/scheduling", label: "תזמון" },
+    { href: "/reports", label: "דוחות" },
+    { href: "/inventory", label: "מלאי" },
+    { href: "/expenses", label: "הוצאות" },
+    { href: "/tasks", label: "משימות" },
+    { href: "/social-media", label: "מדיה חברתית" },
+    { href: "/loyalty", label: "תוכנית נאמנות" },
+    { href: "/finances/cash-flow", label: "פיננסים" },
+  ];
+
   return (
-    <header className="w-full bg-background sticky top-0 z-10 border-b border-border">
-      <div className="flex items-center justify-between px-4 py-2">
-        <div className="flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="lg:hidden"
-            onClick={toggleMobileSidebar}
-            type="button"
-          >
-            <Menu className="h-5 w-5" />
-          </Button>
-          <h1 className="text-xl font-semibold text-center">{pageTitle}</h1>
-        </div>
-
-        <form onSubmit={handleSearch} className="hidden md:flex items-center max-w-sm flex-1 mx-4">
-          <div className="relative w-full">
-            <Search className="absolute right-2 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="חיפוש..."
-              className="pr-8 rounded-full bg-secondary border-none text-right"
-              dir="rtl"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
+    <header className="bg-background sticky top-0 z-50 border-b">
+      <div className="container flex h-16 items-center justify-between py-4">
+        {/* Mobile menu */}
+        {isMobile ? (
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="sm">
+                <Menu className="h-5 w-5 ml-2" />
+                תפריט
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="right" className="w-full sm:w-3/4 md:w-2/3">
+              <SheetHeader className="text-right">
+                <SheetTitle>תפריט</SheetTitle>
+                <SheetDescription>
+                  נווט בין האפשרויות השונות של המערכת.
+                </SheetDescription>
+              </SheetHeader>
+              <div className="py-4">
+                <form onSubmit={handleSearch} className="relative mb-4">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    type="search"
+                    placeholder="חיפוש..."
+                    className="pl-10"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                </form>
+                <ul className="space-y-2">
+                  {navItems.map((item) => (
+                    <li key={item.label}>
+                      <Link to={item.href} className="block py-2">
+                        {item.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <SheetHeader className="text-right">
+                <SheetTitle>הגדרות</SheetTitle>
+              </SheetHeader>
+              <div className="py-4">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="w-full">
+                      <User className="h-4 w-4 ml-2" />
+                      הגדרות משתמש
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuLabel>הגדרות משתמש</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => navigate("/settings")}>
+                      <Settings className="h-4 w-4 ml-2" />
+                      הגדרות
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleLogout}>
+                      <LogOut className="h-4 w-4 ml-2" />
+                      התנתקות
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </SheetContent>
+          </Sheet>
+        ) : (
+          <div className="flex items-center">
+            <Link to="/" className="font-bold text-2xl">
+              {/* Replace with your logo */}
+              My App
+            </Link>
+            <ul className="flex items-center gap-4 mr-8">
+              {navItems.map((item) => (
+                <li key={item.label}>
+                  <Link
+                    to={item.href}
+                    className={cn(
+                      "text-sm font-medium transition-colors hover:text-primary",
+                      pathname === item.href
+                        ? "text-primary underline underline-offset-4"
+                        : "text-muted-foreground"
+                    )}
+                  >
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
           </div>
-        </form>
+        )}
 
-        <div className="flex items-center gap-2">
+        {/* Theme toggle and user menu */}
+        <div className="flex items-center space-x-4">
+          {!isMobile && (
+            <form onSubmit={handleSearch} className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="search"
+                placeholder="חיפוש..."
+                className="pl-10"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </form>
+          )}
+          <Button variant="ghost" size="sm" onClick={toggleTheme}>
+            {isDarkTheme ? (
+              <SunMedium className="h-5 w-5" />
+            ) : (
+              <Moon className="h-5 w-5" />
+            )}
+          </Button>
+          <Button variant="ghost" size="sm">
+            <Bell className="h-5 w-5" />
+          </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="relative">
-                <Bell className="h-5 w-5" />
-                {notificationCount > 0 && (
-                  <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] text-primary-foreground">
-                    {notificationCount}
-                  </span>
-                )}
+              <Button variant="ghost" size="sm">
+                <User className="h-5 w-5 ml-2" />
+                <span className="sr-only">User Menu</span>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-80 text-right">
-              <DropdownMenuLabel className="text-right">התראות</DropdownMenuLabel>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>הגדרות משתמש</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <div className="max-h-[300px] overflow-y-auto">
-                <DropdownMenuItem onClick={() => navigate("/notifications")}>
-                  <div className="flex flex-col gap-1 text-right w-full">
-                    <p className="text-sm font-medium">נקבעה פגישה חדשה</p>
-                    <p className="text-xs text-muted-foreground">רחל כהן - היום, 14:00</p>
-                  </div>
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate("/inventory")}>
-                  <div className="flex flex-col gap-1 text-right w-full">
-                    <p className="text-sm font-medium">התראת מלאי נמוך</p>
-                    <p className="text-xs text-muted-foreground">לק ג'ל אדום (נותרו 2)</p>
-                  </div>
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <div className="flex flex-col gap-1 text-right w-full">
-                    <p className="text-sm font-medium">תזכורת</p>
-                    <p className="text-xs text-muted-foreground">להזמין מלאי חדש</p>
-                  </div>
-                </DropdownMenuItem>
-              </div>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem className="justify-center font-medium text-primary" onClick={() => navigate("/notifications")}>
-                צפה בכל ההתראות
+              <DropdownMenuItem onClick={() => navigate("/settings")}>
+                <Settings className="h-4 w-4 ml-2" />
+                הגדרות
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleLogout}>
+                <LogOut className="h-4 w-4 ml-2" />
+                התנתקות
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
