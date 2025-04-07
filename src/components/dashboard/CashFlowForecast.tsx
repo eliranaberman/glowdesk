@@ -1,7 +1,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, TrendingUp, Calendar, AlertTriangle, Cash } from 'lucide-react';
+import { ArrowRight, TrendingUp, Calendar, AlertTriangle, DollarSign } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import {
   ChartContainer,
@@ -10,7 +10,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { ResponsiveBar } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 const CashFlowForecast = () => {
   // Mock data for cash flow forecasting
@@ -62,7 +62,7 @@ const CashFlowForecast = () => {
         <div className="flex items-center justify-between">
           <div>
             <CardTitle className="text-lg flex items-center">
-              <Cash className="h-5 w-5 ml-2 text-primary" />
+              <DollarSign className="h-5 w-5 ml-2 text-primary" />
               תחזית תזרים מזומנים
             </CardTitle>
             <CardDescription>
@@ -100,67 +100,79 @@ const CashFlowForecast = () => {
             </div>
 
             <div className="h-[200px]" dir="ltr">
-              <ChartContainer
-                config={chartConfig}
-                className="h-[200px]"
-              >
-                <ResponsiveBar
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
                   data={forecastData}
-                  keys={["income", "expenses", "profit"]}
-                  indexBy="date"
                   margin={{ top: 10, right: 10, bottom: 30, left: 40 }}
-                  padding={0.3}
-                  groupMode="grouped"
-                  colors={({ id, data }) => {
-                    if (id === "income") return "var(--color-income)";
-                    if (id === "expenses") return "var(--color-expenses)";
-                    return "var(--color-profit)";
-                  }}
-                  axisBottom={{
-                    tickSize: 0,
-                    tickPadding: 12,
-                  }}
-                  axisLeft={{
-                    tickSize: 0,
-                    tickPadding: 8,
-                    tickValues: 5,
-                  }}
-                  axisTop={null}
-                  axisRight={null}
-                  enableGridY={true}
-                  gridYValues={5}
-                  enableLabel={false}
-                  role="application"
-                  ariaLabel="Cash flow forecast chart"
-                  barComponent={({ data, ...rest }) => {
-                    return (
-                      <g 
-                        opacity={data.projected ? 0.7 : 1}
-                        style={{ 
-                          strokeDasharray: data.projected ? "3,3" : "none",
-                          stroke: data.projected ? "#888" : "none" 
-                        }}
-                        {...rest} 
-                      />
-                    );
-                  }}
-                  tooltip={({ id, value, color, data }) => (
-                    <div className="bg-white px-2 py-1 border shadow text-xs rtl">
-                      <div className="font-medium mb-1">{data.date}</div>
-                      <div className="flex items-center justify-between gap-2">
-                        <span>{chartConfig[id as keyof typeof chartConfig].label}:</span>
-                        <span>₪{value}</span>
-                      </div>
-                      {data.note && (
-                        <div className="text-xs text-red-500 mt-1">
-                          <AlertTriangle className="inline h-3 w-3 mr-1" />
-                          {data.note}
-                        </div>
-                      )}
-                    </div>
-                  )}
-                />
-              </ChartContainer>
+                  barGap={0}
+                  barSize={20}
+                >
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                  <XAxis dataKey="date" tickSize={0} tickPadding={12} />
+                  <YAxis tickSize={0} tickPadding={8} />
+                  <Tooltip 
+                    content={({ active, payload, label }) => {
+                      if (active && payload && payload.length) {
+                        const data = payload[0].payload;
+                        return (
+                          <div className="bg-white px-2 py-1 border shadow text-xs rtl">
+                            <div className="font-medium mb-1">{data.date}</div>
+                            {payload.map((entry, index) => (
+                              <div key={`item-${index}`} className="flex items-center justify-between gap-2">
+                                <span>
+                                  {entry.dataKey === 'income' ? 'הכנסות' :
+                                   entry.dataKey === 'expenses' ? 'הוצאות' : 'רווח'}:
+                                </span>
+                                <span>₪{entry.value}</span>
+                              </div>
+                            ))}
+                            {data.note && (
+                              <div className="text-xs text-red-500 mt-1">
+                                <AlertTriangle className="inline h-3 w-3 mr-1" />
+                                {data.note}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      }
+                      return null;
+                    }}
+                  />
+                  <Bar 
+                    dataKey="income" 
+                    fill="rgba(75, 192, 192, 0.7)" 
+                    name="הכנסות"
+                    radius={[4, 4, 0, 0]}
+                    style={{
+                      stroke: (entry) => entry.projected ? '#888' : 'none',
+                      strokeDasharray: (entry) => entry.projected ? '3 3' : 'none',
+                      opacity: (entry) => entry.projected ? 0.7 : 1
+                    }}
+                  />
+                  <Bar 
+                    dataKey="expenses" 
+                    fill="rgba(255, 99, 132, 0.7)" 
+                    name="הוצאות"
+                    radius={[4, 4, 0, 0]}
+                    style={{
+                      stroke: (entry) => entry.projected ? '#888' : 'none',
+                      strokeDasharray: (entry) => entry.projected ? '3 3' : 'none',
+                      opacity: (entry) => entry.projected ? 0.7 : 1
+                    }}
+                  />
+                  <Bar 
+                    dataKey="profit" 
+                    fill="rgba(153, 102, 255, 0.7)" 
+                    name="רווח"
+                    radius={[4, 4, 0, 0]}
+                    style={{
+                      stroke: (entry) => entry.projected ? '#888' : 'none',
+                      strokeDasharray: (entry) => entry.projected ? '3 3' : 'none',
+                      opacity: (entry) => entry.projected ? 0.7 : 1
+                    }}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
             </div>
             <div className="flex justify-between items-center text-xs mt-2">
               <div>נתונים היסטוריים</div>
