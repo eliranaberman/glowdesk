@@ -1,5 +1,5 @@
 
-import { BarChart, Calendar, DollarSign, TrendingUp, Receipt } from 'lucide-react';
+import { BarChart, Calendar, DollarSign, TrendingUp, Receipt, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import CashFlowForecast from '@/components/dashboard/CashFlowForecast';
@@ -110,6 +110,14 @@ const CashFlow = () => {
         <CashFlowForecast />
 
         {/* Additional components would go here */}
+        <div className="flex justify-center mt-4">
+          <Link to="/finances/all-data">
+            <Button variant="outline" className="gap-2">
+              לצפייה בכל הנתונים הפיננסיים
+              <ArrowRight className="h-4 w-4" />
+            </Button>
+          </Link>
+        </div>
       </div>
     </div>
   );

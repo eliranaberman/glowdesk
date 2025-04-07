@@ -8,11 +8,14 @@ import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import PDFExport from "@/components/reports/PDFExport";
 import ReportGenerator from "@/components/reports/ReportGenerator";
+import { useToast } from "@/hooks/use-toast";
+import { jsPDF } from "jspdf";
 
 const Reports = () => {
   const [reportType, setReportType] = useState("finance");
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [period, setPeriod] = useState("monthly");
+  const { toast } = useToast();
 
   const getReportTitle = () => {
     let title = "";
@@ -47,8 +50,33 @@ const Reports = () => {
     return title;
   };
 
+  const handleGenerateReport = () => {
+    toast({
+      title: "דוח נוצר בהצלחה",
+      description: `ה${getReportTitle()} מוכן לצפייה והורדה`,
+    });
+  };
+
+  // נוסיף תמיכה ב-jspdf בעת טעינת הדף
+  const loadJSPDF = () => {
+    const script = document.createElement('script');
+    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+    script.async = true;
+    document.body.appendChild(script);
+    
+    const autoTableScript = document.createElement('script');
+    autoTableScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js';
+    autoTableScript.async = true;
+    document.body.appendChild(autoTableScript);
+  };
+
+  // נטען את jspdf כשהדף נטען
+  useState(() => {
+    loadJSPDF();
+  });
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" dir="rtl">
       <div>
         <h1 className="text-2xl font-bold mb-2">דוחות</h1>
         <p className="text-muted-foreground">
@@ -59,16 +87,19 @@ const Reports = () => {
       <div className="grid gap-6 md:grid-cols-[1fr_300px]">
         <Card className="order-2 md:order-1">
           <CardHeader>
-            <CardTitle>תצוגת דוח: {getReportTitle()}</CardTitle>
-            <CardDescription>
-              {period === "daily" && "דוח יומי"}
-              {period === "monthly" && "דוח חודשי"}
-              {period === "yearly" && "דוח שנתי"}
-            </CardDescription>
+            <div className="flex justify-between items-center">
+              <div>
+                <CardTitle>תצוגת דוח: {getReportTitle()}</CardTitle>
+                <CardDescription>
+                  {period === "daily" && "דוח יומי"}
+                  {period === "monthly" && "דוח חודשי"}
+                  {period === "yearly" && "דוח שנתי"}
+                </CardDescription>
+              </div>
+              <PDFExport reportTitle={getReportTitle()} reportType={reportType} />
+            </div>
           </CardHeader>
           <CardContent>
-            <PDFExport reportTitle={getReportTitle()} reportType={reportType} />
-            
             <div className="border rounded-md p-4">
               <ReportGenerator 
                 reportType={reportType} 
@@ -130,7 +161,7 @@ const Reports = () => {
                 </div>
               </div>
 
-              <Button className="w-full">הפק דוח</Button>
+              <Button className="w-full" onClick={handleGenerateReport}>הפק דוח</Button>
             </CardContent>
           </Card>
 

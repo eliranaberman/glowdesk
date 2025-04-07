@@ -1,6 +1,6 @@
 
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -10,10 +10,19 @@ import { PlusCircle, Send, Edit, Trash, Copy, MessageSquare } from 'lucide-react
 import { useToast } from '@/hooks/use-toast';
 
 const MarketingTemplates = () => {
-  const [activeTab, setActiveTab] = useState('existing');
+  const [searchParams] = useSearchParams();
+  const initialTab = searchParams.get('tab') === 'create' ? 'create' : 'existing';
+  const [activeTab, setActiveTab] = useState(initialTab);
   const [newTemplate, setNewTemplate] = useState({ name: '', content: '' });
   const { toast } = useToast();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    if (tab === 'create') {
+      setActiveTab('create');
+    }
+  }, [searchParams]);
 
   // Sample template data
   const templates = [
@@ -60,6 +69,7 @@ const MarketingTemplates = () => {
     
     setNewTemplate({ name: '', content: '' });
     setActiveTab('existing');
+    navigate('/marketing/templates');
   };
 
   const handleSendTemplate = (templateName: string) => {

@@ -37,13 +37,15 @@ const InactiveClientsAlert = () => {
         <div className="space-y-3">
           {inactiveClients.map((client) => (
             <div key={client.id} className="flex items-center justify-between p-3 border rounded-lg bg-accent/10">
-              <div className="flex items-center">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-r from-softRose/40 to-mutedPeach/40 flex items-center justify-center text-sm font-medium ml-2">
-                  {client.name.charAt(0)}
-                </div>
-                <div>
-                  <p className="font-medium">{client.name}</p>
-                  <p className="text-xs text-muted-foreground">ביקור אחרון: לפני {client.lastVisit}</p>
+              <div>
+                <div className="flex items-center">
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-r from-softRose/40 to-mutedPeach/40 flex items-center justify-center text-sm font-medium ml-2">
+                    {client.name.charAt(0)}
+                  </div>
+                  <div>
+                    <p className="font-medium">{client.name}</p>
+                    <p className="text-xs text-muted-foreground">ביקור אחרון: לפני {client.lastVisit}</p>
+                  </div>
                 </div>
               </div>
               <Button 

@@ -93,6 +93,9 @@ const Dashboard = () => {
         title: "חיפוש בוצע",
         description: `מחפש: "${searchQuery}"`,
       });
+      
+      // בפרויקט אמיתי כאן היינו מפעילים פונקציה שמחפשת במערכת
+      console.log("Searching for:", searchQuery);
     }
   };
 
@@ -109,6 +112,8 @@ const Dashboard = () => {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
+          {/* הוספת כפתור חיפוש נסתר לצורך הפעלת הפורם */}
+          <button type="submit" className="hidden">חפש</button>
         </form>
       </div>
 

@@ -32,10 +32,10 @@ const LoyaltyPage = () => {
 
   // Mock loyalty data
   const activePromotions = [
-    { id: "1", name: "קבלי 15% הנחה על טיפול הבא", used: 12, total: 30, expires: "12/05/2025", status: "active" },
-    { id: "2", name: "מניקור חינם עם פדיקור מלא", used: 8, total: 20, expires: "30/04/2025", status: "active" },
-    { id: "3", name: "הזמיני 5 טיפולים וקבלי 1 חינם", used: 0, total: 50, expires: "31/05/2025", status: "active" },
-    { id: "4", name: "20% הנחה לחברים חדשים", used: 15, total: 15, expires: "15/03/2025", status: "expired" },
+    { id: "1", name: "קבלי 15% הנחה על טיפול הבא", used: 12, total: 30, expires: "12/05/2025", status: "active", icon: "🌟" },
+    { id: "2", name: "מניקור חינם עם פדיקור מלא", used: 8, total: 20, expires: "30/04/2025", status: "active", icon: "🎁" },
+    { id: "3", name: "הזמיני 5 טיפולים וקבלי 1 חינם", used: 0, total: 50, expires: "31/05/2025", status: "active", icon: "✨" },
+    { id: "4", name: "20% הנחה לחברים חדשים", used: 15, total: 15, expires: "15/03/2025", status: "expired", icon: "💫" },
   ];
 
   const topClients = [
@@ -150,6 +150,7 @@ const LoyaltyPage = () => {
                     <TableHead>תאריך תפוגה</TableHead>
                     <TableHead>מימושים</TableHead>
                     <TableHead>סטטוס</TableHead>
+                    <TableHead>סמל</TableHead>
                     <TableHead className="text-left">פעולות</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -164,6 +165,7 @@ const LoyaltyPage = () => {
                           {promo.status === 'active' ? 'פעיל' : 'פג תוקף'}
                         </Badge>
                       </TableCell>
+                      <TableCell className="text-2xl">{promo.icon}</TableCell>
                       <TableCell className="text-left">
                         <Button variant="ghost" size="icon">
                           <ArrowRight className="h-4 w-4" />

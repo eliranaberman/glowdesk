@@ -1,471 +1,359 @@
 
 import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Calendar, Download, Filter, Printer } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { LineChart, BarChart, Line, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import { Calendar, Download, FileSpreadsheet, Printer, Search, SlidersHorizontal, ChevronLeft, ChevronRight, Filter, TrendingUp, TrendingDown, BarChart4 } from 'lucide-react';
-import { Bar, BarChart, CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { Input } from '@/components/ui/input';
+import PDFExport from '@/components/reports/PDFExport';
 
 const AllFinancialData = () => {
-  const [dateRange, setDateRange] = useState('month');
-  const [activeTab, setActiveTab] = useState('transactions');
+  const [activeTab, setActiveTab] = useState('overview');
+  const [timeRange, setTimeRange] = useState('month');
+  const { toast } = useToast();
 
-  // Mock financial data
-  const transactions = [
-    { id: '1', date: '05/04/2025', type: 'income', category: 'טיפולים', customer: 'שרה כהן', description: 'מניקור ג׳ל', amount: 120 },
-    { id: '2', date: '05/04/2025', type: 'income', category: 'טיפולים', customer: 'דנה לוי', description: 'פדיקור', amount: 140 },
-    { id: '3', date: '04/04/2025', type: 'income', category: 'מוצרים', customer: 'יעל גלעדי', description: 'לק ומחזק', amount: 85 },
-    { id: '4', date: '04/04/2025', type: 'expense', category: 'מלאי', customer: '-', description: 'רכישת חומרים', amount: -350 },
-    { id: '5', date: '03/04/2025', type: 'income', category: 'טיפולים', customer: 'אורית כהן', description: 'בניית ציפורניים', amount: 200 },
-    { id: '6', date: '03/04/2025', type: 'expense', category: 'ציוד', customer: '-', description: 'מנורת LED חדשה', amount: -250 },
-    { id: '7', date: '02/04/2025', type: 'income', category: 'טיפולים', customer: 'נועה שמעון', description: 'מניקור רגיל', amount: 90 },
-    { id: '8', date: '01/04/2025', type: 'expense', category: 'שכירות', customer: '-', description: 'שכירות חודשית', amount: -1500 },
-  ];
+  const handleExport = () => {
+    toast({
+      title: "דוח הופק בהצלחה",
+      description: "הקובץ ירד למחשב שלך",
+    });
+  };
 
-  const monthlyData = [
-    { name: 'ינואר', income: 10500, expenses: 6200, profit: 4300 },
-    { name: 'פברואר', income: 11200, expenses: 6800, profit: 4400 },
-    { name: 'מרץ', income: 12800, expenses: 7100, profit: 5700 },
-    { name: 'אפריל', income: 13400, expenses: 7300, profit: 6100 },
-    { name: 'מאי', income: 14200, expenses: 7400, profit: 6800 },
-    { name: 'יוני', income: 15120, expenses: 7600, profit: 7520 },
-  ];
-
-  const categoryData = [
-    { name: 'טיפולים', value: 68 },
-    { name: 'מוצרים', value: 15 },
-    { name: 'מנויים', value: 12 },
-    { name: 'אחר', value: 5 },
+  // מידע פיננסי לדוגמה
+  const monthlyFinancialData = [
+    { month: 'ינו׳', income: 10500, expenses: 6200, profit: 4300 },
+    { month: 'פבר׳', income: 11200, expenses: 6800, profit: 4400 },
+    { month: 'מרץ', income: 12800, expenses: 7100, profit: 5700 },
+    { month: 'אפר׳', income: 13400, expenses: 7300, profit: 6100 },
+    { month: 'מאי', income: 14200, expenses: 7400, profit: 6800 },
+    { month: 'יוני', income: 15120, expenses: 7600, profit: 7520 },
+    { month: 'יולי', income: 14800, expenses: 7500, profit: 7300 },
+    { month: 'אוג׳', income: 15300, expenses: 7800, profit: 7500 },
+    { month: 'ספט׳', income: 16100, expenses: 8100, profit: 8000 },
+    { month: 'אוק׳', income: 16800, expenses: 8400, profit: 8400 },
+    { month: 'נוב׳', income: 17200, expenses: 8600, profit: 8600 },
+    { month: 'דצמ׳', income: 18500, expenses: 9200, profit: 9300 },
   ];
 
   const incomeByCategory = [
-    { name: 'מניקור', value: 5200 },
-    { name: 'פדיקור', value: 3800 },
-    { name: 'בניית ציפורניים', value: 4200 },
-    { name: 'הסרת לק', value: 1900 },
-    { name: 'מוצרים', value: 1600 },
+    { name: 'מניקור', value: 35000 },
+    { name: 'פדיקור', value: 28000 },
+    { name: 'אקריליק', value: 22000 },
+    { name: 'לק ג\'ל', value: 19000 },
+    { name: 'עיצוב ציפורניים', value: 12000 },
+    { name: 'אחר', value: 7000 },
   ];
 
   const expensesByCategory = [
-    { name: 'שכירות', value: 3000 },
-    { name: 'חומרים', value: 2100 },
-    { name: 'משכורות', value: 1500 },
-    { name: 'שיווק', value: 800 },
-    { name: 'אחר', value: 400 },
+    { name: 'שכירות', value: 42000 },
+    { name: 'חומרים', value: 26000 },
+    { name: 'שכר עובדים', value: 32000 },
+    { name: 'שיווק', value: 11000 },
+    { name: 'חשבונות', value: 8000 },
+    { name: 'אחר', value: 5000 },
   ];
 
-  const totals = {
-    income: transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0),
-    expenses: Math.abs(transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0)),
-    get profit() { return this.income - this.expenses; }
-  };
+  // מידע תזרים מזומנים
+  const cashFlowData = [
+    { date: '01/06', income: 520, expenses: 210, balance: 310 },
+    { date: '02/06', income: 480, expenses: 180, balance: 300 },
+    { date: '03/06', income: 590, expenses: 250, balance: 340 },
+    { date: '04/06', income: 620, expenses: 320, balance: 300 },
+    { date: '05/06', income: 710, expenses: 180, balance: 530 },
+    { date: '06/06', income: 450, expenses: 120, balance: 330 },
+    { date: '07/06', income: 0, expenses: 290, balance: -290 },
+    { date: '08/06', income: 580, expenses: 210, balance: 370 },
+    { date: '09/06', income: 640, expenses: 320, balance: 320 },
+    { date: '10/06', income: 720, expenses: 280, balance: 440 },
+    { date: '11/06', income: 550, expenses: 220, balance: 330 },
+    { date: '12/06', income: 680, expenses: 310, balance: 370 },
+    { date: '13/06', income: 690, expenses: 250, balance: 440 },
+    { date: '14/06', income: 0, expenses: 350, balance: -350 },
+  ];
 
-  const handleExportData = () => {
-    alert('הנתונים מיוצאים לקובץ אקסל');
-  };
-
-  const handlePrintReport = () => {
-    window.print();
-  };
+  // דוחות אחרונים
+  const recentReports = [
+    { id: 1, name: 'דוח הכנסות חודשי', date: '01/06/2025', format: 'PDF' },
+    { id: 2, name: 'ניתוח הוצאות רבעוני', date: '01/05/2025', format: 'Excel' },
+    { id: 3, name: 'דוח מע״מ', date: '15/04/2025', format: 'PDF' },
+    { id: 4, name: 'דוח רווחיות לפי לקוחות', date: '01/04/2025', format: 'PDF' },
+  ];
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-semibold mb-1">נתונים פיננסיים</h1>
-          <p className="text-muted-foreground">סקירה מקיפה של כל הנתונים הפיננסיים של העסק</p>
+          <p className="text-muted-foreground">צפייה וניתוח של כל הנתונים הפיננסיים בעסק</p>
         </div>
         
         <div className="flex gap-2">
-          {/* Date range buttons in RTL order - Day on right, Month on left */}
-          <div className="filter-button-group flex">
-            <Button 
-              variant={dateRange === 'day' ? 'default' : 'ghost'} 
-              size="sm" 
-              onClick={() => setDateRange('day')}
-              className={dateRange === 'day' ? "filter-button-active" : ""}
-            >
-              יום
-            </Button>
-            <Button 
-              variant={dateRange === 'week' ? 'default' : 'ghost'} 
-              size="sm" 
-              onClick={() => setDateRange('week')}
-              className={dateRange === 'week' ? "filter-button-active" : ""}
-            >
-              שבוע
-            </Button>
-            <Button 
-              variant={dateRange === 'month' ? 'default' : 'ghost'} 
-              size="sm" 
-              onClick={() => setDateRange('month')}
-              className={dateRange === 'month' ? "filter-button-active" : ""}
-            >
-              חודש
-            </Button>
-            <Button 
-              variant={dateRange === 'quarter' ? 'default' : 'ghost'} 
-              size="sm" 
-              onClick={() => setDateRange('quarter')}
-              className={dateRange === 'quarter' ? "filter-button-active" : ""}
-            >
-              רבעון
-            </Button>
-            <Button 
-              variant={dateRange === 'year' ? 'default' : 'ghost'} 
-              size="sm" 
-              onClick={() => setDateRange('year')}
-              className={dateRange === 'year' ? "filter-button-active" : ""}
-            >
-              שנה
-            </Button>
-          </div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base">הכנסות</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-col">
-              <div className="text-2xl font-bold">₪{totals.income.toLocaleString()}</div>
-              <div className="flex items-center text-xs text-muted-foreground mt-1">
-                <TrendingUp className="h-3.5 w-3.5 mr-1 text-green-500" />
-                <span className="text-green-500">+8%</span>
-                <span className="mr-1">מהתקופה הקודמת</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base">הוצאות</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-col">
-              <div className="text-2xl font-bold">₪{totals.expenses.toLocaleString()}</div>
-              <div className="flex items-center text-xs text-muted-foreground mt-1">
-                <TrendingDown className="h-3.5 w-3.5 mr-1 text-red-500" />
-                <span className="text-red-500">+3%</span>
-                <span className="mr-1">מהתקופה הקודמת</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base">רווח נקי</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-col">
-              <div className="text-2xl font-bold text-green-600">₪{totals.profit.toLocaleString()}</div>
-              <div className="flex items-center text-xs text-muted-foreground mt-1">
-                <TrendingUp className="h-3.5 w-3.5 mr-1 text-green-500" />
-                <span className="text-green-500">+12%</span>
-                <span className="mr-1">מהתקופה הקודמת</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="flex flex-wrap gap-2 mt-4 justify-between items-center">
-        <div className="flex flex-wrap gap-2">
-          <Button variant="outline" size="sm" className="flex items-center gap-1">
-            <Calendar className="h-4 w-4 ml-1" />
-            <span>01/04/2025</span>
-            <span>-</span>
-            <span>07/04/2025</span>
-          </Button>
+          <Select defaultValue={timeRange} onValueChange={setTimeRange}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="בחרי טווח זמן" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="day">היום</SelectItem>
+              <SelectItem value="week">שבוע אחרון</SelectItem>
+              <SelectItem value="month">חודש אחרון</SelectItem>
+              <SelectItem value="quarter">רבעון אחרון</SelectItem>
+              <SelectItem value="year">שנה אחרונה</SelectItem>
+            </SelectContent>
+          </Select>
           
-          <Button variant="outline" size="sm" className="flex items-center gap-1">
-            <Filter className="h-4 w-4 ml-1" />
-            מסננים
-          </Button>
-        </div>
-        
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={handlePrintReport} className="flex items-center gap-1">
-            <Printer className="h-4 w-4 ml-1" />
-            הדפסה
-          </Button>
-          <Button variant="outline" size="sm" onClick={handleExportData} className="flex items-center gap-1">
-            <FileSpreadsheet className="h-4 w-4 ml-1" />
-            ייצוא לאקסל
-          </Button>
-          <Button variant="outline" size="sm" onClick={handleExportData} className="flex items-center gap-1">
-            <Download className="h-4 w-4 ml-1" />
-            PDF
+          <Button variant="outline" size="icon">
+            <Filter className="h-4 w-4" />
           </Button>
         </div>
       </div>
 
-      <Tabs defaultValue={activeTab} value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid grid-cols-3 mb-6">
-          <TabsTrigger value="transactions">פעולות אחרונות</TabsTrigger>
-          <TabsTrigger value="trends">מגמות פיננסיות</TabsTrigger>
-          <TabsTrigger value="breakdown">פילוח הכנסות והוצאות</TabsTrigger>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4" dir="rtl">
+        <TabsList className="grid grid-cols-3 md:grid-cols-5 lg:w-[600px] mx-auto">
+          <TabsTrigger value="overview">סקירה כללית</TabsTrigger>
+          <TabsTrigger value="income">הכנסות</TabsTrigger>
+          <TabsTrigger value="expenses">הוצאות</TabsTrigger>
+          <TabsTrigger value="cashflow">תזרים מזומנים</TabsTrigger>
+          <TabsTrigger value="reports">דוחות</TabsTrigger>
         </TabsList>
-        
-        <TabsContent value="transactions" className="space-y-4">
-          <div className="flex justify-between items-center mb-4">
-            <div className="flex gap-2">
-              <Select defaultValue="all">
-                <SelectTrigger className="w-[160px]">
-                  <SelectValue placeholder="סוג פעולה" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">כל הפעולות</SelectItem>
-                  <SelectItem value="income">הכנסות</SelectItem>
-                  <SelectItem value="expense">הוצאות</SelectItem>
-                </SelectContent>
-              </Select>
-              
-              <Select defaultValue="all">
-                <SelectTrigger className="w-[160px]">
-                  <SelectValue placeholder="קטגוריה" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">כל הקטגוריות</SelectItem>
-                  <SelectItem value="treatments">טיפולים</SelectItem>
-                  <SelectItem value="products">מוצרים</SelectItem>
-                  <SelectItem value="rent">שכירות</SelectItem>
-                  <SelectItem value="supplies">ציוד וחומרים</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="relative">
-              <Search className="absolute right-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input 
-                type="search" 
-                placeholder="חיפוש..." 
-                className="w-[200px] pr-9"
-              />
-            </div>
+
+        <TabsContent value="overview" className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium">סה״כ הכנסות שנתי</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">₪175,420</div>
+                <p className="text-xs text-muted-foreground mt-1 flex items-center">
+                  <span className="inline-block mr-1 text-emerald-500">+8.2%</span> משנה שעברה
+                </p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium">סה״כ הוצאות שנתי</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">₪92,400</div>
+                <p className="text-xs text-muted-foreground mt-1 flex items-center">
+                  <span className="inline-block mr-1 text-rose-500">+3.5%</span> משנה שעברה
+                </p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium">רווח שנתי</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">₪83,020</div>
+                <p className="text-xs text-muted-foreground mt-1 flex items-center">
+                  <span className="inline-block mr-1 text-emerald-500">+12.4%</span> משנה שעברה
+                </p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium">תחזית שנתית</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">₪190,000</div>
+                <p className="text-xs text-muted-foreground mt-1 flex items-center">
+                  <span className="inline-block mr-1 text-emerald-500">+9.5%</span> מהשנה הנוכחית
+                </p>
+              </CardContent>
+            </Card>
           </div>
-          
-          <Card>
-            <CardContent className="p-0">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>תאריך</TableHead>
-                    <TableHead>סוג</TableHead>
-                    <TableHead>קטגוריה</TableHead>
-                    <TableHead>לקוח/ספק</TableHead>
-                    <TableHead>תיאור</TableHead>
-                    <TableHead className="text-left">סכום</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {transactions.map((transaction) => (
-                    <TableRow key={transaction.id}>
-                      <TableCell>{transaction.date}</TableCell>
-                      <TableCell>
-                        <Badge variant={transaction.type === 'income' ? 'default' : 'outline'}>
-                          {transaction.type === 'income' ? 'הכנסה' : 'הוצאה'}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>{transaction.category}</TableCell>
-                      <TableCell>{transaction.customer}</TableCell>
-                      <TableCell>{transaction.description}</TableCell>
-                      <TableCell className={`text-left font-medium ${transaction.type === 'income' ? 'text-green-600' : 'text-red-600'}`}>
-                        ₪{Math.abs(transaction.amount).toLocaleString()}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-          
-          <div className="flex items-center justify-center gap-2">
-            <Button variant="outline" size="sm">
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-            <Button variant="outline" size="sm">1</Button>
-            <Button variant="outline" size="sm">2</Button>
-            <Button variant="outline" size="sm">3</Button>
-            <Button variant="outline" size="sm">
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-          </div>
-        </TabsContent>
-        
-        <TabsContent value="trends" className="space-y-6">
+
           <Card>
             <CardHeader>
-              <CardTitle>מגמת הכנסות והוצאות חודשית</CardTitle>
-              <CardDescription>השוואה של הכנסות, הוצאות ורווח לאורך זמן</CardDescription>
+              <CardTitle>סקירה שנתית</CardTitle>
+              <CardDescription>הכנסות, הוצאות ורווח בחלוקה חודשית</CardDescription>
             </CardHeader>
-            <CardContent className="p-4">
-              <div className="h-[350px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
-                    data={monthlyData}
-                    margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <Tooltip 
-                      formatter={(value: number) => `₪${value.toLocaleString()}`}
-                      labelFormatter={(label) => `חודש: ${label}`} 
-                    />
-                    <Legend />
-                    <Bar dataKey="income" name="הכנסות" fill="#8884d8" radius={[3, 3, 0, 0]} />
-                    <Bar dataKey="expenses" name="הוצאות" fill="#82ca9d" radius={[3, 3, 0, 0]} />
-                    <Bar dataKey="profit" name="רווח" fill="#ffc658" radius={[3, 3, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
+            <CardContent className="h-80">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={monthlyFinancialData}
+                  margin={{ top: 20, right: 30, left: 20, bottom: 40 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                  <XAxis dataKey="month" />
+                  <YAxis />
+                  <Tooltip 
+                    formatter={(value: any) => `₪${Number(value).toLocaleString()}`}
+                  />
+                  <Legend />
+                  <Bar dataKey="income" name="הכנסות" fill="#606c38" />
+                  <Bar dataKey="expenses" name="הוצאות" fill="#e07a5f" />
+                  <Bar dataKey="profit" name="רווח" fill="#ddbea9" />
+                </BarChart>
+              </ResponsiveContainer>
             </CardContent>
           </Card>
-          
-          <Card>
-            <CardHeader>
-              <CardTitle>מדדי צמיחה</CardTitle>
-              <CardDescription>מדדים עיקריים להערכת ביצועי העסק לאורך זמן</CardDescription>
-            </CardHeader>
-            <CardContent className="p-4">
-              <div className="h-[300px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart
-                    data={monthlyData}
-                    margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <Tooltip 
-                      formatter={(value: number) => `₪${value.toLocaleString()}`}
-                      labelFormatter={(label) => `חודש: ${label}`}  
-                    />
-                    <Legend />
-                    <Line 
-                      type="monotone" 
-                      dataKey="profit" 
-                      name="רווח נקי" 
-                      stroke="#8884d8" 
-                      activeDot={{ r: 8 }} 
-                      strokeWidth={2} 
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="breakdown" className="space-y-6">
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Card>
               <CardHeader>
-                <CardTitle>פילוח הכנסות</CardTitle>
-                <CardDescription>החלוקה של ההכנסות לפי קטגוריות</CardDescription>
+                <CardTitle>הכנסות לפי קטגוריה</CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {incomeByCategory.map((category, index) => (
-                    <div key={index}>
-                      <div className="flex justify-between items-center mb-1">
-                        <span>{category.name}</span>
-                        <span>₪{category.value.toLocaleString()}</span>
-                      </div>
-                      <div className="h-2 bg-muted rounded-full">
-                        <div 
-                          className="h-2 rounded-full bg-primary" 
-                          style={{ width: `${(category.value / incomeByCategory.reduce((sum, c) => sum + c.value, 0)) * 100}%` }} 
-                        />
-                      </div>
-                    </div>
-                  ))}
-                </div>
+              <CardContent className="h-80">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={incomeByCategory}
+                    layout="vertical"
+                    margin={{ top: 20, right: 30, left: 40, bottom: 20 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" horizontal={false} />
+                    <XAxis type="number" />
+                    <YAxis type="category" dataKey="name" />
+                    <Tooltip formatter={(value: any) => `₪${Number(value).toLocaleString()}`} />
+                    <Bar dataKey="value" name="הכנסות" fill="#EFCFD4" />
+                  </BarChart>
+                </ResponsiveContainer>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader>
-                <CardTitle>פילוח הוצאות</CardTitle>
-                <CardDescription>החלוקה של ההוצאות לפי קטגוריות</CardDescription>
+                <CardTitle>הוצאות לפי קטגוריה</CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {expensesByCategory.map((category, index) => (
-                    <div key={index}>
-                      <div className="flex justify-between items-center mb-1">
-                        <span>{category.name}</span>
-                        <span>₪{category.value.toLocaleString()}</span>
-                      </div>
-                      <div className="h-2 bg-muted rounded-full">
-                        <div 
-                          className="h-2 rounded-full bg-destructive/70" 
-                          style={{ width: `${(category.value / expensesByCategory.reduce((sum, c) => sum + c.value, 0)) * 100}%` }} 
-                        />
-                      </div>
-                    </div>
-                  ))}
-                </div>
+              <CardContent className="h-80">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={expensesByCategory}
+                    layout="vertical"
+                    margin={{ top: 20, right: 30, left: 40, bottom: 20 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" horizontal={false} />
+                    <XAxis type="number" />
+                    <YAxis type="category" dataKey="name" />
+                    <Tooltip formatter={(value: any) => `₪${Number(value).toLocaleString()}`} />
+                    <Bar dataKey="value" name="הוצאות" fill="#FAD8C3" />
+                  </BarChart>
+                </ResponsiveContainer>
               </CardContent>
             </Card>
           </div>
-          
+        </TabsContent>
+
+        <TabsContent value="income" className="space-y-6">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle>פירוט הכנסות</CardTitle>
+                <CardDescription>ניתוח הכנסות מפורט לפי תקופה וסוגים</CardDescription>
+              </div>
+              <div>
+                <PDFExport reportTitle="דוח הכנסות" reportType="income" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              {/* תוכן דוח הכנסות יופיע כאן */}
+              <div className="text-center py-10 text-muted-foreground">
+                פירוט הכנסות מפורט יוצג כאן
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="expenses" className="space-y-6">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle>פירוט הוצאות</CardTitle>
+                <CardDescription>ניתוח הוצאות מפורט לפי תקופה וסוגים</CardDescription>
+              </div>
+              <div>
+                <PDFExport reportTitle="דוח הוצאות" reportType="expenses" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              {/* תוכן דוח הוצאות יופיע כאן */}
+              <div className="text-center py-10 text-muted-foreground">
+                פירוט הוצאות מפורט יוצג כאן
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="cashflow" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>דוח רווחיות מפורט</CardTitle>
-              <CardDescription>ניתוח מעמיק של הרווחיות בחתכים שונים</CardDescription>
+              <CardTitle>תזרים מזומנים</CardTitle>
+              <CardDescription>תנועות כספים ומאזן יומי</CardDescription>
             </CardHeader>
-            <CardContent className="p-4">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>קטגוריה</TableHead>
-                    <TableHead className="text-right">הכנסות</TableHead>
-                    <TableHead className="text-right">הוצאות</TableHead>
-                    <TableHead className="text-right">רווח</TableHead>
-                    <TableHead className="text-right">אחוז רווחיות</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  <TableRow>
-                    <TableCell className="font-medium">טיפולים</TableCell>
-                    <TableCell className="text-right">₪13,500</TableCell>
-                    <TableCell className="text-right">₪5,200</TableCell>
-                    <TableCell className="text-right">₪8,300</TableCell>
-                    <TableCell className="text-right">61%</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="font-medium">מוצרים</TableCell>
-                    <TableCell className="text-right">₪2,400</TableCell>
-                    <TableCell className="text-right">₪1,600</TableCell>
-                    <TableCell className="text-right">₪800</TableCell>
-                    <TableCell className="text-right">33%</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="font-medium">שירותים אחרים</TableCell>
-                    <TableCell className="text-right">₪1,200</TableCell>
-                    <TableCell className="text-right">₪500</TableCell>
-                    <TableCell className="text-right">₪700</TableCell>
-                    <TableCell className="text-right">58%</TableCell>
-                  </TableRow>
-                  <TableRow className="font-semibold">
-                    <TableCell>סה"כ</TableCell>
-                    <TableCell className="text-right">₪17,100</TableCell>
-                    <TableCell className="text-right">₪7,300</TableCell>
-                    <TableCell className="text-right">₪9,800</TableCell>
-                    <TableCell className="text-right">57%</TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
+            <CardContent className="h-80">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart
+                  data={cashFlowData}
+                  margin={{ top: 20, right: 30, left: 20, bottom: 40 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                  <XAxis dataKey="date" />
+                  <YAxis />
+                  <Tooltip 
+                    formatter={(value: any) => `₪${Number(value).toLocaleString()}`}
+                  />
+                  <Legend />
+                  <Line type="monotone" dataKey="income" name="הכנסות" stroke="#606c38" strokeWidth={2} />
+                  <Line type="monotone" dataKey="expenses" name="הוצאות" stroke="#e07a5f" strokeWidth={2} />
+                  <Line type="monotone" dataKey="balance" name="מאזן" stroke="#ddbea9" strokeWidth={2} />
+                </LineChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="reports" className="space-y-6">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle>דוחות פיננסיים</CardTitle>
+                <CardDescription>דוחות פיננסיים שנוצרו לאחרונה</CardDescription>
+              </div>
+              <Button onClick={handleExport}>
+                <Download className="ml-2 h-4 w-4" />
+                הפק דוח חדש
+              </Button>
+            </CardHeader>
+            <CardContent>
+              <div className="border rounded-lg overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-right">
+                    <thead>
+                      <tr className="bg-muted/50">
+                        <th className="p-3">שם הדוח</th>
+                        <th className="p-3">תאריך</th>
+                        <th className="p-3">פורמט</th>
+                        <th className="p-3">פעולות</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {recentReports.map((report) => (
+                        <tr key={report.id} className="border-t hover:bg-muted/30">
+                          <td className="p-3">{report.name}</td>
+                          <td className="p-3">{report.date}</td>
+                          <td className="p-3">{report.format}</td>
+                          <td className="p-3">
+                            <div className="flex gap-2">
+                              <Button variant="ghost" size="sm">
+                                <Download className="h-4 w-4 ml-1" />
+                                הורדה
+                              </Button>
+                              <Button variant="ghost" size="sm">
+                                <Printer className="h-4 w-4 ml-1" />
+                                הדפסה
+                              </Button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>

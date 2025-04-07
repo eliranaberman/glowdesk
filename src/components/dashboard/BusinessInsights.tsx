@@ -7,10 +7,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
 import { Link, useNavigate } from 'react-router-dom';
+import { useToast } from '@/hooks/use-toast';
 
 const BusinessInsights = () => {
   const [activeTab, setActiveTab] = useState('today');
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   // Mock insights data
   const insights = {
@@ -89,7 +91,12 @@ const BusinessInsights = () => {
   };
 
   const handleMoreDetails = () => {
+    // ניווט לדף התובנות העסקיות
     navigate('/finances/insights');
+    toast({
+      title: "עובר לדף התובנות העסקיות",
+      description: "מציג ניתוח מפורט של תובנות וניתוחי מגמות",
+    });
   };
 
   return (
