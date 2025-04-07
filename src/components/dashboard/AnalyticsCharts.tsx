@@ -1,212 +1,140 @@
 
-import { useState } from 'react';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import {
-  BarChart,
-  Bar,
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
-  Legend,
-} from 'recharts';
-import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { BarChart, LineChart, PieChart } from "lucide-react";
+import { ResponsiveContainer, BarChart as RechartsBarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, LineChart as RechartsLineChart, Line } from "recharts";
 
-interface AnalyticsChartsProps {
-  monthlyData: {
-    name: string;
-    income: number;
-    expenses: number;
-  }[];
-  retentionData: {
-    name: string;
-    value: number;
-  }[];
-  servicesData: {
-    name: string;
-    value: number;
-    color: string;
-  }[];
-  bookingsData: {
-    name: string;
-    value: number;
-  }[];
-}
+const mockAnalyticsData = [
+  { name: "ינואר", הכנסות: 4000, הוצאות: 2400 },
+  { name: "פברואר", הכנסות: 3000, הוצאות: 2200 },
+  { name: "מרץ", הכנסות: 5000, הוצאות: 2600 },
+  { name: "אפריל", הכנסות: 4500, הוצאות: 2800 },
+  { name: "מאי", הכנסות: 6000, הוצאות: 3000 },
+  { name: "יוני", הכנסות: 5500, הוצאות: 2900 }
+];
 
-const AnalyticsCharts = ({
-  monthlyData,
-  retentionData,
-  servicesData,
-  bookingsData,
-}: AnalyticsChartsProps) => {
-  const [activeChart, setActiveChart] = useState('income');
-  
-  // Statistics for Order Trends (מגמת הזמנות)
-  const totalBookings = bookingsData.reduce((sum, item) => sum + item.value, 0);
-  const maxBooking = Math.max(...bookingsData.map(item => item.value));
-  const avgBookings = totalBookings / bookingsData.length;
-
+const AnalyticsCharts = () => {
   return (
-    <Card className="shadow-soft">
+    <Card>
       <CardHeader>
-        <CardTitle className="text-lg">נתונים אנליטיים</CardTitle>
-        <CardDescription>ניתוח מגמות והכנסות של העסק</CardDescription>
-        
-        <div className="mt-2">
-          <Tabs defaultValue="income" value={activeChart} onValueChange={setActiveChart}>
-            <TabsList className="grid grid-cols-4">
-              <TabsTrigger value="income" className="text-right">הכנסה חודשית</TabsTrigger>
-              <TabsTrigger value="services" className="text-right">שירותים פופולריים</TabsTrigger>
-              <TabsTrigger value="retention" className="text-right">שימור לקוחות</TabsTrigger>
-              <TabsTrigger value="bookings" className="text-right">מגמת הזמנות</TabsTrigger>
-            </TabsList>
-          </Tabs>
-        </div>
+        <CardTitle className="flex justify-between items-center">
+          <span>נתונים כספיים</span>
+        </CardTitle>
       </CardHeader>
       <CardContent>
-        {/* Income vs Expenses Chart */}
-        <TabsContent value="income" className="h-80">
-          <div className="mb-2 flex justify-between items-center">
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2">
-                <div className="h-3 w-3 rounded-full bg-oliveGreen/90"></div>
-                <span className="text-sm">הכנסות</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="h-3 w-3 rounded-full bg-softRose/90"></div>
-                <span className="text-sm">הוצאות</span>
-              </div>
-            </div>
-            
-            <div className="space-x-1 rtl:space-x-reverse">
-              <Button variant="filter" size="sm" className="text-xs">חודשי</Button>
-              <Button variant="filter" size="sm" className="text-xs">רבעוני</Button>
-              <Button variant="filter" size="sm" className="text-xs">שנתי</Button>
-            </div>
-          </div>
-          <div className="h-[280px]" dir="ltr">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart
-                data={monthlyData}
-                margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip
-                  formatter={(value: number) => [`₪${value}`, undefined]}
-                  labelFormatter={(label) => `חודש: ${label}`}
-                />
-                <Bar dataKey="income" fill="#606c38" name="הכנסות" radius={[3, 3, 0, 0]} />
-                <Bar dataKey="expenses" fill="#e07a5f" name="הוצאות" radius={[3, 3, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </TabsContent>
-        
-        {/* Popular Services Chart */}
-        <TabsContent value="services" className="h-80">
-          <div className="h-[320px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={servicesData}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  outerRadius={120}
-                  fill="#8884d8"
-                  dataKey="value"
-                  nameKey="name"
-                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                >
-                  {servicesData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Legend layout="horizontal" verticalAlign="bottom" align="center" />
-                <Tooltip formatter={(value: number) => [`${value}%`, undefined]} />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-        </TabsContent>
-        
-        {/* Client Retention Chart */}
-        <TabsContent value="retention" className="h-80">
-          <div className="h-[320px]" dir="ltr">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart
-                data={retentionData}
-                margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="name" />
-                <YAxis domain={[50, 100]} />
-                <Tooltip 
-                  formatter={(value: number) => [`${value}%`, 'שימור']}
-                  labelFormatter={(label) => `חודש: ${label}`}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="value"
-                  stroke="#8884d8"
-                  strokeWidth={2}
-                  dot={{ r: 4 }}
-                  activeDot={{ r: 6 }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </TabsContent>
-        
-        {/* Bookings Trend Chart */}
-        <TabsContent value="bookings" className="h-80">
-          <div className="mb-6 grid grid-cols-3 gap-4">
-            <div className="p-4 border rounded-lg bg-card text-right">
-              <p className="text-sm text-muted-foreground">סך הכל בחודש</p>
-              <p className="text-xl font-semibold mt-1">{totalBookings}</p>
-            </div>
-            <div className="p-4 border rounded-lg bg-card text-right">
-              <p className="text-sm text-muted-foreground">מקסימום</p>
-              <p className="text-xl font-semibold mt-1">{maxBooking}</p>
-            </div>
-            <div className="p-4 border rounded-lg bg-card text-right">
-              <p className="text-sm text-muted-foreground">ממוצע יומי</p>
-              <p className="text-xl font-semibold mt-1">{avgBookings.toFixed(1)}</p>
-            </div>
-          </div>
+        <Tabs defaultValue="bar" className="w-full">
+          <TabsList className="mb-4 grid grid-cols-3">
+            <TabsTrigger value="bar" className="flex items-center gap-1.5">
+              <BarChart className="h-4 w-4" />
+              גרף עמודות
+            </TabsTrigger>
+            <TabsTrigger value="line" className="flex items-center gap-1.5">
+              <LineChart className="h-4 w-4" />
+              גרף קווי
+            </TabsTrigger>
+            <TabsTrigger value="comparison" className="flex items-center gap-1.5">
+              <PieChart className="h-4 w-4" />
+              השוואה
+            </TabsTrigger>
+          </TabsList>
           
-          <div className="h-[220px]" dir="ltr">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart
-                data={bookingsData}
-                margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip
-                  formatter={(value: number) => [`${value} הזמנות`, undefined]}
-                  labelFormatter={(label) => `יום: ${label}`}
-                />
-                <Bar dataKey="value" fill="#EFCFD4" radius={[3, 3, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </TabsContent>
+          <TabsContent value="bar">
+            <div className="h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <RechartsBarChart
+                  data={mockAnalyticsData}
+                  margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <Tooltip 
+                    formatter={(value: number) => `₪${value}`} 
+                    labelFormatter={(label) => `חודש: ${label}`}
+                  />
+                  <Legend 
+                    formatter={(value) => <span style={{marginRight: 10}}>{value}</span>}
+                    align="right" 
+                  />
+                  <Bar dataKey="הכנסות" fill="#8884d8" />
+                  <Bar dataKey="הוצאות" fill="#82ca9d" />
+                </RechartsBarChart>
+              </ResponsiveContainer>
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="line">
+            <div className="h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <RechartsLineChart
+                  data={mockAnalyticsData}
+                  margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <Tooltip 
+                    formatter={(value: number) => `₪${value}`} 
+                    labelFormatter={(label) => `חודש: ${label}`}
+                  />
+                  <Legend 
+                    formatter={(value) => <span style={{marginRight: 10}}>{value}</span>}
+                    align="right" 
+                  />
+                  <Line type="monotone" dataKey="הכנסות" stroke="#8884d8" activeDot={{ r: 8 }} />
+                  <Line type="monotone" dataKey="הוצאות" stroke="#82ca9d" />
+                </RechartsLineChart>
+              </ResponsiveContainer>
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="comparison">
+            <div className="flex gap-4 flex-col md:flex-row">
+              <div className="flex-1 border rounded-lg p-4">
+                <h3 className="font-medium mb-3 text-center">יחס הכנסות/הוצאות</h3>
+                <div className="space-y-4">
+                  {mockAnalyticsData.map((month) => (
+                    <div key={month.name} className="space-y-1">
+                      <div className="flex justify-between">
+                        <span>{month.name}</span>
+                        <span>יחס: {(month.הכנסות / month.הוצאות).toFixed(1)}</span>
+                      </div>
+                      <div className="bg-muted h-2 rounded-full">
+                        <div 
+                          className="bg-primary h-2 rounded-full" 
+                          style={{ width: `${Math.min(100, (month.הכנסות / month.הוצאות) * 50)}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="flex-1 border rounded-lg p-4">
+                <h3 className="font-medium mb-3 text-center">סיכום שנתי</h3>
+                <div className="space-y-3">
+                  <div className="flex justify-between">
+                    <span>סה״כ הכנסות:</span>
+                    <span className="font-bold">
+                      ₪{mockAnalyticsData.reduce((sum, month) => sum + month.הכנסות, 0).toLocaleString()}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>סה״כ הוצאות:</span>
+                    <span className="font-bold">
+                      ₪{mockAnalyticsData.reduce((sum, month) => sum + month.הוצאות, 0).toLocaleString()}
+                    </span>
+                  </div>
+                  <div className="flex justify-between pt-2 border-t">
+                    <span>רווח נקי:</span>
+                    <span className="font-bold text-green-600">
+                      ₪{(mockAnalyticsData.reduce((sum, month) => sum + month.הכנסות - month.הוצאות, 0)).toLocaleString()}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </TabsContent>
+        </Tabs>
       </CardContent>
     </Card>
   );

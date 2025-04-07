@@ -122,58 +122,140 @@ const InboxContent = () => {
                 פייסבוק
               </TabsTrigger>
             </TabsList>
-          </Tabs>
-          
-          <div className="h-[calc(100vh-320px)] overflow-y-auto">
-            {filteredMessages.length ? (
-              filteredMessages.map((msg) => (
-                <div 
-                  key={msg.id}
-                  onClick={() => setSelectedMessage(msg)}
-                  className={`flex gap-3 p-3 border-b cursor-pointer hover:bg-muted/30 ${selectedMessage?.id === msg.id ? 'bg-muted/50' : ''} ${!msg.read ? 'bg-muted/20' : ''}`}
-                >
-                  <div className="w-10 h-10 rounded-full overflow-hidden">
-                    <img src={msg.avatar} alt={msg.sender} className="w-full h-full object-cover" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between mb-1">
-                      <div className="flex items-center">
-                        <span className="font-medium">{msg.sender}</span>
-                        {!msg.read && (
-                          <span className="ml-2 w-2 h-2 bg-primary rounded-full"></span>
-                        )}
+            
+            <TabsContent value="all">
+              <div className="h-[calc(100vh-320px)] overflow-y-auto">
+                {filteredMessages.length ? (
+                  filteredMessages.map((msg) => (
+                    <div 
+                      key={msg.id}
+                      onClick={() => setSelectedMessage(msg)}
+                      className={`flex gap-3 p-3 border-b cursor-pointer hover:bg-muted/30 transition-colors ${selectedMessage?.id === msg.id ? 'bg-muted/50' : ''} ${!msg.read ? 'bg-muted/20' : ''}`}
+                    >
+                      <div className="w-10 h-10 rounded-full overflow-hidden">
+                        <img src={msg.avatar} alt={msg.sender} className="w-full h-full object-cover" />
                       </div>
-                      <span className="text-xs text-muted-foreground">{msg.time}</span>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between mb-1">
+                          <div className="flex items-center">
+                            <span className="font-medium">{msg.sender}</span>
+                            {!msg.read && (
+                              <span className="ml-2 w-2 h-2 bg-primary rounded-full"></span>
+                            )}
+                          </div>
+                          <span className="text-xs text-muted-foreground">{msg.time}</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <p className="text-sm text-muted-foreground truncate max-w-[70%]">{msg.message}</p>
+                          <span className="text-xs bg-muted/50 px-1.5 py-0.5 rounded-full">
+                            {msg.platform}
+                          </span>
+                        </div>
+                      </div>
                     </div>
-                    <div className="flex justify-between items-center">
-                      <p className="text-sm text-muted-foreground truncate max-w-[70%]">{msg.message}</p>
-                      <span className="text-xs bg-muted/50 px-1.5 py-0.5 rounded-full">
-                        {msg.platform}
-                      </span>
-                    </div>
+                  ))
+                ) : (
+                  <div className="flex flex-col items-center justify-center h-full p-4">
+                    <MessageSquare size={40} className="text-muted-foreground mb-2" />
+                    <p className="text-muted-foreground">אין הודעות להצגה</p>
                   </div>
-                </div>
-              ))
-            ) : (
-              <div className="flex flex-col items-center justify-center h-full p-4">
-                <MessageSquare size={40} className="text-muted-foreground mb-2" />
-                <p className="text-muted-foreground">אין הודעות להצגה</p>
+                )}
               </div>
-            )}
-          </div>
-          
-          {filteredMessages.length > 0 && (
-            <div className="p-2 border-t">
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="w-full"
-                onClick={handleMarkAllAsRead}
-              >
-                סמן הכל כנקרא
-              </Button>
-            </div>
-          )}
+              
+              {filteredMessages.length > 0 && (
+                <div className="p-2 border-t">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="w-full"
+                    onClick={handleMarkAllAsRead}
+                  >
+                    סמן הכל כנקרא
+                  </Button>
+                </div>
+              )}
+            </TabsContent>
+            
+            <TabsContent value="instagram">
+              <div className="h-[calc(100vh-320px)] overflow-y-auto">
+                {filteredMessages.length ? (
+                  filteredMessages.map((msg) => (
+                    <div 
+                      key={msg.id}
+                      onClick={() => setSelectedMessage(msg)}
+                      className={`flex gap-3 p-3 border-b cursor-pointer hover:bg-muted/30 transition-colors ${selectedMessage?.id === msg.id ? 'bg-muted/50' : ''} ${!msg.read ? 'bg-muted/20' : ''}`}
+                    >
+                      <div className="w-10 h-10 rounded-full overflow-hidden">
+                        <img src={msg.avatar} alt={msg.sender} className="w-full h-full object-cover" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between mb-1">
+                          <div className="flex items-center">
+                            <span className="font-medium">{msg.sender}</span>
+                            {!msg.read && (
+                              <span className="ml-2 w-2 h-2 bg-primary rounded-full"></span>
+                            )}
+                          </div>
+                          <span className="text-xs text-muted-foreground">{msg.time}</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <p className="text-sm text-muted-foreground truncate max-w-[70%]">{msg.message}</p>
+                          <span className="text-xs bg-muted/50 px-1.5 py-0.5 rounded-full">
+                            {msg.platform}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="flex flex-col items-center justify-center h-full p-4">
+                    <MessageSquare size={40} className="text-muted-foreground mb-2" />
+                    <p className="text-muted-foreground">אין הודעות להצגה</p>
+                  </div>
+                )}
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="facebook">
+              <div className="h-[calc(100vh-320px)] overflow-y-auto">
+                {filteredMessages.length ? (
+                  filteredMessages.map((msg) => (
+                    <div 
+                      key={msg.id}
+                      onClick={() => setSelectedMessage(msg)}
+                      className={`flex gap-3 p-3 border-b cursor-pointer hover:bg-muted/30 transition-colors ${selectedMessage?.id === msg.id ? 'bg-muted/50' : ''} ${!msg.read ? 'bg-muted/20' : ''}`}
+                    >
+                      <div className="w-10 h-10 rounded-full overflow-hidden">
+                        <img src={msg.avatar} alt={msg.sender} className="w-full h-full object-cover" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between mb-1">
+                          <div className="flex items-center">
+                            <span className="font-medium">{msg.sender}</span>
+                            {!msg.read && (
+                              <span className="ml-2 w-2 h-2 bg-primary rounded-full"></span>
+                            )}
+                          </div>
+                          <span className="text-xs text-muted-foreground">{msg.time}</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <p className="text-sm text-muted-foreground truncate max-w-[70%]">{msg.message}</p>
+                          <span className="text-xs bg-muted/50 px-1.5 py-0.5 rounded-full">
+                            {msg.platform}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="flex flex-col items-center justify-center h-full p-4">
+                    <MessageSquare size={40} className="text-muted-foreground mb-2" />
+                    <p className="text-muted-foreground">אין הודעות להצגה</p>
+                  </div>
+                )}
+              </div>
+            </TabsContent>
+          </Tabs>
         </CardContent>
       </Card>
       
@@ -257,15 +339,15 @@ const InboxContent = () => {
           </div>
         )}
       </Card>
-      
+
       <ConnectionModal
         open={isModalOpen}
         onOpenChange={setIsModalOpen}
         connectedAccounts={{
-          instagram: true,
-          facebook: true,
-          tiktok: false,
+          instagram: false,
+          facebook: false,
           twitter: false,
+          tiktok: false
         }}
         onConnect={() => {}}
       />
