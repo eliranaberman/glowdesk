@@ -4,6 +4,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart, LineChart, PieChart } from "lucide-react";
 import { ResponsiveContainer, BarChart as RechartsBarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, LineChart as RechartsLineChart, Line } from "recharts";
 
+// Define types for the props
+interface AnalyticsChartsProps {
+  monthlyData?: Array<{ name: string; income: number; expenses: number; }>;
+  retentionData?: Array<{ name: string; value: number; }>;
+  servicesData?: Array<{ name: string; value: number; color: string; }>;
+  bookingsData?: Array<{ name: string; value: number; }>;
+}
+
+// Default data if no props are provided
 const mockAnalyticsData = [
   { name: "ינואר", הכנסות: 4000, הוצאות: 2400 },
   { name: "פברואר", הכנסות: 3000, הוצאות: 2200 },
@@ -13,7 +22,19 @@ const mockAnalyticsData = [
   { name: "יוני", הכנסות: 5500, הוצאות: 2900 }
 ];
 
-const AnalyticsCharts = () => {
+const AnalyticsCharts: React.FC<AnalyticsChartsProps> = ({
+  monthlyData,
+  retentionData,
+  servicesData,
+  bookingsData
+}) => {
+  // Transform monthly data if provided to match the format expected by the charts
+  const chartData = monthlyData ? monthlyData.map(item => ({
+    name: item.name,
+    הכנסות: item.income,
+    הוצאות: item.expenses
+  })) : mockAnalyticsData;
+
   return (
     <Card>
       <CardHeader>
@@ -42,7 +63,7 @@ const AnalyticsCharts = () => {
             <div className="h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
                 <RechartsBarChart
-                  data={mockAnalyticsData}
+                  data={chartData}
                   margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
                 >
                   <CartesianGrid strokeDasharray="3 3" vertical={false} />
@@ -67,7 +88,7 @@ const AnalyticsCharts = () => {
             <div className="h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
                 <RechartsLineChart
-                  data={mockAnalyticsData}
+                  data={chartData}
                   margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
                 >
                   <CartesianGrid strokeDasharray="3 3" vertical={false} />
@@ -93,7 +114,7 @@ const AnalyticsCharts = () => {
               <div className="flex-1 border rounded-lg p-4">
                 <h3 className="font-medium mb-3 text-center">יחס הכנסות/הוצאות</h3>
                 <div className="space-y-4">
-                  {mockAnalyticsData.map((month) => (
+                  {chartData.map((month) => (
                     <div key={month.name} className="space-y-1">
                       <div className="flex justify-between">
                         <span>{month.name}</span>
@@ -115,19 +136,19 @@ const AnalyticsCharts = () => {
                   <div className="flex justify-between">
                     <span>סה״כ הכנסות:</span>
                     <span className="font-bold">
-                      ₪{mockAnalyticsData.reduce((sum, month) => sum + month.הכנסות, 0).toLocaleString()}
+                      ₪{chartData.reduce((sum, month) => sum + month.הכנסות, 0).toLocaleString()}
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span>סה״כ הוצאות:</span>
                     <span className="font-bold">
-                      ₪{mockAnalyticsData.reduce((sum, month) => sum + month.הוצאות, 0).toLocaleString()}
+                      ₪{chartData.reduce((sum, month) => sum + month.הוצאות, 0).toLocaleString()}
                     </span>
                   </div>
                   <div className="flex justify-between pt-2 border-t">
                     <span>רווח נקי:</span>
                     <span className="font-bold text-green-600">
-                      ₪{(mockAnalyticsData.reduce((sum, month) => sum + month.הכנסות - month.הוצאות, 0)).toLocaleString()}
+                      ₪{(chartData.reduce((sum, month) => sum + month.הכנסות - month.הוצאות, 0)).toLocaleString()}
                     </span>
                   </div>
                 </div>
