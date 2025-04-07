@@ -159,7 +159,7 @@ const MarketingTemplates = () => {
                     תוכן ההודעה
                   </label>
                   <p className="text-xs text-muted-foreground mb-2">
-                    השתמשי במשתנים דינמיים כמו {{'{שם}'}} או {{'{טיפול}'}} שיוחלפו אוטומטית בערכים אמיתיים
+                    השתמשי במשתנים דינמיים כמו {"{שם}"} או {"{טיפול}"} שיוחלפו אוטומטית בערכים אמיתיים
                   </p>
                   <Textarea 
                     id="template-content" 
