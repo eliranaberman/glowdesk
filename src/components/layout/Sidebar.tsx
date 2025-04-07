@@ -4,6 +4,7 @@ import { NavLink, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   LayoutDashboard,
   Users,
@@ -21,6 +22,7 @@ import {
   TrendingUp,
 } from 'lucide-react';
 
+// Updated order according to requirements
 const navItems = [
   { 
     name: 'דשבורד', 
@@ -28,39 +30,19 @@ const navItems = [
     icon: <LayoutDashboard className="w-5 h-5" /> 
   },
   { 
-    name: 'לקוחות', 
-    path: '/customers', 
-    icon: <Users className="w-5 h-5" /> 
-  },
-  { 
     name: 'יומן', 
     path: '/scheduling', 
     icon: <Calendar className="w-5 h-5" /> 
   },
   { 
+    name: 'לקוחות', 
+    path: '/customers', 
+    icon: <Users className="w-5 h-5" /> 
+  },
+  { 
     name: 'מדיה חברתית', 
     path: '/social-media', 
     icon: <Share2 className="w-5 h-5" /> 
-  },
-  { 
-    name: 'משימות', 
-    path: '/tasks', 
-    icon: <ClipboardList className="w-5 h-5" /> 
-  },
-  { 
-    name: 'הוצאות',
-    path: '/expenses', 
-    icon: <Receipt className="w-5 h-5" />
-  },
-  { 
-    name: 'מלאי', 
-    path: '/inventory', 
-    icon: <Package className="w-5 h-5" /> 
-  },
-  { 
-    name: 'דוחות', 
-    path: '/reports', 
-    icon: <BarChart className="w-5 h-5" /> 
   },
 ];
 
@@ -76,6 +58,30 @@ const financialItems = [
     path: '/finances/insights',
     icon: <TrendingUp className="w-5 h-5" />
   }
+];
+
+// Additional operational items
+const operationalItems = [
+  { 
+    name: 'הוצאות',
+    path: '/expenses', 
+    icon: <Receipt className="w-5 h-5" />
+  },
+  { 
+    name: 'משימות', 
+    path: '/tasks', 
+    icon: <ClipboardList className="w-5 h-5" /> 
+  },
+  { 
+    name: 'מלאי', 
+    path: '/inventory', 
+    icon: <Package className="w-5 h-5" /> 
+  },
+  { 
+    name: 'דוחות', 
+    path: '/reports', 
+    icon: <BarChart className="w-5 h-5" /> 
+  },
 ];
 
 interface SidebarProps {
@@ -125,57 +131,89 @@ const Sidebar = ({ onLinkClick }: SidebarProps) => {
 
       <Separator className="bg-border/30" />
 
-      <nav className="flex-1 p-2">
-        <ul className="space-y-1">
-          {navItems.map((item) => (
-            <li key={item.name}>
-              <NavLink
-                to={item.path}
-                className={({ isActive }) => 
-                  cn(
-                    "nav-link",
-                    isActive ? "bg-accent/50 font-medium text-primary shadow-soft" : "hover:bg-accent/30",
-                    collapsed ? "justify-center" : "justify-start text-right"
-                  )
-                }
-                onClick={handleLinkClick}
-              >
-                {item.icon}
-                {!collapsed && <span className="text-right">{item.name}</span>}
-              </NavLink>
-            </li>
-          ))}
-        </ul>
+      {/* Improved scroll behavior with ScrollArea component */}
+      <ScrollArea className="flex-1 px-2">
+        <div className="py-2">
+          <ul className="space-y-1">
+            {navItems.map((item) => (
+              <li key={item.name}>
+                <NavLink
+                  to={item.path}
+                  className={({ isActive }) => 
+                    cn(
+                      "nav-link",
+                      isActive ? "bg-accent/50 font-medium text-primary shadow-soft" : "hover:bg-accent/30",
+                      collapsed ? "justify-center" : "justify-start text-right"
+                    )
+                  }
+                  onClick={handleLinkClick}
+                >
+                  {item.icon}
+                  {!collapsed && <span className="text-right">{item.name}</span>}
+                </NavLink>
+              </li>
+            ))}
+          </ul>
 
-        {/* Financial management category */}
-        {!collapsed && (
-          <div className="mt-4 mb-2">
-            <h3 className="text-xs font-semibold text-muted-foreground px-2 py-1 text-right">
-              ניהול פיננסי ותובנות
-            </h3>
-          </div>
-        )}
-        <ul className="space-y-1">
-          {financialItems.map((item) => (
-            <li key={item.name}>
-              <NavLink
-                to={item.path}
-                className={({ isActive }) => 
-                  cn(
-                    "nav-link",
-                    isActive ? "bg-accent/50 font-medium text-primary shadow-soft" : "hover:bg-accent/30",
-                    collapsed ? "justify-center" : "justify-start text-right"
-                  )
-                }
-                onClick={handleLinkClick}
-              >
-                {item.icon}
-                {!collapsed && <span className="text-right">{item.name}</span>}
-              </NavLink>
-            </li>
-          ))}
-        </ul>
-      </nav>
+          {/* Financial management category */}
+          {!collapsed && (
+            <div className="mt-4 mb-2">
+              <h3 className="text-xs font-semibold text-muted-foreground px-2 py-1 text-right">
+                ניהול פיננסי
+              </h3>
+            </div>
+          )}
+          <ul className="space-y-1">
+            {financialItems.map((item) => (
+              <li key={item.name}>
+                <NavLink
+                  to={item.path}
+                  className={({ isActive }) => 
+                    cn(
+                      "nav-link",
+                      isActive ? "bg-accent/50 font-medium text-primary shadow-soft" : "hover:bg-accent/30",
+                      collapsed ? "justify-center" : "justify-start text-right"
+                    )
+                  }
+                  onClick={handleLinkClick}
+                >
+                  {item.icon}
+                  {!collapsed && <span className="text-right">{item.name}</span>}
+                </NavLink>
+              </li>
+            ))}
+          </ul>
+
+          {/* Operational items */}
+          {!collapsed && operationalItems.length > 0 && (
+            <div className="mt-4 mb-2">
+              <h3 className="text-xs font-semibold text-muted-foreground px-2 py-1 text-right">
+                תפעול
+              </h3>
+            </div>
+          )}
+          <ul className="space-y-1">
+            {operationalItems.map((item) => (
+              <li key={item.name}>
+                <NavLink
+                  to={item.path}
+                  className={({ isActive }) => 
+                    cn(
+                      "nav-link",
+                      isActive ? "bg-accent/50 font-medium text-primary shadow-soft" : "hover:bg-accent/30",
+                      collapsed ? "justify-center" : "justify-start text-right"
+                    )
+                  }
+                  onClick={handleLinkClick}
+                >
+                  {item.icon}
+                  {!collapsed && <span className="text-right">{item.name}</span>}
+                </NavLink>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </ScrollArea>
 
       <Separator className="bg-border/30" />
 

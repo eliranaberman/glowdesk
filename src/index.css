@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -162,12 +163,12 @@
     text-align: right;
   }
   
-  /* Make shadcn Table component work better with RTL */
-  .rtl .text-alignment-left {
+  /* Make shadcn Table component work better with RTL - fixed circular dependency */
+  .rtl .alignment-left {
     text-align: right !important;
   }
   
-  .rtl .text-alignment-right {
+  .rtl .alignment-right {
     text-align: left !important;
   }
   
@@ -232,4 +233,10 @@
 .rtl .date-range-buttons {
   display: flex;
   flex-direction: row-reverse;
+}
+
+/* RTL adjustments for ScrollArea in sidebar */
+.rtl .scrollbar {
+  left: 0;
+  right: unset;
 }
