@@ -108,8 +108,8 @@ const CashFlowForecast = () => {
                   barSize={20}
                 >
                   <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                  <XAxis dataKey="date" tickSize={0} tickPadding={12} />
-                  <YAxis tickSize={0} tickPadding={8} />
+                  <XAxis dataKey="date" tickSize={0} />
+                  <YAxis tickSize={0} />
                   <Tooltip 
                     content={({ active, payload, label }) => {
                       if (active && payload && payload.length) {
@@ -143,33 +143,27 @@ const CashFlowForecast = () => {
                     fill="rgba(75, 192, 192, 0.7)" 
                     name="הכנסות"
                     radius={[4, 4, 0, 0]}
-                    style={{
-                      stroke: (entry) => entry.projected ? '#888' : 'none',
-                      strokeDasharray: (entry) => entry.projected ? '3 3' : 'none',
-                      opacity: (entry) => entry.projected ? 0.7 : 1
-                    }}
+                    className={entry => entry.projected ? 'opacity-70' : ''}
+                    stroke={entry => entry.projected ? "#888" : "none"}
+                    strokeDasharray={entry => entry.projected ? "3 3" : "none"}
                   />
                   <Bar 
                     dataKey="expenses" 
                     fill="rgba(255, 99, 132, 0.7)" 
                     name="הוצאות"
                     radius={[4, 4, 0, 0]}
-                    style={{
-                      stroke: (entry) => entry.projected ? '#888' : 'none',
-                      strokeDasharray: (entry) => entry.projected ? '3 3' : 'none',
-                      opacity: (entry) => entry.projected ? 0.7 : 1
-                    }}
+                    className={entry => entry.projected ? 'opacity-70' : ''}
+                    stroke={entry => entry.projected ? "#888" : "none"}
+                    strokeDasharray={entry => entry.projected ? "3 3" : "none"}
                   />
                   <Bar 
                     dataKey="profit" 
                     fill="rgba(153, 102, 255, 0.7)" 
                     name="רווח"
                     radius={[4, 4, 0, 0]}
-                    style={{
-                      stroke: (entry) => entry.projected ? '#888' : 'none',
-                      strokeDasharray: (entry) => entry.projected ? '3 3' : 'none',
-                      opacity: (entry) => entry.projected ? 0.7 : 1
-                    }}
+                    className={entry => entry.projected ? 'opacity-70' : ''}
+                    stroke={entry => entry.projected ? "#888" : "none"}
+                    strokeDasharray={entry => entry.projected ? "3 3" : "none"}
                   />
                 </BarChart>
               </ResponsiveContainer>
