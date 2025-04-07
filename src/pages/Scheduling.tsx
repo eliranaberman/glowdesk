@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import GanttChart from '../components/scheduling/GanttChart';
 import CalendarSync from '../components/scheduling/CalendarSync';
 import { Button } from '@/components/ui/button';
@@ -8,6 +8,7 @@ import { CalendarPlus } from 'lucide-react';
 
 const Scheduling = () => {
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [filteredAppointments, setFilteredAppointments] = useState<any[]>([]);
 
   // Mock appointments data with dates
   const today = new Date();
@@ -16,7 +17,7 @@ const Scheduling = () => {
   const dayAfterTomorrow = new Date();
   dayAfterTomorrow.setDate(today.getDate() + 2);
 
-  const appointments = [
+  const allAppointments = [
     {
       id: '1',
       customer: 'שרה כהן',
@@ -77,7 +78,47 @@ const Scheduling = () => {
       date: dayAfterTomorrow,
       price: '₪160',
     },
+    {
+      id: '7',
+      customer: 'יעל מור',
+      service: 'מניקור ג\'ל',
+      startTime: '09:00',
+      duration: 60,
+      color: 'rgba(198, 113, 211, 0.3)',
+      date: new Date(today.getFullYear(), today.getMonth(), today.getDate() + 3),
+      price: '₪120',
+    },
+    {
+      id: '8',
+      customer: 'נופר דהן',
+      service: 'פדיקור',
+      startTime: '15:30',
+      duration: 75,
+      color: 'rgba(156, 61, 167, 0.3)',
+      date: new Date(today.getFullYear(), today.getMonth(), today.getDate() + 4),
+      price: '₪140',
+    },
   ];
+
+  // Filter appointments whenever the selected date changes
+  useEffect(() => {
+    const filterAppointmentsByDate = () => {
+      // Filter appointments for the selected date
+      const filtered = allAppointments.filter(appointment => {
+        if (!appointment.date) return false;
+        
+        return (
+          appointment.date.getFullYear() === selectedDate.getFullYear() &&
+          appointment.date.getMonth() === selectedDate.getMonth() &&
+          appointment.date.getDate() === selectedDate.getDate()
+        );
+      });
+      
+      setFilteredAppointments(filtered);
+    };
+
+    filterAppointmentsByDate();
+  }, [selectedDate]);
 
   return (
     <div dir="rtl">
@@ -98,7 +139,7 @@ const Scheduling = () => {
         <CalendarSync />
         
         <GanttChart
-          appointments={appointments}
+          appointments={filteredAppointments}
           date={selectedDate}
           onDateChange={setSelectedDate}
         />

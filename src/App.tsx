@@ -23,6 +23,7 @@ import Notifications from "./pages/Notifications";
 import NewPayment from "./pages/payments/NewPayment";
 import Expenses from "./pages/Expenses";
 import SocialMedia from "./pages/SocialMedia";
+import LoyaltyPage from "./pages/LoyaltyPage";
 
 const queryClient = new QueryClient();
 
@@ -117,6 +118,11 @@ const App = () => (
             <Route path="/payments/new" element={
               <Layout>
                 <NewPayment />
+              </Layout>
+            } />
+            <Route path="/loyalty" element={
+              <Layout>
+                <LoyaltyPage />
               </Layout>
             } />
             <Route path="*" element={<NotFound />} />

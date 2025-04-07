@@ -1,4 +1,5 @@
 
+import { useState } from 'react';
 import { CalendarClock, Users, DollarSign, TrendingUp } from 'lucide-react';
 import StatCard from '../components/dashboard/StatCard';
 import DailySummary from '../components/dashboard/DailySummary';
@@ -8,6 +9,11 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from '@/hooks/use-mobile';
+import LoyaltyProgram from '@/components/dashboard/LoyaltyProgram';
+import MarketingMessages from '@/components/dashboard/MarketingMessages';
+import BusinessInsights from '@/components/dashboard/BusinessInsights';
+import CashFlowForecast from '@/components/dashboard/CashFlowForecast';
+import InactiveClientsAlert from '@/components/dashboard/InactiveClientsAlert';
 
 const Dashboard = () => {
   const { toast } = useToast();
@@ -92,6 +98,12 @@ const Dashboard = () => {
         ))}
       </div>
       
+      {/* Business Insights and Cash Flow Forecast */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
+        <BusinessInsights />
+        <CashFlowForecast />
+      </div>
+      
       {/* Main data panels with improved spacing and consistency */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
         <DailySummary 
@@ -102,6 +114,15 @@ const Dashboard = () => {
         />
         <RecentAppointments appointments={appointments} />
       </div>
+
+      {/* Marketing and Loyalty */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
+        <MarketingMessages />
+        <LoyaltyProgram />
+      </div>
+      
+      {/* Inactive Clients Alert */}
+      <InactiveClientsAlert />
       
       {/* Analytics Charts Section - Below the daily summary and recent appointments */}
       <div className="mb-6 md:mb-8">

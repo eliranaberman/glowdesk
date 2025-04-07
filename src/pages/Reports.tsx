@@ -1,9 +1,16 @@
 
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Download, FileBarChart, FileText } from "lucide-react";
+import { Download, FileBarChart, FileText, Calendar, Users, DollarSign } from "lucide-react";
+import { toast } from "sonner";
+import ReportGenerator from "../components/reports/ReportGenerator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const Reports = () => {
+  const [selectedReport, setSelectedReport] = useState<string | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
+
   // Mock report data
   const recentReports = [
     {
@@ -26,6 +33,45 @@ const Reports = () => {
     },
   ];
 
+  const reportTypes = [
+    {
+      id: "revenue",
+      name: "דו״ח הכנסות",
+      icon: <DollarSign className="h-8 w-8 text-primary" />,
+      description: "סיכום של כל ההכנסות שלך לפי יום, שבוע, או חודש",
+    },
+    {
+      id: "services",
+      name: "דו״ח שירותים מובילים",
+      icon: <FileText className="h-8 w-8 text-primary" />,
+      description: "סקירה של השירותים הפופולריים ביותר והרווחיים ביותר",
+    },
+    {
+      id: "clients",
+      name: "דו״ח לקוחות",
+      icon: <Users className="h-8 w-8 text-primary" />,
+      description: "ניתוח בסיס הלקוחות שלך, כולל לקוחות חדשים וחוזרים",
+    },
+    {
+      id: "schedule",
+      name: "דו״ח לוח זמנים",
+      icon: <Calendar className="h-8 w-8 text-primary" />,
+      description: "סיכום הפגישות שלך וניתוח של זמני השיא",
+    },
+  ];
+
+  const handleDownload = (reportId: string) => {
+    setSelectedReport(reportId);
+    setIsGenerating(true);
+    
+    // Simulate report generation
+    setTimeout(() => {
+      setIsGenerating(false);
+      setSelectedReport(null);
+      toast.success("הדו״ח הורד בהצלחה");
+    }, 1500);
+  };
+
   return (
     <div dir="rtl">
       <h1 className="text-2xl font-bold mb-4">דוחות</h1>
@@ -33,58 +79,50 @@ const Reports = () => {
         צפייה וניתוח ביצועי העסק שלך עם דוחות מפורטים.
       </p>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base">דו״ח הכנסות</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between">
-              <div>
-                <FileBarChart className="h-8 w-8 text-primary" />
-              </div>
-              <Button size="sm">
-                <Download className="h-4 w-4 mr-2" />
-                הורדה
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base">דו״ח שירותים מובילים</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between">
-              <div>
-                <FileText className="h-8 w-8 text-primary" />
-              </div>
-              <Button size="sm">
-                <Download className="h-4 w-4 mr-2" />
-                הורדה
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base">דו״ח לקוחות</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between">
-              <div>
-                <FileBarChart className="h-8 w-8 text-primary" />
-              </div>
-              <Button size="sm">
-                <Download className="h-4 w-4 mr-2" />
-                הורדה
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      <Tabs defaultValue="standard" className="mb-6">
+        <TabsList className="mb-4">
+          <TabsTrigger value="standard">דוחות סטנדרטיים</TabsTrigger>
+          <TabsTrigger value="custom">דוחות מותאמים אישית</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="standard">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            {reportTypes.map((report) => (
+              <Card key={report.id}>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-base">{report.name}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-col gap-4">
+                    <div className="flex items-center">
+                      <div>{report.icon}</div>
+                      <p className="text-sm text-muted-foreground mr-2">{report.description}</p>
+                    </div>
+                    <Button size="sm" 
+                      onClick={() => handleDownload(report.id)}
+                      disabled={isGenerating && selectedReport === report.id}
+                      className="w-full"
+                    >
+                      {isGenerating && selectedReport === report.id ? (
+                        <span className="flex items-center">
+                          <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-b-transparent"></div>
+                          מכין דו״ח...
+                        </span>
+                      ) : (
+                        <><Download className="h-4 w-4 mr-2" /> הורדה</>
+                      )}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="custom">
+          <ReportGenerator />
+        </TabsContent>
+      </Tabs>
 
       <Card>
         <CardHeader>
@@ -106,7 +144,7 @@ const Reports = () => {
                     </p>
                   </div>
                 </div>
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" onClick={() => handleDownload(report.id)}>
                   <Download className="h-4 w-4 ml-1" /> הורד
                 </Button>
               </div>

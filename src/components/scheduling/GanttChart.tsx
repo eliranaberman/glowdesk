@@ -1,5 +1,5 @@
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { Calendar as CalendarIcon, ChevronLeft, ChevronRight } from 'lucide-react';
@@ -68,10 +68,15 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
   // Filter appointments for the current view
   const filteredAppointments = useMemo(() => {
     if (view === 'day') {
-      return appointments;
+      // For day view, filter appointments for the selected date
+      return appointments.filter(appointment => {
+        if (appointment.date) {
+          return isSameDay(appointment.date, date);
+        }
+        return true; // If no date specified, show on the current date
+      });
     } else {
-      // For week and month views, we need to filter by date
-      // Assuming appointments have a date property or we're showing today's appointments across all days
+      // For week and month views, filter by date range
       return appointments.filter(appointment => {
         // If appointment has a date, check if it's in the current view
         if (appointment.date) {
@@ -87,8 +92,8 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
             });
           }
         }
-        // If no date specified, show on the current date only
-        return true;
+        // If no date specified, only show on the selected date
+        return isSameDay(new Date(), date);
       });
     }
   }, [appointments, view, date]);
@@ -212,9 +217,9 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
           {view === 'day' ? (
             <div className="gantt-container relative overflow-x-auto">
               <div className="gantt-timeline grid grid-cols-1 border-b">
-                <div className="hours-header flex border-b">
+                <div className="hours-header flex border-b bg-muted/30">
                   {HOURS.map((hour) => (
-                    <div key={hour} className="hour-cell flex-1 text-center py-2 text-xs font-medium">
+                    <div key={hour} className="hour-cell flex-1 text-center py-2 text-sm font-medium border-r last:border-r-0">
                       {formatHour(hour)}
                     </div>
                   ))}
@@ -227,11 +232,24 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
                     {HOURS.map((hour) => (
                       <div 
                         key={hour} 
-                        className="absolute border-l h-full"
-                        style={{left: `${(hour - 8) * (100 / (HOURS.length - 1))}%`}}
+                        className="absolute border-r h-full bg-muted/10"
+                        style={{left: `${(hour - 8) * (100 / HOURS.length)}%`, width: `${100 / HOURS.length}%`}}
                       ></div>
                     ))}
                   </div>
+
+                  {/* Hour markers (vertical lines) */}
+                  {Array.from({ length: 16 }, (_, i) => i + 8).map((hour) => (
+                    <div 
+                      key={`hour-${hour}`}
+                      className="absolute border-t border-muted w-full"
+                      style={{ top: `${(hour - 8) * CELL_HEIGHT}px` }}
+                    >
+                      <span className="absolute -top-3 right-1 text-xs font-medium text-muted-foreground">
+                        {formatHour(hour)}
+                      </span>
+                    </div>
+                  ))}
 
                   {/* Appointments */}
                   {filteredAppointments.map((appointment, index) => {
@@ -243,7 +261,7 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
                     return (
                       <div
                         key={appointment.id}
-                        className="absolute rounded-md p-2 transition-all hover:ring-2 hover:ring-primary cursor-pointer"
+                        className="absolute rounded-md p-3 transition-all hover:ring-2 hover:ring-primary cursor-pointer shadow-sm"
                         style={{
                           ...style,
                           backgroundColor: appointment.color || 'var(--nail-200)',
@@ -274,11 +292,11 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
                   </h3>
                   <div className="space-y-2">
                     {filteredAppointments
-                      .filter(app => app.date ? isSameDay(app.date, dayDate) : isSameDay(date, dayDate))
+                      .filter(app => app.date ? isSameDay(app.date, dayDate) : false)
                       .map(appointment => (
                         <div
                           key={appointment.id}
-                          className="rounded-md p-2 transition-all hover:ring-2 hover:ring-primary cursor-pointer"
+                          className="rounded-md p-2 transition-all hover:ring-2 hover:ring-primary cursor-pointer shadow-sm"
                           style={{
                             backgroundColor: appointment.color || 'var(--nail-200)',
                           }}
