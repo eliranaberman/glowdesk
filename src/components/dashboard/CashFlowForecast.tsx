@@ -56,6 +56,10 @@ const CashFlowForecast = () => {
     },
   };
 
+  // Separate data for historical and projected values
+  const historicalData = forecastData.filter(item => !item.projected);
+  const projectedData = forecastData.filter(item => item.projected);
+
   return (
     <Card>
       <CardHeader className="pb-3">
@@ -138,39 +142,38 @@ const CashFlowForecast = () => {
                       return null;
                     }}
                   />
+                  {/* Historical Data Bars */}
                   <Bar 
                     dataKey="income" 
                     fill="rgba(75, 192, 192, 0.7)" 
                     name="הכנסות"
                     radius={[4, 4, 0, 0]}
-                    className={entry => entry.projected ? 'opacity-70' : ''}
-                    stroke={entry => entry.projected ? "#888" : "none"}
-                    strokeDasharray={entry => entry.projected ? "3 3" : "none"}
                   />
                   <Bar 
                     dataKey="expenses" 
                     fill="rgba(255, 99, 132, 0.7)" 
                     name="הוצאות"
                     radius={[4, 4, 0, 0]}
-                    className={entry => entry.projected ? 'opacity-70' : ''}
-                    stroke={entry => entry.projected ? "#888" : "none"}
-                    strokeDasharray={entry => entry.projected ? "3 3" : "none"}
                   />
                   <Bar 
                     dataKey="profit" 
                     fill="rgba(153, 102, 255, 0.7)" 
                     name="רווח"
                     radius={[4, 4, 0, 0]}
-                    className={entry => entry.projected ? 'opacity-70' : ''}
-                    stroke={entry => entry.projected ? "#888" : "none"}
-                    strokeDasharray={entry => entry.projected ? "3 3" : "none"}
                   />
                 </BarChart>
               </ResponsiveContainer>
             </div>
+            
             <div className="flex justify-between items-center text-xs mt-2">
-              <div>נתונים היסטוריים</div>
-              <div>תחזית</div>
+              <div className="flex items-center">
+                <div className="w-2 h-2 bg-gray-400 mr-1 rounded-sm"></div>
+                <span>נתונים היסטוריים</span>
+              </div>
+              <div className="flex items-center">
+                <div className="w-2 h-2 bg-gray-400 mr-1 rounded-sm border border-gray-500 border-dashed"></div>
+                <span>תחזית</span>
+              </div>
             </div>
           </div>
 
