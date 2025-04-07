@@ -132,7 +132,7 @@ const CashFlowForecast = () => {
                     radius={[4, 4, 0, 0]}
                     stroke={styledData[0].projected ? "#888" : "transparent"}
                     strokeDasharray={styledData[0].projected ? "3 3" : "0"}
-                    fillOpacity={styledData.map(d => d.projected ? 0.5 : 0.7)}
+                    fillOpacity={0.7}
                     className="income-bar"
                   />
                   <Bar 
@@ -142,7 +142,7 @@ const CashFlowForecast = () => {
                     radius={[4, 4, 0, 0]}
                     stroke={styledData[0].projected ? "#888" : "transparent"}
                     strokeDasharray={styledData[0].projected ? "3 3" : "0"}
-                    fillOpacity={styledData.map(d => d.projected ? 0.5 : 0.7)}
+                    fillOpacity={0.7}
                     className="expenses-bar"
                   />
                   <Bar 
@@ -152,7 +152,7 @@ const CashFlowForecast = () => {
                     radius={[4, 4, 0, 0]}
                     stroke={styledData[0].projected ? "#888" : "transparent"}
                     strokeDasharray={styledData[0].projected ? "3 3" : "0"}
-                    fillOpacity={styledData.map(d => d.projected ? 0.5 : 0.7)}
+                    fillOpacity={0.7}
                     className="profit-bar"
                   />
                 </BarChart>
