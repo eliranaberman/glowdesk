@@ -1,5 +1,5 @@
 
-import { BarChart, Calendar, ChevronDown, TrendingUp, Users } from 'lucide-react';
+import { BarChart, Calendar, TrendingUp, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useState } from 'react';
@@ -20,12 +20,12 @@ const BusinessInsightsPage = () => {
           {/* Date range buttons in RTL order */}
           <div className="bg-muted p-1 rounded-lg flex">
             <Button 
-              variant={activeRange === 'day' ? 'default' : 'ghost'} 
+              variant={activeRange === 'month' ? 'default' : 'ghost'} 
               size="sm" 
-              onClick={() => setActiveRange('day')}
+              onClick={() => setActiveRange('month')}
               className="rounded-lg"
             >
-              יום
+              חודש
             </Button>
             <Button 
               variant={activeRange === 'week' ? 'default' : 'ghost'} 
@@ -36,12 +36,12 @@ const BusinessInsightsPage = () => {
               שבוע
             </Button>
             <Button 
-              variant={activeRange === 'month' ? 'default' : 'ghost'} 
+              variant={activeRange === 'day' ? 'default' : 'ghost'} 
               size="sm" 
-              onClick={() => setActiveRange('month')}
+              onClick={() => setActiveRange('day')}
               className="rounded-lg"
             >
-              חודש
+              יום
             </Button>
           </div>
         </div>

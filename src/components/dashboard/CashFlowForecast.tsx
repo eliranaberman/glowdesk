@@ -24,49 +24,24 @@ const CashFlowForecast = () => {
     { date: '04/14', income: 820, expenses: 310, profit: 510, projected: true },
   ];
 
+  // Prepare data with visual styling for historical vs projected data
+  const styledData = forecastData.map(item => ({
+    ...item,
+    incomeOpacity: item.projected ? 0.7 : 1,
+    expensesOpacity: item.projected ? 0.7 : 1,
+    profitOpacity: item.projected ? 0.7 : 1,
+  }));
+
+  // Separate historical and projected data for the legend
+  const historicalData = forecastData.filter(item => !item.projected);
+  const projectedData = forecastData.filter(item => item.projected);
+
   // Upcoming expenses
   const upcomingExpenses = [
     { id: '1', name: 'שכר דירה', date: '10/04/2025', amount: '₪3,500' },
     { id: '2', name: 'שכר עובדים', date: '05/04/2025', amount: '₪4,200' },
     { id: '3', name: 'הזמנת מלאי', date: '12/04/2025', amount: '₪1,800' },
   ];
-
-  // Chart configuration
-  const chartConfig = {
-    income: {
-      label: "הכנסות",
-      theme: {
-        light: "rgba(75, 192, 192, 0.7)",
-        dark: "rgba(75, 192, 192, 0.7)",
-      },
-    },
-    expenses: {
-      label: "הוצאות",
-      theme: {
-        light: "rgba(255, 99, 132, 0.7)",
-        dark: "rgba(255, 99, 132, 0.7)",
-      },
-    },
-    profit: {
-      label: "רווח",
-      theme: {
-        light: "rgba(153, 102, 255, 0.7)",
-        dark: "rgba(153, 102, 255, 0.7)",
-      },
-    },
-  };
-
-  // Separate data for historical and projected values
-  const historicalData = forecastData.filter(item => !item.projected);
-  const projectedData = forecastData.filter(item => item.projected);
-
-  // Modified data for styling differences
-  const styledForecastData = forecastData.map(item => ({
-    ...item,
-    incomeFill: item.projected ? "rgba(75, 192, 192, 0.5)" : "rgba(75, 192, 192, 0.7)",
-    expensesFill: item.projected ? "rgba(255, 99, 132, 0.5)" : "rgba(255, 99, 132, 0.7)",
-    profitFill: item.projected ? "rgba(153, 102, 255, 0.5)" : "rgba(153, 102, 255, 0.7)",
-  }));
 
   return (
     <Card>
@@ -114,7 +89,7 @@ const CashFlowForecast = () => {
             <div className="h-[200px]" dir="ltr">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart
-                  data={styledForecastData}
+                  data={styledData}
                   margin={{ top: 10, right: 10, bottom: 30, left: 40 }}
                   barGap={0}
                   barSize={20}
@@ -155,27 +130,30 @@ const CashFlowForecast = () => {
                     fill="rgba(75, 192, 192, 0.7)" 
                     name="הכנסות"
                     radius={[4, 4, 0, 0]}
-                    strokeWidth={data => data.projected ? 1 : 0}
-                    stroke={data => data.projected ? "#888" : "transparent"}
-                    strokeDasharray={data => data.projected ? "3 3" : "0"}
+                    stroke={styledData[0].projected ? "#888" : "transparent"}
+                    strokeDasharray={styledData[0].projected ? "3 3" : "0"}
+                    fillOpacity={styledData.map(d => d.projected ? 0.5 : 0.7)}
+                    className="income-bar"
                   />
                   <Bar 
                     dataKey="expenses" 
                     fill="rgba(255, 99, 132, 0.7)" 
                     name="הוצאות"
                     radius={[4, 4, 0, 0]}
-                    strokeWidth={data => data.projected ? 1 : 0}
-                    stroke={data => data.projected ? "#888" : "transparent"}
-                    strokeDasharray={data => data.projected ? "3 3" : "0"}
+                    stroke={styledData[0].projected ? "#888" : "transparent"}
+                    strokeDasharray={styledData[0].projected ? "3 3" : "0"}
+                    fillOpacity={styledData.map(d => d.projected ? 0.5 : 0.7)}
+                    className="expenses-bar"
                   />
                   <Bar 
                     dataKey="profit" 
                     fill="rgba(153, 102, 255, 0.7)" 
                     name="רווח"
                     radius={[4, 4, 0, 0]}
-                    strokeWidth={data => data.projected ? 1 : 0}
-                    stroke={data => data.projected ? "#888" : "transparent"}
-                    strokeDasharray={data => data.projected ? "3 3" : "0"}
+                    stroke={styledData[0].projected ? "#888" : "transparent"}
+                    strokeDasharray={styledData[0].projected ? "3 3" : "0"}
+                    fillOpacity={styledData.map(d => d.projected ? 0.5 : 0.7)}
+                    className="profit-bar"
                   />
                 </BarChart>
               </ResponsiveContainer>
