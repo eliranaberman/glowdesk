@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
@@ -40,7 +41,12 @@ interface NavItem {
   label: string;
 }
 
-const Header = () => {
+interface HeaderProps {
+  pageTitle?: string;
+  toggleMobileSidebar?: () => void;
+}
+
+const Header = ({ pageTitle, toggleMobileSidebar }: HeaderProps = {}) => {
   const [isDarkTheme, setIsDarkTheme] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const { toast } = useToast();
@@ -89,9 +95,9 @@ const Header = () => {
         {isMobile ? (
           <Sheet>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="sm">
+              <Button variant="ghost" size="sm" onClick={toggleMobileSidebar}>
                 <Menu className="h-5 w-5 ml-2" />
-                תפריט
+                {pageTitle || "תפריט"}
               </Button>
             </SheetTrigger>
             <SheetContent side="right" className="w-full sm:w-3/4 md:w-2/3">
@@ -153,7 +159,7 @@ const Header = () => {
           <div className="flex items-center">
             <Link to="/" className="font-bold text-2xl">
               {/* Replace with your logo */}
-              My App
+              {pageTitle || "My App"}
             </Link>
             <ul className="flex items-center gap-4 mr-8">
               {navItems.map((item) => (

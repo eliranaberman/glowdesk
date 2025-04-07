@@ -152,7 +152,7 @@ const Reports = () => {
                 <label className="text-sm font-medium mb-1.5 block">תאריך</label>
                 <div className="border rounded-md p-1">
                   <Calendar
-                    mode={period === "daily" ? "single" : "month"}
+                    mode="single"
                     selected={date}
                     onSelect={setDate}
                     disabled={(date) => date > new Date()}
