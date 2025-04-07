@@ -3,14 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { ArrowRight, TrendingUp, Calendar, AlertTriangle, DollarSign } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import {
-  ChartContainer,
-  ChartLegend,
-  ChartLegendContent,
-  ChartTooltip,
-  ChartTooltipContent,
-} from "@/components/ui/chart";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 const CashFlowForecast = () => {
   // Mock data for cash flow forecasting
@@ -32,10 +25,6 @@ const CashFlowForecast = () => {
     profitOpacity: item.projected ? 0.7 : 1,
   }));
 
-  // Separate historical and projected data for the legend
-  const historicalData = forecastData.filter(item => !item.projected);
-  const projectedData = forecastData.filter(item => item.projected);
-
   // Upcoming expenses
   const upcomingExpenses = [
     { id: '1', name: 'שכר דירה', date: '10/04/2025', amount: '₪3,500' },
@@ -44,12 +33,12 @@ const CashFlowForecast = () => {
   ];
 
   return (
-    <Card>
+    <Card className="elegant-card overflow-hidden">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div>
             <CardTitle className="text-lg flex items-center">
-              <DollarSign className="h-5 w-5 ml-2 text-primary" />
+              <DollarSign className="h-5 w-5 ml-2 text-roseGold" />
               תחזית תזרים מזומנים
             </CardTitle>
             <CardDescription>
@@ -67,20 +56,20 @@ const CashFlowForecast = () => {
       <CardContent>
         <div className="space-y-6">
           {/* Cash flow chart */}
-          <div className="border rounded-lg p-4">
+          <div className="border rounded-2xl p-4 bg-white shadow-card">
             <div className="flex justify-between items-center mb-4">
               <h3 className="font-medium">תחזית שבועית</h3>
               <div className="flex items-center gap-3 text-xs">
-                <div className="flex items-center gap-1">
-                  <div className="w-3 h-3 bg-teal-500/70 rounded"></div>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-3 h-3 bg-oliveGreen/90 rounded"></div>
                   <span>הכנסות</span>
                 </div>
-                <div className="flex items-center gap-1">
-                  <div className="w-3 h-3 bg-rose-500/70 rounded"></div>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-3 h-3 bg-softRose/90 rounded"></div>
                   <span>הוצאות</span>
                 </div>
-                <div className="flex items-center gap-1">
-                  <div className="w-3 h-3 bg-purple-500/70 rounded"></div>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-3 h-3 bg-roseGold/90 rounded"></div>
                   <span>רווח</span>
                 </div>
               </div>
@@ -94,27 +83,28 @@ const CashFlowForecast = () => {
                   barGap={0}
                   barSize={20}
                 >
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
                   <XAxis dataKey="date" tickSize={0} />
                   <YAxis tickSize={0} />
                   <Tooltip 
+                    cursor={{fill: 'rgba(240, 240, 240, 0.2)'}}
                     content={({ active, payload, label }) => {
                       if (active && payload && payload.length) {
                         const data = payload[0].payload;
                         return (
-                          <div className="bg-white px-2 py-1 border shadow text-xs rtl">
-                            <div className="font-medium mb-1">{data.date}</div>
+                          <div className="bg-white px-3 py-2 border shadow-soft rounded-lg text-xs rtl">
+                            <div className="font-medium mb-2 text-center border-b pb-1">{data.date}</div>
                             {payload.map((entry, index) => (
-                              <div key={`item-${index}`} className="flex items-center justify-between gap-2">
-                                <span>
+                              <div key={`item-${index}`} className="flex items-center justify-between gap-4 py-0.5">
+                                <span className="font-medium">
                                   {entry.dataKey === 'income' ? 'הכנסות' :
                                    entry.dataKey === 'expenses' ? 'הוצאות' : 'רווח'}:
                                 </span>
-                                <span>₪{entry.value}</span>
+                                <span className="font-semibold">₪{entry.value}</span>
                               </div>
                             ))}
                             {data.note && (
-                              <div className="text-xs text-red-500 mt-1">
+                              <div className="text-xs text-destructive mt-2 pt-1 border-t flex items-center">
                                 <AlertTriangle className="inline h-3 w-3 mr-1" />
                                 {data.note}
                               </div>
@@ -127,63 +117,60 @@ const CashFlowForecast = () => {
                   />
                   <Bar 
                     dataKey="income" 
-                    fill="rgba(75, 192, 192, 0.7)" 
+                    className="income-bar" 
                     name="הכנסות"
                     radius={[4, 4, 0, 0]}
                     stroke={styledData[0].projected ? "#888" : "transparent"}
                     strokeDasharray={styledData[0].projected ? "3 3" : "0"}
                     fillOpacity={0.7}
-                    className="income-bar"
                   />
                   <Bar 
                     dataKey="expenses" 
-                    fill="rgba(255, 99, 132, 0.7)" 
+                    className="expenses-bar" 
                     name="הוצאות"
                     radius={[4, 4, 0, 0]}
                     stroke={styledData[0].projected ? "#888" : "transparent"}
                     strokeDasharray={styledData[0].projected ? "3 3" : "0"}
                     fillOpacity={0.7}
-                    className="expenses-bar"
                   />
                   <Bar 
                     dataKey="profit" 
-                    fill="rgba(153, 102, 255, 0.7)" 
+                    className="profit-bar" 
                     name="רווח"
                     radius={[4, 4, 0, 0]}
                     stroke={styledData[0].projected ? "#888" : "transparent"}
                     strokeDasharray={styledData[0].projected ? "3 3" : "0"}
                     fillOpacity={0.7}
-                    className="profit-bar"
                   />
                 </BarChart>
               </ResponsiveContainer>
             </div>
             
-            <div className="flex justify-between items-center text-xs mt-2">
+            <div className="flex justify-between items-center text-xs mt-3">
               <div className="flex items-center">
-                <div className="w-2 h-2 bg-gray-400 mr-1 rounded-sm"></div>
+                <div className="w-2 h-2 bg-gray-400 ml-1.5 rounded-sm"></div>
                 <span>נתונים היסטוריים</span>
               </div>
               <div className="flex items-center">
-                <div className="w-2 h-2 bg-gray-400 mr-1 rounded-sm border border-gray-500 border-dashed"></div>
+                <div className="w-2 h-2 bg-gray-400 ml-1.5 rounded-sm border border-gray-500 border-dashed"></div>
                 <span>תחזית</span>
               </div>
             </div>
           </div>
 
           {/* Important notes */}
-          <div className="border rounded-lg p-4 bg-muted/20">
+          <div className="border rounded-2xl p-4 bg-warmBeige/30">
             <div className="flex items-center mb-3">
               <AlertTriangle className="h-4 w-4 text-amber-500 ml-2" />
               <h3 className="font-medium">תזכורות חשובות</h3>
             </div>
-            <ul className="space-y-2 text-sm">
+            <ul className="space-y-2.5 text-sm">
               <li className="flex items-start">
                 <Calendar className="h-4 w-4 text-muted-foreground ml-2 mt-0.5" />
                 <span>פסח בשבת (12.04) - צפוי יום שקט יותר</span>
               </li>
               <li className="flex items-start">
-                <TrendingUp className="h-4 w-4 text-green-500 ml-2 mt-0.5" />
+                <TrendingUp className="h-4 w-4 text-oliveGreen ml-2 mt-0.5" />
                 <span>גידול של 15% בהזמנות לפני החג - הכן מלאי בהתאם</span>
               </li>
             </ul>
@@ -194,12 +181,15 @@ const CashFlowForecast = () => {
             <h3 className="font-medium mb-3">הוצאות קרובות</h3>
             <div className="space-y-2">
               {upcomingExpenses.map((expense) => (
-                <div key={expense.id} className="flex justify-between items-center p-2 border rounded-lg">
+                <div 
+                  key={expense.id} 
+                  className="flex justify-between items-center p-3 border rounded-xl bg-white hover:bg-softGray/30 transition-colors"
+                >
                   <div>
                     <p className="font-medium">{expense.name}</p>
                     <p className="text-xs text-muted-foreground">{expense.date}</p>
                   </div>
-                  <p className="font-semibold">{expense.amount}</p>
+                  <p className="font-semibold text-primary">{expense.amount}</p>
                 </div>
               ))}
             </div>

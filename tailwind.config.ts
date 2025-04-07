@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -20,8 +19,8 @@ export default {
 		},
 		extend: {
 			fontFamily: {
-				sans: ['Inter var', 'Inter', 'system-ui', 'sans-serif'],
-				display: ['Poppins', 'system-ui', 'sans-serif'],
+				sans: ['Heebo', 'Inter var', 'system-ui', 'sans-serif'],
+				display: ['Rubik', 'Poppins', 'system-ui', 'sans-serif'],
 			},
 			colors: {
 				border: 'hsl(var(--border))',
@@ -67,11 +66,15 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				warmBeige: '#F5F0EB',
-				softRose: '#EFCFD4',
-				mutedPeach: '#FAD8C3',
-				deepNavy: '#2B2E4A',
+				warmBeige: '#F8F5F1',
+				softRose: '#E8BCAA',
+				mutedPeach: '#E6CCB9',
+				deepNavy: '#364156',
 				charcoal: '#3A3A3C',
+				oliveGreen: '#7D8E6E',
+				roseGold: '#D4B499',
+				creamWhite: '#FFFBF5',
+				softGray: '#F0EDE8',
 				nail: {
 					50: "#FCF7FD",
 					100: "#F5E6F8",
@@ -87,6 +90,7 @@ export default {
 				}
 			},
 			borderRadius: {
+				'2xl': '1rem',
 				lg: 'var(--radius)',
 				md: 'calc(var(--radius) - 2px)',
 				sm: 'calc(var(--radius) - 4px)'
@@ -131,7 +135,10 @@ export default {
 				'fade-in': 'fade-in 0.3s ease-in',
 				'fade-out': 'fade-out 0.3s ease-out',
 				'slide-in': 'slide-in 0.3s ease-out',
-				'pulse-subtle': 'pulse-subtle 2s ease-in-out infinite'
+				'pulse-subtle': 'pulse-subtle 2s ease-in-out infinite',
+				'button-press': 'button-press 0.2s ease-out',
+				'scale-in-out': 'scale-in-out 0.3s ease-in-out',
+				'float-in': 'float-in 0.5s ease-out',
 			},
 			textAlign: {
 				'right': 'right',
@@ -142,6 +149,12 @@ export default {
 				'soft': '0 4px 20px 0 rgba(0, 0, 0, 0.05)',
 				'soft-lg': '0 10px 30px 0 rgba(0, 0, 0, 0.05)',
 				'button': '0 2px 6px 0 rgba(0, 0, 0, 0.05)',
+				'card': '0 8px 24px rgba(149, 157, 165, 0.1)',
+				'elevated': '0 8px 28px -2px rgba(0, 0, 0, 0.07)',
+				'hover': '0 14px 34px -4px rgba(0, 0, 0, 0.08)',
+			},
+			transitionTimingFunction: {
+				'elegant': 'cubic-bezier(0.4, 0, 0.2, 1)',
 			},
 		}
 	},

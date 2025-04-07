@@ -3,9 +3,12 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Import Hebrew fonts: Heebo and Rubik */
+@import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700&family=Rubik:wght@400;500;600;700&display=swap');
+
 @layer base {
   :root {
-    --background: 33 33% 95%;
+    --background: 35 30% 96%;
     --foreground: 227 17% 23%;
 
     --card: 0 0% 100%;
@@ -14,35 +17,40 @@
     --popover: 0 0% 100%;
     --popover-foreground: 227 17% 23%;
 
-    --primary: 227 17% 23%;
-    --primary-foreground: 33 33% 95%;
+    --primary: 30 23% 40%;
+    --primary-foreground: 35 30% 96%;
 
-    --secondary: 29 43% 94%;
-    --secondary-foreground: 227 17% 23%;
+    --secondary: 30 20% 94%;
+    --secondary-foreground: 30 23% 35%;
 
-    --muted: 29 43% 94%;
-    --muted-foreground: 227 17% 40%;
+    --muted: 30 20% 94%;
+    --muted-foreground: 30 8% 45%;
 
-    --accent: 11 36% 88%;
-    --accent-foreground: 227 17% 23%;
+    --accent: 25 30% 88%;
+    --accent-foreground: 30 23% 30%;
 
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 33 33% 95%;
+    --destructive-foreground: 35 30% 96%;
 
-    --border: 29 43% 88%;
-    --input: 29 43% 88%;
-    --ring: 227 17% 23%;
+    --border: 30 10% 88%;
+    --input: 30 10% 88%;
+    --ring: 30 23% 40%;
 
     --radius: 0.75rem;
 
     --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 227 17% 40%;
-    --sidebar-primary: 227 17% 23%;
-    --sidebar-primary-foreground: 33 33% 99%;
-    --sidebar-accent: 29 43% 94%;
-    --sidebar-accent-foreground: 227 17% 40%;
-    --sidebar-border: 29 43% 94%;
-    --sidebar-ring: 227 17% 23%;
+    --sidebar-foreground: 30 8% 45%;
+    --sidebar-primary: 30 23% 40%;
+    --sidebar-primary-foreground: 35 30% 99%;
+    --sidebar-accent: 30 20% 94%;
+    --sidebar-accent-foreground: 30 8% 45%;
+    --sidebar-border: 30 20% 94%;
+    --sidebar-ring: 30 23% 40%;
+
+    --success: 142 71% 45%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
   }
 
   .dark {
@@ -112,8 +120,9 @@
 }
 
 @layer components {
+  /* Navigation styles */
   .nav-link {
-    @apply flex items-center gap-2 p-2 rounded-md hover:bg-accent/50 transition-all duration-300;
+    @apply flex items-center gap-3 p-2.5 rounded-2xl hover:bg-accent/50 transition-all duration-300;
   }
   
   .nav-link.active {
@@ -125,8 +134,9 @@
     @apply text-right justify-start;
   }
   
+  /* Card & Container Styling */
   .stat-card {
-    @apply p-4 md:p-5 rounded-xl bg-card border shadow-soft hover:shadow-soft-lg transition-shadow duration-300;
+    @apply p-5 md:p-6 rounded-2xl bg-card border shadow-card hover:shadow-elevated transition-shadow duration-300;
   }
   
   .fade-in {
@@ -163,7 +173,7 @@
     text-align: right;
   }
   
-  /* Make shadcn Table component work better with RTL - fixed circular dependency */
+  /* Make shadcn Table component work better with RTL - fixed alignment issues */
   .rtl .alignment-left {
     text-align: right !important;
   }
@@ -174,7 +184,7 @@
   
   /* Card and component styling */
   .elegant-card {
-    @apply rounded-xl shadow-soft bg-card border border-border/50 hover:shadow-soft-lg transition-all duration-300;
+    @apply rounded-2xl shadow-card bg-card border border-border/30 hover:shadow-elevated transition-all duration-300;
   }
   
   .warm-gradient {
@@ -182,17 +192,61 @@
   }
   
   .elegant-button {
-    @apply rounded-lg shadow-button transition-all duration-300 hover:shadow-soft transform hover:-translate-y-0.5;
+    @apply rounded-2xl shadow-card transition-all duration-300 hover:shadow-hover transform hover:-translate-y-0.5;
   }
   
   .elegant-input {
-    @apply rounded-lg border-border/50 focus:border-accent focus:ring-1 focus:ring-accent transition-all duration-300;
+    @apply rounded-xl border-border/50 focus:border-roseGold focus:ring-1 focus:ring-roseGold/50 transition-all duration-300;
   }
+
+  /* Redesigned Filter Buttons */
+  .filter-button-group {
+    @apply bg-softGray/80 p-1 rounded-xl flex;
+  }
+
+  .filter-button {
+    @apply rounded-lg text-charcoal/70 hover:text-charcoal transition-all duration-200;
+  }
+
+  .filter-button-active {
+    @apply bg-white text-primary shadow-soft;
+  }
+
+  /* Date Range Buttons in RTL */
+  .rtl .date-range-buttons {
+    @apply flex flex-row-reverse;
+  }
+
+  /* Enhanced Button States */
+  .btn {
+    @apply rounded-xl px-4 py-2 font-medium transition-all duration-200 transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 active:scale-[0.98];
+  }
+
+  .btn-primary {
+    @apply bg-primary text-primary-foreground hover:bg-primary/90 focus:ring-primary/30;
+  }
+
+  .btn-secondary {
+    @apply bg-secondary text-secondary-foreground hover:bg-secondary/90 focus:ring-secondary/30;
+  }
+
+  .btn-outline {
+    @apply border border-input bg-background hover:bg-accent/50 hover:text-accent-foreground focus:ring-accent/30;
+  }
+
+  /* Chart Styling */
+  .chart-container {
+    @apply rounded-2xl bg-card p-4 shadow-card hover:shadow-elevated transition-all duration-300;
+  }
+
+  .income-bar { @apply fill-oliveGreen/90; }
+  .expenses-bar { @apply fill-softRose/90; }
+  .profit-bar { @apply fill-roseGold/90; }
 
   /* Responsive adjustments */
   @media (max-width: 640px) {
     .stat-card {
-      @apply p-3;
+      @apply p-4;
     }
 
     .card-title {
@@ -204,30 +258,30 @@
     }
     
     button, a.button {
-      @apply text-sm px-2 py-1;
+      @apply text-sm px-3 py-1.5;
     }
   }
 }
 
 /* Mobile specific optimizations */
 @media (max-width: 768px) {
+  /* Adjust dropdown positioning for mobile */
   [data-radix-popper-content-wrapper] {
     max-width: 90vw !important;
     transform: translateX(-50%) !important;
     left: 50% !important;
   }
   
+  /* Ensure dialogs are properly centered on mobile */
   [role="dialog"] {
-    @apply p-3;
+    @apply p-4;
   }
   
+  /* Fix potential overflow issues in mobile views */
   .overflow-auto {
     -webkit-overflow-scrolling: touch;
   }
 }
-
-/* Add a font import for Inter and Poppins */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap');
 
 /* RTL specific adjustments for date range buttons */
 .rtl .date-range-buttons {
@@ -239,4 +293,23 @@
 .rtl .scrollbar {
   left: 0;
   right: unset;
+}
+
+/* Custom scroll styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted));
+  border-radius: 8px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground));
 }

@@ -1,5 +1,5 @@
 
-import { BarChart, Calendar, DollarSign, TrendingUp } from 'lucide-react';
+import { BarChart, Calendar, DollarSign, TrendingUp, Receipt } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import CashFlowForecast from '@/components/dashboard/CashFlowForecast';
@@ -18,12 +18,12 @@ const CashFlow = () => {
         
         <div className="flex gap-2">
           {/* Date range buttons in RTL order */}
-          <div className="bg-muted p-1 rounded-lg flex">
+          <div className="filter-button-group">
             <Button 
               variant={activeRange === 'day' ? 'default' : 'ghost'} 
               size="sm" 
               onClick={() => setActiveRange('day')}
-              className="rounded-lg"
+              className={cn("filter-button", activeRange === 'day' && "filter-button-active")}
             >
               יום
             </Button>
@@ -31,7 +31,7 @@ const CashFlow = () => {
               variant={activeRange === 'week' ? 'default' : 'ghost'} 
               size="sm" 
               onClick={() => setActiveRange('week')}
-              className="rounded-lg"
+              className={cn("filter-button", activeRange === 'week' && "filter-button-active")}
             >
               שבוע
             </Button>
@@ -39,7 +39,7 @@ const CashFlow = () => {
               variant={activeRange === 'month' ? 'default' : 'ghost'} 
               size="sm" 
               onClick={() => setActiveRange('month')}
-              className="rounded-lg"
+              className={cn("filter-button", activeRange === 'month' && "filter-button-active")}
             >
               חודש
             </Button>
@@ -49,51 +49,51 @@ const CashFlow = () => {
 
       <div className="grid gap-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card>
+          <Card className="elegant-card">
             <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
               <CardTitle className="text-sm font-medium">סך הכנסות</CardTitle>
-              <DollarSign className="h-4 w-4 text-muted-foreground" />
+              <DollarSign className="h-5 w-5 text-oliveGreen/80" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">₪15,425</div>
-              <p className="text-xs text-muted-foreground mt-1">
-                <span className="text-green-500">+4%</span> מהחודש הקודם
+              <p className="text-xs text-muted-foreground mt-1 flex items-center">
+                <span className="inline-block mr-1 text-oliveGreen">+4%</span> מהחודש הקודם
               </p>
             </CardContent>
           </Card>
-          <Card>
+          <Card className="elegant-card">
             <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
               <CardTitle className="text-sm font-medium">סך הוצאות</CardTitle>
-              <Receipt className="h-4 w-4 text-muted-foreground" />
+              <Receipt className="h-5 w-5 text-softRose/90" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">₪8,250</div>
-              <p className="text-xs text-muted-foreground mt-1">
-                <span className="text-rose-500">+2%</span> מהחודש הקודם
+              <p className="text-xs text-muted-foreground mt-1 flex items-center">
+                <span className="inline-block mr-1 text-rose-500">+2%</span> מהחודש הקודם
               </p>
             </CardContent>
           </Card>
-          <Card>
+          <Card className="elegant-card">
             <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
               <CardTitle className="text-sm font-medium">רווח נקי</CardTitle>
-              <TrendingUp className="h-4 w-4 text-muted-foreground" />
+              <TrendingUp className="h-5 w-5 text-roseGold/90" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">₪7,175</div>
-              <p className="text-xs text-muted-foreground mt-1">
-                <span className="text-green-500">+7%</span> מהחודש הקודם
+              <p className="text-xs text-muted-foreground mt-1 flex items-center">
+                <span className="inline-block mr-1 text-oliveGreen">+7%</span> מהחודש הקודם
               </p>
             </CardContent>
           </Card>
-          <Card>
+          <Card className="elegant-card">
             <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
               <CardTitle className="text-sm font-medium">תחזית חודשית</CardTitle>
-              <Calendar className="h-4 w-4 text-muted-foreground" />
+              <Calendar className="h-5 w-5 text-deepNavy/60" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">₪16,800</div>
-              <p className="text-xs text-muted-foreground mt-1">
-                <span className="text-green-500">+9%</span> צפי לחודש הבא
+              <p className="text-xs text-muted-foreground mt-1 flex items-center">
+                <span className="inline-block mr-1 text-oliveGreen">+9%</span> צפי לחודש הבא
               </p>
             </CardContent>
           </Card>
@@ -110,24 +110,6 @@ const CashFlow = () => {
 
 export default CashFlow;
 
-function Receipt(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M4 2v20l5-3 5 3 5-3 5 3V2a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1z" />
-      <path d="M7 8h10" />
-      <path d="M7 12h10" />
-      <path d="M7 16h10" />
-    </svg>
-  );
+function cn(...classes: any[]) {
+  return classes.filter(Boolean).join(' ');
 }

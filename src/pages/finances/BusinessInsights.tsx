@@ -18,30 +18,30 @@ const BusinessInsightsPage = () => {
         
         <div className="flex gap-2">
           {/* Date range buttons in RTL order */}
-          <div className="bg-muted p-1 rounded-lg flex">
+          <div className="filter-button-group">
             <Button 
-              variant={activeRange === 'month' ? 'default' : 'ghost'} 
+              variant={activeRange === 'day' ? 'default' : 'ghost'} 
               size="sm" 
-              onClick={() => setActiveRange('month')}
-              className="rounded-lg"
+              onClick={() => setActiveRange('day')}
+              className={cn("filter-button", activeRange === 'day' && "filter-button-active")}
             >
-              חודש
+              יום
             </Button>
             <Button 
               variant={activeRange === 'week' ? 'default' : 'ghost'} 
               size="sm" 
               onClick={() => setActiveRange('week')}
-              className="rounded-lg"
+              className={cn("filter-button", activeRange === 'week' && "filter-button-active")}
             >
               שבוע
             </Button>
             <Button 
-              variant={activeRange === 'day' ? 'default' : 'ghost'} 
+              variant={activeRange === 'month' ? 'default' : 'ghost'} 
               size="sm" 
-              onClick={() => setActiveRange('day')}
-              className="rounded-lg"
+              onClick={() => setActiveRange('month')}
+              className={cn("filter-button", activeRange === 'month' && "filter-button-active")}
             >
-              יום
+              חודש
             </Button>
           </div>
         </div>
@@ -49,51 +49,51 @@ const BusinessInsightsPage = () => {
 
       <div className="grid gap-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card>
+          <Card className="elegant-card">
             <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
               <CardTitle className="text-sm font-medium">לקוחות מרוצים</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
+              <Users className="h-5 w-5 text-roseGold/80" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">86%</div>
-              <p className="text-xs text-muted-foreground mt-1">
-                <span className="text-green-500">+2%</span> מהחודש הקודם
+              <p className="text-xs text-muted-foreground mt-1 flex items-center">
+                <span className="inline-block mr-1 text-oliveGreen">+2%</span> מהחודש הקודם
               </p>
             </CardContent>
           </Card>
-          <Card>
+          <Card className="elegant-card">
             <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
               <CardTitle className="text-sm font-medium">לקוחות חוזרים</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
+              <Users className="h-5 w-5 text-roseGold/80" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">73%</div>
-              <p className="text-xs text-muted-foreground mt-1">
-                <span className="text-green-500">+5%</span> מהחודש הקודם
+              <p className="text-xs text-muted-foreground mt-1 flex items-center">
+                <span className="inline-block mr-1 text-oliveGreen">+5%</span> מהחודש הקודם
               </p>
             </CardContent>
           </Card>
-          <Card>
+          <Card className="elegant-card">
             <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
               <CardTitle className="text-sm font-medium">גידול בהכנסות</CardTitle>
-              <TrendingUp className="h-4 w-4 text-muted-foreground" />
+              <TrendingUp className="h-5 w-5 text-oliveGreen/80" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">12%</div>
-              <p className="text-xs text-muted-foreground mt-1">
-                <span className="text-green-500">+3%</span> מהחודש הקודם
+              <p className="text-xs text-muted-foreground mt-1 flex items-center">
+                <span className="inline-block mr-1 text-oliveGreen">+3%</span> מהחודש הקודם
               </p>
             </CardContent>
           </Card>
-          <Card>
+          <Card className="elegant-card">
             <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
               <CardTitle className="text-sm font-medium">ביצועי פרסום</CardTitle>
-              <BarChart className="h-4 w-4 text-muted-foreground" />
+              <BarChart className="h-5 w-5 text-deepNavy/60" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">21%</div>
-              <p className="text-xs text-muted-foreground mt-1">
-                <span className="text-rose-500">-2%</span> מהחודש הקודם
+              <p className="text-xs text-muted-foreground mt-1 flex items-center">
+                <span className="inline-block mr-1 text-rose-500">-2%</span> מהחודש הקודם
               </p>
             </CardContent>
           </Card>
@@ -109,3 +109,7 @@ const BusinessInsightsPage = () => {
 };
 
 export default BusinessInsightsPage;
+
+function cn(...classes: any[]) {
+  return classes.filter(Boolean).join(' ');
+}

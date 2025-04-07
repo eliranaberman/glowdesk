@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -91,6 +91,7 @@ interface SidebarProps {
 const Sidebar = ({ onLinkClick }: SidebarProps) => {
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   const handleLinkClick = () => {
     if (onLinkClick) {
@@ -98,18 +99,29 @@ const Sidebar = ({ onLinkClick }: SidebarProps) => {
     }
   };
 
+  // Effect to scroll to active element when sidebar mounts or location changes
+  useEffect(() => {
+    if (!collapsed && scrollAreaRef.current) {
+      const activeElement = scrollAreaRef.current.querySelector('[data-state="active"]');
+      if (activeElement) {
+        activeElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+  }, [collapsed, location.pathname]);
+
   return (
     <div
       className={cn(
-        "flex flex-col h-screen bg-sidebar border-l border-border transition-all duration-300 shadow-soft",
+        "flex flex-col h-screen bg-sidebar border-l border-border/50 transition-all duration-300 shadow-card overflow-hidden",
         collapsed ? "w-16" : "w-64"
       )}
       dir="rtl"
     >
-      <div className="flex items-center justify-between p-4">
+      {/* Header with Brand */}
+      <div className="flex items-center justify-between p-4 h-16">
         {!collapsed && (
           <div className="flex items-center">
-            <div className="w-9 h-9 rounded-full bg-gradient-to-r from-softRose to-mutedPeach flex items-center justify-center text-deepNavy font-medium">
+            <div className="w-9 h-9 rounded-full bg-gradient-to-r from-roseGold to-mutedPeach flex items-center justify-center text-primary font-medium">
               CM
             </div>
             <h1 className="mr-2 font-display font-medium text-lg">Chen Mizrahi</h1>
@@ -119,7 +131,7 @@ const Sidebar = ({ onLinkClick }: SidebarProps) => {
           variant="ghost"
           size="icon"
           onClick={() => setCollapsed(!collapsed)}
-          className="mr-auto hover:bg-accent/30"
+          className={cn("hover:bg-accent/30", collapsed ? "mx-auto" : "mr-auto")}
         >
           {collapsed ? (
             <ChevronLeft className="h-4 w-4" />
@@ -132,128 +144,129 @@ const Sidebar = ({ onLinkClick }: SidebarProps) => {
       <Separator className="bg-border/30" />
 
       {/* Improved scroll behavior with ScrollArea component */}
-      <ScrollArea className="flex-1 px-2">
-        <div className="py-2">
-          <ul className="space-y-1">
+      <ScrollArea 
+        ref={scrollAreaRef} 
+        className="flex-1 pr-1 pl-3"
+        scrollHideDelay={200}
+      >
+        <div className="py-3 space-y-6">
+          {/* Main navigation items */}
+          <div className="space-y-1">
             {navItems.map((item) => (
-              <li key={item.name}>
-                <NavLink
-                  to={item.path}
-                  className={({ isActive }) => 
-                    cn(
-                      "nav-link",
-                      isActive ? "bg-accent/50 font-medium text-primary shadow-soft" : "hover:bg-accent/30",
-                      collapsed ? "justify-center" : "justify-start text-right"
-                    )
-                  }
-                  onClick={handleLinkClick}
-                >
-                  {item.icon}
-                  {!collapsed && <span className="text-right">{item.name}</span>}
-                </NavLink>
-              </li>
+              <NavLink
+                key={item.name}
+                to={item.path}
+                className={({ isActive }) => 
+                  cn(
+                    "nav-link",
+                    isActive ? "bg-accent/50 font-medium text-primary shadow-card" : "hover:bg-accent/30",
+                    collapsed ? "justify-center" : "justify-start text-right"
+                  )
+                }
+                data-state={({ isActive }: {isActive: boolean}) => isActive ? "active" : "inactive"}
+                onClick={handleLinkClick}
+              >
+                {item.icon}
+                {!collapsed && <span className="text-right">{item.name}</span>}
+              </NavLink>
             ))}
-          </ul>
+          </div>
 
           {/* Financial management category */}
           {!collapsed && (
-            <div className="mt-4 mb-2">
+            <div>
               <h3 className="text-xs font-semibold text-muted-foreground px-2 py-1 text-right">
                 ניהול פיננסי
               </h3>
+              <div className="mt-1 space-y-1">
+                {financialItems.map((item) => (
+                  <NavLink
+                    key={item.name}
+                    to={item.path}
+                    className={({ isActive }) => 
+                      cn(
+                        "nav-link",
+                        isActive ? "bg-accent/50 font-medium text-primary shadow-card" : "hover:bg-accent/30",
+                        collapsed ? "justify-center" : "justify-start text-right"
+                      )
+                    }
+                    data-state={({ isActive }: {isActive: boolean}) => isActive ? "active" : "inactive"}
+                    onClick={handleLinkClick}
+                  >
+                    {item.icon}
+                    {!collapsed && <span className="text-right">{item.name}</span>}
+                  </NavLink>
+                ))}
+              </div>
             </div>
           )}
-          <ul className="space-y-1">
-            {financialItems.map((item) => (
-              <li key={item.name}>
-                <NavLink
-                  to={item.path}
-                  className={({ isActive }) => 
-                    cn(
-                      "nav-link",
-                      isActive ? "bg-accent/50 font-medium text-primary shadow-soft" : "hover:bg-accent/30",
-                      collapsed ? "justify-center" : "justify-start text-right"
-                    )
-                  }
-                  onClick={handleLinkClick}
-                >
-                  {item.icon}
-                  {!collapsed && <span className="text-right">{item.name}</span>}
-                </NavLink>
-              </li>
-            ))}
-          </ul>
 
           {/* Operational items */}
           {!collapsed && operationalItems.length > 0 && (
-            <div className="mt-4 mb-2">
+            <div>
               <h3 className="text-xs font-semibold text-muted-foreground px-2 py-1 text-right">
                 תפעול
               </h3>
+              <div className="mt-1 space-y-1">
+                {operationalItems.map((item) => (
+                  <NavLink
+                    key={item.name}
+                    to={item.path}
+                    className={({ isActive }) => 
+                      cn(
+                        "nav-link",
+                        isActive ? "bg-accent/50 font-medium text-primary shadow-card" : "hover:bg-accent/30",
+                        collapsed ? "justify-center" : "justify-start text-right"
+                      )
+                    }
+                    data-state={({ isActive }: {isActive: boolean}) => isActive ? "active" : "inactive"}
+                    onClick={handleLinkClick}
+                  >
+                    {item.icon}
+                    {!collapsed && <span className="text-right">{item.name}</span>}
+                  </NavLink>
+                ))}
+              </div>
             </div>
           )}
-          <ul className="space-y-1">
-            {operationalItems.map((item) => (
-              <li key={item.name}>
-                <NavLink
-                  to={item.path}
-                  className={({ isActive }) => 
-                    cn(
-                      "nav-link",
-                      isActive ? "bg-accent/50 font-medium text-primary shadow-soft" : "hover:bg-accent/30",
-                      collapsed ? "justify-center" : "justify-start text-right"
-                    )
-                  }
-                  onClick={handleLinkClick}
-                >
-                  {item.icon}
-                  {!collapsed && <span className="text-right">{item.name}</span>}
-                </NavLink>
-              </li>
-            ))}
-          </ul>
         </div>
       </ScrollArea>
 
       <Separator className="bg-border/30" />
 
-      <div className="p-2">
-        <ul className="space-y-1">
-          <li>
-            <NavLink
-              to="/notifications"
-              className={({ isActive }) => 
-                cn(
-                  "nav-link",
-                  isActive ? "bg-accent/50 font-medium text-primary shadow-soft" : "hover:bg-accent/30",
-                  collapsed ? "justify-center" : "justify-start text-right"
-                )
-              }
-              onClick={handleLinkClick}
-            >
-              <Bell className="w-5 h-5" />
-              {!collapsed && <span className="text-right">התראות</span>}
-            </NavLink>
-          </li>
-          <li>
-            <NavLink
-              to="/settings"
-              className={({ isActive }) => 
-                cn(
-                  "nav-link",
-                  isActive ? "bg-accent/50 font-medium text-primary shadow-soft" : "hover:bg-accent/30",
-                  collapsed ? "justify-center" : "justify-start text-right"
-                )
-              }
-              onClick={handleLinkClick}
-            >
-              <Settings className="w-5 h-5" />
-              {!collapsed && <span className="text-right">הגדרות</span>}
-            </NavLink>
-          </li>
-        </ul>
+      {/* Bottom actions */}
+      <div className="p-2 space-y-1">
+        <NavLink
+          to="/notifications"
+          className={({ isActive }) => 
+            cn(
+              "nav-link",
+              isActive ? "bg-accent/50 font-medium text-primary shadow-card" : "hover:bg-accent/30",
+              collapsed ? "justify-center" : "justify-start text-right"
+            )
+          }
+          onClick={handleLinkClick}
+        >
+          <Bell className="w-5 h-5" />
+          {!collapsed && <span className="text-right">התראות</span>}
+        </NavLink>
+        <NavLink
+          to="/settings"
+          className={({ isActive }) => 
+            cn(
+              "nav-link",
+              isActive ? "bg-accent/50 font-medium text-primary shadow-card" : "hover:bg-accent/30",
+              collapsed ? "justify-center" : "justify-start text-right"
+            )
+          }
+          onClick={handleLinkClick}
+        >
+          <Settings className="w-5 h-5" />
+          {!collapsed && <span className="text-right">הגדרות</span>}
+        </NavLink>
       </div>
 
+      {/* Profile section */}
       <div className="p-4">
         {!collapsed && (
           <div className="flex items-center">
