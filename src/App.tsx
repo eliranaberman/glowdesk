@@ -24,6 +24,8 @@ import NewPayment from "./pages/payments/NewPayment";
 import Expenses from "./pages/Expenses";
 import SocialMedia from "./pages/SocialMedia";
 import LoyaltyPage from "./pages/LoyaltyPage";
+import CashFlow from "./pages/finances/CashFlow";
+import BusinessInsights from "./pages/finances/BusinessInsights";
 
 const queryClient = new QueryClient();
 
@@ -123,6 +125,17 @@ const App = () => (
             <Route path="/loyalty" element={
               <Layout>
                 <LoyaltyPage />
+              </Layout>
+            } />
+            {/* New finance routes */}
+            <Route path="/finances/cash-flow" element={
+              <Layout>
+                <CashFlow />
+              </Layout>
+            } />
+            <Route path="/finances/insights" element={
+              <Layout>
+                <BusinessInsights />
               </Layout>
             } />
             <Route path="*" element={<NotFound />} />

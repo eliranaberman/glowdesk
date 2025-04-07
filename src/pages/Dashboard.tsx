@@ -97,14 +97,8 @@ const Dashboard = () => {
           />
         ))}
       </div>
-      
-      {/* Business Insights and Cash Flow Forecast */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
-        <BusinessInsights />
-        <CashFlowForecast />
-      </div>
-      
-      {/* Main data panels with improved spacing and consistency */}
+
+      {/* Rearranged: Daily Summary directly below stats */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
         <DailySummary 
           customers={dailyData.customers}
@@ -114,7 +108,13 @@ const Dashboard = () => {
         />
         <RecentAppointments appointments={appointments} />
       </div>
-
+      
+      {/* Business Insights and Cash Flow Forecast */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
+        <BusinessInsights />
+        <CashFlowForecast />
+      </div>
+      
       {/* Marketing and Loyalty */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
         <MarketingMessages />

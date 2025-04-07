@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -16,6 +17,8 @@ import {
   ChevronRight,
   Receipt,
   Share2,
+  DollarSign,
+  TrendingUp,
 } from 'lucide-react';
 
 const navItems = [
@@ -59,6 +62,20 @@ const navItems = [
     path: '/reports', 
     icon: <BarChart className="w-5 h-5" /> 
   },
+];
+
+// Financial management category with its items
+const financialItems = [
+  {
+    name: 'תזרים מזומנים',
+    path: '/finances/cash-flow',
+    icon: <DollarSign className="w-5 h-5" />
+  },
+  {
+    name: 'תובנות עסקיות',
+    path: '/finances/insights',
+    icon: <TrendingUp className="w-5 h-5" />
+  }
 ];
 
 interface SidebarProps {
@@ -118,7 +135,36 @@ const Sidebar = ({ onLinkClick }: SidebarProps) => {
                   cn(
                     "nav-link",
                     isActive ? "bg-accent/50 font-medium text-primary shadow-soft" : "hover:bg-accent/30",
-                    collapsed && "justify-center"
+                    collapsed ? "justify-center" : "justify-start text-right"
+                  )
+                }
+                onClick={handleLinkClick}
+              >
+                {item.icon}
+                {!collapsed && <span className="text-right">{item.name}</span>}
+              </NavLink>
+            </li>
+          ))}
+        </ul>
+
+        {/* Financial management category */}
+        {!collapsed && (
+          <div className="mt-4 mb-2">
+            <h3 className="text-xs font-semibold text-muted-foreground px-2 py-1 text-right">
+              ניהול פיננסי ותובנות
+            </h3>
+          </div>
+        )}
+        <ul className="space-y-1">
+          {financialItems.map((item) => (
+            <li key={item.name}>
+              <NavLink
+                to={item.path}
+                className={({ isActive }) => 
+                  cn(
+                    "nav-link",
+                    isActive ? "bg-accent/50 font-medium text-primary shadow-soft" : "hover:bg-accent/30",
+                    collapsed ? "justify-center" : "justify-start text-right"
                   )
                 }
                 onClick={handleLinkClick}
@@ -142,7 +188,7 @@ const Sidebar = ({ onLinkClick }: SidebarProps) => {
                 cn(
                   "nav-link",
                   isActive ? "bg-accent/50 font-medium text-primary shadow-soft" : "hover:bg-accent/30",
-                  collapsed && "justify-center"
+                  collapsed ? "justify-center" : "justify-start text-right"
                 )
               }
               onClick={handleLinkClick}
@@ -158,7 +204,7 @@ const Sidebar = ({ onLinkClick }: SidebarProps) => {
                 cn(
                   "nav-link",
                   isActive ? "bg-accent/50 font-medium text-primary shadow-soft" : "hover:bg-accent/30",
-                  collapsed && "justify-center"
+                  collapsed ? "justify-center" : "justify-start text-right"
                 )
               }
               onClick={handleLinkClick}

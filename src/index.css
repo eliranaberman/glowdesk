@@ -1,5 +1,4 @@
 
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -93,74 +92,84 @@
 
   body {
     @apply bg-background text-foreground;
-    text-align: center;
     -webkit-text-size-adjust: 100%;
   }
   
   h1, h2, h3, h4, h5, h6 {
     @apply font-display font-medium;
   }
+  
+  /* Enhanced RTL support */
+  .rtl {
+    direction: rtl;
+  }
+  
+  /* Default text alignment for RTL */
+  .rtl h1, .rtl h2, .rtl h3, .rtl h4, .rtl h5, .rtl h6, 
+  .rtl p, .rtl span, .rtl div, .rtl label, .rtl li {
+    text-align: right;
+  }
 }
 
 @layer components {
   .nav-link {
-    @apply flex items-center gap-2 p-2 rounded-md hover:bg-accent/50 transition-all duration-300 justify-center;
+    @apply flex items-center gap-2 p-2 rounded-md hover:bg-accent/50 transition-all duration-300;
   }
   
   .nav-link.active {
     @apply bg-accent font-medium text-primary;
   }
   
+  /* RTL specific styling for nav-link */
+  .rtl .nav-link {
+    @apply text-right justify-start;
+  }
+  
   .stat-card {
-    @apply p-4 md:p-5 rounded-xl bg-card border shadow-soft hover:shadow-soft-lg transition-shadow duration-300 text-center;
+    @apply p-4 md:p-5 rounded-xl bg-card border shadow-soft hover:shadow-soft-lg transition-shadow duration-300;
   }
   
   .fade-in {
     @apply animate-fade-in;
   }
-
-  .rtl {
-    direction: rtl;
-    text-align: center;
-  }
   
-  .rtl .text-left {
-    text-align: center;
-  }
-  
-  .rtl .text-right {
-    text-align: center;
-  }
-  
+  /* RTL adjustments for margins and padding */
   .rtl .mr-auto {
-    margin-right: auto;
-    margin-left: auto;
+    margin-left: auto !important;
+    margin-right: 0 !important;
   }
   
   .rtl .ml-auto {
-    margin-left: auto;
-    margin-right: auto;
+    margin-right: auto !important;
+    margin-left: 0 !important;
   }
   
+  .rtl .mr-1, .rtl .mr-2, .rtl .mr-3, .rtl .mr-4, .rtl .mr-5 {
+    margin-right: 0 !important;
+  }
+  
+  .rtl .ml-1, .rtl .ml-2, .rtl .ml-3, .rtl .ml-4, .rtl .ml-5 {
+    margin-left: 0 !important;
+  }
+  
+  /* RTL for charts */
   .rtl .chart-title {
-    text-align: center;
+    text-align: right;
   }
   
   /* Enhanced RTL for tables */
   .rtl th, 
   .rtl td {
-    text-align: center;
+    text-align: right;
   }
   
   /* Make shadcn Table component work better with RTL */
-  .rtl [class*="text-left"],
-  .rtl [class*="text-right"] {
-    text-align: center;
+  .rtl .text-left {
+    text-align: right !important;
   }
   
-  /* Center all text by default */
-  h1, h2, h3, h4, h5, h6, p, span, div, a, button, input, select, textarea, label, li {
-    text-align: center;
+  .rtl .text-right {
+    text-align: left !important;
   }
   
   /* Card and component styling */
@@ -223,3 +232,8 @@
 /* Add a font import for Inter and Poppins */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap');
 
+/* RTL specific adjustments for date range buttons */
+.rtl .date-range-buttons {
+  display: flex;
+  flex-direction: row-reverse;
+}

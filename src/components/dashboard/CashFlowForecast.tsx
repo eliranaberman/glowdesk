@@ -10,7 +10,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 
 const CashFlowForecast = () => {
   // Mock data for cash flow forecasting
@@ -60,6 +60,14 @@ const CashFlowForecast = () => {
   const historicalData = forecastData.filter(item => !item.projected);
   const projectedData = forecastData.filter(item => item.projected);
 
+  // Modified data for styling differences
+  const styledForecastData = forecastData.map(item => ({
+    ...item,
+    incomeFill: item.projected ? "rgba(75, 192, 192, 0.5)" : "rgba(75, 192, 192, 0.7)",
+    expensesFill: item.projected ? "rgba(255, 99, 132, 0.5)" : "rgba(255, 99, 132, 0.7)",
+    profitFill: item.projected ? "rgba(153, 102, 255, 0.5)" : "rgba(153, 102, 255, 0.7)",
+  }));
+
   return (
     <Card>
       <CardHeader className="pb-3">
@@ -106,7 +114,7 @@ const CashFlowForecast = () => {
             <div className="h-[200px]" dir="ltr">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart
-                  data={forecastData}
+                  data={styledForecastData}
                   margin={{ top: 10, right: 10, bottom: 30, left: 40 }}
                   barGap={0}
                   barSize={20}
@@ -142,24 +150,32 @@ const CashFlowForecast = () => {
                       return null;
                     }}
                   />
-                  {/* Historical Data Bars */}
                   <Bar 
                     dataKey="income" 
                     fill="rgba(75, 192, 192, 0.7)" 
                     name="הכנסות"
                     radius={[4, 4, 0, 0]}
+                    strokeWidth={data => data.projected ? 1 : 0}
+                    stroke={data => data.projected ? "#888" : "transparent"}
+                    strokeDasharray={data => data.projected ? "3 3" : "0"}
                   />
                   <Bar 
                     dataKey="expenses" 
                     fill="rgba(255, 99, 132, 0.7)" 
                     name="הוצאות"
                     radius={[4, 4, 0, 0]}
+                    strokeWidth={data => data.projected ? 1 : 0}
+                    stroke={data => data.projected ? "#888" : "transparent"}
+                    strokeDasharray={data => data.projected ? "3 3" : "0"}
                   />
                   <Bar 
                     dataKey="profit" 
                     fill="rgba(153, 102, 255, 0.7)" 
                     name="רווח"
                     radius={[4, 4, 0, 0]}
+                    strokeWidth={data => data.projected ? 1 : 0}
+                    stroke={data => data.projected ? "#888" : "transparent"}
+                    strokeDasharray={data => data.projected ? "3 3" : "0"}
                   />
                 </BarChart>
               </ResponsiveContainer>
