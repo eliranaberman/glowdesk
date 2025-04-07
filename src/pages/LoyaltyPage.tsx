@@ -1,6 +1,5 @@
 
-import { useState, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -17,25 +16,16 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import SendCouponForm from "@/components/loyalty/SendCouponForm";
 
 const LoyaltyPage = () => {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const initialTab = searchParams.get('tab') === 'send-coupon' ? 'send-coupon' : 'promotions';
-  const [activeTab, setActiveTab] = useState(initialTab);
-
-  useEffect(() => {
-    if (searchParams.get('tab') === 'send-coupon') {
-      setActiveTab('send-coupon');
-    }
-  }, [searchParams]);
+  const [activeTab, setActiveTab] = useState("overview");
 
   // Mock loyalty data
   const activePromotions = [
-    { id: "1", name: "קבלי 15% הנחה על טיפול הבא", used: 12, total: 30, expires: "12/05/2025", status: "active", icon: "🌟" },
-    { id: "2", name: "מניקור חינם עם פדיקור מלא", used: 8, total: 20, expires: "30/04/2025", status: "active", icon: "🎁" },
-    { id: "3", name: "הזמיני 5 טיפולים וקבלי 1 חינם", used: 0, total: 50, expires: "31/05/2025", status: "active", icon: "✨" },
-    { id: "4", name: "20% הנחה לחברים חדשים", used: 15, total: 15, expires: "15/03/2025", status: "expired", icon: "💫" },
+    { id: "1", name: "קבלי 15% הנחה על טיפול הבא", used: 12, total: 30, expires: "12/05/2025", status: "active" },
+    { id: "2", name: "מניקור חינם עם פדיקור מלא", used: 8, total: 20, expires: "30/04/2025", status: "active" },
+    { id: "3", name: "הזמיני 5 טיפולים וקבלי 1 חינם", used: 0, total: 50, expires: "31/05/2025", status: "active" },
+    { id: "4", name: "20% הנחה לחברים חדשים", used: 15, total: 15, expires: "15/03/2025", status: "expired" },
   ];
 
   const topClients = [
@@ -49,20 +39,6 @@ const LoyaltyPage = () => {
   const createPromotion = () => {
     toast.success("הקופון נוצר בהצלחה");
   };
-
-  const handleBack = () => {
-    setActiveTab('promotions');
-    setSearchParams({});
-  };
-
-  const handleSendCouponToSelectedClients = () => {
-    setActiveTab('send-coupon');
-    setSearchParams({ tab: 'send-coupon' });
-  };
-
-  if (activeTab === 'send-coupon') {
-    return <SendCouponForm onBack={handleBack} />;
-  }
 
   return (
     <div dir="rtl">
@@ -129,7 +105,7 @@ const LoyaltyPage = () => {
         </Card>
       </div>
 
-      <Tabs defaultValue={activeTab} value={activeTab} onValueChange={setActiveTab}>
+      <Tabs defaultValue="promotions" value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid grid-cols-3 mb-6">
           <TabsTrigger value="promotions">מבצעים וקופונים</TabsTrigger>
           <TabsTrigger value="clients">לקוחות מועדון</TabsTrigger>
@@ -150,7 +126,6 @@ const LoyaltyPage = () => {
                     <TableHead>תאריך תפוגה</TableHead>
                     <TableHead>מימושים</TableHead>
                     <TableHead>סטטוס</TableHead>
-                    <TableHead>סמל</TableHead>
                     <TableHead className="text-left">פעולות</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -165,7 +140,6 @@ const LoyaltyPage = () => {
                           {promo.status === 'active' ? 'פעיל' : 'פג תוקף'}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-2xl">{promo.icon}</TableCell>
                       <TableCell className="text-left">
                         <Button variant="ghost" size="icon">
                           <ArrowRight className="h-4 w-4" />
@@ -208,16 +182,8 @@ const LoyaltyPage = () => {
         <TabsContent value="clients" className="space-y-6">
           <Card>
             <CardHeader>
-              <div className="flex justify-between items-center">
-                <div>
-                  <CardTitle>לקוחות מובילים במועדון</CardTitle>
-                  <CardDescription>הלקוחות עם הכי הרבה נקודות נאמנות</CardDescription>
-                </div>
-                <Button onClick={handleSendCouponToSelectedClients}>
-                  <Gift className="ml-2 h-4 w-4" />
-                  שלח קופונים ללקוחות
-                </Button>
-              </div>
+              <CardTitle>לקוחות מובילים במועדון</CardTitle>
+              <CardDescription>הלקוחות עם הכי הרבה נקודות נאמנות</CardDescription>
             </CardHeader>
             <CardContent>
               <Table>

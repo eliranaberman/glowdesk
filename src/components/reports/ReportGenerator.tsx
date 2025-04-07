@@ -12,17 +12,11 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { DateRange } from "react-day-picker";
 
-interface ReportGeneratorProps {
-  reportType?: string;
-  period?: string;
-  date?: Date;
-}
-
-const ReportGenerator = ({ reportType: initialReportType, period: initialPeriod, date: initialDate }: ReportGeneratorProps = {}) => {
+const ReportGenerator = () => {
   const [reportName, setReportName] = useState("");
-  const [reportType, setReportType] = useState(initialReportType || "");
+  const [reportType, setReportType] = useState("");
   const [dateRange, setDateRange] = useState<DateRange>({
-    from: initialDate || undefined,
+    from: undefined,
     to: undefined,
   });
   const [format, setFormat] = useState("pdf");

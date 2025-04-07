@@ -5,18 +5,19 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Trophy, Users, Gift, Send, ArrowRight } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
 
 const LoyaltyProgram = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const { toast } = useToast();
-  const navigate = useNavigate();
 
   const handleSendCoupons = () => {
-    // Navigate to the coupon sending page
-    navigate('/loyalty?tab=send-coupon');
+    toast({
+      title: "פעולה הושלמה",
+      description: "קופונים נשלחו ללקוחות הנבחרים בהצלחה!",
+    });
   };
 
   return (
@@ -41,9 +42,9 @@ const LoyaltyProgram = () => {
       <CardContent>
         <Tabs defaultValue={activeTab} value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid grid-cols-3 mb-4">
-            <TabsTrigger value="overview" className="text-right order-3">סקירה כללית</TabsTrigger>
-            <TabsTrigger value="customers" className="text-right order-2">לקוחות נאמנים</TabsTrigger>
-            <TabsTrigger value="promotions" className="text-right order-1">הטבות פעילות</TabsTrigger>
+            <TabsTrigger value="overview" className="text-right">סקירה כללית</TabsTrigger>
+            <TabsTrigger value="customers" className="text-right">לקוחות נאמנים</TabsTrigger>
+            <TabsTrigger value="promotions" className="text-right">הטבות פעילות</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-4">
