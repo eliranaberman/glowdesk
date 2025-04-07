@@ -3,8 +3,8 @@ import { useState } from 'react';
 import { Bell, Search, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Separator } from '@/components/ui/separator';
 import { useNavigate } from 'react-router-dom';
+import { useToast } from '@/hooks/use-toast';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,12 +20,46 @@ interface HeaderProps {
 }
 
 const Header = ({ pageTitle, toggleMobileSidebar }: HeaderProps) => {
-  const [notificationCount] = useState(3); // Example notification count
+  const [notificationCount] = useState(3);
+  const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      // In a real app, this would perform an actual search
+      toast({
+        title: "חיפוש",
+        description: `מחפש: "${searchQuery}"`,
+      });
+      
+      // For demo purposes, navigate to a relevant page based on search
+      if (searchQuery.toLowerCase().includes('לקוח') || 
+          searchQuery.toLowerCase().includes('client')) {
+        navigate('/customers');
+      } else if (searchQuery.toLowerCase().includes('פגיש') || 
+                searchQuery.toLowerCase().includes('appoint')) {
+        navigate('/scheduling');
+      } else if (searchQuery.toLowerCase().includes('שיווק') || 
+                searchQuery.toLowerCase().includes('market')) {
+        navigate('/social-media');
+      } else {
+        // Default search results page could be added here
+        toast({
+          title: "תוצאות חיפוש",
+          description: "לא נמצאו תוצאות התואמות לחיפוש שלך",
+          variant: "destructive",
+        });
+      }
+      
+      setSearchQuery('');
+    }
+  };
 
   return (
     <header className="w-full bg-background sticky top-0 z-10 border-b border-border">
-      <div className="flex items-center justify-center px-4 py-2">
+      <div className="flex items-center justify-between px-4 py-2">
         <div className="flex items-center gap-4">
           <Button
             variant="ghost"
@@ -39,21 +73,23 @@ const Header = ({ pageTitle, toggleMobileSidebar }: HeaderProps) => {
           <h1 className="text-xl font-semibold text-center">{pageTitle}</h1>
         </div>
 
-        <div className="hidden md:flex items-center max-w-sm flex-1 mx-4">
+        <form onSubmit={handleSearch} className="hidden md:flex items-center max-w-sm flex-1 mx-4">
           <div className="relative w-full">
             <Search className="absolute right-2 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="חיפוש..."
-              className="pr-8 rounded-full bg-secondary border-none text-center"
+              className="pr-8 rounded-full bg-secondary border-none text-right"
               dir="rtl"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
-        </div>
+        </form>
 
         <div className="flex items-center gap-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="relative" onClick={() => navigate("/notifications")}>
+              <Button variant="ghost" size="icon" className="relative">
                 <Bell className="h-5 w-5" />
                 {notificationCount > 0 && (
                   <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] text-primary-foreground">
@@ -62,24 +98,24 @@ const Header = ({ pageTitle, toggleMobileSidebar }: HeaderProps) => {
                 )}
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-80 text-center">
-              <DropdownMenuLabel className="text-center">התראות</DropdownMenuLabel>
+            <DropdownMenuContent align="end" className="w-80 text-right">
+              <DropdownMenuLabel className="text-right">התראות</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <div className="max-h-[300px] overflow-y-auto">
                 <DropdownMenuItem onClick={() => navigate("/notifications")}>
-                  <div className="flex flex-col gap-1 text-center w-full">
+                  <div className="flex flex-col gap-1 text-right w-full">
                     <p className="text-sm font-medium">נקבעה פגישה חדשה</p>
                     <p className="text-xs text-muted-foreground">רחל כהן - היום, 14:00</p>
                   </div>
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => navigate("/inventory")}>
-                  <div className="flex flex-col gap-1 text-center w-full">
+                  <div className="flex flex-col gap-1 text-right w-full">
                     <p className="text-sm font-medium">התראת מלאי נמוך</p>
                     <p className="text-xs text-muted-foreground">לק ג'ל אדום (נותרו 2)</p>
                   </div>
                 </DropdownMenuItem>
                 <DropdownMenuItem>
-                  <div className="flex flex-col gap-1 text-center w-full">
+                  <div className="flex flex-col gap-1 text-right w-full">
                     <p className="text-sm font-medium">תזכורת</p>
                     <p className="text-xs text-muted-foreground">להזמין מלאי חדש</p>
                   </div>
@@ -89,26 +125,6 @@ const Header = ({ pageTitle, toggleMobileSidebar }: HeaderProps) => {
               <DropdownMenuItem className="justify-center font-medium text-primary" onClick={() => navigate("/notifications")}>
                 צפה בכל ההתראות
               </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          <Separator orientation="vertical" className="h-8" />
-
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                <div className="h-8 w-8 rounded-full bg-nail-300 flex items-center justify-center text-primary-foreground">
-                  CM
-                </div>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="text-center">
-              <DropdownMenuLabel className="text-center">החשבון שלי</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-center">פרופיל</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => navigate("/settings")} className="text-center">הגדרות</DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-center">התנתק</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

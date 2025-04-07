@@ -17,14 +17,6 @@ const CashFlowForecast = () => {
     { date: '04/14', income: 820, expenses: 310, profit: 510, projected: true },
   ];
 
-  // Prepare data with visual styling for historical vs projected data
-  const styledData = forecastData.map(item => ({
-    ...item,
-    incomeOpacity: item.projected ? 0.7 : 1,
-    expensesOpacity: item.projected ? 0.7 : 1,
-    profitOpacity: item.projected ? 0.7 : 1,
-  }));
-
   // Upcoming expenses
   const upcomingExpenses = [
     { id: '1', name: 'שכר דירה', date: '10/04/2025', amount: '₪3,500' },
@@ -78,7 +70,7 @@ const CashFlowForecast = () => {
             <div className="h-[200px]" dir="ltr">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart
-                  data={styledData}
+                  data={forecastData}
                   margin={{ top: 10, right: 10, bottom: 30, left: 40 }}
                   barGap={0}
                   barSize={20}
@@ -120,27 +112,27 @@ const CashFlowForecast = () => {
                     className="income-bar" 
                     name="הכנסות"
                     radius={[4, 4, 0, 0]}
-                    stroke={styledData[0].projected ? "#888" : "transparent"}
-                    strokeDasharray={styledData[0].projected ? "3 3" : "0"}
+                    fill="#606c38"
                     fillOpacity={0.7}
+                    strokeWidth={2}
                   />
                   <Bar 
                     dataKey="expenses" 
                     className="expenses-bar" 
                     name="הוצאות"
                     radius={[4, 4, 0, 0]}
-                    stroke={styledData[0].projected ? "#888" : "transparent"}
-                    strokeDasharray={styledData[0].projected ? "3 3" : "0"}
+                    fill="#e07a5f"
                     fillOpacity={0.7}
+                    strokeWidth={2}
                   />
                   <Bar 
                     dataKey="profit" 
                     className="profit-bar" 
                     name="רווח"
                     radius={[4, 4, 0, 0]}
-                    stroke={styledData[0].projected ? "#888" : "transparent"}
-                    strokeDasharray={styledData[0].projected ? "3 3" : "0"}
+                    fill="#ddbea9"
                     fillOpacity={0.7}
+                    strokeWidth={2}
                   />
                 </BarChart>
               </ResponsiveContainer>

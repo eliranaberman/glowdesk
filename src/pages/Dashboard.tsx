@@ -46,7 +46,7 @@ const Dashboard = () => {
     ]
   };
 
-  // Analytics chart data
+  // Analytics chart data - updated with correct labels
   const monthlyData = [
     { name: 'ינואר', income: 10500, expenses: 6200 },
     { name: 'פברואר', income: 11200, expenses: 6800 },
@@ -100,7 +100,7 @@ const Dashboard = () => {
 
       {/* Updated: Daily Summary and Latest Appointments */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-6 order-first">
           <DailySummary 
             customers={dailyData.customers}
             hours={dailyData.hours}

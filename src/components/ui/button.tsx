@@ -22,13 +22,16 @@ const buttonVariants = cva(
         soft: "bg-roseGold/20 text-deepNavy hover:bg-roseGold/30",
         warm: "bg-mutedPeach/40 text-primary hover:bg-mutedPeach/60",
         success: "bg-oliveGreen text-white hover:bg-oliveGreen/90",
-        back: "bg-softGray text-muted-foreground hover:bg-softGray/80 pr-2 pl-3" // New back button variant
+        back: "bg-softGray text-muted-foreground hover:bg-softGray/80 pr-3 pl-2", // Updated back button variant for RTL
+        filter: "bg-transparent border hover:bg-accent/20", // New variant for filter buttons
+        remind: "bg-accent/10 text-primary hover:bg-accent/30 text-xs px-3 py-1.5 h-auto", // New variant for reminder buttons
       },
       size: {
         default: "h-10 px-5 py-2.5",
         sm: "h-9 rounded-lg px-4 py-2",
         lg: "h-12 rounded-xl px-8 py-3 text-base",
         icon: "h-10 w-10 rounded-full",
+        xs: "h-7 text-xs px-3 py-1 rounded-lg", // Added extra small button size
       },
     },
     defaultVariants: {

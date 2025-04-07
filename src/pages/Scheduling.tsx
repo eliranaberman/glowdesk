@@ -4,11 +4,13 @@ import GanttChart from '../components/scheduling/GanttChart';
 import CalendarSync from '../components/scheduling/CalendarSync';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import { CalendarPlus } from 'lucide-react';
+import { CalendarPlus, Filter } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 const Scheduling = () => {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [filteredAppointments, setFilteredAppointments] = useState<any[]>([]);
+  const [activeFilter, setActiveFilter] = useState('day');
 
   // Generate random appointments for the next 30 days
   const generateRandomAppointments = () => {
@@ -31,13 +33,13 @@ const Scheduling = () => {
     
     const startTimes = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00'];
     
-    // Create 30 days of random appointments
+    // Create 30 days of random appointments (more appointments for realistic testing)
     for (let i = 0; i < 30; i++) {
       const appointmentDate = new Date(currentDate);
       appointmentDate.setDate(currentDate.getDate() + i);
       
-      // Random number of appointments per day (0-5)
-      const numAppointments = Math.floor(Math.random() * 6);
+      // Random number of appointments per day (1-6)
+      const numAppointments = Math.floor(Math.random() * 6) + 1;
       const usedTimes = new Set();
       
       for (let j = 0; j < numAppointments; j++) {
@@ -92,19 +94,52 @@ const Scheduling = () => {
 
   return (
     <div dir="rtl">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">לוח פגישות</h1>
-        <Link to="/scheduling/new">
-          <Button>
-            <CalendarPlus className="h-4 w-4 ml-2" />
-            פגישה חדשה
-          </Button>
-        </Link>
-      </div>
-      <p className="text-muted-foreground mb-6">
-        ניהול הפגישות שלך וארגון היום בצורה יעילה.
-      </p>
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
+        <div>
+          <h1 className="text-2xl font-bold">לוח פגישות</h1>
+          <p className="text-muted-foreground">
+            ניהול הפגישות שלך וארגון היום בצורה יעילה.
+          </p>
+        </div>
+        
+        <div className="flex gap-4 flex-col sm:flex-row">
+          {/* Filter buttons - in RTL direction (Day on the right, Month on the left) */}
+          <div className="flex rounded-full bg-secondary/50 p-1">
+            <Button
+              variant={activeFilter === 'day' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => setActiveFilter('day')}
+              className="flex-1"
+            >
+              יום
+            </Button>
+            <Button
+              variant={activeFilter === 'week' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => setActiveFilter('week')}
+              className="flex-1"
+            >
+              שבוע
+            </Button>
+            <Button
+              variant={activeFilter === 'month' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => setActiveFilter('month')}
+              className="flex-1"
+            >
+              חודש
+            </Button>
+          </div>
 
+          <Link to="/scheduling/new">
+            <Button>
+              <CalendarPlus className="h-4 w-4 ml-2" />
+              פגישה חדשה
+            </Button>
+          </Link>
+        </div>
+      </div>
+      
       <div className="space-y-6">
         <CalendarSync />
         

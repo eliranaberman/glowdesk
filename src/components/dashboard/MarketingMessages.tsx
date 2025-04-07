@@ -1,103 +1,29 @@
 
-import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Send, Users, FileText, ArrowRight } from "lucide-react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from "@/components/ui/select";
-import { Link } from "react-router-dom";
-import { toast } from "sonner";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Textarea } from "@/components/ui/textarea";
+import { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Mail, MessageSquare, Send, PlusCircle, ArrowRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { useToast } from '@/hooks/use-toast';
 
 const MarketingMessages = () => {
-  const [selectedTemplate, setSelectedTemplate] = useState("");
-  const [selectedGroup, setSelectedGroup] = useState("all");
-  const [customMessage, setCustomMessage] = useState("");
-  const [dialogOpen, setDialogOpen] = useState(false);
-  
-  // Message templates
-  const templates = [
-    { 
-      id: "welcome", 
-      name: "הודעת ברוכים הבאים", 
-      content: "היי [שם], תודה שבחרת בנו! נשמח לראות אותך שוב בקרוב."
-    },
-    { 
-      id: "followup", 
-      name: "הודעת מעקב אחרי טיפול", 
-      content: "היי [שם], איך את מרגישה עם הטיפול? נשמח לשמוע ממך!"
-    },
-    { 
-      id: "comeback", 
-      name: "הזמנה לחזור", 
-      content: "היי [שם], מתגעגעים אלייך! רוצה לקבוע תור לטיפול הבא?"
-    },
-    { 
-      id: "birthday", 
-      name: "הודעת יום הולדת", 
-      content: "היי [שם], יום הולדת שמח! קבלי 10% הנחה בתור ליום ההולדת שלך."
-    },
-    { 
-      id: "promotion", 
-      name: "הודעת מבצע", 
-      content: "היי [שם], יש לנו מבצע מיוחד! קבלי 20% הנחה על הטיפול הבא שלך בהזמנה עד סוף החודש."
-    }
-  ];
+  const [activeTab, setActiveTab] = useState('templates');
+  const { toast } = useToast();
 
-  // Customer groups
-  const customerGroups = [
-    { id: "all", name: "כל הלקוחות", count: 176 },
-    { id: "regular", name: "לקוחות קבועים", count: 84 },
-    { id: "new", name: "לקוחות חדשים", count: 32 },
-    { id: "inactive", name: "לקוחות לא פעילים", count: 60 },
-    { id: "birthday", name: "ימי הולדת החודש", count: 14 },
-  ];
-
-  // Recent campaigns
-  const recentCampaigns = [
-    { id: "1", name: "מבצע סוף החודש", sentTo: 120, opened: 76, date: "28/03/2025" },
-    { id: "2", name: "הזמנה לחזור", sentTo: 45, opened: 22, date: "15/03/2025" },
-    { id: "3", name: "ברכות ליום האישה", sentTo: 150, opened: 112, date: "08/03/2025" },
-  ];
-
-  const handleSendMessage = () => {
-    const template = templates.find(t => t.id === selectedTemplate);
-    const group = customerGroups.find(g => g.id === selectedGroup);
-    
-    if (!template || !group) {
-      toast.error("נא לבחור תבנית וקבוצת לקוחות");
-      return;
-    }
-
-    toast.success(`נשלח "${template.name}" ל-${group.count} לקוחות`);
-    setDialogOpen(false);
+  const handleSendToAll = () => {
+    toast({
+      title: "פעולה הושלמה",
+      description: "ההודעה נשלחה לכל הלקוחות בהצלחה!",
+    });
   };
 
-  const handleCustomMessage = () => {
-    if (!customMessage || !selectedGroup) {
-      toast.error("נא להזין הודעה ולבחור קבוצת לקוחות");
-      return;
-    }
-
-    const group = customerGroups.find(g => g.id === selectedGroup);
-    toast.success(`הודעה אישית נשלחה ל-${group?.count} לקוחות`);
-    setCustomMessage("");
-    setDialogOpen(false);
+  const handleCreate = () => {
+    // In a production app, this would navigate to a template creation form
+    toast({
+      title: "יצירת תבנית חדשה",
+      description: "המערכת מעבירה אותך לעמוד יצירת תבנית חדשה...",
+    });
   };
 
   return (
@@ -106,160 +32,82 @@ const MarketingMessages = () => {
         <div className="flex items-center justify-between">
           <div>
             <CardTitle className="text-lg flex items-center">
-              <Send className="h-5 w-5 ml-2 text-primary" />
+              <MessageSquare className="h-5 w-5 ml-2 text-primary" />
               הודעות שיווקיות
             </CardTitle>
-            <CardDescription>
-              שליחת עדכונים ומבצעים ללקוחות
-            </CardDescription>
           </div>
-          <Link to="/marketing">
+          <Link to="/marketing/templates">
             <Button variant="ghost" size="sm" className="gap-1">
-              לניהול קמפיינים
+              לכל התבניות
               <ArrowRight className="h-4 w-4 mr-1" />
             </Button>
           </Link>
         </div>
       </CardHeader>
-      <CardContent>
-        <Tabs defaultValue="templates" className="w-full">
-          <TabsList className="grid grid-cols-2 mb-4">
-            <TabsTrigger value="templates">תבניות מוכנות</TabsTrigger>
-            <TabsTrigger value="campaigns">קמפיינים קודמים</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="templates" className="space-y-4">
-            <div className="border rounded-lg p-4 space-y-4">
-              <h3 className="font-medium mb-2">תבניות זמינות</h3>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {templates.slice(0, 4).map((template) => (
-                  <div
-                    key={template.id}
-                    className="border rounded-lg p-3 cursor-pointer hover:bg-accent/50 transition-colors"
-                    onClick={() => {
-                      setSelectedTemplate(template.id);
-                      setDialogOpen(true);
-                    }}
-                  >
-                    <div className="flex items-center justify-between mb-2">
-                      <h4 className="font-medium text-sm">{template.name}</h4>
-                      <FileText className="h-4 w-4 text-muted-foreground" />
-                    </div>
-                    <p className="text-xs text-muted-foreground line-clamp-2">{template.content}</p>
-                  </div>
-                ))}
-              </div>
 
-              <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-                <DialogContent className="sm:max-w-md">
-                  <DialogHeader>
-                    <DialogTitle>שליחת הודעה שיווקית</DialogTitle>
-                    <DialogDescription>
-                      בחר למי לשלוח את ההודעה
-                    </DialogDescription>
-                  </DialogHeader>
-                  <div className="space-y-4 py-4">
-                    {selectedTemplate && (
-                      <div className="border rounded-lg p-3 bg-muted/20">
-                        <h4 className="font-medium text-sm mb-2">
-                          {templates.find(t => t.id === selectedTemplate)?.name}
-                        </h4>
-                        <p className="text-sm">
-                          {templates.find(t => t.id === selectedTemplate)?.content}
-                        </p>
-                      </div>
-                    )}
-                    {!selectedTemplate && (
-                      <div className="space-y-2">
-                        <p className="text-sm font-medium">הודעה מותאמת אישית</p>
-                        <Textarea
-                          placeholder="הזן את ההודעה שלך כאן..."
-                          value={customMessage}
-                          onChange={(e) => setCustomMessage(e.target.value)}
-                          rows={4}
-                        />
-                      </div>
-                    )}
-                    <div className="space-y-2">
-                      <p className="text-sm font-medium">שלח ל:</p>
-                      <Select value={selectedGroup} onValueChange={setSelectedGroup}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="בחר קבוצת לקוחות" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {customerGroups.map((group) => (
-                            <SelectItem key={group.id} value={group.id}>
-                              {group.name} ({group.count})
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
+      <CardContent>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid grid-cols-2 mb-4">
+            <TabsTrigger value="templates" className="text-right">תבניות מוכנות</TabsTrigger>
+            <TabsTrigger value="campaigns" className="text-right">קמפיינים קודמים</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="templates" className="space-y-4">
+            <div className="grid gap-3">
+              {["תזכורת לתור", "הצעה מיוחדת", "יום הולדת", "חגים"].map((template) => (
+                <div
+                  key={template}
+                  className="flex items-center justify-between p-3 border rounded-lg hover:bg-accent/10 transition-colors"
+                >
+                  <div className="flex items-center">
+                    <Mail className="h-4 w-4 text-muted-foreground ml-2" />
+                    <span>{template}</span>
                   </div>
-                  <DialogFooter>
-                    <Button variant="outline" onClick={() => setDialogOpen(false)}>
-                      ביטול
-                    </Button>
-                    <Button onClick={selectedTemplate ? handleSendMessage : handleCustomMessage}>
-                      <Send className="ml-2 h-4 w-4" />
-                      שלח הודעה
-                    </Button>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
-              
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button variant="outline" className="w-full">
-                    <FileText className="h-4 w-4 ml-2" />
-                    יצירת תבנית חדשה
+                  <Button variant="soft" size="sm">
+                    <Send className="h-3.5 w-3.5 ml-1" />
+                    שלח
                   </Button>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-md">
-                  <DialogHeader>
-                    <DialogTitle>יצירת תבנית חדשה</DialogTitle>
-                    <DialogDescription>
-                      צור תבנית הודעה מותאמת אישית
-                    </DialogDescription>
-                  </DialogHeader>
-                  {/* Dialog content for creating a new template */}
-                </DialogContent>
-              </Dialog>
+                </div>
+              ))}
             </div>
-            
-            <Button className="w-full">
-              <Send className="h-4 w-4 ml-2" />
-              שלח הודעה לכל הלקוחות
-            </Button>
+
+            <div className="flex flex-col sm:flex-row gap-2 pt-2">
+              <Button variant="outline" onClick={handleCreate} className="flex items-center gap-1">
+                <PlusCircle className="h-4 w-4 ml-1" />
+                יצירת תבנית חדשה
+              </Button>
+              <Button onClick={handleSendToAll}>
+                שליחת הודעה לכל הלקוחות
+              </Button>
+            </div>
           </TabsContent>
-          
+
           <TabsContent value="campaigns" className="space-y-4">
             <div className="space-y-3">
-              {recentCampaigns.map((campaign) => (
-                <div key={campaign.id} className="flex justify-between items-center border-b pb-3 last:border-0 last:pb-0">
-                  <div>
-                    <p className="font-medium">{campaign.name}</p>
-                    <div className="flex items-center mt-1">
-                      <Users className="h-3 w-3 text-muted-foreground ml-1" />
-                      <span className="text-xs text-muted-foreground">{campaign.sentTo} נשלחו</span>
-                      <span className="text-xs text-muted-foreground mx-1">•</span>
-                      <span className="text-xs text-green-600">{campaign.opened} נפתחו</span>
-                    </div>
+              {[
+                { name: "הנחה לחג פסח", date: "15/03/2025", opened: "68%", clicks: "42%" },
+                { name: "תזכורת לקוחות לא פעילים", date: "02/03/2025", opened: "55%", clicks: "28%" },
+                { name: "השקת מוצרים חדשים", date: "18/02/2025", opened: "72%", clicks: "38%" }
+              ].map((campaign) => (
+                <div
+                  key={campaign.name}
+                  className="p-3 border rounded-lg hover:bg-accent/10 transition-colors"
+                >
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="font-medium">{campaign.name}</span>
+                    <span className="text-xs text-muted-foreground">{campaign.date}</span>
                   </div>
-                  <div className="text-right">
-                    <p className="text-xs text-muted-foreground">{campaign.date}</p>
-                    <Button variant="ghost" size="sm" className="mt-1">
-                      שלח שוב
-                    </Button>
+                  <div className="flex justify-between text-xs text-muted-foreground">
+                    <span>אחוז פתיחה: {campaign.opened}</span>
+                    <span>אחוז לחיצות: {campaign.clicks}</span>
                   </div>
                 </div>
               ))}
             </div>
-            
+
             <Button variant="outline" className="w-full">
-              <ArrowRight className="h-4 w-4 ml-2" />
-              צפה בכל הקמפיינים
+              <Mail className="h-4 w-4 ml-2" />
+              צפייה בכל הקמפיינים הקודמים
             </Button>
           </TabsContent>
         </Tabs>

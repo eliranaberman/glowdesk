@@ -1,37 +1,23 @@
 
-import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
-import { ArrowRight, BadgePercent, Gift, Users, Send } from "lucide-react";
-import { toast } from "sonner";
-import { Link } from "react-router-dom";
+import { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
+import { Trophy, Users, Gift, Send, ArrowRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Progress } from '@/components/ui/progress';
+import { useToast } from '@/hooks/use-toast';
 
 const LoyaltyProgram = () => {
-  const [activeTab, setActiveTab] = useState("overview");
-  
-  // Mock loyalty data
-  const activePromotions = [
-    { id: "1", name: "קבלי 15% הנחה על טיפול הבא", used: 12, total: 30, expires: "12/05/2025" },
-    { id: "2", name: "מניקור חינם עם פדיקור מלא", used: 8, total: 20, expires: "30/04/2025" },
-    { id: "3", name: "הזמיני 5 טיפולים וקבלי 1 חינם", used: 0, total: 50, expires: "31/05/2025" },
-  ];
+  const [activeTab, setActiveTab] = useState('overview');
+  const { toast } = useToast();
 
-  const topClients = [
-    { id: "1", name: "שרה כהן", points: 450, visits: 12, nextReward: "טיפול חינם" },
-    { id: "2", name: "אמילי לוי", points: 320, visits: 9, nextReward: "20% הנחה" },
-    { id: "3", name: "ליאת ונג", points: 280, visits: 8, nextReward: "טיפול מתנה לחברה" },
-  ];
-
-  const claimedRewards = [
-    { id: "1", clientName: "נופר רז", reward: "מניקור חינם", date: "01/04/2025" },
-    { id: "2", clientName: "דניאלה גיא", reward: "הנחה של 20%", date: "29/03/2025" },
-  ];
-
-  const sendPromotion = () => {
-    toast.success("הקופון נשלח ללקוחות נבחרים");
+  const handleSendCoupons = () => {
+    toast({
+      title: "פעולה הושלמה",
+      description: "קופונים נשלחו ללקוחות הנבחרים בהצלחה!",
+    });
   };
 
   return (
@@ -40,126 +26,142 @@ const LoyaltyProgram = () => {
         <div className="flex items-center justify-between">
           <div>
             <CardTitle className="text-lg flex items-center">
-              <BadgePercent className="h-5 w-5 ml-2 text-primary" />
+              <Trophy className="h-5 w-5 ml-2 text-primary" />
               תוכנית נאמנות
             </CardTitle>
-            <CardDescription>
-              ניהול הטבות ומעקב אחר נקודות נאמנות
-            </CardDescription>
           </div>
           <Link to="/loyalty">
             <Button variant="ghost" size="sm" className="gap-1">
-              לכל הנתונים
+              לתוכנית המלאה
               <ArrowRight className="h-4 w-4 mr-1" />
             </Button>
           </Link>
         </div>
       </CardHeader>
+
       <CardContent>
-        <Tabs defaultValue="overview" value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid grid-cols-3 mb-4">
-            <TabsTrigger value="overview">סקירה כללית</TabsTrigger>
-            <TabsTrigger value="clients">לקוחות נאמנים</TabsTrigger>
-            <TabsTrigger value="promotions">הטבות פעילות</TabsTrigger>
+            <TabsTrigger value="overview" className="text-right">סקירה כללית</TabsTrigger>
+            <TabsTrigger value="customers" className="text-right">לקוחות נאמנים</TabsTrigger>
+            <TabsTrigger value="promotions" className="text-right">הטבות פעילות</TabsTrigger>
           </TabsList>
-          
+
           <TabsContent value="overview" className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="border rounded-lg p-3 bg-muted/20 flex justify-between">
-                <div>
-                  <p className="text-sm font-medium">קופונים פעילים</p>
-                  <p className="text-2xl font-bold">{activePromotions.length}</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="flex flex-col p-4 border rounded-lg bg-card">
+                <div className="flex justify-between items-center mb-2">
+                  <h4 className="font-medium">לקוחות משתתפים</h4>
+                  <Users className="h-4 w-4 text-muted-foreground" />
                 </div>
-                <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-                  <Gift className="h-6 w-6 text-primary" />
-                </div>
+                <p className="text-2xl font-semibold">124</p>
+                <p className="text-xs text-muted-foreground">70% מסך הלקוחות</p>
               </div>
-              
-              <div className="border rounded-lg p-3 bg-muted/20 flex justify-between">
-                <div>
-                  <p className="text-sm font-medium">לקוחות במועדון</p>
-                  <p className="text-2xl font-bold">52</p>
+              <div className="flex flex-col p-4 border rounded-lg bg-card">
+                <div className="flex justify-between items-center mb-2">
+                  <h4 className="font-medium">קופונים שנוצלו</h4>
+                  <Gift className="h-4 w-4 text-muted-foreground" />
                 </div>
-                <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-                  <Users className="h-6 w-6 text-primary" />
-                </div>
+                <p className="text-2xl font-semibold">37</p>
+                <p className="text-xs text-muted-foreground">בחודש האחרון</p>
               </div>
             </div>
 
-            <div className="border rounded-lg p-4">
-              <h3 className="font-medium mb-3">מבצעים פעילים</h3>
+            <div className="space-y-4 pt-2">
+              <h3 className="font-medium">הקופונים הפופולריים ביותר</h3>
               <div className="space-y-3">
-                {activePromotions.map((promo) => (
-                  <div key={promo.id} className="flex justify-between items-center">
+                {[
+                  { name: "הנחה 20% על טיפול הבא", used: 85 },
+                  { name: "טיפול חינם עם חברה", used: 56 },
+                  { name: "קנה 3 קבל 1 חינם", used: 42 }
+                ].map((coupon, i) => (
+                  <div key={i} className="flex items-center justify-between">
                     <div>
-                      <p className="font-medium text-sm">{promo.name}</p>
-                      <p className="text-xs text-muted-foreground">פג תוקף: {promo.expires}</p>
+                      <p className="text-sm">{coupon.name}</p>
+                      <p className="text-xs text-muted-foreground">{coupon.used} שימושים</p>
                     </div>
-                    <div className="text-right text-sm">
-                      <p className="text-xs font-medium">{promo.used} / {promo.total}</p>
-                      <Progress value={(promo.used / promo.total) * 100} className="h-1 w-16" />
-                    </div>
+                    <Progress value={coupon.used > 70 ? 75 : coupon.used > 50 ? 50 : 30} 
+                              className="w-16 h-1.5" />
                   </div>
                 ))}
               </div>
             </div>
-            
-            <Button className="w-full" onClick={sendPromotion}>
-              <Send className="h-4 w-4 ml-2" />
-              שלח קופון ללקוחות נבחרים
-            </Button>
           </TabsContent>
-          
-          <TabsContent value="clients">
+
+          <TabsContent value="customers" className="space-y-4">
             <div className="space-y-3">
-              {topClients.map((client) => (
-                <div key={client.id} className="flex justify-between items-center border-b pb-3 last:border-0 last:pb-0">
+              {[
+                { name: "שרה כהן", visits: 24, points: 2400 },
+                { name: "לאה אברמוב", visits: 18, points: 1950 },
+                { name: "יעל גלעדי", visits: 16, points: 1720 }
+              ].map((customer, i) => (
+                <div key={i} className="flex items-center justify-between p-3 border rounded-lg">
                   <div>
-                    <p className="font-medium">{client.name}</p>
-                    <div className="flex gap-2 items-center mt-1">
-                      <Badge variant="outline" className="text-xs">
-                        {client.visits} ביקורים
-                      </Badge>
-                      <Badge variant="secondary" className="text-xs">
-                        {client.points} נקודות
-                      </Badge>
-                    </div>
+                    <p className="font-medium">{customer.name}</p>
+                    <p className="text-xs text-muted-foreground">{customer.visits} ביקורים</p>
                   </div>
-                  <div className="text-right">
-                    <Button variant="ghost" size="sm">
-                      שלח הטבה
+                  <div className="flex items-center">
+                    <Badge variant="secondary" className="ml-2">{customer.points} נקודות</Badge>
+                    <Button variant="remind" size="xs">
+                      שלח תזכורת
                     </Button>
                   </div>
                 </div>
               ))}
             </div>
+            
+            <div className="pt-2">
+              <Button variant="outline" onClick={handleSendCoupons} className="w-full">
+                <Send className="h-4 w-4 ml-2" />
+                שלח קופון ללקוחות נבחרים
+              </Button>
+            </div>
           </TabsContent>
-          
-          <TabsContent value="promotions">
-            <div className="space-y-3">
-              {activePromotions.map((promo) => (
-                <div key={promo.id} className="border rounded-lg p-3">
-                  <div className="flex justify-between items-center">
-                    <h3 className="font-medium">{promo.name}</h3>
-                    <Badge variant={promo.used > 0 ? "secondary" : "outline"}>
-                      {promo.used > 0 ? "פעיל" : "חדש"}
-                    </Badge>
-                  </div>
-                  <div className="mt-2">
-                    <div className="flex justify-between text-sm mb-1">
-                      <span className="text-muted-foreground">ניצול:</span>
-                      <span>{promo.used}/{promo.total}</span>
+
+          <TabsContent value="promotions" className="space-y-4">
+            <div className="grid gap-3">
+              {[
+                { 
+                  name: "הנחה 15%", 
+                  description: "לכל הטיפולים עד סוף החודש", 
+                  code: "SUMMER15",
+                  icon: "🌟"
+                },
+                { 
+                  name: "1+1", 
+                  description: "טיפול שני חינם ללקוחות חדשים", 
+                  code: "NEWCLIENT",
+                  icon: "🎁" 
+                },
+                { 
+                  name: "נקודות כפולות", 
+                  description: "בימי שני ורביעי", 
+                  code: "DOUBLE",
+                  icon: "✨" 
+                }
+              ].map((promo, i) => (
+                <div key={i} className="flex p-3 border rounded-lg hover:bg-accent/10 transition-colors">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <h4 className="font-medium">{promo.name}</h4>
+                      <Badge variant="outline" className="text-xs">{promo.code}</Badge>
                     </div>
-                    <Progress value={(promo.used / promo.total) * 100} className="h-2" />
+                    <p className="text-sm text-muted-foreground mt-1">{promo.description}</p>
                   </div>
-                  <p className="text-xs text-muted-foreground mt-2">פג תוקף: {promo.expires}</p>
+                  <div className="text-2xl flex items-center justify-center w-10">
+                    {promo.icon}
+                  </div>
                 </div>
               ))}
-
-              <Button variant="outline" className="w-full">
-                <Gift className="h-4 w-4 ml-2" />
-                צור הטבה חדשה
-              </Button>
+            </div>
+            
+            <div className="pt-2">
+              <Link to="/loyalty" className="w-full">
+                <Button variant="default" className="w-full">
+                  <Gift className="h-4 w-4 ml-2" />
+                  צור הטבה חדשה
+                </Button>
+              </Link>
             </div>
           </TabsContent>
         </Tabs>

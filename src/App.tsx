@@ -26,6 +26,7 @@ import SocialMedia from "./pages/SocialMedia";
 import LoyaltyPage from "./pages/LoyaltyPage";
 import CashFlow from "./pages/finances/CashFlow";
 import BusinessInsights from "./pages/finances/BusinessInsights";
+import MarketingTemplates from "./pages/marketing/MarketingTemplates";
 
 const queryClient = new QueryClient();
 
@@ -136,6 +137,12 @@ const App = () => (
             <Route path="/finances/insights" element={
               <Layout>
                 <BusinessInsights />
+              </Layout>
+            } />
+            {/* Marketing pages */}
+            <Route path="/marketing/templates" element={
+              <Layout>
+                <MarketingTemplates />
               </Layout>
             } />
             <Route path="*" element={

@@ -1,73 +1,51 @@
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, TrendingUp, LineChart, Users, Calendar, Award, DollarSign } from 'lucide-react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart as RechartsLineChart, Line } from 'recharts';
-import { cn } from '@/lib/utils';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { ArrowRight, BarChart as BarChartIcon, LineChart as LineChartIcon, Lightbulb, TrendingUp, Download } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Progress } from '@/components/ui/progress';
 
 const BusinessInsights = () => {
-  const isMobile = useIsMobile();
-  
-  // Growth trends data
-  const growthData = [
-    { month: 'ינואר', clients: 124, sessions: 183, revenue: 10200 },
-    { month: 'פברואר', clients: 132, sessions: 197, revenue: 11800 },
-    { month: 'מרץ', clients: 141, sessions: 210, revenue: 12900 },
-    { month: 'אפריל', clients: 158, sessions: 245, revenue: 14500 },
-    { month: 'מאי', clients: 164, sessions: 258, revenue: 15100 },
-    { month: 'יוני', clients: 176, sessions: 267, revenue: 16400 },
+  const [activeRange, setActiveRange] = useState('month');
+  const [activeTab, setActiveTab] = useState('performance');
+
+  // Mock data
+  const performanceData = [
+    { month: 'ינואר', revenue: 12400, target: 12000, clients: 45 },
+    { month: 'פברואר', revenue: 13100, target: 12500, clients: 48 },
+    { month: 'מרץ', revenue: 14200, target: 13000, clients: 52 },
+    { month: 'אפריל', revenue: 13800, target: 13500, clients: 55 },
+    { month: 'מאי', revenue: 15100, target: 14000, clients: 58 },
+    { month: 'יוני', revenue: 15800, target: 14500, clients: 62 },
   ];
 
-  // Service popularity data
-  const servicePopularity = [
-    { name: 'מניקור ג\'ל', value: 40 },
-    { name: 'פדיקור', value: 25 },
-    { name: 'אקריליק', value: 18 },
-    { name: 'לק ג\'ל', value: 12 },
-    { name: 'עיצוב', value: 5 },
+  // Key insights data
+  const keyInsights = [
+    {
+      title: 'שעות שיא ביקוש',
+      description: 'בין השעות 16:00-18:00 נרשם הביקוש הגבוה ביותר לטיפולים. שקלי להוסיף תורים בשעות אלה.',
+      priority: 'high'
+    },
+    {
+      title: 'לקוחות חוזרים',
+      description: '68% מהלקוחות מגיעים לפחות פעם בחודשיים. יש מקום לשיפור בשיעור החזרה.',
+      priority: 'medium'
+    },
+    {
+      title: 'שירותים משולבים',
+      description: 'לקוחות שמזמינות מניקור+פדיקור יחד מוציאות בממוצע 35% יותר מלקוחות שמזמינות טיפול בודד.',
+      priority: 'high'
+    },
   ];
 
-  // Client retention data
-  const retentionData = [
-    { month: 'ינואר', rate: 68 },
-    { month: 'פברואר', rate: 71 },
-    { month: 'מרץ', rate: 72 },
-    { month: 'אפריל', rate: 75 },
-    { month: 'מאי', rate: 78 },
-    { month: 'יוני', rate: 82 },
-  ];
-
-  // Key business metrics
-  const keyMetrics = [
-    {
-      title: 'שיעור שימור לקוחות',
-      value: '82%',
-      change: '+5%',
-      icon: <Users className="h-5 w-5 text-roseGold" />,
-      trend: 'positive'
-    },
-    {
-      title: 'הכנסה ממוצעת ללקוח',
-      value: '₪480',
-      change: '+8%',
-      icon: <DollarSign className="h-5 w-5 text-mutedPeach" />,
-      trend: 'positive'
-    },
-    {
-      title: 'אחוז תפוסה',
-      value: '76%',
-      change: '+12%',
-      icon: <Calendar className="h-5 w-5 text-deepNavy/70" />,
-      trend: 'positive'
-    },
-    {
-      title: 'ציון משוב לקוחות',
-      value: '4.8/5',
-      change: '+0.3',
-      icon: <Award className="h-5 w-5 text-oliveGreen" />,
-      trend: 'positive'
-    },
+  const goalData = [
+    { name: 'הכנסה חודשית', current: 15800, target: 20000, percentage: 79 },
+    { name: 'לקוחות חדשים', current: 12, target: 20, percentage: 60 },
+    { name: 'שיעור חזרה', current: 68, target: 80, percentage: 85 },
+    { name: 'טיפולים בשבוע', current: 32, target: 40, percentage: 80 },
   ];
 
   return (
@@ -75,208 +53,169 @@ const BusinessInsights = () => {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-semibold mb-1">תובנות עסקיות</h1>
-          <p className="text-muted-foreground">ניתוח מגמות וביצועים של העסק</p>
+          <p className="text-muted-foreground">ניתוח הביצועים העסקיים שלך והצעות לשיפור</p>
         </div>
         
         <div className="flex gap-2">
-          <Button size="sm" variant="soft" className="gap-2">
-            <LineChart className="h-4 w-4" />
-            התאמה אישית
+          {/* Date range buttons in RTL order */}
+          <div className="filter-button-group flex">
+            <Button 
+              variant={activeRange === 'day' ? 'default' : 'ghost'} 
+              size="sm" 
+              onClick={() => setActiveRange('day')}
+              className={activeRange === 'day' ? "filter-button-active" : ""}
+            >
+              יום
+            </Button>
+            <Button 
+              variant={activeRange === 'week' ? 'default' : 'ghost'} 
+              size="sm" 
+              onClick={() => setActiveRange('week')}
+              className={activeRange === 'week' ? "filter-button-active" : ""}
+            >
+              שבוע
+            </Button>
+            <Button 
+              variant={activeRange === 'month' ? 'default' : 'ghost'} 
+              size="sm" 
+              onClick={() => setActiveRange('month')}
+              className={activeRange === 'month' ? "filter-button-active" : ""}
+            >
+              חודש
+            </Button>
+          </div>
+          
+          <Button variant="outline" size="sm" className="flex gap-1">
+            <Download className="h-4 w-4 ml-1" />
+            הורדת דוח
           </Button>
         </div>
       </div>
 
-      {/* Key Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {keyMetrics.map((metric, i) => (
-          <Card key={i} className="elegant-card">
-            <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
-              <CardTitle className="text-sm font-medium">{metric.title}</CardTitle>
-              {metric.icon}
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{metric.value}</div>
-              <p className="text-xs text-muted-foreground mt-1 flex items-center">
-                <span className={cn(
-                  "inline-block mr-1",
-                  metric.trend === 'positive' ? "text-oliveGreen" : "text-rose-500"
-                )}>
-                  {metric.change}
-                </span> 
-                מהחודש הקודם
-              </p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      {/* Growth Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="elegant-card">
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <TrendingUp className="h-5 w-5 ml-2 text-deepNavy/70" />
-              צמיחת הכנסות
-            </CardTitle>
-            <CardDescription>מגמות הכנסות ב-6 החודשים האחרונים</CardDescription>
+      <div className="grid gap-6">
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg">ביצועים עסקיים</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="h-[300px]" dir="ltr">
-              <ResponsiveContainer width="100%" height="100%">
-                <RechartsLineChart data={growthData} margin={{ top: 10, right: 10, bottom: 30, left: isMobile ? 10 : 30 }}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
-                  <XAxis dataKey="month" />
-                  <YAxis tickFormatter={(value) => `₪${value / 1000}K`} />
-                  <Tooltip 
-                    formatter={(value) => [`₪${value}`, 'הכנסה']}
-                    labelFormatter={(label) => `חודש: ${label}`}
-                  />
-                  <Line 
-                    type="monotone" 
-                    dataKey="revenue" 
-                    stroke="#7D8E6E" 
-                    strokeWidth={2}
-                    dot={{ fill: '#7D8E6E', r: 4 }}
-                    activeDot={{ r: 6, fill: '#7D8E6E', stroke: 'white', strokeWidth: 2 }}
-                  />
-                </RechartsLineChart>
-              </ResponsiveContainer>
-            </div>
+            <Tabs defaultValue="performance" value={activeTab} onValueChange={setActiveTab}>
+              <TabsList className="grid grid-cols-2 mb-6">
+                <TabsTrigger value="performance" className="flex items-center gap-2">
+                  <BarChartIcon className="h-4 w-4" />
+                  ביצועים
+                </TabsTrigger>
+                <TabsTrigger value="goals" className="flex items-center gap-2">
+                  <TrendingUp className="h-4 w-4" />
+                  יעדים
+                </TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="performance">
+                <div className="h-[300px]" dir="ltr">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart
+                      data={performanceData}
+                      margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                      <XAxis dataKey="month" />
+                      <YAxis />
+                      <Tooltip 
+                        formatter={(value: number) => [`₪${value}`, undefined]}
+                        labelFormatter={(label) => `חודש: ${label}`}
+                      />
+                      <Bar dataKey="revenue" name="הכנסה" fill="#606c38" radius={[3, 3, 0, 0]} />
+                      <Bar dataKey="target" name="יעד" fill="#ddbea9" radius={[3, 3, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="goals">
+                <div className="space-y-6">
+                  {goalData.map((goal, i) => (
+                    <div key={i} className="space-y-1.5">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm font-medium">{goal.name}</span>
+                        <span className="text-sm text-muted-foreground">{goal.current}/{goal.target}</span>
+                      </div>
+                      <Progress value={goal.percentage} className="h-2" />
+                      <div className="flex justify-end">
+                        <span className="text-xs text-muted-foreground">{goal.percentage}%</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </TabsContent>
+            </Tabs>
           </CardContent>
         </Card>
 
-        <Card className="elegant-card">
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Users className="h-5 w-5 ml-2 text-roseGold" />
-              צמיחת לקוחות ופגישות
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg flex items-center">
+              <Lightbulb className="h-5 w-5 ml-2 text-amber-500" />
+              תובנות מפתח
             </CardTitle>
-            <CardDescription>מגמות לקוחות ופגישות לפי חודש</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="h-[300px]" dir="ltr">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart
-                  data={growthData}
-                  margin={{ top: 10, right: 10, bottom: 30, left: isMobile ? 10 : 30 }}
-                  barGap={4}
-                >
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
-                  <XAxis dataKey="month" />
-                  <YAxis />
-                  <Tooltip />
-                  <Bar dataKey="clients" name="לקוחות" fill="#D4B499" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="sessions" name="פגישות" fill="#E6CCB9" radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Services & Retention */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="elegant-card">
-          <CardHeader>
-            <CardTitle>שירותים פופולריים</CardTitle>
-            <CardDescription>התפלגות הזמנות שירותים לפי סוג</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {servicePopularity.map((service) => (
-                <div key={service.name} className="flex flex-col">
-                  <div className="flex justify-between mb-1">
-                    <span className="text-sm font-medium">{service.name}</span>
-                    <span className="text-sm text-muted-foreground">{service.value}%</span>
-                  </div>
-                  <div className="w-full h-3 bg-muted/30 rounded-full overflow-hidden">
-                    <div 
-                      className="h-full bg-roseGold/80 rounded-full" 
-                      style={{ width: `${service.value}%` }}
-                    />
-                  </div>
+              {keyInsights.map((insight, i) => (
+                <div 
+                  key={i} 
+                  className={`p-4 rounded-lg border-r-4 ${
+                    insight.priority === 'high' ? 'border-r-amber-400 bg-amber-50/30' : 
+                    'border-r-blue-400 bg-blue-50/30'
+                  }`}
+                >
+                  <h3 className="font-medium mb-1">{insight.title}</h3>
+                  <p className="text-sm text-muted-foreground">{insight.description}</p>
                 </div>
               ))}
+              
+              <div className="pt-2 flex justify-end">
+                <Link to="/finances/detailed-insights">
+                  <Button variant="outline" className="gap-1">
+                    לפרטים נוספים
+                    <ArrowRight className="h-4 w-4 mr-1" />
+                  </Button>
+                </Link>
+              </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="elegant-card">
-          <CardHeader>
-            <CardTitle>שימור לקוחות</CardTitle>
-            <CardDescription>אחוז שימור לקוחות לאורך זמן</CardDescription>
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg">מגמות לקוחות</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="h-[280px]" dir="ltr">
+            <div className="h-[250px]" dir="ltr">
               <ResponsiveContainer width="100%" height="100%">
-                <RechartsLineChart data={retentionData} margin={{ top: 10, right: 10, bottom: 30, left: isMobile ? 10 : 30 }}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+                <LineChart
+                  data={performanceData}
+                  margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
                   <XAxis dataKey="month" />
-                  <YAxis domain={[60, 85]} tickFormatter={(value) => `${value}%`} />
-                  <Tooltip 
-                    formatter={(value) => [`${value}%`, 'שיעור שימור']}
+                  <YAxis />
+                  <Tooltip
+                    formatter={(value: number) => [value, 'מספר לקוחות']}
                     labelFormatter={(label) => `חודש: ${label}`}
                   />
                   <Line 
                     type="monotone" 
-                    dataKey="rate" 
-                    stroke="#D4B499" 
-                    strokeWidth={2}
-                    dot={{ fill: '#D4B499', r: 4 }}
-                    activeDot={{ r: 6, fill: '#D4B499', stroke: 'white', strokeWidth: 2 }}
+                    dataKey="clients" 
+                    stroke="#8884d8" 
+                    activeDot={{ r: 8 }} 
+                    name="לקוחות" 
                   />
-                </RechartsLineChart>
+                </LineChart>
               </ResponsiveContainer>
             </div>
           </CardContent>
         </Card>
       </div>
-
-      {/* Key Insights */}
-      <Card className="elegant-card border-r-4 border-r-oliveGreen">
-        <CardHeader>
-          <CardTitle className="flex items-center text-lg">
-            <TrendingUp className="h-5 w-5 ml-2 text-oliveGreen" />
-            תובנות מפתח
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-            <div className="space-y-2">
-              <h3 className="font-medium">שימור לקוחות</h3>
-              <p className="text-sm text-muted-foreground">
-                העלייה של 5% בשימור הלקוחות נובעת מתוכנית המועדון החדשה שהושקה לפני 3 חודשים.
-              </p>
-              <Button variant="link" size="sm" className="px-0 text-primary">
-                פרטים נוספים
-                <ArrowRight className="h-4 w-4 mr-1" />
-              </Button>
-            </div>
-            
-            <div className="space-y-2">
-              <h3 className="font-medium">שירותים פופולריים</h3>
-              <p className="text-sm text-muted-foreground">
-                מניקור ג'ל נשאר השירות הפופולרי ביותר, עם גידול של 8% בהזמנות בחודש האחרון.
-              </p>
-              <Button variant="link" size="sm" className="px-0 text-primary">
-                פרטים נוספים
-                <ArrowRight className="h-4 w-4 mr-1" />
-              </Button>
-            </div>
-            
-            <div className="space-y-2">
-              <h3 className="font-medium">הזדמנויות צמיחה</h3>
-              <p className="text-sm text-muted-foreground">
-                הרחבת היצע השירותים לפדיקור מקצועי עשויה להגדיל את ההכנסה הממוצעת ללקוח ב-15%.
-              </p>
-              <Button variant="link" size="sm" className="px-0 text-primary">
-                פרטים נוספים
-                <ArrowRight className="h-4 w-4 mr-1" />
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 };
