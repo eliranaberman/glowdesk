@@ -8,6 +8,7 @@ import { Instagram, Facebook, Twitter, MessageCircle, User, Calendar, Clock, Fla
 import ConnectionModal from "./ConnectionModal";
 import ReplyModal from "./ReplyModal";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+
 const mockedMessages: Message[] = [{
   id: 1,
   platform: "instagram",
@@ -49,6 +50,7 @@ const mockedMessages: Message[] = [{
   read: true,
   avatar: "https://picsum.photos/seed/5/64"
 }];
+
 const InboxContent = () => {
   const [messages, setMessages] = useState(mockedMessages);
   const [activePlatform, setActivePlatform] = useState<string>("all");
@@ -60,11 +62,12 @@ const InboxContent = () => {
   const {
     toast
   } = useToast();
+
   const filteredMessages = activePlatform === "all" ? messages : messages.filter(msg => msg.platform === activePlatform);
+
   const handleSendReply = () => {
     if (!replyText.trim() || !selectedMessage) return;
 
-    // Mark the message as read
     setMessages(prev => prev.map(msg => msg.id === selectedMessage.id ? {
       ...msg,
       read: true
@@ -75,6 +78,7 @@ const InboxContent = () => {
     });
     setReplyText("");
   };
+
   const handleMarkAllAsRead = () => {
     setMessages(prev => prev.map(msg => ({
       ...msg,
@@ -85,15 +89,17 @@ const InboxContent = () => {
       description: "כל ההודעות סומנו כנקראו בהצלחה"
     });
   };
+
   const handleReply = (message: Message) => {
     setSelectedMessage(message);
     setReplyModalOpen(true);
   };
+
   const handleShowDetails = () => {
     setDetailsOpen(true);
   };
+
   return <div className="flex flex-col lg:flex-row-reverse gap-5 h-[calc(100vh-220px)]">
-      {/* Message List - Now responsive column */}
       <Card className="lg:w-1/3 w-full">
         <CardHeader className="flex flex-row items-center justify-between pb-2">
           <Button variant="outline" size="sm" onClick={() => setIsModalOpen(true)}>
@@ -130,7 +136,6 @@ const InboxContent = () => {
         </CardContent>
       </Card>
 
-      {/* Message View - Now as the main content */}
       <Card className="flex-1">
         {selectedMessage ? <>
             <CardHeader className="flex flex-row items-center justify-between pb-4 border-b">
@@ -156,32 +161,36 @@ const InboxContent = () => {
               </div>
             </CardHeader>
             
-            <CardContent className="flex flex-col h-[calc(100vh-380px)] py-[47px]">
-              <div className="flex-1 overflow-y-auto p-6 space-y-8 bg-muted/10 mb-6 border border-border/50 rounded-md mx-0 my-0 py-[115px]">
-                {/* Customer Message */}
+            <CardContent className="flex flex-col h-[calc(100vh-380px)]">
+              <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6 bg-muted/10 mb-4 border border-border/40 rounded-md shadow-soft flex flex-col justify-center">
                 <div className="flex flex-row gap-4 items-start max-w-[85%] ml-auto">
-                  <div className="bg-muted/30 p-6 rounded-lg w-full shadow-soft my-[5px]">
-                    <p className="mb-3 text-base">{selectedMessage.message}</p>
+                  <div className="bg-muted/30 p-4 md:p-5 rounded-lg w-full shadow-soft">
+                    <p className="mb-2 text-base">{selectedMessage.message}</p>
                     <span className="text-sm text-muted-foreground block">{selectedMessage.time}</span>
                   </div>
-                  <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0">
+                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-full overflow-hidden flex-shrink-0">
                     <img src={selectedMessage.avatar} alt={selectedMessage.sender} className="w-full h-full object-cover" />
                   </div>
                 </div>
                 
-                {/* If there was a previous response */}
                 {selectedMessage.id % 2 === 0 && <div className="flex justify-end">
-                    <div className="bg-primary/10 p-6 rounded-lg max-w-[85%] w-full shadow-soft">
-                      <p className="mb-3 text-base">תודה על פנייתך! אשמח לעזור. אפשר לתת מחיר מדויק בטלפון או כשאראה את המצב הקיים.</p>
+                    <div className="bg-primary/10 p-4 md:p-5 rounded-lg max-w-[85%] w-full shadow-soft">
+                      <p className="mb-2 text-base">תודה על פנייתך! אשמח לעזור. אפשר לתת מחיר מדויק בטלפון או כשאראה את המצב הקיים.</p>
                       <span className="text-sm text-muted-foreground block">10:30</span>
                     </div>
                   </div>}
               </div>
               
-              <div className="flex gap-4 bg-card shadow-inner p-4 rounded-lg border border-border/30 py-[11px]">
-                <textarea value={replyText} onChange={e => setReplyText(e.target.value)} className="flex-1 border rounded-lg p-5 text-base focus:outline-none focus:ring-2 focus:ring-primary/30 min-h-[120px] resize-none" placeholder="כתוב את תגובתך כאן..." rows={6} />
+              <div className="flex gap-3 bg-card shadow-inner p-3 md:p-4 rounded-lg border border-border/30 mb-2">
+                <textarea 
+                  value={replyText} 
+                  onChange={e => setReplyText(e.target.value)} 
+                  className="flex-1 border rounded-lg p-3 md:p-4 text-base focus:outline-none focus:ring-2 focus:ring-primary/30 min-h-[100px] resize-none" 
+                  placeholder="כתוב את תגובתך כאן..." 
+                  rows={4} 
+                />
                 <div className="flex flex-col gap-2 justify-end">
-                  <Button onClick={handleSendReply} className="h-14 px-8" disabled={!replyText.trim()}>
+                  <Button onClick={handleSendReply} className="h-12 px-6" disabled={!replyText.trim()}>
                     שלח
                   </Button>
                 </div>
@@ -208,6 +217,7 @@ const InboxContent = () => {
       <CustomerDetailsDialog open={detailsOpen} onOpenChange={setDetailsOpen} customer={selectedMessage} />
     </div>;
 };
+
 const CustomerDetailsDialog = ({
   open,
   onOpenChange,
@@ -278,6 +288,7 @@ const CustomerDetailsDialog = ({
       </DialogContent>
     </Dialog>;
 };
+
 const MessageList = ({
   messages,
   selectedMessage,
@@ -327,7 +338,6 @@ const MessageList = ({
     </div>;
 };
 
-// Helper function to get platform icon
 const getPlatformIcon = (platform: string) => {
   switch (platform.toLowerCase()) {
     case "instagram":
@@ -340,4 +350,5 @@ const getPlatformIcon = (platform: string) => {
       return <MessageCircle size={16} className="text-gray-500" />;
   }
 };
+
 export default InboxContent;
