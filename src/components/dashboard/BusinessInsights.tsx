@@ -111,9 +111,9 @@ const BusinessInsights = () => {
       <CardContent>
         <Tabs defaultValue="today" value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid grid-cols-3 mb-4">
-            <TabsTrigger value="today" className="order-1">היום</TabsTrigger>
+            <TabsTrigger value="today" className="order-3">היום</TabsTrigger>
             <TabsTrigger value="week" className="order-2">השבוע</TabsTrigger>
-            <TabsTrigger value="month" className="order-3">החודש</TabsTrigger>
+            <TabsTrigger value="month" className="order-1">החודש</TabsTrigger>
           </TabsList>
           
           <TabsContent value="today" className="space-y-4">
