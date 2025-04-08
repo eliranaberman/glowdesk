@@ -159,16 +159,17 @@ const Sidebar = ({ onLinkClick }: SidebarProps) => {
                 to={item.path}
                 className={({ isActive }) => 
                   cn(
-                    "nav-link",
+                    "nav-link flex items-center",
                     isActive ? "bg-accent/50 font-medium text-primary shadow-card" : "hover:bg-accent/30",
-                    collapsed ? "justify-center" : "justify-start text-right"
+                    collapsed ? "justify-center" : "justify-start"
                   )
                 }
                 data-state={({ isActive }: {isActive: boolean}) => isActive ? "active" : "inactive"}
                 onClick={handleLinkClick}
               >
+                {/* Changed order of icon and text for RTL */}
+                {!collapsed && <span className="text-right flex-grow">{item.name}</span>}
                 {item.icon}
-                {!collapsed && <span className="text-right">{item.name}</span>}
               </NavLink>
             ))}
           </div>
@@ -187,16 +188,17 @@ const Sidebar = ({ onLinkClick }: SidebarProps) => {
                   to={item.path}
                   className={({ isActive }) => 
                     cn(
-                      "nav-link",
+                      "nav-link flex items-center",
                       isActive ? "bg-accent/50 font-medium text-primary shadow-card" : "hover:bg-accent/30",
-                      collapsed ? "justify-center" : "justify-start text-right"
+                      collapsed ? "justify-center" : "justify-start"
                     )
                   }
                   data-state={({ isActive }: {isActive: boolean}) => isActive ? "active" : "inactive"}
                   onClick={handleLinkClick}
                 >
+                  {/* Changed order of icon and text for RTL */}
+                  {!collapsed && <span className="text-right flex-grow">{item.name}</span>}
                   {item.icon}
-                  {!collapsed && <span className="text-right">{item.name}</span>}
                 </NavLink>
               ))}
             </div>
@@ -216,16 +218,17 @@ const Sidebar = ({ onLinkClick }: SidebarProps) => {
                   to={item.path}
                   className={({ isActive }) => 
                     cn(
-                      "nav-link",
+                      "nav-link flex items-center",
                       isActive ? "bg-accent/50 font-medium text-primary shadow-card" : "hover:bg-accent/30",
-                      collapsed ? "justify-center" : "justify-start text-right"
+                      collapsed ? "justify-center" : "justify-start"
                     )
                   }
                   data-state={({ isActive }: {isActive: boolean}) => isActive ? "active" : "inactive"}
                   onClick={handleLinkClick}
                 >
+                  {/* Changed order of icon and text for RTL */}
+                  {!collapsed && <span className="text-right flex-grow">{item.name}</span>}
                   {item.icon}
-                  {!collapsed && <span className="text-right">{item.name}</span>}
                 </NavLink>
               ))}
             </div>
@@ -241,31 +244,33 @@ const Sidebar = ({ onLinkClick }: SidebarProps) => {
           to="/notifications"
           className={({ isActive }) => 
             cn(
-              "nav-link",
+              "nav-link flex items-center",
               isActive ? "bg-accent/50 font-medium text-primary shadow-card" : "hover:bg-accent/30",
-              collapsed ? "justify-center" : "justify-start text-right"
+              collapsed ? "justify-center" : "justify-start"
             )
           }
           data-state={({ isActive }: {isActive: boolean}) => isActive ? "active" : "inactive"}
           onClick={handleLinkClick}
         >
+          {/* Changed order of icon and text for RTL */}
+          {!collapsed && <span className="text-right flex-grow">התראות</span>}
           <Bell className="w-5 h-5" />
-          {!collapsed && <span className="text-right">התראות</span>}
         </NavLink>
         <NavLink
           to="/settings"
           className={({ isActive }) => 
             cn(
-              "nav-link",
+              "nav-link flex items-center",
               isActive ? "bg-accent/50 font-medium text-primary shadow-card" : "hover:bg-accent/30",
-              collapsed ? "justify-center" : "justify-start text-right"
+              collapsed ? "justify-center" : "justify-start"
             )
           }
           data-state={({ isActive }: {isActive: boolean}) => isActive ? "active" : "inactive"}
           onClick={handleLinkClick}
         >
+          {/* Changed order of icon and text for RTL */}
+          {!collapsed && <span className="text-right flex-grow">הגדרות</span>}
           <Settings className="w-5 h-5" />
-          {!collapsed && <span className="text-right">הגדרות</span>}
         </NavLink>
       </div>
 
@@ -288,3 +293,4 @@ const Sidebar = ({ onLinkClick }: SidebarProps) => {
 };
 
 export default Sidebar;
+
