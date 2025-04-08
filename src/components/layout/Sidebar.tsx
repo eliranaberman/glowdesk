@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -22,7 +21,6 @@ import {
   TrendingUp,
 } from 'lucide-react';
 
-// Updated order according to final requirements
 const navItems = [
   { 
     name: 'דשבורד', 
@@ -46,7 +44,6 @@ const navItems = [
   },
 ];
 
-// Financial management category with its items
 const financialItems = [
   {
     name: 'תזרים מזומנים',
@@ -60,7 +57,6 @@ const financialItems = [
   }
 ];
 
-// Additional operational items - updated order
 const operationalItems = [
   { 
     name: 'הוצאות',
@@ -99,7 +95,6 @@ const Sidebar = ({ onLinkClick }: SidebarProps) => {
     }
   };
 
-  // Effect to scroll to active element when sidebar mounts or location changes
   useEffect(() => {
     if (!collapsed && scrollAreaRef.current) {
       const activeElement = scrollAreaRef.current.querySelector('[data-state="active"]');
@@ -119,7 +114,6 @@ const Sidebar = ({ onLinkClick }: SidebarProps) => {
       )}
       dir="rtl"
     >
-      {/* Header with Brand */}
       <div className="flex items-center justify-between p-4 h-16 shrink-0">
         {!collapsed && (
           <div className="flex items-center">
@@ -145,13 +139,11 @@ const Sidebar = ({ onLinkClick }: SidebarProps) => {
 
       <Separator className="bg-border/30" />
 
-      {/* Improved scroll behavior with ScrollArea component */}
       <ScrollArea 
         className="flex-1 pr-0 pl-1 overflow-y-auto overflow-x-hidden"
         scrollHideDelay={200}
       >
         <div className="py-3 space-y-6 px-2">
-          {/* Main navigation items */}
           <div className="space-y-1">
             {navItems.map((item) => (
               <NavLink
@@ -167,14 +159,12 @@ const Sidebar = ({ onLinkClick }: SidebarProps) => {
                 data-state={({ isActive }: {isActive: boolean}) => isActive ? "active" : "inactive"}
                 onClick={handleLinkClick}
               >
-                {/* Changed order of icon and text for RTL */}
                 {!collapsed && <span className="text-right flex-grow">{item.name}</span>}
                 {item.icon}
               </NavLink>
             ))}
           </div>
 
-          {/* Financial management category */}
           <div>
             {!collapsed && (
               <h3 className="text-xs font-semibold text-muted-foreground px-2 py-1 text-right">
@@ -196,7 +186,6 @@ const Sidebar = ({ onLinkClick }: SidebarProps) => {
                   data-state={({ isActive }: {isActive: boolean}) => isActive ? "active" : "inactive"}
                   onClick={handleLinkClick}
                 >
-                  {/* Changed order of icon and text for RTL */}
                   {!collapsed && <span className="text-right flex-grow">{item.name}</span>}
                   {item.icon}
                 </NavLink>
@@ -204,7 +193,6 @@ const Sidebar = ({ onLinkClick }: SidebarProps) => {
             </div>
           </div>
 
-          {/* Operational items */}
           <div>
             {!collapsed && (
               <h3 className="text-xs font-semibold text-muted-foreground px-2 py-1 text-right">
@@ -226,7 +214,6 @@ const Sidebar = ({ onLinkClick }: SidebarProps) => {
                   data-state={({ isActive }: {isActive: boolean}) => isActive ? "active" : "inactive"}
                   onClick={handleLinkClick}
                 >
-                  {/* Changed order of icon and text for RTL */}
                   {!collapsed && <span className="text-right flex-grow">{item.name}</span>}
                   {item.icon}
                 </NavLink>
@@ -238,43 +225,39 @@ const Sidebar = ({ onLinkClick }: SidebarProps) => {
 
       <Separator className="bg-border/30" />
 
-      {/* Bottom actions */}
       <div className="p-2 space-y-1 shrink-0">
         <NavLink
           to="/notifications"
           className={({ isActive }) => 
             cn(
-              "nav-link flex items-center",
+              "nav-link flex items-center justify-end",
               isActive ? "bg-accent/50 font-medium text-primary shadow-card" : "hover:bg-accent/30",
-              collapsed ? "justify-center" : "justify-start"
+              collapsed ? "justify-center" : "justify-end"
             )
           }
           data-state={({ isActive }: {isActive: boolean}) => isActive ? "active" : "inactive"}
           onClick={handleLinkClick}
         >
-          {/* Changed order of icon and text for RTL */}
-          {!collapsed && <span className="text-right flex-grow">התראות</span>}
-          <Bell className="w-5 h-5" />
+          <Bell className="w-5 h-5 ml-2" />
+          {!collapsed && <span>התראות</span>}
         </NavLink>
         <NavLink
           to="/settings"
           className={({ isActive }) => 
             cn(
-              "nav-link flex items-center",
+              "nav-link flex items-center justify-end",
               isActive ? "bg-accent/50 font-medium text-primary shadow-card" : "hover:bg-accent/30",
-              collapsed ? "justify-center" : "justify-start"
+              collapsed ? "justify-center" : "justify-end"
             )
           }
           data-state={({ isActive }: {isActive: boolean}) => isActive ? "active" : "inactive"}
           onClick={handleLinkClick}
         >
-          {/* Changed order of icon and text for RTL */}
-          {!collapsed && <span className="text-right flex-grow">הגדרות</span>}
-          <Settings className="w-5 h-5" />
+          <Settings className="w-5 h-5 ml-2" />
+          {!collapsed && <span>הגדרות</span>}
         </NavLink>
       </div>
 
-      {/* Profile section */}
       <div className="p-4 shrink-0">
         {!collapsed && (
           <div className="flex items-center">
@@ -293,4 +276,3 @@ const Sidebar = ({ onLinkClick }: SidebarProps) => {
 };
 
 export default Sidebar;
-
