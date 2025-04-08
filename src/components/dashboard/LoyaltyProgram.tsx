@@ -49,14 +49,6 @@ const LoyaltyProgram = () => {
 
           <TabsContent value="overview" className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="flex flex-col p-4 border rounded-lg bg-card order-2 sm:order-2">
-                <div className="flex justify-between items-center mb-2">
-                  <Users className="h-4 w-4 text-muted-foreground" />
-                  <h4 className="font-medium">קופונים שנוצלו</h4>
-                </div>
-                <p className="text-2xl font-semibold text-right">37</p>
-                <p className="text-xs text-muted-foreground text-right">בחודש האחרון</p>
-              </div>
               <div className="flex flex-col p-4 border rounded-lg bg-card order-1 sm:order-1">
                 <div className="flex justify-between items-center mb-2">
                   <Users className="h-4 w-4 text-muted-foreground" />
@@ -64,6 +56,14 @@ const LoyaltyProgram = () => {
                 </div>
                 <p className="text-2xl font-semibold text-right">124</p>
                 <p className="text-xs text-muted-foreground text-right">70% מסך הלקוחות</p>
+              </div>
+              <div className="flex flex-col p-4 border rounded-lg bg-card order-2 sm:order-2">
+                <div className="flex justify-between items-center mb-2">
+                  <Users className="h-4 w-4 text-muted-foreground" />
+                  <h4 className="font-medium">קופונים שנוצלו</h4>
+                </div>
+                <p className="text-2xl font-semibold text-right">37</p>
+                <p className="text-xs text-muted-foreground text-right">בחודש האחרון</p>
               </div>
             </div>
 
