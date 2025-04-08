@@ -79,11 +79,11 @@ const BusinessInsights = () => {
   const getInsightCardStyle = (priority: string) => {
     switch (priority) {
       case 'high':
-        return 'border-l-4 border-l-red-400 bg-red-50/30';
+        return 'border-r-4 border-r-red-400 bg-red-50/30';
       case 'medium':
-        return 'border-l-4 border-l-amber-400 bg-amber-50/30';
+        return 'border-r-4 border-r-amber-400 bg-amber-50/30';
       default:
-        return 'border-l-4 border-l-blue-400 bg-blue-50/30';
+        return 'border-r-4 border-r-blue-400 bg-blue-50/30';
     }
   };
 
@@ -91,19 +91,19 @@ const BusinessInsights = () => {
     <Card>
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
-          <div>
-            <CardTitle className="text-lg flex items-center">
+          <div className="text-right">
+            <CardTitle className="text-lg flex items-center justify-end">
               <Lightbulb className="h-5 w-5 ml-2 text-primary" />
               תובנות עסקיות
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-right">
               המלצות ותובנות מבוססות נתונים לשיפור העסק
             </CardDescription>
           </div>
           <Link to="/insights">
-            <Button variant="ghost" size="sm" className="gap-1">
+            <Button variant="ghost" size="sm" className="gap-1 flex-row-reverse">
               לכל התובנות
-              <ArrowRight className="h-4 w-4 mr-1" />
+              <ArrowRight className="h-4 w-4 ml-1" />
             </Button>
           </Link>
         </div>
@@ -111,18 +111,18 @@ const BusinessInsights = () => {
       <CardContent>
         <Tabs defaultValue="today" value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid grid-cols-3 mb-4">
-            <TabsTrigger value="today">היום</TabsTrigger>
-            <TabsTrigger value="week">השבוע</TabsTrigger>
-            <TabsTrigger value="month">החודש</TabsTrigger>
+            <TabsTrigger value="today" className="order-1">היום</TabsTrigger>
+            <TabsTrigger value="week" className="order-2">השבוע</TabsTrigger>
+            <TabsTrigger value="month" className="order-3">החודש</TabsTrigger>
           </TabsList>
           
           <TabsContent value="today" className="space-y-4">
             {insights.today.map((insight) => (
               <div
                 key={insight.id}
-                className={cn("p-4 rounded-lg", getInsightCardStyle(insight.priority))}
+                className={cn("p-4 rounded-lg text-right", getInsightCardStyle(insight.priority))}
               >
-                <div className="flex items-start gap-3">
+                <div className="flex items-start gap-3 flex-row-reverse">
                   <div className="mt-0.5">{insight.icon}</div>
                   <div>
                     <h3 className="font-medium text-base">{insight.title}</h3>
@@ -133,11 +133,11 @@ const BusinessInsights = () => {
             ))}
 
             <div className="border rounded-lg p-4">
-              <h3 className="font-medium mb-3">לקוחות לא פעילים</h3>
+              <h3 className="font-medium mb-3 text-right">לקוחות לא פעילים</h3>
               <div className="space-y-3">
                 {inactiveClients.map((client) => (
-                  <div key={client.id} className="flex justify-between items-center">
-                    <div>
+                  <div key={client.id} className="flex justify-between items-center flex-row-reverse">
+                    <div className="text-right">
                       <p className="font-medium text-sm">{client.name}</p>
                       <p className="text-xs text-muted-foreground">ביקור אחרון: לפני {client.lastVisit}</p>
                     </div>
@@ -154,9 +154,9 @@ const BusinessInsights = () => {
             {insights.week.map((insight) => (
               <div
                 key={insight.id}
-                className={cn("p-4 rounded-lg", getInsightCardStyle(insight.priority))}
+                className={cn("p-4 rounded-lg text-right", getInsightCardStyle(insight.priority))}
               >
-                <div className="flex items-start gap-3">
+                <div className="flex items-start gap-3 flex-row-reverse">
                   <div className="mt-0.5">{insight.icon}</div>
                   <div>
                     <h3 className="font-medium text-base">{insight.title}</h3>
@@ -167,15 +167,15 @@ const BusinessInsights = () => {
             ))}
             
             <div className="border rounded-lg p-4">
-              <h3 className="font-medium mb-3">ביצועי השבוע לפי יום</h3>
+              <h3 className="font-medium mb-3 text-right">ביצועי השבוע לפי יום</h3>
               <div className="space-y-3">
                 {['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי'].map((day, index) => {
                   const value = [90, 50, 80, 75, 85, 95][index];
                   return (
-                    <div key={day} className="flex items-center gap-2">
-                      <span className="text-sm min-w-[80px]">{day}</span>
+                    <div key={day} className="flex items-center gap-2 flex-row-reverse">
+                      <span className="text-sm min-w-[80px] text-right">{day}</span>
                       <Progress value={value} className="h-2 flex-1" />
-                      <span className="text-xs text-muted-foreground min-w-[30px] text-left">
+                      <span className="text-xs text-muted-foreground min-w-[30px] text-right">
                         {value}%
                       </span>
                     </div>
@@ -189,9 +189,9 @@ const BusinessInsights = () => {
             {insights.month.map((insight) => (
               <div
                 key={insight.id}
-                className={cn("p-4 rounded-lg", getInsightCardStyle(insight.priority))}
+                className={cn("p-4 rounded-lg text-right", getInsightCardStyle(insight.priority))}
               >
-                <div className="flex items-start gap-3">
+                <div className="flex items-start gap-3 flex-row-reverse">
                   <div className="mt-0.5">{insight.icon}</div>
                   <div>
                     <h3 className="font-medium text-base">{insight.title}</h3>
@@ -202,30 +202,30 @@ const BusinessInsights = () => {
             ))}
             
             <div className="border rounded-lg p-4">
-              <h3 className="font-medium mb-3">מגמות חודשיות</h3>
+              <h3 className="font-medium mb-3 text-right">מגמות חודשיות</h3>
               <div className="space-y-2">
-                <div className="flex justify-between items-center">
+                <div className="flex justify-between items-center flex-row-reverse">
                   <span className="text-sm">לקוחות חדשים</span>
                   <div className="flex items-center">
                     <TrendingUp className="h-4 w-4 text-green-500 ml-1" />
                     <span className="text-green-500 text-sm">+12%</span>
                   </div>
                 </div>
-                <div className="flex justify-between items-center">
+                <div className="flex justify-between items-center flex-row-reverse">
                   <span className="text-sm">הכנסה חודשית</span>
                   <div className="flex items-center">
                     <TrendingUp className="h-4 w-4 text-green-500 ml-1" />
                     <span className="text-green-500 text-sm">+8%</span>
                   </div>
                 </div>
-                <div className="flex justify-between items-center">
+                <div className="flex justify-between items-center flex-row-reverse">
                   <span className="text-sm">מספר טיפולים</span>
                   <div className="flex items-center">
                     <TrendingUp className="h-4 w-4 text-green-500 ml-1" />
                     <span className="text-green-500 text-sm">+5%</span>
                   </div>
                 </div>
-                <div className="flex justify-between items-center">
+                <div className="flex justify-between items-center flex-row-reverse">
                   <span className="text-sm">ביטולי פגישות</span>
                   <div className="flex items-center">
                     <TrendingDown className="h-4 w-4 text-red-500 ml-1" />
