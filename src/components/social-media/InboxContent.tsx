@@ -109,15 +109,15 @@ const InboxContent = () => {
       <Card className="flex-1 mb-4 md:mb-0">
         {selectedMessage ? (
           <>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardHeader className="flex flex-row items-center justify-between pb-4">
               <div className="flex flex-row-reverse items-center">
                 <div>
-                  <CardTitle className="text-lg">{selectedMessage.sender}</CardTitle>
-                  <p className="text-xs text-muted-foreground">
+                  <CardTitle className="text-xl">{selectedMessage.sender}</CardTitle>
+                  <p className="text-sm text-muted-foreground">
                     {selectedMessage.platform} • {selectedMessage.time}
                   </p>
                 </div>
-                <div className="w-12 h-12 rounded-full overflow-hidden ml-3">
+                <div className="w-14 h-14 rounded-full overflow-hidden ml-4">
                   <img 
                     src={selectedMessage.avatar} 
                     alt={selectedMessage.sender} 
@@ -134,14 +134,14 @@ const InboxContent = () => {
             </CardHeader>
             
             <CardContent className="flex flex-col h-[calc(100vh-380px)]">
-              <div className="flex-1 overflow-y-auto p-4 space-y-6 bg-muted/20 rounded-lg mb-4">
+              <div className="flex-1 overflow-y-auto p-6 space-y-8 bg-muted/20 rounded-lg mb-6">
                 {/* Customer Message */}
-                <div className="flex flex-row gap-3 items-start max-w-[85%] ml-auto">
-                  <div className="bg-muted/50 p-4 rounded-lg text-base">
-                    <p className="mb-1">{selectedMessage.message}</p>
-                    <span className="text-xs text-muted-foreground block">{selectedMessage.time}</span>
+                <div className="flex flex-row gap-4 items-start max-w-[85%] ml-auto">
+                  <div className="bg-muted/50 p-5 rounded-lg text-lg">
+                    <p className="mb-2">{selectedMessage.message}</p>
+                    <span className="text-sm text-muted-foreground block">{selectedMessage.time}</span>
                   </div>
-                  <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
+                  <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0">
                     <img 
                       src={selectedMessage.avatar} 
                       alt={selectedMessage.sender} 
@@ -153,23 +153,27 @@ const InboxContent = () => {
                 {/* If there was a previous response */}
                 {selectedMessage.id % 2 === 0 && (
                   <div className="flex justify-end">
-                    <div className="bg-primary/10 p-4 rounded-lg max-w-[85%] text-base">
-                      <p className="mb-1">תודה על פנייתך! אשמח לעזור. אפשר לתת מחיר מדויק בטלפון או כשאראה את המצב הקיים.</p>
-                      <span className="text-xs text-muted-foreground block">10:30</span>
+                    <div className="bg-primary/10 p-5 rounded-lg max-w-[85%] text-lg">
+                      <p className="mb-2">תודה על פנייתך! אשמח לעזור. אפשר לתת מחיר מדויק בטלפון או כשאראה את המצב הקיים.</p>
+                      <span className="text-sm text-muted-foreground block">10:30</span>
                     </div>
                   </div>
                 )}
               </div>
               
-              <div className="flex gap-3">
+              <div className="flex gap-4">
                 <textarea 
                   value={replyText}
                   onChange={(e) => setReplyText(e.target.value)}
-                  className="flex-1 border rounded-lg p-3 text-base focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  className="flex-1 border rounded-lg p-4 text-lg focus:outline-none focus:ring-2 focus:ring-primary/30"
                   placeholder="כתוב את תגובתך כאן..."
-                  rows={3}
+                  rows={4}
                 />
-                <Button onClick={handleSendReply} className="self-end h-12 px-5" disabled={!replyText.trim()}>
+                <Button 
+                  onClick={handleSendReply} 
+                  className="self-end h-14 px-6 text-lg" 
+                  disabled={!replyText.trim()}
+                >
                   שלח
                 </Button>
               </div>
@@ -177,9 +181,9 @@ const InboxContent = () => {
           </>
         ) : (
           <div className="flex flex-col items-center justify-center h-full py-12">
-            <MessageCircle size={60} className="text-muted-foreground mb-4" />
-            <h3 className="text-lg font-medium">בחר הודעה לתצוגה</h3>
-            <p className="text-muted-foreground mt-1 mb-4 max-w-xs text-center">
+            <MessageCircle size={70} className="text-muted-foreground mb-6" />
+            <h3 className="text-xl font-medium">בחר הודעה לתצוגה</h3>
+            <p className="text-muted-foreground mt-2 mb-4 max-w-sm text-center text-lg">
               לחץ על אחת מההודעות מהרשימה בצד ימין כדי לראות את התוכן שלה.
             </p>
           </div>
