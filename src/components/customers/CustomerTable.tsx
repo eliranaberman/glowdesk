@@ -47,7 +47,6 @@ const CustomerTable = ({
   );
 
   const sortedCustomers = [...filteredCustomers].sort((a, b) => {
-    // Handle different types of fields appropriately
     if (sortField === 'totalSpent' || sortField === 'totalVisits') {
       return sortDirection === 'asc'
         ? a[sortField] - b[sortField]
@@ -107,7 +106,7 @@ const CustomerTable = ({
               </TableHead>
               <TableHead 
                 onClick={() => handleSort('totalVisits')}
-                className="cursor-pointer hover:bg-muted text-right"
+                className="cursor-pointer hover:bg-muted text-center"
               >
                 סה"כ ביקורים
               </TableHead>
@@ -151,8 +150,8 @@ const CustomerTable = ({
                       <span>{customer.lastAppointment}</span>
                     </div>
                   </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex items-center justify-end">
+                  <TableCell className="text-center">
+                    <div className="flex items-center justify-center">
                       <Clock className="h-3 w-3 ml-1 text-muted-foreground" />
                       <span>{customer.totalVisits}</span>
                     </div>
