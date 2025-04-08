@@ -135,13 +135,13 @@ const InboxContent = () => {
             
             <CardContent className="flex flex-col h-[calc(100vh-380px)]">
               <div className="flex-1 overflow-y-auto p-6 space-y-8 bg-muted/20 rounded-lg mb-6">
-                {/* Customer Message */}
+                {/* Customer Message - Improved visibility */}
                 <div className="flex flex-row gap-4 items-start max-w-[85%] ml-auto">
-                  <div className="bg-muted/50 p-5 rounded-lg text-lg">
-                    <p className="mb-2">{selectedMessage.message}</p>
+                  <div className="bg-muted/50 p-6 rounded-lg">
+                    <p className="text-xl font-medium mb-3">{selectedMessage.message}</p>
                     <span className="text-sm text-muted-foreground block">{selectedMessage.time}</span>
                   </div>
-                  <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0">
+                  <div className="w-14 h-14 rounded-full overflow-hidden flex-shrink-0">
                     <img 
                       src={selectedMessage.avatar} 
                       alt={selectedMessage.sender} 
@@ -150,11 +150,11 @@ const InboxContent = () => {
                   </div>
                 </div>
                 
-                {/* If there was a previous response */}
+                {/* If there was a previous response - Improved visibility */}
                 {selectedMessage.id % 2 === 0 && (
                   <div className="flex justify-end">
-                    <div className="bg-primary/10 p-5 rounded-lg max-w-[85%] text-lg">
-                      <p className="mb-2">תודה על פנייתך! אשמח לעזור. אפשר לתת מחיר מדויק בטלפון או כשאראה את המצב הקיים.</p>
+                    <div className="bg-primary/10 p-6 rounded-lg max-w-[85%]">
+                      <p className="text-xl font-medium mb-3">תודה על פנייתך! אשמח לעזור. אפשר לתת מחיר מדויק בטלפון או כשאראה את המצב הקיים.</p>
                       <span className="text-sm text-muted-foreground block">10:30</span>
                     </div>
                   </div>
@@ -165,13 +165,13 @@ const InboxContent = () => {
                 <textarea 
                   value={replyText}
                   onChange={(e) => setReplyText(e.target.value)}
-                  className="flex-1 border rounded-lg p-4 text-lg focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  className="flex-1 border rounded-lg p-4 text-base focus:outline-none focus:ring-2 focus:ring-primary/30"
                   placeholder="כתוב את תגובתך כאן..."
-                  rows={4}
+                  rows={3}
                 />
                 <Button 
                   onClick={handleSendReply} 
-                  className="self-end h-14 px-6 text-lg" 
+                  className="self-end h-12 px-6" 
                   disabled={!replyText.trim()}
                 >
                   שלח
