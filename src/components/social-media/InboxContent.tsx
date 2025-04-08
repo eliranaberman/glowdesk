@@ -135,10 +135,10 @@ const InboxContent = () => {
             
             <CardContent className="flex flex-col h-[calc(100vh-380px)]">
               <div className="flex-1 overflow-y-auto p-6 space-y-8 bg-muted/20 rounded-lg mb-6">
-                {/* Customer Message - Improved visibility */}
+                {/* Customer Message - Enlarged container */}
                 <div className="flex flex-row gap-4 items-start max-w-[85%] ml-auto">
-                  <div className="bg-muted/50 p-6 rounded-lg">
-                    <p className="text-xl font-medium mb-3">{selectedMessage.message}</p>
+                  <div className="bg-muted/50 p-8 rounded-lg w-full">
+                    <p className="mb-3">{selectedMessage.message}</p>
                     <span className="text-sm text-muted-foreground block">{selectedMessage.time}</span>
                   </div>
                   <div className="w-14 h-14 rounded-full overflow-hidden flex-shrink-0">
@@ -150,11 +150,11 @@ const InboxContent = () => {
                   </div>
                 </div>
                 
-                {/* If there was a previous response - Improved visibility */}
+                {/* If there was a previous response - Enlarged container */}
                 {selectedMessage.id % 2 === 0 && (
                   <div className="flex justify-end">
-                    <div className="bg-primary/10 p-6 rounded-lg max-w-[85%]">
-                      <p className="text-xl font-medium mb-3">תודה על פנייתך! אשמח לעזור. אפשר לתת מחיר מדויק בטלפון או כשאראה את המצב הקיים.</p>
+                    <div className="bg-primary/10 p-8 rounded-lg max-w-[85%] w-full">
+                      <p className="mb-3">תודה על פנייתך! אשמח לעזור. אפשר לתת מחיר מדויק בטלפון או כשאראה את המצב הקיים.</p>
                       <span className="text-sm text-muted-foreground block">10:30</span>
                     </div>
                   </div>
