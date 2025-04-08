@@ -38,7 +38,7 @@ const RecentMessagesPanel = ({ messages }: RecentMessagesPanelProps) => {
     <>
       <Card className="shadow-soft hover:shadow-soft-lg transition-all duration-300">
         <CardHeader className="flex flex-row items-center justify-between pb-2 border-b">
-          <CardTitle className="text-lg text-center mx-auto">הודעות אחרונות</CardTitle>
+          <CardTitle className="text-lg font-medium mx-auto">הודעות אחרונות</CardTitle>
           <Button variant="outline" size="sm">
             טען עוד
           </Button>
@@ -50,8 +50,8 @@ const RecentMessagesPanel = ({ messages }: RecentMessagesPanelProps) => {
                 key={message.id} 
                 className="p-4 hover:bg-muted/20 transition-colors duration-200"
               >
-                <div className="flex flex-row-reverse gap-3 items-start">
-                  <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
+                <div className="flex flex-row-reverse gap-4 items-start">
+                  <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 border border-border/30">
                     <img 
                       src={message.avatar} 
                       alt={message.sender} 
@@ -59,30 +59,32 @@ const RecentMessagesPanel = ({ messages }: RecentMessagesPanelProps) => {
                     />
                   </div>
                   <div className="flex-1">
-                    <div className="flex flex-row-reverse items-center gap-2 mb-1">
-                      {!message.read && (
-                        <Badge variant="soft" className="h-2 w-2 p-0 rounded-full ml-1" />
-                      )}
-                      <div className="flex flex-row-reverse items-center text-xs text-muted-foreground gap-1">
-                        <span>({message.platform})</span>
-                        {getPlatformIcon(message.platform)}
+                    <div className="flex flex-row-reverse items-center justify-between mb-1.5">
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-medium">
+                          {message.sender}
+                        </span>
+                        {!message.read && (
+                          <Badge variant="soft" className="h-2 w-2 p-0 rounded-full" />
+                        )}
                       </div>
-                      <span className="font-medium">
-                        {message.sender}
-                      </span>
+                      <div className="flex items-center text-xs text-muted-foreground gap-1">
+                        {getPlatformIcon(message.platform)}
+                        <span>({message.platform})</span>
+                      </div>
                     </div>
-                    <p className="text-sm mb-2 text-muted-foreground text-right">{message.message}</p>
-                    <div className="flex items-center justify-between flex-row-reverse">
+                    <p className="text-sm mb-3 text-right">{message.message}</p>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-muted-foreground">{message.time}</span>
                       <Button 
                         variant="ghost" 
                         size="sm" 
-                        className="p-0 h-auto hover:bg-transparent hover:underline text-xs text-muted-foreground"
+                        className="p-1 h-auto hover:bg-transparent hover:underline text-xs text-muted-foreground"
                         onClick={() => handleReply(message)}
                       >
-                        <MessageCircle size={14} className="ml-1" />
+                        <MessageCircle size={14} className="ml-1.5" />
                         השב
                       </Button>
-                      <span className="text-xs text-muted-foreground">{message.time}</span>
                     </div>
                   </div>
                 </div>

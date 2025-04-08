@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Message } from "./types";
-import { Send } from "lucide-react";
+import { Send, Image, FileText, Smile } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -65,46 +65,54 @@ const ReplyModal = ({ open, onOpenChange, message }: ReplyModalProps) => {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className={`sm:max-w-3xl max-h-[90vh] flex flex-col ${isMobile ? 'p-4 w-[95vw]' : ''}`}>
-        <DialogHeader>
-          <DialogTitle className="text-center mb-4 text-xl font-bold">
-            שיחה עם {message.sender} ({message.platform})
+      <DialogContent className={`max-w-3xl w-[calc(100%-32px)] mx-auto flex flex-col h-auto max-h-[90vh] p-5 ${isMobile ? 'gap-3' : 'gap-4'}`}>
+        <DialogHeader className="border-b pb-3 mb-3">
+          <DialogTitle className="text-center text-xl">
+            שיחה עם {message.sender}
           </DialogTitle>
         </DialogHeader>
         
-        <div className="space-y-6 flex-1 overflow-hidden">
+        <div className="flex-1 overflow-hidden flex flex-col min-h-0">
           {/* Message display area with improved sizing and scrolling */}
-          <ScrollArea className={`bg-muted/20 rounded-lg ${isMobile ? 'h-[35vh]' : 'h-[50vh]'} border border-border/50 shadow-inner`}>
-            <div className="p-6 space-y-8">
-              {/* Original message with improved styling */}
-              <div className="flex gap-4 items-start">
-                <div className="w-16 h-16 rounded-full overflow-hidden flex-shrink-0 border-2 border-primary/20">
+          <ScrollArea className="flex-1 bg-muted/10 rounded-lg border border-border/50 shadow-inner mb-4">
+            <div className="p-4 space-y-6">
+              {/* Original message */}
+              <div className="flex gap-3 items-start">
+                <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 border-2 border-primary/20">
                   <img src={message.avatar} alt={message.sender} className="w-full h-full object-cover" />
                 </div>
-                <div className="bg-muted/40 p-6 rounded-lg max-w-[80%]">
-                  <p className="text-xl font-medium mb-3">{message.sender}</p>
-                  <p className="text-lg leading-relaxed mb-3">{message.message}</p>
-                  <span className="text-sm text-muted-foreground">{message.time}</span>
+                <div className="bg-muted/30 p-4 rounded-lg flex-1">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs text-muted-foreground">{message.time}</span>
+                    <p className="font-medium">{message.sender}</p>
+                  </div>
+                  <p className="text-base mb-1">{message.message}</p>
                 </div>
               </div>
               
-              {/* Simulated previous thread */}
+              {/* Simulated previous thread if it exists */}
               {message.id % 2 === 0 && (
                 <>
-                  <div className="flex justify-end mb-8">
-                    <div className="bg-primary/10 p-6 rounded-lg max-w-[80%]">
-                      <p className="text-lg leading-relaxed mb-3">תודה שפנית אלינו! איך נוכל לעזור?</p>
-                      <span className="text-sm text-muted-foreground">09:46</span>
+                  <div className="flex justify-end">
+                    <div className="bg-primary/10 p-4 rounded-lg max-w-[85%]">
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-xs text-muted-foreground">09:46</span>
+                        <p className="font-medium">אתה</p>
+                      </div>
+                      <p className="text-base">תודה שפנית אלינו! איך נוכל לעזור?</p>
                     </div>
                   </div>
                   
-                  <div className="flex gap-4 items-start">
-                    <div className="w-16 h-16 rounded-full overflow-hidden flex-shrink-0 border-2 border-primary/20">
+                  <div className="flex gap-3 items-start">
+                    <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 border-2 border-primary/20">
                       <img src={message.avatar} alt={message.sender} className="w-full h-full object-cover" />
                     </div>
-                    <div className="bg-muted/40 p-6 rounded-lg max-w-[80%]">
-                      <p className="text-lg leading-relaxed mb-3">{message.message}</p>
-                      <span className="text-sm text-muted-foreground">{message.time}</span>
+                    <div className="bg-muted/30 p-4 rounded-lg flex-1">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-xs text-muted-foreground">{message.time}</span>
+                        <p className="font-medium">{message.sender}</p>
+                      </div>
+                      <p className="text-base">{message.message}</p>
                     </div>
                   </div>
                 </>
@@ -112,42 +120,49 @@ const ReplyModal = ({ open, onOpenChange, message }: ReplyModalProps) => {
             </div>
           </ScrollArea>
           
-          <div className="space-y-3">
+          <div className="border rounded-lg bg-card shadow-sm">
             <Textarea 
               placeholder="הקלד את התגובה שלך כאן..." 
-              className={`min-h-[120px] text-base p-4 ${isMobile ? 'text-lg' : ''}`}
+              className="min-h-[100px] text-base p-3 border-0 focus-visible:ring-0 resize-none"
               value={reply}
               onChange={(e) => setReply(e.target.value)}
             />
             
-            <div className={`flex ${isMobile ? 'flex-col space-y-2' : 'justify-between'}`}>
-              <div className={`flex gap-2 ${isMobile ? 'w-full justify-between' : ''}`}>
-                <Button variant="outline" size={isMobile ? "sm" : "default"}>
-                  הכנס תבנית
+            <div className="flex items-center justify-between p-2 border-t">
+              <div className="flex gap-1">
+                <Button type="button" variant="ghost" size="sm" className="rounded-full w-8 h-8 p-0">
+                  <Image size={16} />
+                  <span className="sr-only">צרף תמונה</span>
                 </Button>
-                <Button variant="outline" size={isMobile ? "sm" : "default"}>
-                  צרף מדיה
+                <Button type="button" variant="ghost" size="sm" className="rounded-full w-8 h-8 p-0">
+                  <FileText size={16} />
+                  <span className="sr-only">צרף קובץ</span>
+                </Button>
+                <Button type="button" variant="ghost" size="sm" className="rounded-full w-8 h-8 p-0">
+                  <Smile size={16} />
+                  <span className="sr-only">הוסף אימוג'י</span>
                 </Button>
               </div>
+              <Button 
+                onClick={handleSendReply}
+                disabled={sending || !reply.trim()}
+                size="sm"
+                className="gap-1.5"
+              >
+                <Send size={14} />
+                {sending ? "שולח..." : "שלח"}
+              </Button>
             </div>
           </div>
         </div>
         
-        <DialogFooter className={`mt-4 ${isMobile ? 'flex-col space-y-2' : ''}`}>
+        <DialogFooter className="pt-2 mt-auto">
           <Button 
             onClick={() => onOpenChange(false)} 
             variant="outline"
-            className={isMobile ? "w-full" : ""}
+            className={`${isMobile ? 'flex-1' : ''}`}
           >
-            ביטול
-          </Button>
-          <Button 
-            onClick={handleSendReply} 
-            disabled={sending}
-            className={`gap-2 ${isMobile ? "w-full" : ""}`}
-          >
-            <Send size={16} />
-            {sending ? "שולח..." : "שלח תגובה"}
+            סגור
           </Button>
         </DialogFooter>
       </DialogContent>

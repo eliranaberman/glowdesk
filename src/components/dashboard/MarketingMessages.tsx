@@ -26,7 +26,7 @@ const MarketingMessages = () => {
   };
 
   return (
-    <Card>
+    <Card className="shadow-soft hover:shadow-soft-lg transition-all duration-300">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div>
@@ -47,8 +47,8 @@ const MarketingMessages = () => {
       <CardContent>
         <Tabs defaultValue={activeTab} value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid grid-cols-2 mb-4">
-            <TabsTrigger value="templates" className="text-right order-2">תבניות מוכנות</TabsTrigger>
-            <TabsTrigger value="campaigns" className="text-right order-1">קמפיינים קודמים</TabsTrigger>
+            <TabsTrigger value="templates" className="text-right">תבניות מוכנות</TabsTrigger>
+            <TabsTrigger value="campaigns" className="text-right">קמפיינים קודמים</TabsTrigger>
           </TabsList>
 
           <TabsContent value="templates" className="space-y-4">
@@ -58,8 +58,8 @@ const MarketingMessages = () => {
                   key={template}
                   className="flex items-center justify-between p-3 border rounded-lg hover:bg-accent/10 transition-colors"
                 >
-                  <Button variant="soft" size="sm">
-                    <Send className="h-3.5 w-3.5 ml-1" />
+                  <Button variant="soft" size="sm" className="flex items-center gap-1">
+                    <Send className="h-3.5 w-3.5" />
                     שלח
                   </Button>
                   <div className="flex items-center">
@@ -71,12 +71,12 @@ const MarketingMessages = () => {
             </div>
 
             <div className="flex flex-col sm:flex-row gap-2 pt-2 justify-end">
-              <Button onClick={handleSendToAll} className="order-2">
-                שליחת הודעה לכל הלקוחות
-              </Button>
-              <Button variant="outline" onClick={handleCreate} className="flex items-center gap-1 order-1">
+              <Button onClick={handleCreate} variant="outline" className="flex items-center gap-1 order-first sm:order-first">
                 <PlusCircle className="h-4 w-4 ml-1" />
                 יצירת תבנית חדשה
+              </Button>
+              <Button onClick={handleSendToAll} className="order-last sm:order-last">
+                שליחת הודעה לכל הלקוחות
               </Button>
             </div>
           </TabsContent>
@@ -93,19 +93,19 @@ const MarketingMessages = () => {
                   className="p-3 border rounded-lg hover:bg-accent/10 transition-colors"
                 >
                   <div className="flex items-center justify-between mb-1">
+                    <span className="text-muted-foreground text-xs">{campaign.date}</span>
                     <span className="font-medium">{campaign.name}</span>
-                    <span className="text-xs text-muted-foreground">{campaign.date}</span>
                   </div>
                   <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>אחוז פתיחה: {campaign.opened}</span>
                     <span>אחוז לחיצות: {campaign.clicks}</span>
+                    <span>אחוז פתיחה: {campaign.opened}</span>
                   </div>
                 </div>
               ))}
             </div>
 
-            <Button variant="outline" className="w-full">
-              <Mail className="h-4 w-4 ml-2" />
+            <Button variant="outline" className="w-full flex items-center gap-2">
+              <Mail className="h-4 w-4" />
               צפייה בכל הקמפיינים הקודמים
             </Button>
           </TabsContent>

@@ -1,13 +1,16 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Message } from "./types";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Instagram, Facebook, Twitter, MessageCircle, User, Calendar, Clock, Flag, ArrowRight } from "lucide-react";
+import { Instagram, Facebook, Twitter, MessageCircle, User, Calendar, Clock, Flag, ArrowRight, Send } from "lucide-react";
 import ConnectionModal from "./ConnectionModal";
 import ReplyModal from "./ReplyModal";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const mockedMessages: Message[] = [{
   id: 1,
@@ -59,11 +62,12 @@ const InboxContent = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [replyModalOpen, setReplyModalOpen] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(false);
-  const {
-    toast
-  } = useToast();
+  const isMobile = useIsMobile();
+  const { toast } = useToast();
 
-  const filteredMessages = activePlatform === "all" ? messages : messages.filter(msg => msg.platform === activePlatform);
+  const filteredMessages = activePlatform === "all" 
+    ? messages 
+    : messages.filter(msg => msg.platform === activePlatform);
 
   const handleSendReply = () => {
     if (!replyText.trim() || !selectedMessage) return;
@@ -72,10 +76,12 @@ const InboxContent = () => {
       ...msg,
       read: true
     } : msg));
+    
     toast({
       title: "תגובה נשלחה",
       description: `התגובה שלך ל-${selectedMessage.sender} נשלחה בהצלחה`
     });
+    
     setReplyText("");
   };
 
@@ -84,6 +90,7 @@ const InboxContent = () => {
       ...msg,
       read: true
     })));
+    
     toast({
       title: "הכל סומן כנקרא",
       description: "כל ההודעות סומנו כנקראו בהצלחה"
@@ -99,58 +106,93 @@ const InboxContent = () => {
     setDetailsOpen(true);
   };
 
-  return <div className="flex flex-col lg:flex-row-reverse gap-5 h-[calc(100vh-220px)]">
-      <Card className="lg:w-1/3 w-full">
-        <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <Button variant="outline" size="sm" onClick={() => setIsModalOpen(true)}>
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 h-[calc(100vh-220px)]">
+      {/* Mobile view - conversation toggle */}
+      {isMobile && selectedMessage && (
+        <div className="fixed bottom-4 right-4 z-10">
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="default" className="rounded-full w-14 h-14 shadow-lg">
+                <MessageCircle size={24} />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="bottom" className="h-[80vh] p-0">
+              <div className="flex flex-col h-full">
+                <SheetHeader className="border-b p-4">
+                  <SheetTitle>הודעות</SheetTitle>
+                </SheetHeader>
+                <div className="flex-1 overflow-y-auto">
+                  <MessageList 
+                    messages={filteredMessages} 
+                    selectedMessage={selectedMessage} 
+                    setSelectedMessage={setSelectedMessage} 
+                    handleReply={handleReply} 
+                    handleMarkAllAsRead={handleMarkAllAsRead}
+                    activePlatform={activePlatform}
+                    setActivePlatform={setActivePlatform}
+                  />
+                </div>
+              </div>
+            </SheetContent>
+          </Sheet>
+        </div>
+      )}
+      
+      {/* Messages sidebar */}
+      <Card className={`${isMobile && selectedMessage ? 'hidden' : 'block'} lg:col-span-1`}>
+        <CardHeader className="flex flex-row items-center justify-between p-4">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => setIsModalOpen(true)}
+            className="px-2 py-1 h-8"
+          >
             חבר חשבון
           </Button>
           <CardTitle className="mx-auto text-lg">הודעות</CardTitle>
+          {messages.some(msg => !msg.read) && (
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={handleMarkAllAsRead}
+              className="px-2 py-1 h-8 text-xs whitespace-nowrap"
+            >
+              סמן הכל כנקרא
+            </Button>
+          )}
         </CardHeader>
+        
         <CardContent className="p-0">
-          <Tabs defaultValue="all" value={activePlatform} onValueChange={setActivePlatform} className="w-full">
-            <TabsList className="w-full grid grid-cols-3 rounded-none border-b">
-              <TabsTrigger value="facebook" className="rounded-none">
-                <Facebook className="ml-1" size={16} />
-                פייסבוק
-              </TabsTrigger>
-              <TabsTrigger value="instagram" className="rounded-none">
-                <Instagram className="ml-1" size={16} />
-                אינסטגרם
-              </TabsTrigger>
-              <TabsTrigger value="all" className="rounded-none">הכל</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="all" className="m-0">
-              <MessageList messages={filteredMessages} selectedMessage={selectedMessage} setSelectedMessage={setSelectedMessage} handleReply={handleReply} handleMarkAllAsRead={handleMarkAllAsRead} />
-            </TabsContent>
-            
-            <TabsContent value="instagram" className="m-0">
-              <MessageList messages={filteredMessages} selectedMessage={selectedMessage} setSelectedMessage={setSelectedMessage} handleReply={handleReply} handleMarkAllAsRead={handleMarkAllAsRead} />
-            </TabsContent>
-            
-            <TabsContent value="facebook" className="m-0">
-              <MessageList messages={filteredMessages} selectedMessage={selectedMessage} setSelectedMessage={setSelectedMessage} handleReply={handleReply} handleMarkAllAsRead={handleMarkAllAsRead} />
-            </TabsContent>
-          </Tabs>
+          <MessageList 
+            messages={filteredMessages} 
+            selectedMessage={selectedMessage} 
+            setSelectedMessage={setSelectedMessage} 
+            handleReply={handleReply} 
+            handleMarkAllAsRead={handleMarkAllAsRead}
+            activePlatform={activePlatform}
+            setActivePlatform={setActivePlatform}
+          />
         </CardContent>
       </Card>
 
-      <Card className="flex-1">
-        {selectedMessage ? <>
-            <CardHeader className="flex flex-row items-center justify-between pb-4 border-b">
-              <div className="flex flex-row-reverse items-center">
+      {/* Conversation area */}
+      <Card className={`${isMobile && !selectedMessage ? 'hidden' : 'block'} lg:col-span-2 flex flex-col h-full`}>
+        {selectedMessage ? (
+          <>
+            <CardHeader className="flex flex-row items-center justify-between p-4 border-b">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-accent">
+                  <img src={selectedMessage.avatar} alt={selectedMessage.sender} className="w-full h-full object-cover" />
+                </div>
                 <div>
                   <CardTitle className="text-xl">{selectedMessage.sender}</CardTitle>
                   <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                    <span>{selectedMessage.platform}</span>
                     {getPlatformIcon(selectedMessage.platform)}
+                    <span>{selectedMessage.platform}</span>
                     <span>•</span>
                     <span>{selectedMessage.time}</span>
                   </div>
-                </div>
-                <div className="w-16 h-16 rounded-full overflow-hidden ml-4 border-2 border-accent">
-                  <img src={selectedMessage.avatar} alt={selectedMessage.sender} className="w-full h-full object-cover" />
                 </div>
               </div>
               
@@ -161,61 +203,190 @@ const InboxContent = () => {
               </div>
             </CardHeader>
             
-            <CardContent className="flex flex-col h-[calc(100vh-380px)]">
-              <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6 bg-muted/10 mb-4 border border-border/40 rounded-md shadow-soft flex flex-col justify-center">
-                <div className="flex flex-row gap-4 items-start max-w-[85%] ml-auto">
-                  <div className="bg-muted/30 p-4 md:p-5 rounded-lg w-full shadow-soft">
-                    <p className="mb-2 text-base">{selectedMessage.message}</p>
-                    <span className="text-sm text-muted-foreground block">{selectedMessage.time}</span>
-                  </div>
-                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-full overflow-hidden flex-shrink-0">
+            <CardContent className="flex-1 flex flex-col p-4 gap-4 overflow-hidden">
+              {/* Messages */}
+              <div className="flex-1 overflow-y-auto p-4 space-y-6 bg-muted/10 mb-2 border rounded-lg">
+                <div className="flex gap-3 items-start max-w-[80%]">
+                  <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
                     <img src={selectedMessage.avatar} alt={selectedMessage.sender} className="w-full h-full object-cover" />
+                  </div>
+                  <div className="bg-muted/30 p-4 rounded-lg">
+                    <p className="mb-2">{selectedMessage.message}</p>
+                    <span className="text-xs text-muted-foreground">{selectedMessage.time}</span>
                   </div>
                 </div>
                 
-                {selectedMessage.id % 2 === 0 && <div className="flex justify-end">
-                    <div className="bg-primary/10 p-4 md:p-5 rounded-lg max-w-[85%] w-full shadow-soft">
-                      <p className="mb-2 text-base">תודה על פנייתך! אשמח לעזור. אפשר לתת מחיר מדויק בטלפון או כשאראה את המצב הקיים.</p>
-                      <span className="text-sm text-muted-foreground block">10:30</span>
+                {selectedMessage.id % 2 === 0 && (
+                  <>
+                    <div className="flex justify-end">
+                      <div className="bg-primary/10 p-4 rounded-lg max-w-[80%]">
+                        <p className="mb-2">תודה על פנייתך! אשמח לעזור. אפשר לתת מחיר מדויק בטלפון או כשאראה את המצב הקיים.</p>
+                        <span className="text-xs text-muted-foreground">10:30</span>
+                      </div>
                     </div>
-                  </div>}
+                  </>
+                )}
               </div>
               
-              <div className="flex gap-3 bg-card shadow-inner p-3 md:p-4 rounded-lg border border-border/30 mb-2">
-                <textarea 
-                  value={replyText} 
-                  onChange={e => setReplyText(e.target.value)} 
-                  className="flex-1 border rounded-lg p-3 md:p-4 text-base focus:outline-none focus:ring-2 focus:ring-primary/30 min-h-[100px] resize-none" 
-                  placeholder="כתוב את תגובתך כאן..." 
-                  rows={4} 
-                />
-                <div className="flex flex-col gap-2 justify-end">
-                  <Button onClick={handleSendReply} className="h-12 px-6" disabled={!replyText.trim()}>
-                    שלח
+              {/* Reply input */}
+              <div className="flex items-end gap-3">
+                <div className="flex-1 relative">
+                  <textarea 
+                    value={replyText} 
+                    onChange={e => setReplyText(e.target.value)}
+                    className="w-full rounded-lg border p-3 focus:outline-none focus:ring-2 focus:ring-primary/30 min-h-[80px] resize-none" 
+                    placeholder="כתוב את תגובתך כאן..." 
+                  />
+                  <div className="absolute left-2 bottom-2 flex gap-1">
+                    <Button variant="ghost" size="icon" className="rounded-full h-8 w-8">
+                      <Image size={16} />
+                    </Button>
+                    <Button variant="ghost" size="icon" className="rounded-full h-8 w-8">
+                      <FileText size={16} />
+                    </Button>
+                    <Button variant="ghost" size="icon" className="rounded-full h-8 w-8">
+                      <Smile size={16} />
+                    </Button>
+                  </div>
+                </div>
+                <Button 
+                  onClick={handleSendReply} 
+                  disabled={!replyText.trim()} 
+                  size="sm"
+                  className="mb-1 px-5 gap-2"
+                >
+                  <Send size={14} />
+                  שלח
+                </Button>
+              </div>
+            </CardContent>
+          </>
+        ) : (
+          <div className="flex flex-col items-center justify-center h-full py-12">
+            <MessageCircle size={70} className="text-muted-foreground mb-6" />
+            <h3 className="text-xl font-medium">בחר הודעה לתצוגה</h3>
+            <p className="text-muted-foreground mt-2 mb-4 max-w-sm text-center">
+              לחץ על אחת מההודעות מהרשימה בצד ימין כדי לראות את התוכן שלה.
+            </p>
+          </div>
+        )}
+      </Card>
+
+      {/* Modals */}
+      <ConnectionModal 
+        open={isModalOpen} 
+        onOpenChange={setIsModalOpen} 
+        connectedAccounts={{
+          instagram: false,
+          facebook: false,
+          twitter: false,
+          tiktok: false
+        }} 
+        onConnect={() => {}} 
+      />
+      
+      <ReplyModal 
+        open={replyModalOpen} 
+        onOpenChange={setReplyModalOpen} 
+        message={selectedMessage} 
+      />
+      
+      <CustomerDetailsDialog 
+        open={detailsOpen} 
+        onOpenChange={setDetailsOpen} 
+        customer={selectedMessage} 
+      />
+    </div>
+  );
+};
+
+type MessageListProps = {
+  messages: Message[];
+  selectedMessage: Message | null;
+  setSelectedMessage: (msg: Message) => void;
+  handleReply: (msg: Message) => void;
+  handleMarkAllAsRead: () => void;
+  activePlatform: string;
+  setActivePlatform: (platform: string) => void;
+};
+
+const MessageList = ({
+  messages,
+  selectedMessage,
+  setSelectedMessage,
+  handleReply,
+  handleMarkAllAsRead,
+  activePlatform,
+  setActivePlatform
+}: MessageListProps) => {
+  return (
+    <div className="flex flex-col h-full">
+      <Tabs defaultValue={activePlatform} value={activePlatform} onValueChange={setActivePlatform} className="w-full">
+        <TabsList className="w-full grid grid-cols-3 rounded-none border-b">
+          <TabsTrigger value="facebook" className="rounded-none py-2 data-[state=active]:bg-accent/50">
+            <Facebook className="ml-1.5" size={16} />
+            פייסבוק
+          </TabsTrigger>
+          <TabsTrigger value="instagram" className="rounded-none py-2 data-[state=active]:bg-accent/50">
+            <Instagram className="ml-1.5" size={16} />
+            אינסטגרם
+          </TabsTrigger>
+          <TabsTrigger value="all" className="rounded-none py-2 data-[state=active]:bg-accent/50">הכל</TabsTrigger>
+        </TabsList>
+      </Tabs>
+      
+      <div className="h-[calc(100vh-320px)] overflow-y-auto">
+        {messages.length ? messages.map(msg => (
+          <div 
+            key={msg.id} 
+            onClick={() => setSelectedMessage(msg)} 
+            className={`flex justify-between p-3 border-b cursor-pointer hover:bg-muted/20 transition-colors
+              ${selectedMessage?.id === msg.id ? 'bg-muted/30' : ''} 
+              ${!msg.read ? 'bg-muted/10' : ''}`
+            }
+          >
+            <div className="flex gap-3 items-center w-full">
+              <div className="w-12 h-12 rounded-full overflow-hidden border border-border/30">
+                <img src={msg.avatar} alt={msg.sender} className="w-full h-full object-cover" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between mb-1">
+                  <div className="flex items-center gap-1.5">
+                    <span className="font-medium">{msg.sender}</span>
+                    {!msg.read && <span className="w-2 h-2 bg-primary rounded-full"></span>}
+                  </div>
+                  <span className="text-xs text-muted-foreground">{msg.time}</span>
+                </div>
+                <p className="text-sm text-muted-foreground truncate mb-1">{msg.message}</p>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs bg-muted/40 px-2 py-0.5 rounded-full flex items-center gap-1">
+                    {getPlatformIcon(msg.platform)}
+                    {msg.platform}
+                  </span>
+                  <Button 
+                    variant="ghost" 
+                    size="xs" 
+                    className="p-1 h-6 text-xs hover:bg-transparent hover:underline text-muted-foreground"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleReply(msg);
+                    }}
+                  >
+                    השב
                   </Button>
                 </div>
               </div>
-            </CardContent>
-          </> : <div className="flex flex-col items-center justify-center h-full py-12">
-            <MessageCircle size={70} className="text-muted-foreground mb-6" />
-            <h3 className="text-xl font-medium">בחר הודעה לתצוגה</h3>
-            <p className="text-muted-foreground mt-2 mb-4 max-w-sm text-center text-lg">
-              לחץ על אחת מההודעות מהרשימה בצד ימין כדי לראות את התוכן שלה.
-            </p>
-          </div>}
-      </Card>
-
-      <ConnectionModal open={isModalOpen} onOpenChange={setIsModalOpen} connectedAccounts={{
-      instagram: false,
-      facebook: false,
-      twitter: false,
-      tiktok: false
-    }} onConnect={() => {}} />
-      
-      <ReplyModal open={replyModalOpen} onOpenChange={setReplyModalOpen} message={selectedMessage} />
-      
-      <CustomerDetailsDialog open={detailsOpen} onOpenChange={setDetailsOpen} customer={selectedMessage} />
-    </div>;
+            </div>
+          </div>
+        )) : (
+          <div className="flex flex-col items-center justify-center h-full p-4">
+            <MessageCircle size={40} className="text-muted-foreground mb-2" />
+            <p className="text-muted-foreground">אין הודעות להצגה</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
 };
 
 const CustomerDetailsDialog = ({
@@ -228,116 +399,71 @@ const CustomerDetailsDialog = ({
   customer: Message | null;
 }) => {
   if (!customer) return null;
-  return <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle className="text-center">פרטי לקוח</DialogTitle>
+  
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-md">
+        <DialogHeader className="border-b pb-4 mb-4">
+          <DialogTitle className="text-center text-xl">פרטי לקוח</DialogTitle>
         </DialogHeader>
         
-        <div className="flex flex-col items-center pt-4">
+        <div className="flex flex-col items-center">
           <div className="w-24 h-24 rounded-full overflow-hidden mb-4 border-2 border-accent">
             <img src={customer.avatar} alt={customer.sender} className="w-full h-full object-cover" />
           </div>
-          <h3 className="text-xl font-medium">{customer.sender}</h3>
-          <p className="text-muted-foreground flex items-center gap-1 mb-4">
+          <h3 className="text-xl font-medium mb-1">{customer.sender}</h3>
+          <p className="text-muted-foreground flex items-center gap-1 mb-6">
             {getPlatformIcon(customer.platform)}
             {customer.platform}
           </p>
         </div>
         
-        <div className="space-y-4 mt-4">
+        <div className="space-y-3">
           <div className="flex items-center justify-between p-3 border rounded-lg">
-            <div className="flex items-center">
-              <User className="w-4 h-4 ml-2 text-primary" />
+            <div className="flex items-center gap-2">
+              <User className="w-4 h-4 text-primary" />
               <span>משתמש מאז</span>
             </div>
             <span>15/02/2025</span>
           </div>
           
           <div className="flex items-center justify-between p-3 border rounded-lg">
-            <div className="flex items-center">
-              <Calendar className="w-4 h-4 ml-2 text-primary" />
+            <div className="flex items-center gap-2">
+              <Calendar className="w-4 h-4 text-primary" />
               <span>תורים קודמים</span>
             </div>
             <span>3</span>
           </div>
           
           <div className="flex items-center justify-between p-3 border rounded-lg">
-            <div className="flex items-center">
-              <Clock className="w-4 h-4 ml-2 text-primary" />
+            <div className="flex items-center gap-2">
+              <Clock className="w-4 h-4 text-primary" />
               <span>זמן תגובה ממוצע</span>
             </div>
             <span>2.5 שעות</span>
           </div>
           
           <div className="flex items-center justify-between p-3 border rounded-lg">
-            <div className="flex items-center">
-              <Flag className="w-4 h-4 ml-2 text-primary" />
+            <div className="flex items-center gap-2">
+              <Flag className="w-4 h-4 text-primary" />
               <span>סטטוס לקוח</span>
             </div>
             <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">פעיל</span>
           </div>
         </div>
         
-        <div className="mt-6">
-          <Button variant="outline" className="w-full flex items-center justify-center" onClick={() => onOpenChange(false)}>
-            <ArrowRight size={16} className="ml-2" />
+        <div className="mt-6 flex justify-center">
+          <Button variant="outline" className="flex items-center gap-2 px-6" onClick={() => onOpenChange(false)}>
+            <ArrowRight size={16} />
             לפרופיל מלא
           </Button>
         </div>
       </DialogContent>
-    </Dialog>;
+    </Dialog>
+  );
 };
 
-const MessageList = ({
-  messages,
-  selectedMessage,
-  setSelectedMessage,
-  handleReply,
-  handleMarkAllAsRead
-}: {
-  messages: Message[];
-  selectedMessage: Message | null;
-  setSelectedMessage: (msg: Message) => void;
-  handleReply: (msg: Message) => void;
-  handleMarkAllAsRead: () => void;
-}) => {
-  return <div>
-      <div className="h-[calc(100vh-320px)] overflow-y-auto">
-        {messages.length ? messages.map(msg => <div key={msg.id} onClick={() => setSelectedMessage(msg)} className={`flex flex-row-reverse gap-4 p-4 border-b cursor-pointer hover:bg-muted/30 transition-colors ${selectedMessage?.id === msg.id ? 'bg-muted/50' : ''} ${!msg.read ? 'bg-muted/20' : ''}`}>
-              <div className="w-12 h-12 rounded-full overflow-hidden">
-                <img src={msg.avatar} alt={msg.sender} className="w-full h-full object-cover" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs text-muted-foreground">{msg.time}</span>
-                  <div className="flex items-center">
-                    <span className="font-medium text-base">{msg.sender}</span>
-                    {!msg.read && <span className="mr-2 w-2 h-2 bg-primary rounded-full"></span>}
-                  </div>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-xs bg-muted/50 px-2 py-1 rounded-full flex items-center gap-1">
-                    {getPlatformIcon(msg.platform)}
-                    {msg.platform}
-                  </span>
-                  <p className="text-sm text-muted-foreground truncate max-w-[70%] text-right">{msg.message}</p>
-                </div>
-              </div>
-            </div>) : <div className="flex flex-col items-center justify-center h-full p-4">
-            <MessageCircle size={40} className="text-muted-foreground mb-2" />
-            <p className="text-muted-foreground">אין הודעות להצגה</p>
-          </div>}
-      </div>
-      
-      {messages.length > 0 && <div className="p-3 border-t">
-          <Button variant="ghost" size="sm" className="w-full" onClick={handleMarkAllAsRead}>
-            סמן הכל כנקרא
-          </Button>
-        </div>}
-    </div>;
-};
-
+// Helper function to get platform icon
 const getPlatformIcon = (platform: string) => {
   switch (platform.toLowerCase()) {
     case "instagram":
