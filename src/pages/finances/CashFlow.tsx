@@ -8,6 +8,58 @@ import { useState } from 'react';
 const CashFlow = () => {
   const [activeRange, setActiveRange] = useState('week');
 
+  // Generate different summary data based on the active range
+  const getSummaryData = () => {
+    switch (activeRange) {
+      case 'day':
+        return {
+          income: '₪2,350',
+          incomeChange: '+2%',
+          expenses: '₪1,120',
+          expensesChange: '-1%',
+          profit: '₪1,230',
+          profitChange: '+5%',
+          forecast: '₪2,500',
+          forecastChange: '+6%'
+        };
+      case 'week':
+        return {
+          income: '₪15,425',
+          incomeChange: '+4%',
+          expenses: '₪8,250',
+          expensesChange: '+2%',
+          profit: '₪7,175',
+          profitChange: '+7%',
+          forecast: '₪16,800',
+          forecastChange: '+9%'
+        };
+      case 'month':
+        return {
+          income: '₪58,720',
+          incomeChange: '+12%',
+          expenses: '₪32,450',
+          expensesChange: '+5%',
+          profit: '₪26,270',
+          profitChange: '+21%',
+          forecast: '₪63,500',
+          forecastChange: '+8%'
+        };
+      default:
+        return {
+          income: '₪15,425',
+          incomeChange: '+4%',
+          expenses: '₪8,250',
+          expensesChange: '+2%',
+          profit: '₪7,175',
+          profitChange: '+7%',
+          forecast: '₪16,800',
+          forecastChange: '+9%'
+        };
+    }
+  };
+
+  const summaryData = getSummaryData();
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -55,9 +107,9 @@ const CashFlow = () => {
               <DollarSign className="h-5 w-5 text-oliveGreen/80" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">₪15,425</div>
+              <div className="text-2xl font-bold">{summaryData.income}</div>
               <p className="text-xs text-muted-foreground mt-1 flex items-center">
-                <span className="inline-block mr-1 text-oliveGreen">+4%</span> מהחודש הקודם
+                <span className="inline-block mr-1 text-oliveGreen">{summaryData.incomeChange}</span> מהחודש הקודם
               </p>
             </CardContent>
           </Card>
@@ -67,9 +119,9 @@ const CashFlow = () => {
               <Receipt className="h-5 w-5 text-softRose/90" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">₪8,250</div>
+              <div className="text-2xl font-bold">{summaryData.expenses}</div>
               <p className="text-xs text-muted-foreground mt-1 flex items-center">
-                <span className="inline-block mr-1 text-rose-500">+2%</span> מהחודש הקודם
+                <span className="inline-block mr-1 text-rose-500">{summaryData.expensesChange}</span> מהחודש הקודם
               </p>
             </CardContent>
           </Card>
@@ -79,9 +131,9 @@ const CashFlow = () => {
               <TrendingUp className="h-5 w-5 text-roseGold/90" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">₪7,175</div>
+              <div className="text-2xl font-bold">{summaryData.profit}</div>
               <p className="text-xs text-muted-foreground mt-1 flex items-center">
-                <span className="inline-block mr-1 text-oliveGreen">+7%</span> מהחודש הקודם
+                <span className="inline-block mr-1 text-oliveGreen">{summaryData.profitChange}</span> מהחודש הקודם
               </p>
             </CardContent>
           </Card>
@@ -91,16 +143,16 @@ const CashFlow = () => {
               <Calendar className="h-5 w-5 text-deepNavy/60" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">₪16,800</div>
+              <div className="text-2xl font-bold">{summaryData.forecast}</div>
               <p className="text-xs text-muted-foreground mt-1 flex items-center">
-                <span className="inline-block mr-1 text-oliveGreen">+9%</span> צפי לחודש הבא
+                <span className="inline-block mr-1 text-oliveGreen">{summaryData.forecastChange}</span> צפי לחודש הבא
               </p>
             </CardContent>
           </Card>
         </div>
 
-        {/* Cash Flow Forecast Component */}
-        <CashFlowForecast />
+        {/* Cash Flow Forecast Component with activeRange prop */}
+        <CashFlowForecast activeRange={activeRange} />
 
         {/* Additional components would go here */}
       </div>

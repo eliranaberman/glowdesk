@@ -5,24 +5,130 @@ import { ArrowRight, TrendingUp, Calendar, AlertTriangle, DollarSign } from 'luc
 import { Link } from 'react-router-dom';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
-const CashFlowForecast = () => {
-  // Mock data for cash flow forecasting
-  const forecastData = [
-    { date: '04/08', income: 850, expenses: 300, profit: 550, projected: false },
-    { date: '04/09', income: 920, expenses: 320, profit: 600, projected: false },
-    { date: '04/10', income: 760, expenses: 290, profit: 470, projected: true },
-    { date: '04/11', income: 650, expenses: 290, profit: 360, projected: true, note: "פסח - תנועה נמוכה" },
-    { date: '04/12', income: 450, expenses: 290, profit: 160, projected: true, note: "חג" },
-    { date: '04/13', income: 350, expenses: 200, profit: 150, projected: true, note: "שבת" },
-    { date: '04/14', income: 820, expenses: 310, profit: 510, projected: true },
-  ];
+interface CashFlowForecastProps {
+  activeRange?: 'day' | 'week' | 'month';
+}
 
-  // Upcoming expenses
-  const upcomingExpenses = [
-    { id: '1', name: 'שכר דירה', date: '10/04/2025', amount: '₪3,500' },
-    { id: '2', name: 'שכר עובדים', date: '05/04/2025', amount: '₪4,200' },
-    { id: '3', name: 'הזמנת מלאי', date: '12/04/2025', amount: '₪1,800' },
-  ];
+const CashFlowForecast = ({ activeRange = 'week' }: CashFlowForecastProps) => {
+  // Generate different forecast data based on the active range
+  const getForecastData = () => {
+    switch (activeRange) {
+      case 'day':
+        return [
+          { date: '08:00', income: 150, expenses: 50, profit: 100, projected: false },
+          { date: '10:00', income: 320, expenses: 70, profit: 250, projected: false },
+          { date: '12:00', income: 480, expenses: 120, profit: 360, projected: false },
+          { date: '14:00', income: 650, expenses: 180, profit: 470, projected: false },
+          { date: '16:00', income: 760, expenses: 210, profit: 550, projected: true },
+          { date: '18:00', income: 920, expenses: 260, profit: 660, projected: true },
+          { date: '20:00', income: 1050, expenses: 290, profit: 760, projected: true },
+        ];
+      case 'week':
+        return [
+          { date: '04/08', income: 850, expenses: 300, profit: 550, projected: false },
+          { date: '04/09', income: 920, expenses: 320, profit: 600, projected: false },
+          { date: '04/10', income: 760, expenses: 290, profit: 470, projected: true },
+          { date: '04/11', income: 650, expenses: 290, profit: 360, projected: true, note: "פסח - תנועה נמוכה" },
+          { date: '04/12', income: 450, expenses: 290, profit: 160, projected: true, note: "חג" },
+          { date: '04/13', income: 350, expenses: 200, profit: 150, projected: true, note: "שבת" },
+          { date: '04/14', income: 820, expenses: 310, profit: 510, projected: true },
+        ];
+      case 'month':
+        return [
+          { date: 'שבוע 1', income: 3250, expenses: 1200, profit: 2050, projected: false },
+          { date: 'שבוע 2', income: 4120, expenses: 1580, profit: 2540, projected: false },
+          { date: 'שבוע 3', income: 3860, expenses: 1450, profit: 2410, projected: false },
+          { date: 'שבוע 4', income: 3950, expenses: 1490, profit: 2460, projected: true },
+          { date: 'שבוע 5', income: 4350, expenses: 1650, profit: 2700, projected: true, note: "חג - צפי לעליה" },
+        ];
+      default:
+        return [
+          { date: '04/08', income: 850, expenses: 300, profit: 550, projected: false },
+          { date: '04/09', income: 920, expenses: 320, profit: 600, projected: false },
+          { date: '04/10', income: 760, expenses: 290, profit: 470, projected: true },
+          { date: '04/11', income: 650, expenses: 290, profit: 360, projected: true },
+          { date: '04/12', income: 450, expenses: 290, profit: 160, projected: true },
+          { date: '04/13', income: 350, expenses: 200, profit: 150, projected: true },
+          { date: '04/14', income: 820, expenses: 310, profit: 510, projected: true },
+        ];
+    }
+  };
+
+  // Generate upcoming expenses based on active range
+  const getUpcomingExpenses = () => {
+    switch (activeRange) {
+      case 'day':
+        return [
+          { id: '1', name: 'חשבון חשמל', date: '18:00 היום', amount: '₪450' },
+          { id: '2', name: 'משלוח סחורה', date: '15:30 היום', amount: '₪280' },
+          { id: '3', name: 'שכר שעתי', date: '20:00 היום', amount: '₪320' },
+        ];
+      case 'week':
+        return [
+          { id: '1', name: 'שכר דירה', date: '10/04/2025', amount: '₪3,500' },
+          { id: '2', name: 'שכר עובדים', date: '05/04/2025', amount: '₪4,200' },
+          { id: '3', name: 'הזמנת מלאי', date: '12/04/2025', amount: '₪1,800' },
+        ];
+      case 'month':
+        return [
+          { id: '1', name: 'שכר דירה', date: '10/04/2025', amount: '₪3,500' },
+          { id: '2', name: 'שכר עובדים', date: '30/04/2025', amount: '₪16,800' },
+          { id: '3', name: 'ביטוח עסק', date: '15/04/2025', amount: '₪2,350' },
+          { id: '4', name: 'החזר הלוואה', date: '20/04/2025', amount: '₪4,500' },
+        ];
+      default:
+        return [
+          { id: '1', name: 'שכר דירה', date: '10/04/2025', amount: '₪3,500' },
+          { id: '2', name: 'שכר עובדים', date: '05/04/2025', amount: '₪4,200' },
+          { id: '3', name: 'הזמנת מלאי', date: '12/04/2025', amount: '₪1,800' },
+        ];
+    }
+  };
+
+  // Generate important notes based on active range
+  const getImportantNotes = () => {
+    switch (activeRange) {
+      case 'day':
+        return [
+          { icon: <Calendar className="h-4 w-4 text-muted-foreground ml-2 mt-0.5" />, text: "פגישה עם ספק בשעה 16:00" },
+          { icon: <TrendingUp className="h-4 w-4 text-oliveGreen ml-2 mt-0.5" />, text: "שעות השיא צפויות בין 17:00-19:00" },
+        ];
+      case 'week':
+        return [
+          { icon: <Calendar className="h-4 w-4 text-muted-foreground ml-2 mt-0.5" />, text: "פסח בשבת (12.04) - צפוי יום שקט יותר" },
+          { icon: <TrendingUp className="h-4 w-4 text-oliveGreen ml-2 mt-0.5" />, text: "גידול של 15% בהזמנות לפני החג - הכן מלאי בהתאם" },
+        ];
+      case 'month':
+        return [
+          { icon: <Calendar className="h-4 w-4 text-muted-foreground ml-2 mt-0.5" />, text: "חגי ניסן (פסח) - תכנן את המלאי מראש" },
+          { icon: <TrendingUp className="h-4 w-4 text-oliveGreen ml-2 mt-0.5" />, text: "צפי לעליה של 20% במכירות לקראת סוף החודש" },
+          { icon: <AlertTriangle className="h-4 w-4 text-amber-500 ml-2 mt-0.5" />, text: "תשלומי מס רבעוניים בסוף החודש" },
+        ];
+      default:
+        return [
+          { icon: <Calendar className="h-4 w-4 text-muted-foreground ml-2 mt-0.5" />, text: "פסח בשבת (12.04) - צפוי יום שקט יותר" },
+          { icon: <TrendingUp className="h-4 w-4 text-oliveGreen ml-2 mt-0.5" />, text: "גידול של 15% בהזמנות לפני החג - הכן מלאי בהתאם" },
+        ];
+    }
+  };
+
+  // Get appropriate title based on the active range
+  const getTitleText = () => {
+    switch (activeRange) {
+      case 'day':
+        return 'תחזית יומית';
+      case 'week':
+        return 'תחזית שבועית';
+      case 'month':
+        return 'תחזית חודשית';
+      default:
+        return 'תחזית שבועית';
+    }
+  };
+
+  const forecastData = getForecastData();
+  const upcomingExpenses = getUpcomingExpenses();
+  const importantNotes = getImportantNotes();
 
   return (
     <Card className="elegant-card overflow-hidden">
@@ -34,7 +140,7 @@ const CashFlowForecast = () => {
               תחזית תזרים מזומנים
             </CardTitle>
             <CardDescription>
-              תחזית הכנסות והוצאות לשבוע הקרוב
+              תחזית הכנסות והוצאות {activeRange === 'day' ? 'ליום הקרוב' : activeRange === 'week' ? 'לשבוע הקרוב' : 'לחודש הקרוב'}
             </CardDescription>
           </div>
           <Link to="/finances/cash-flow">
@@ -50,7 +156,7 @@ const CashFlowForecast = () => {
           {/* Cash flow chart */}
           <div className="border rounded-2xl p-4 bg-white shadow-card">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="font-medium">תחזית שבועית</h3>
+              <h3 className="font-medium">{getTitleText()}</h3>
               <div className="flex items-center gap-3 text-xs">
                 <div className="flex items-center gap-1.5">
                   <div className="w-3 h-3 bg-oliveGreen/90 rounded"></div>
@@ -157,14 +263,12 @@ const CashFlowForecast = () => {
               <h3 className="font-medium">תזכורות חשובות</h3>
             </div>
             <ul className="space-y-2.5 text-sm">
-              <li className="flex items-start">
-                <Calendar className="h-4 w-4 text-muted-foreground ml-2 mt-0.5" />
-                <span>פסח בשבת (12.04) - צפוי יום שקט יותר</span>
-              </li>
-              <li className="flex items-start">
-                <TrendingUp className="h-4 w-4 text-oliveGreen ml-2 mt-0.5" />
-                <span>גידול של 15% בהזמנות לפני החג - הכן מלאי בהתאם</span>
-              </li>
+              {importantNotes.map((note, index) => (
+                <li key={index} className="flex items-start">
+                  {note.icon}
+                  <span>{note.text}</span>
+                </li>
+              ))}
             </ul>
           </div>
 
