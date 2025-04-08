@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -167,7 +166,7 @@ const InboxContent = () => {
                   onChange={(e) => setReplyText(e.target.value)}
                   className="flex-1 border rounded-lg p-4 text-base focus:outline-none focus:ring-2 focus:ring-primary/30"
                   placeholder="כתוב את תגובתך כאן..."
-                  rows={3}
+                  rows={5}
                 />
                 <Button 
                   onClick={handleSendReply} 
@@ -270,7 +269,6 @@ const InboxContent = () => {
   );
 };
 
-// Extracted message list component to reduce code duplication
 const MessageList = ({ 
   messages, 
   selectedMessage, 
@@ -284,7 +282,6 @@ const MessageList = ({
   handleReply: (msg: Message) => void,
   handleMarkAllAsRead: () => void
 }) => {
-  // Helper function to get platform icon
   const getPlatformIcon = (platform: string) => {
     switch (platform.toLowerCase()) {
       case "instagram":
