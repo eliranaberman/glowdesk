@@ -38,10 +38,10 @@ const RecentMessagesPanel = ({ messages }: RecentMessagesPanelProps) => {
     <>
       <Card className="shadow-soft hover:shadow-soft-lg transition-all duration-300">
         <CardHeader className="flex flex-row items-center justify-between pb-2 border-b">
+          <CardTitle className="text-lg text-center mx-auto">הודעות אחרונות</CardTitle>
           <Button variant="outline" size="sm">
             טען עוד
           </Button>
-          <CardTitle className="text-lg text-center mx-auto">הודעות אחרונות</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           <div className="divide-y">
@@ -68,21 +68,21 @@ const RecentMessagesPanel = ({ messages }: RecentMessagesPanelProps) => {
                         <span>({message.platform})</span>
                       </div>
                       {!message.read && (
-                        <Badge variant="soft" className="h-2 w-2 p-0 rounded-full ml-1" />
+                        <Badge variant="soft" className="h-2 w-2 p-0 rounded-full mr-1" />
                       )}
                     </div>
                     <p className="text-sm mb-2 text-muted-foreground">{message.message}</p>
                     <div className="flex items-center justify-between">
+                      <span className="text-xs text-muted-foreground">{message.time}</span>
                       <Button 
                         variant="ghost" 
                         size="sm" 
                         className="p-0 h-auto hover:bg-transparent hover:underline text-xs text-muted-foreground"
                         onClick={() => handleReply(message)}
                       >
-                        <MessageCircle size={14} className="mr-1" />
+                        <MessageCircle size={14} className="ml-1" />
                         השב
                       </Button>
-                      <span className="text-xs text-muted-foreground">{message.time}</span>
                     </div>
                   </div>
                 </div>

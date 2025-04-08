@@ -120,11 +120,6 @@ const PostCreationPanel = () => {
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle className="mx-auto text-center">פרסום פוסטים</CardTitle>
-        <Button variant="soft" onClick={handleUploadClick}>
-          <Upload className="ml-2" size={16} />
-          העלה מדיה
-        </Button>
         <input 
           type="file" 
           ref={fileInputRef} 
@@ -132,36 +127,15 @@ const PostCreationPanel = () => {
           accept="image/*,video/*"
           onChange={handleFileInput}
         />
+        <Button variant="soft" onClick={handleUploadClick}>
+          <Upload className="ml-2" size={16} />
+          העלה מדיה
+        </Button>
+        <CardTitle className="mx-auto text-center">פרסום פוסטים</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className={`bg-muted/30 rounded-lg flex items-center justify-center p-4 md:order-first ${uploadedMedia ? 'overflow-hidden' : ''}`}>
-            {uploadedMedia ? (
-              <div className="relative w-full h-full min-h-[200px]">
-                <img 
-                  src={uploadedMedia} 
-                  alt="Preview" 
-                  className="w-full h-full object-cover rounded-lg"
-                />
-                <Button 
-                  variant="destructive" 
-                  size="sm" 
-                  className="absolute top-2 right-2 opacity-80"
-                  onClick={() => setUploadedMedia(null)}
-                >
-                  הסר
-                </Button>
-              </div>
-            ) : (
-              <div className="text-center">
-                <Upload size={32} className="mx-auto mb-2 text-muted-foreground" />
-                <p className="text-muted-foreground text-sm mb-2">גרור תמונות או וידאו לכאן</p>
-                <Button variant="outline" size="sm" onClick={handleSelectFiles}>בחר קבצים</Button>
-              </div>
-            )}
-          </div>
-          
-          <div className="md:col-span-2">
+          <div className="md:order-first md:col-span-2">
             <div className="space-y-4">
               <div>
                 <label className="block text-right mb-1 text-sm">טקסט הפוסט</label>
@@ -195,18 +169,11 @@ const PostCreationPanel = () => {
                 <label className="block text-right mb-2 text-sm">פלטפורמות לפרסום</label>
                 <div className="flex flex-wrap gap-2 justify-end">
                   <Badge 
-                    variant={selectedPlatforms.includes("twitter") ? "warm" : "outline"} 
+                    variant={selectedPlatforms.includes("instagram") ? "soft" : "outline"} 
                     className="cursor-pointer hover:bg-accent p-2"
-                    onClick={() => togglePlatform("twitter")}
+                    onClick={() => togglePlatform("instagram")}
                   >
-                    טוויטר / X
-                  </Badge>
-                  <Badge 
-                    variant={selectedPlatforms.includes("tiktok") ? "warm" : "outline"} 
-                    className="cursor-pointer hover:bg-accent p-2"
-                    onClick={() => togglePlatform("tiktok")}
-                  >
-                    טיקטוק
+                    אינסטגרם
                   </Badge>
                   <Badge 
                     variant={selectedPlatforms.includes("facebook") ? "warm" : "outline"} 
@@ -216,40 +183,51 @@ const PostCreationPanel = () => {
                     פייסבוק
                   </Badge>
                   <Badge 
-                    variant={selectedPlatforms.includes("instagram") ? "soft" : "outline"} 
+                    variant={selectedPlatforms.includes("tiktok") ? "warm" : "outline"} 
                     className="cursor-pointer hover:bg-accent p-2"
-                    onClick={() => togglePlatform("instagram")}
+                    onClick={() => togglePlatform("tiktok")}
                   >
-                    אינסטגרם
+                    טיקטוק
+                  </Badge>
+                  <Badge 
+                    variant={selectedPlatforms.includes("twitter") ? "warm" : "outline"} 
+                    className="cursor-pointer hover:bg-accent p-2"
+                    onClick={() => togglePlatform("twitter")}
+                  >
+                    טוויטר / X
                   </Badge>
                 </div>
               </div>
             </div>
           </div>
+          <div className={`bg-muted/30 rounded-lg flex items-center justify-center p-4 ${uploadedMedia ? 'overflow-hidden' : ''}`}>
+            {uploadedMedia ? (
+              <div className="relative w-full h-full min-h-[200px]">
+                <img 
+                  src={uploadedMedia} 
+                  alt="Preview" 
+                  className="w-full h-full object-cover rounded-lg"
+                />
+                <Button 
+                  variant="destructive" 
+                  size="sm" 
+                  className="absolute top-2 left-2 opacity-80"
+                  onClick={() => setUploadedMedia(null)}
+                >
+                  הסר
+                </Button>
+              </div>
+            ) : (
+              <div className="text-center">
+                <Upload size={32} className="mx-auto mb-2 text-muted-foreground" />
+                <p className="text-muted-foreground text-sm mb-2">גרור תמונות או וידאו לכאן</p>
+                <Button variant="outline" size="sm" onClick={handleSelectFiles}>בחר קבצים</Button>
+              </div>
+            )}
+          </div>
         </div>
         
         <div className="flex justify-between mt-6 pt-4 border-t">
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button variant="outline" className="gap-2">
-                <Calendar size={16} />
-                {date ? format(date, "dd/MM/yyyy") : "תזמן לפרסום"}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
-              <CalendarComponent
-                mode="single"
-                selected={date}
-                onSelect={setDate}
-                initialFocus
-              />
-              <div className="p-2 border-t flex justify-between">
-                <Button size="sm" variant="outline" onClick={() => setDate(undefined)}>איפוס</Button>
-                <Button size="sm" onClick={handleSchedulePost}>אישור</Button>
-              </div>
-            </PopoverContent>
-          </Popover>
-          
           <Button 
             onClick={handlePublishNow} 
             disabled={isPublishing}
@@ -258,6 +236,27 @@ const PostCreationPanel = () => {
             <Send size={16} />
             {isPublishing ? "מפרסם..." : "פרסם עכשיו"}
           </Button>
+          
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" className="gap-2">
+                <Calendar size={16} />
+                {date ? format(date, "dd/MM/yyyy") : "תזמן לפרסום"}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="end">
+              <CalendarComponent
+                mode="single"
+                selected={date}
+                onSelect={setDate}
+                initialFocus
+              />
+              <div className="p-2 border-t flex justify-between">
+                <Button size="sm" onClick={handleSchedulePost}>אישור</Button>
+                <Button size="sm" variant="outline" onClick={() => setDate(undefined)}>איפוס</Button>
+              </div>
+            </PopoverContent>
+          </Popover>
         </div>
       </CardContent>
     </Card>

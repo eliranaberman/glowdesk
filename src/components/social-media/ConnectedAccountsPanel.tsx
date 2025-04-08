@@ -59,10 +59,17 @@ const ConnectedAccountsPanel = ({ connectedAccounts, connectPlatform }: Connecte
             {socialAccounts.map((account, index) => (
               <div 
                 key={account.id}
-                className={`flex flex-row-reverse justify-between items-center ${
+                className={`flex justify-between items-center ${
                   index < socialAccounts.length - 1 ? 'border-b pb-2' : ''
                 }`}
               >
+                <div className="flex flex-col text-right">
+                  <div className="flex items-center gap-1.5">
+                    {account.icon}
+                    <span className="font-medium">{account.name}</span>
+                  </div>
+                  <span className="text-xs text-muted-foreground">{account.followers.toLocaleString()} followers</span>
+                </div>
                 <Button 
                   variant={account.connected ? "soft" : "outline"} 
                   className="gap-2"
@@ -71,13 +78,6 @@ const ConnectedAccountsPanel = ({ connectedAccounts, connectPlatform }: Connecte
                   {account.icon}
                   {account.connected ? "מחובר" : "חבר חשבון"}
                 </Button>
-                <div className="flex flex-col text-right">
-                  <div className="flex items-center gap-1.5">
-                    {account.icon}
-                    <span className="font-medium">{account.name}</span>
-                  </div>
-                  <span className="text-xs text-muted-foreground">{account.followers.toLocaleString()} followers</span>
-                </div>
               </div>
             ))}
           </div>

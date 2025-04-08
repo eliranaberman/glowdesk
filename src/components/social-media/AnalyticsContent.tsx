@@ -24,22 +24,25 @@ interface AnalyticsContentProps {
 const AnalyticsContent = ({ analyticsData }: AnalyticsContentProps) => {
   const [selectedPlatform, setSelectedPlatform] = useState<string>("all");
 
-  // Use default colors if not provided
-  const colors = analyticsData?.colors || {
+  // Use colors matching CashFlowForecast
+  const colors = {
     primary: "#606c38", // oliveGreen
     secondary: "#e07a5f", // softRose
     tertiary: "#ddbea9", // roseGold
+    income: "#606c38",    // For income (matching CashFlowForecast)
+    expenses: "#e07a5f",  // For expenses (matching CashFlowForecast)
+    profit: "#ddbea9"     // For profit (matching CashFlowForecast)
   };
 
   // Mock platform data
   const platformData = [
-    { name: "Instagram", followers: 1250, engagement: 7.5, posts: 45, color: colors.primary },
-    { name: "Facebook", followers: 950, engagement: 5.2, posts: 35, color: colors.secondary },
-    { name: "TikTok", followers: 720, engagement: 8.3, posts: 28, color: colors.tertiary },
+    { name: "Instagram", followers: 1250, engagement: 7.5, posts: 45, color: colors.income },
+    { name: "Facebook", followers: 950, engagement: 5.2, posts: 35, color: colors.expenses },
+    { name: "TikTok", followers: 720, engagement: 8.3, posts: 28, color: colors.profit },
     { name: "Twitter", followers: 520, engagement: 4.1, posts: 25, color: "#90BE6D" }
   ];
 
-  // Mock follower growth data
+  // Follower growth data
   const followerGrowthData = analyticsData?.followers || [
     { name: "ינואר", count: 320 },
     { name: "פברואר", count: 350 },
@@ -49,7 +52,7 @@ const AnalyticsContent = ({ analyticsData }: AnalyticsContentProps) => {
     { name: "יוני", count: 590 },
   ];
 
-  // Mock engagement rate data
+  // Engagement rate data
   const engagementRateData = analyticsData?.engagement || [
     { name: "ינואר", rate: 5.2 },
     { name: "פברואר", rate: 5.8 },
@@ -59,7 +62,7 @@ const AnalyticsContent = ({ analyticsData }: AnalyticsContentProps) => {
     { name: "יוני", rate: 8.5 },
   ];
 
-  // Mock post frequency data
+  // Post frequency data
   const postFrequencyData = analyticsData?.posts || [
     { name: "ינואר", count: 10 },
     { name: "פברואר", count: 12 },
@@ -135,12 +138,12 @@ const AnalyticsContent = ({ analyticsData }: AnalyticsContentProps) => {
                   <CartesianGrid strokeDasharray="3 3" vertical={false} />
                   <XAxis dataKey="name" />
                   <YAxis />
-                  <Tooltip labelFormatter={(label) => `חודש: ${label}`} />
+                  <Tooltip labelFormatter={(label) => `חודש: ${label}`} formatter={(value) => [`${value} עוקבים`, ``]} />
                   <Line 
                     type="monotone" 
                     dataKey="count" 
                     name="מספר עוקבים"
-                    stroke={colors.primary} 
+                    stroke={colors.income}
                     activeDot={{ r: 8 }} 
                     strokeWidth={2}
                   />
@@ -162,11 +165,11 @@ const AnalyticsContent = ({ analyticsData }: AnalyticsContentProps) => {
                   <CartesianGrid strokeDasharray="3 3" vertical={false} />
                   <XAxis dataKey="name" />
                   <YAxis />
-                  <Tooltip labelFormatter={(label) => `חודש: ${label}`} />
+                  <Tooltip labelFormatter={(label) => `חודש: ${label}`} formatter={(value) => [`${value}%`, ``]} />
                   <Bar 
                     dataKey="rate" 
                     name="אחוז מעורבות"
-                    fill={colors.secondary} 
+                    fill={colors.expenses}
                     radius={[4, 4, 0, 0]}
                     fillOpacity={0.7}
                   />
@@ -190,11 +193,11 @@ const AnalyticsContent = ({ analyticsData }: AnalyticsContentProps) => {
                   <CartesianGrid strokeDasharray="3 3" vertical={false} />
                   <XAxis dataKey="name" />
                   <YAxis />
-                  <Tooltip labelFormatter={(label) => `חודש: ${label}`} />
+                  <Tooltip labelFormatter={(label) => `חודש: ${label}`} formatter={(value) => [`${value} פוסטים`, ``]} />
                   <Bar 
                     dataKey="count" 
                     name="מספר פוסטים"
-                    fill={colors.tertiary} 
+                    fill={colors.profit}
                     radius={[4, 4, 0, 0]}
                     fillOpacity={0.7}
                   />
@@ -249,7 +252,7 @@ const AnalyticsContent = ({ analyticsData }: AnalyticsContentProps) => {
                 className="flex items-center justify-between p-3 border rounded-lg"
               >
                 <div className="flex items-center">
-                  <div className="w-10 h-10 bg-accent rounded-full flex items-center justify-center mr-3">
+                  <div className="w-10 h-10 bg-accent rounded-full flex items-center justify-center ml-3">
                     <span className="text-sm font-medium">{content.platform.charAt(0)}</span>
                   </div>
                   <div>
@@ -259,7 +262,7 @@ const AnalyticsContent = ({ analyticsData }: AnalyticsContentProps) => {
                     </p>
                   </div>
                 </div>
-                <div className="text-right">
+                <div className="text-left">
                   <p className="font-semibold text-primary">{content.engagement}</p>
                   <p className="text-xs text-muted-foreground">אינטראקציות</p>
                 </div>

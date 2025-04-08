@@ -101,6 +101,8 @@ const SocialMedia = () => {
   return (
     <div className="space-y-6" dir="rtl">
       <div className="flex justify-between items-center">
+        <div className="w-[85px]" /> {/* Spacer for visual balance */}
+        <h1 className="text-2xl font-medium text-center mx-auto">מדיה חברתית ושיווק</h1>
         <Button 
           variant="soft" 
           size="sm" 
@@ -110,8 +112,6 @@ const SocialMedia = () => {
           <Plus size={16} />
           חבר חשבון
         </Button>
-        <h1 className="text-2xl font-medium text-center mx-auto">מדיה חברתית ושיווק</h1>
-        <div className="w-[85px]" /> {/* Spacer for visual balance */}
       </div>
 
       <Tabs defaultValue={activeTab} value={activeTab} onValueChange={setActiveTab} className="w-full">
