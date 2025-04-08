@@ -42,33 +42,33 @@ const LoyaltyProgram = () => {
       <CardContent>
         <Tabs defaultValue={activeTab} value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid grid-cols-3 mb-4">
-            <TabsTrigger value="overview" className="text-right">סקירה כללית</TabsTrigger>
-            <TabsTrigger value="customers" className="text-right">לקוחות נאמנים</TabsTrigger>
-            <TabsTrigger value="promotions" className="text-right">הטבות פעילות</TabsTrigger>
+            <TabsTrigger value="promotions" className="text-right order-3">הטבות פעילות</TabsTrigger>
+            <TabsTrigger value="customers" className="text-right order-2">לקוחות נאמנים</TabsTrigger>
+            <TabsTrigger value="overview" className="text-right order-1">סקירה כללית</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="flex flex-col p-4 border rounded-lg bg-card">
+              <div className="flex flex-col p-4 border rounded-lg bg-card order-2 sm:order-2">
                 <div className="flex justify-between items-center mb-2">
-                  <h4 className="font-medium">לקוחות משתתפים</h4>
                   <Users className="h-4 w-4 text-muted-foreground" />
-                </div>
-                <p className="text-2xl font-semibold">124</p>
-                <p className="text-xs text-muted-foreground">70% מסך הלקוחות</p>
-              </div>
-              <div className="flex flex-col p-4 border rounded-lg bg-card">
-                <div className="flex justify-between items-center mb-2">
                   <h4 className="font-medium">קופונים שנוצלו</h4>
-                  <Gift className="h-4 w-4 text-muted-foreground" />
                 </div>
-                <p className="text-2xl font-semibold">37</p>
-                <p className="text-xs text-muted-foreground">בחודש האחרון</p>
+                <p className="text-2xl font-semibold text-right">37</p>
+                <p className="text-xs text-muted-foreground text-right">בחודש האחרון</p>
+              </div>
+              <div className="flex flex-col p-4 border rounded-lg bg-card order-1 sm:order-1">
+                <div className="flex justify-between items-center mb-2">
+                  <Users className="h-4 w-4 text-muted-foreground" />
+                  <h4 className="font-medium">לקוחות משתתפים</h4>
+                </div>
+                <p className="text-2xl font-semibold text-right">124</p>
+                <p className="text-xs text-muted-foreground text-right">70% מסך הלקוחות</p>
               </div>
             </div>
 
             <div className="space-y-4 pt-2">
-              <h3 className="font-medium">הקופונים הפופולריים ביותר</h3>
+              <h3 className="font-medium text-right">הקופונים הפופולריים ביותר</h3>
               <div className="space-y-3">
                 {[
                   { name: "הנחה 20% על טיפול הבא", used: 85 },
@@ -76,12 +76,12 @@ const LoyaltyProgram = () => {
                   { name: "קנה 3 קבל 1 חינם", used: 42 }
                 ].map((coupon, i) => (
                   <div key={i} className="flex items-center justify-between">
-                    <div>
+                    <Progress value={coupon.used > 70 ? 75 : coupon.used > 50 ? 50 : 30} 
+                              className="w-16 h-1.5" />
+                    <div className="text-right">
                       <p className="text-sm">{coupon.name}</p>
                       <p className="text-xs text-muted-foreground">{coupon.used} שימושים</p>
                     </div>
-                    <Progress value={coupon.used > 70 ? 75 : coupon.used > 50 ? 50 : 30} 
-                              className="w-16 h-1.5" />
                   </div>
                 ))}
               </div>
@@ -96,15 +96,15 @@ const LoyaltyProgram = () => {
                 { name: "יעל גלעדי", visits: 16, points: 1720 }
               ].map((customer, i) => (
                 <div key={i} className="flex items-center justify-between p-3 border rounded-lg">
-                  <div>
-                    <p className="font-medium">{customer.name}</p>
-                    <p className="text-xs text-muted-foreground">{customer.visits} ביקורים</p>
-                  </div>
                   <div className="flex items-center">
-                    <Badge variant="secondary" className="ml-2">{customer.points} נקודות</Badge>
                     <Button variant="remind" size="xs">
                       שלח תזכורת
                     </Button>
+                    <Badge variant="secondary" className="ml-2">{customer.points} נקודות</Badge>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-medium">{customer.name}</p>
+                    <p className="text-xs text-muted-foreground">{customer.visits} ביקורים</p>
                   </div>
                 </div>
               ))}
@@ -141,15 +141,15 @@ const LoyaltyProgram = () => {
                 }
               ].map((promo, i) => (
                 <div key={i} className="flex p-3 border rounded-lg hover:bg-accent/10 transition-colors">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <h4 className="font-medium">{promo.name}</h4>
-                      <Badge variant="outline" className="text-xs">{promo.code}</Badge>
-                    </div>
-                    <p className="text-sm text-muted-foreground mt-1">{promo.description}</p>
-                  </div>
                   <div className="text-2xl flex items-center justify-center w-10">
                     {promo.icon}
+                  </div>
+                  <div className="flex-1 text-right">
+                    <div className="flex items-center gap-2 justify-end">
+                      <Badge variant="outline" className="text-xs">{promo.code}</Badge>
+                      <h4 className="font-medium">{promo.name}</h4>
+                    </div>
+                    <p className="text-sm text-muted-foreground mt-1">{promo.description}</p>
                   </div>
                 </div>
               ))}
