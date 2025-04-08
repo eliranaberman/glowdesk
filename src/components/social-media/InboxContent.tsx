@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Message } from "./types";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Instagram, Facebook, Twitter, MessageCircle, User, Calendar, Clock, Flag, ArrowRight, Send } from "lucide-react";
+import { Instagram, Facebook, Twitter, MessageCircle, User, Calendar, Clock, Flag, ArrowRight, Send, Image, FileText, Smile } from "lucide-react";
 import ConnectionModal from "./ConnectionModal";
 import ReplyModal from "./ReplyModal";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";

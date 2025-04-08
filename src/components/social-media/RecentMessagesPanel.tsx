@@ -38,10 +38,14 @@ const RecentMessagesPanel = ({ messages }: RecentMessagesPanelProps) => {
     <>
       <Card className="shadow-soft hover:shadow-soft-lg transition-all duration-300">
         <CardHeader className="flex flex-row items-center justify-between pb-2 border-b">
-          <CardTitle className="text-lg font-medium mx-auto">הודעות אחרונות</CardTitle>
+          {/* Right button - "Load more" moved to right side */}
           <Button variant="outline" size="sm">
             טען עוד
           </Button>
+          {/* Title in the center */}
+          <CardTitle className="text-lg font-medium">הודעות אחרונות</CardTitle>
+          {/* Left button - placeholder for visual balance */}
+          <div className="w-[65px]" /> {/* Width to match the "טען עוד" button */}
         </CardHeader>
         <CardContent className="p-0">
           <div className="divide-y">
