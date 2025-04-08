@@ -5,8 +5,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import CashFlowForecast from '@/components/dashboard/CashFlowForecast';
 import { useState } from 'react';
 
+type ActiveRangeType = 'day' | 'week' | 'month';
+
 const CashFlow = () => {
-  const [activeRange, setActiveRange] = useState('week');
+  const [activeRange, setActiveRange] = useState<ActiveRangeType>('week');
 
   // Generate different summary data based on the active range
   const getSummaryData = () => {
