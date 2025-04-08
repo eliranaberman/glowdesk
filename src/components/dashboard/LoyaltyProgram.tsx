@@ -42,9 +42,9 @@ const LoyaltyProgram = () => {
       <CardContent>
         <Tabs defaultValue={activeTab} value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid grid-cols-3 mb-4">
-            <TabsTrigger value="promotions" className="text-right order-3">הטבות פעילות</TabsTrigger>
+            <TabsTrigger value="overview" className="text-right order-3">סקירה כללית</TabsTrigger>
             <TabsTrigger value="customers" className="text-right order-2">לקוחות נאמנים</TabsTrigger>
-            <TabsTrigger value="overview" className="text-right order-1">סקירה כללית</TabsTrigger>
+            <TabsTrigger value="promotions" className="text-right order-1">הטבות פעילות</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-4">
