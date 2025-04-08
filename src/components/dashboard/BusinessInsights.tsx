@@ -132,22 +132,7 @@ const BusinessInsights = () => {
               </div>
             ))}
 
-            <div className="border rounded-lg p-4">
-              <h3 className="font-medium mb-3 text-right">לקוחות לא פעילים</h3>
-              <div className="space-y-3">
-                {inactiveClients.map((client) => (
-                  <div key={client.id} className="flex justify-between items-center flex-row-reverse">
-                    <div className="text-right">
-                      <p className="font-medium text-sm">{client.name}</p>
-                      <p className="text-xs text-muted-foreground">ביקור אחרון: לפני {client.lastVisit}</p>
-                    </div>
-                    <Button variant="ghost" size="sm">
-                      שלח תזכורת
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            </div>
+            {/* Removed the "border rounded-lg p-4" div with the inactive clients */}
           </TabsContent>
           
           <TabsContent value="week" className="space-y-4">
