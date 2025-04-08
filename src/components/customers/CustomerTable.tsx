@@ -114,7 +114,7 @@ const CustomerTable = ({
               </TableHead>
               <TableHead 
                 onClick={() => handleSort('totalSpent')}
-                className="cursor-pointer hover:bg-muted text-right"
+                className="cursor-pointer hover:bg-muted text-center"
               >
                 סה"כ תשלום מצטבר
               </TableHead>
@@ -158,7 +158,7 @@ const CustomerTable = ({
                       <span>{customer.totalVisits}</span>
                     </div>
                   </TableCell>
-                  <TableCell className="text-right font-medium">
+                  <TableCell className="text-center font-medium">
                     ₪{customer.totalSpent}
                   </TableCell>
                   <TableCell>
