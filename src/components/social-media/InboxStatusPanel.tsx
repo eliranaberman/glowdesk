@@ -17,22 +17,22 @@ const InboxStatusPanel = ({ handleOpenInbox }: InboxStatusPanelProps) => {
       <CardContent>
         <div className="space-y-4">
           <div className="flex justify-between items-center">
-            <Badge variant="soft">2 לא נקראו</Badge>
             <div className="text-right">
               <span className="font-medium">הודעות חדשות</span>
             </div>
+            <Badge variant="soft">2 לא נקראו</Badge>
           </div>
           <div className="flex justify-between items-center">
-            <span>1.2 שעות</span>
             <div className="text-right">
               <span className="font-medium">זמן תגובה ממוצע</span>
             </div>
+            <span>1.2 שעות</span>
           </div>
           <div className="flex justify-between items-center">
-            <span>92%</span>
             <div className="text-right">
               <span className="font-medium">שיעור מענה</span>
             </div>
+            <span>92%</span>
           </div>
           
           <Button 
