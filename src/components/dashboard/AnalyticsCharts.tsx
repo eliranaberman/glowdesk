@@ -50,17 +50,17 @@ const AnalyticsCharts: React.FC<AnalyticsChartsProps> = ({
       <CardContent>
         <Tabs defaultValue="bar" className="w-full">
           <TabsList className="mb-4 grid grid-cols-3">
-            <TabsTrigger value="comparison" className="flex items-center gap-1.5 order-3">
-              <PieChart className="h-4 w-4" />
-              השוואה
+            <TabsTrigger value="bar" className="flex items-center gap-1.5 order-3">
+              <BarChart className="h-4 w-4" />
+              גרף עמודות
             </TabsTrigger>
             <TabsTrigger value="line" className="flex items-center gap-1.5 order-2">
               <LineChart className="h-4 w-4" />
               גרף קווי
             </TabsTrigger>
-            <TabsTrigger value="bar" className="flex items-center gap-1.5 order-1">
-              <BarChart className="h-4 w-4" />
-              גרף עמודות
+            <TabsTrigger value="comparison" className="flex items-center gap-1.5 order-1">
+              <PieChart className="h-4 w-4" />
+              השוואה
             </TabsTrigger>
           </TabsList>
           
