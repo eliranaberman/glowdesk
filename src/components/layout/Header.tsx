@@ -70,7 +70,7 @@ const Header = ({ pageTitle, toggleMobileSidebar }: HeaderProps) => {
           >
             <Menu className="h-5 w-5" />
           </Button>
-          <h1 className="text-xl font-semibold text-center">{pageTitle}</h1>
+          <h1 className="text-xl font-semibold text-center">By Chen Mizrahi</h1>
         </div>
 
         <form onSubmit={handleSearch} className="hidden md:flex items-center max-w-sm flex-1 mx-4">
