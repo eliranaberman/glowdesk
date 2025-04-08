@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -46,8 +47,8 @@ const MarketingMessages = () => {
       <CardContent>
         <Tabs defaultValue={activeTab} value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid grid-cols-2 mb-4">
-            <TabsTrigger value="campaigns" className="text-right order-1">קמפיינים קודמים</TabsTrigger>
             <TabsTrigger value="templates" className="text-right order-2">תבניות מוכנות</TabsTrigger>
+            <TabsTrigger value="campaigns" className="text-right order-1">קמפיינים קודמים</TabsTrigger>
           </TabsList>
 
           <TabsContent value="templates" className="space-y-4">
@@ -69,13 +70,13 @@ const MarketingMessages = () => {
               ))}
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-2 pt-2">
-              <Button variant="outline" onClick={handleCreate} className="flex items-center gap-1">
+            <div className="flex flex-col sm:flex-row gap-2 pt-2 justify-end">
+              <Button onClick={handleSendToAll} className="order-2">
+                שליחת הודעה לכל הלקוחות
+              </Button>
+              <Button variant="outline" onClick={handleCreate} className="flex items-center gap-1 order-1">
                 <PlusCircle className="h-4 w-4 ml-1" />
                 יצירת תבנית חדשה
-              </Button>
-              <Button onClick={handleSendToAll}>
-                שליחת הודעה לכל הלקוחות
               </Button>
             </div>
           </TabsContent>
