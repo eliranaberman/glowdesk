@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import {
   Table,
@@ -159,7 +158,7 @@ const CustomerTable = ({
                     </div>
                   </TableCell>
                   <TableCell className="text-center font-medium">
-                    ₪{customer.totalSpent}
+                    <span className="inline-block w-full text-center">₪{customer.totalSpent}</span>
                   </TableCell>
                   <TableCell>
                     <Badge variant={customer.status === 'active' ? 'default' : 'secondary'}>
