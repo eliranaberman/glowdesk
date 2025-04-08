@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -123,7 +122,6 @@ const SocialMedia = () => {
           <TabsTrigger value="ai-tools" className="text-xs md:text-base">כלי שיווק AI</TabsTrigger>
         </TabsList>
 
-        {/* Dashboard Tab */}
         <TabsContent value="dashboard">
           <DashboardContent 
             connectedAccounts={connectedAccounts}
@@ -133,22 +131,18 @@ const SocialMedia = () => {
           />
         </TabsContent>
 
-        {/* Inbox Tab */}
         <TabsContent value="inbox">
           <InboxContent />
         </TabsContent>
 
-        {/* Posts Tab */}
         <TabsContent value="posts">
           <PostCreationPanel />
         </TabsContent>
 
-        {/* Analytics Tab */}
         <TabsContent value="analytics">
           <AnalyticsContent analyticsData={analyticsData} />
         </TabsContent>
         
-        {/* AI Marketing Tools Tab */}
         <TabsContent value="ai-tools">
           <AIMarketingTools />
         </TabsContent>
