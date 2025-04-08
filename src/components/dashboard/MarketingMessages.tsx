@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -19,7 +18,6 @@ const MarketingMessages = () => {
   };
 
   const handleCreate = () => {
-    // In a production app, this would navigate to a template creation form
     toast({
       title: "יצירת תבנית חדשה",
       description: "המערכת מעבירה אותך לעמוד יצירת תבנית חדשה...",
@@ -59,14 +57,14 @@ const MarketingMessages = () => {
                   key={template}
                   className="flex items-center justify-between p-3 border rounded-lg hover:bg-accent/10 transition-colors"
                 >
-                  <div className="flex items-center">
-                    <Mail className="h-4 w-4 text-muted-foreground ml-2" />
-                    <span>{template}</span>
-                  </div>
                   <Button variant="soft" size="sm">
                     <Send className="h-3.5 w-3.5 ml-1" />
                     שלח
                   </Button>
+                  <div className="flex items-center">
+                    <Mail className="h-4 w-4 text-muted-foreground ml-2" />
+                    <span>{template}</span>
+                  </div>
                 </div>
               ))}
             </div>
