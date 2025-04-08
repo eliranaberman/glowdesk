@@ -116,7 +116,7 @@ const CustomerTable = ({
                 onClick={() => handleSort('totalSpent')}
                 className="cursor-pointer hover:bg-muted text-right"
               >
-                סה"כ תשלום
+                סה"כ תשלום מצטבר
               </TableHead>
               <TableHead 
                 onClick={() => handleSort('status')}
