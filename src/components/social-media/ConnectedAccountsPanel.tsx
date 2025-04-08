@@ -63,21 +63,21 @@ const ConnectedAccountsPanel = ({ connectedAccounts, connectPlatform }: Connecte
                   index < socialAccounts.length - 1 ? 'border-b pb-2' : ''
                 }`}
               >
-                <div className="flex flex-col text-right">
-                  <div className="flex items-center gap-1.5">
-                    {account.icon}
-                    <span className="font-medium">{account.name}</span>
-                  </div>
-                  <span className="text-xs text-muted-foreground">{account.followers.toLocaleString()} followers</span>
-                </div>
                 <Button 
                   variant={account.connected ? "soft" : "outline"} 
                   className="gap-2"
                   onClick={() => setIsModalOpen(true)}
                 >
-                  {account.icon}
                   {account.connected ? "מחובר" : "חבר חשבון"}
+                  {account.icon}
                 </Button>
+                <div className="flex flex-col text-right">
+                  <div className="flex items-center gap-1.5">
+                    <span className="font-medium">{account.name}</span>
+                    {account.icon}
+                  </div>
+                  <span className="text-xs text-muted-foreground">{account.followers.toLocaleString()} followers</span>
+                </div>
               </div>
             ))}
           </div>

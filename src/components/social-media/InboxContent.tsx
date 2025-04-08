@@ -104,25 +104,25 @@ const InboxContent = () => {
   };
 
   return (
-    <div className="flex flex-col-reverse md:flex-row gap-6 h-[calc(100vh-220px)]">
+    <div className="flex flex-col-reverse md:flex-row-reverse gap-6 h-[calc(100vh-220px)]">
       {/* Message View */}
       <Card className="flex-1 mb-4 md:mb-0">
         {selectedMessage ? (
           <>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <div className="flex items-center">
+              <div className="flex flex-row-reverse items-center">
+                <div>
+                  <CardTitle className="text-lg">{selectedMessage.sender}</CardTitle>
+                  <p className="text-xs text-muted-foreground">
+                    {selectedMessage.platform} • {selectedMessage.time}
+                  </p>
+                </div>
                 <div className="w-10 h-10 rounded-full overflow-hidden ml-3">
                   <img 
                     src={selectedMessage.avatar} 
                     alt={selectedMessage.sender} 
                     className="w-full h-full object-cover" 
                   />
-                </div>
-                <div>
-                  <CardTitle className="text-lg">{selectedMessage.sender}</CardTitle>
-                  <p className="text-xs text-muted-foreground">
-                    {selectedMessage.platform} • {selectedMessage.time}
-                  </p>
                 </div>
               </div>
               
@@ -136,7 +136,11 @@ const InboxContent = () => {
             <CardContent className="flex flex-col h-[calc(100vh-380px)]">
               <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-muted/20 rounded-lg mb-4">
                 {/* Customer Message */}
-                <div className="flex flex-row-reverse gap-3 items-start max-w-[80%] mr-auto">
+                <div className="flex flex-row gap-3 items-start max-w-[80%] ml-auto">
+                  <div className="bg-muted/50 p-3 rounded-lg">
+                    <p>{selectedMessage.message}</p>
+                    <span className="text-xs text-muted-foreground mt-1 block">{selectedMessage.time}</span>
+                  </div>
                   <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
                     <img 
                       src={selectedMessage.avatar} 
@@ -144,15 +148,11 @@ const InboxContent = () => {
                       className="w-full h-full object-cover" 
                     />
                   </div>
-                  <div className="bg-muted/50 p-3 rounded-lg">
-                    <p>{selectedMessage.message}</p>
-                    <span className="text-xs text-muted-foreground mt-1 block">{selectedMessage.time}</span>
-                  </div>
                 </div>
                 
                 {/* If there was a previous response */}
                 {selectedMessage.id % 2 === 0 && (
-                  <div className="flex justify-start">
+                  <div className="flex justify-end">
                     <div className="bg-primary/10 p-3 rounded-lg max-w-[80%]">
                       <p>תודה על פנייתך! אשמח לעזור. אפשר לתת מחיר מדויק בטלפון או כשאראה את המצב הקיים.</p>
                       <span className="text-xs text-muted-foreground mt-1 block">10:30</span>
@@ -162,9 +162,6 @@ const InboxContent = () => {
               </div>
               
               <div className="flex gap-2">
-                <Button onClick={handleSendReply} className="self-end" disabled={!replyText.trim()}>
-                  שלח
-                </Button>
                 <textarea 
                   value={replyText}
                   onChange={(e) => setReplyText(e.target.value)}
@@ -172,6 +169,9 @@ const InboxContent = () => {
                   placeholder="כתוב את תגובתך כאן..."
                   rows={2}
                 />
+                <Button onClick={handleSendReply} className="self-end" disabled={!replyText.trim()}>
+                  שלח
+                </Button>
               </div>
             </CardContent>
           </>
@@ -189,7 +189,6 @@ const InboxContent = () => {
       {/* Message List */}
       <Card className="w-full md:w-1/3">
         <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="mx-auto">הודעות</CardTitle>
           <Button 
             variant="outline" 
             size="sm"
@@ -197,19 +196,20 @@ const InboxContent = () => {
           >
             חבר חשבון
           </Button>
+          <CardTitle className="mx-auto">הודעות</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           <Tabs defaultValue="all" value={activePlatform} onValueChange={setActivePlatform} className="w-full">
             <TabsList className="w-full grid grid-cols-3 rounded-none border-b">
-              <TabsTrigger value="all" className="rounded-none">הכל</TabsTrigger>
-              <TabsTrigger value="instagram" className="rounded-none">
-                <Instagram className="ml-1" size={16} />
-                אינסטגרם
-              </TabsTrigger>
               <TabsTrigger value="facebook" className="rounded-none">
                 <Facebook className="ml-1" size={16} />
                 פייסבוק
               </TabsTrigger>
+              <TabsTrigger value="instagram" className="rounded-none">
+                <Instagram className="ml-1" size={16} />
+                אינסטגרם
+              </TabsTrigger>
+              <TabsTrigger value="all" className="rounded-none">הכל</TabsTrigger>
             </TabsList>
             
             <TabsContent value="all">
@@ -302,27 +302,27 @@ const MessageList = ({
             <div 
               key={msg.id}
               onClick={() => setSelectedMessage(msg)}
-              className={`flex gap-3 p-3 border-b cursor-pointer hover:bg-muted/30 transition-colors ${selectedMessage?.id === msg.id ? 'bg-muted/50' : ''} ${!msg.read ? 'bg-muted/20' : ''}`}
+              className={`flex flex-row-reverse gap-3 p-3 border-b cursor-pointer hover:bg-muted/30 transition-colors ${selectedMessage?.id === msg.id ? 'bg-muted/50' : ''} ${!msg.read ? 'bg-muted/20' : ''}`}
             >
               <div className="w-10 h-10 rounded-full overflow-hidden">
                 <img src={msg.avatar} alt={msg.sender} className="w-full h-full object-cover" />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between mb-1">
+                  <span className="text-xs text-muted-foreground">{msg.time}</span>
                   <div className="flex items-center">
                     <span className="font-medium">{msg.sender}</span>
                     {!msg.read && (
                       <span className="mr-2 w-2 h-2 bg-primary rounded-full"></span>
                     )}
                   </div>
-                  <span className="text-xs text-muted-foreground">{msg.time}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <p className="text-sm text-muted-foreground truncate max-w-[70%]">{msg.message}</p>
                   <span className="text-xs bg-muted/50 px-1.5 py-0.5 rounded-full flex items-center gap-1">
                     {getPlatformIcon(msg.platform)}
                     {msg.platform}
                   </span>
+                  <p className="text-sm text-muted-foreground truncate max-w-[70%]">{msg.message}</p>
                 </div>
               </div>
             </div>

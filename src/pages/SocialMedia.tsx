@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -116,11 +115,11 @@ const SocialMedia = () => {
 
       <Tabs defaultValue={activeTab} value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid grid-cols-5 mb-6">
-          <TabsTrigger value="dashboard" className="text-xs md:text-base">דשבורד</TabsTrigger>
-          <TabsTrigger value="inbox" className="text-xs md:text-base">תיבת הודעות</TabsTrigger>
-          <TabsTrigger value="posts" className="text-xs md:text-base">פרסום פוסטים</TabsTrigger>
-          <TabsTrigger value="analytics" className="text-xs md:text-base">אנליטיקס</TabsTrigger>
           <TabsTrigger value="ai-tools" className="text-xs md:text-base">כלי שיווק AI</TabsTrigger>
+          <TabsTrigger value="analytics" className="text-xs md:text-base">אנליטיקס</TabsTrigger>
+          <TabsTrigger value="posts" className="text-xs md:text-base">פרסום פוסטים</TabsTrigger>
+          <TabsTrigger value="inbox" className="text-xs md:text-base">תיבת הודעות</TabsTrigger>
+          <TabsTrigger value="dashboard" className="text-xs md:text-base">דשבורד</TabsTrigger>
         </TabsList>
 
         <TabsContent value="dashboard">
