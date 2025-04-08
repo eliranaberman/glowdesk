@@ -145,6 +145,7 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
     } else if (view === 'month') {
       return new Intl.DateTimeFormat('he-IL', { month: 'long', year: 'numeric' }).format(date);
     }
+    return '';
   };
 
   // Format hours in 24-hour format
@@ -217,9 +218,9 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
           {view === 'day' ? (
             <div className="gantt-container relative overflow-x-auto">
               <div className="gantt-timeline grid grid-cols-1 border-b">
-                <div className="hours-header flex border-b bg-muted/30">
+                <div className="hours-header flex justify-between border-b bg-muted/30 text-right">
                   {HOURS.map((hour) => (
-                    <div key={hour} className="hour-cell flex-1 text-center py-2 text-sm font-medium border-r last:border-r-0">
+                    <div key={hour} className="hour-cell text-center py-2 text-sm font-medium border-l last:border-l-0 w-[6.25%]">
                       {formatHour(hour)}
                     </div>
                   ))}
@@ -229,11 +230,11 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
                 <div className="relative h-[600px]">
                   {/* Time grid lines */}
                   <div className="absolute inset-0">
-                    {HOURS.map((hour) => (
+                    {HOURS.map((hour, index) => (
                       <div 
                         key={hour} 
-                        className="absolute border-r h-full bg-muted/10"
-                        style={{left: `${(hour - 8) * (100 / HOURS.length)}%`, width: `${100 / HOURS.length}%`}}
+                        className="absolute border-l h-full bg-muted/10"
+                        style={{right: `${(HOURS.length - index - 1) * (100 / HOURS.length)}%`, width: `${100 / HOURS.length}%`}}
                       ></div>
                     ))}
                   </div>
@@ -261,11 +262,11 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
                     return (
                       <div
                         key={appointment.id}
-                        className="absolute rounded-md p-3 transition-all hover:ring-2 hover:ring-primary cursor-pointer shadow-sm"
+                        className="absolute rounded-md p-3 transition-all hover:ring-2 hover:ring-primary cursor-pointer shadow-sm text-right"
                         style={{
                           ...style,
                           backgroundColor: appointment.color || 'var(--nail-200)',
-                          left: `${column * width}%`,
+                          right: `${column * width}%`,
                           width: `${width}%`,
                           zIndex: 10 - index, // Higher index, lower z-index
                         }}
@@ -284,7 +285,7 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
           ) : view === 'week' ? (
             <div className="grid grid-cols-7 gap-2 p-4" dir="rtl">
               {viewDates.map((dayDate) => (
-                <div key={dayDate.toISOString()} className="border rounded p-2">
+                <div key={dayDate.toISOString()} className="border rounded p-2 text-right">
                   <h3 className="text-center font-medium mb-2">
                     {new Intl.DateTimeFormat('he-IL', { weekday: 'short' }).format(dayDate)}
                     <br />
@@ -296,7 +297,7 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
                       .map(appointment => (
                         <div
                           key={appointment.id}
-                          className="rounded-md p-2 transition-all hover:ring-2 hover:ring-primary cursor-pointer shadow-sm"
+                          className="rounded-md p-2 transition-all hover:ring-2 hover:ring-primary cursor-pointer shadow-sm text-right"
                           style={{
                             backgroundColor: appointment.color || 'var(--nail-200)',
                           }}
@@ -346,7 +347,7 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
                         {dayAppointments.length > 2 ? (
                           <>
                             <div 
-                              className="text-xs p-1 rounded mb-1 truncate" 
+                              className="text-xs p-1 rounded mb-1 truncate text-right" 
                               style={{ backgroundColor: dayAppointments[0].color || 'var(--nail-200)' }}
                             >
                               {dayAppointments[0].customer}
@@ -359,7 +360,7 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
                           dayAppointments.map(app => (
                             <div 
                               key={app.id}
-                              className="text-xs p-1 rounded mb-1 truncate" 
+                              className="text-xs p-1 rounded mb-1 truncate text-right" 
                               style={{ backgroundColor: app.color || 'var(--nail-200)' }}
                               onClick={(e) => {
                                 e.stopPropagation();

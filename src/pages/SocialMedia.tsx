@@ -52,6 +52,39 @@ const SocialMedia = () => {
     },
   ];
 
+  // Analytics data with colors matching CashFlowForecast
+  const analyticsData = {
+    followers: [
+      { name: "ינואר", count: 320 },
+      { name: "פברואר", count: 350 },
+      { name: "מרץ", count: 410 },
+      { name: "אפריל", count: 490 },
+      { name: "מאי", count: 550 },
+      { name: "יוני", count: 590 },
+    ],
+    engagement: [
+      { name: "ינואר", rate: 5.2 },
+      { name: "פברואר", rate: 5.8 },
+      { name: "מרץ", rate: 6.5 },
+      { name: "אפריל", rate: 7.2 },
+      { name: "מאי", rate: 8.0 },
+      { name: "יוני", rate: 8.5 },
+    ],
+    posts: [
+      { name: "ינואר", count: 10 },
+      { name: "פברואר", count: 12 },
+      { name: "מרץ", count: 14 },
+      { name: "אפריל", count: 15 },
+      { name: "מאי", count: 18 },
+      { name: "יוני", count: 16 },
+    ],
+    colors: {
+      primary: "#606c38", // oliveGreen
+      secondary: "#e07a5f", // softRose
+      tertiary: "#ddbea9", // roseGold
+    }
+  };
+
   const connectPlatform = (platform: string) => {
     // Toggle the connection state for the platform
     setConnectedAccounts(prev => ({
@@ -66,7 +99,7 @@ const SocialMedia = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" dir="rtl">
       <div className="flex justify-between items-center">
         <Button 
           variant="soft" 
@@ -81,7 +114,7 @@ const SocialMedia = () => {
         <div className="w-[85px]" /> {/* Spacer for visual balance */}
       </div>
 
-      <Tabs defaultValue={activeTab} value={activeTab} onValueChange={setActiveTab} className="w-full" dir="rtl">
+      <Tabs defaultValue={activeTab} value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid grid-cols-5 mb-6">
           <TabsTrigger value="dashboard" className="text-xs md:text-base">דשבורד</TabsTrigger>
           <TabsTrigger value="inbox" className="text-xs md:text-base">תיבת הודעות</TabsTrigger>
@@ -112,7 +145,7 @@ const SocialMedia = () => {
 
         {/* Analytics Tab */}
         <TabsContent value="analytics">
-          <AnalyticsContent />
+          <AnalyticsContent analyticsData={analyticsData} />
         </TabsContent>
         
         {/* AI Marketing Tools Tab */}

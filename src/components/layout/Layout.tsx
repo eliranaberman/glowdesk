@@ -22,7 +22,7 @@ const Layout = ({ children }: LayoutProps) => {
   const getPageTitle = (): string => {
     const path = location.pathname;
     
-    if (path === '/') return 'By Chen Mizrahi';
+    if (path === '/') return 'דשבורד';
     if (path === '/customers') return 'לקוחות';
     if (path === '/customers/new') return 'הוספת לקוח';
     if (path.startsWith('/customers/edit/')) return 'עריכת לקוח';
@@ -44,7 +44,7 @@ const Layout = ({ children }: LayoutProps) => {
     if (path === '/loyalty') return 'תוכנית נאמנות';
     if (path === '/marketing/templates') return 'תבניות הודעות';
 
-    return 'By Chen Mizrahi'; // Default
+    return 'דשבורד'; // Default
   };
   
   // Determine if the current route should show the back button

@@ -1,321 +1,271 @@
 
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Download, Calendar as CalendarIcon, FileText } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { AnalyticsData, PostData } from "./types";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, LineChart, Line } from "recharts";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { useToast } from "@/hooks/use-toast";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { BarChart, LineChart, PieChart } from "lucide-react";
+import { ResponsiveContainer, BarChart as RechartsBarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, LineChart as RechartsLineChart, Line, PieChart as RechartsPieChart, Pie, Cell } from "recharts";
 
-// Mock data
-const mockAnalyticsData: AnalyticsData = {
-  totalReach: 15280,
-  engagementRate: 4.7,
-  followerGrowth: 250,
-  totalPosts: 28,
-  platformData: {
-    instagram: {
-      impressions: 8750,
-      likes: 1200,
-      shares: 125,
-      comments: 180,
-      clickThroughRate: 5.6
-    },
-    facebook: {
-      impressions: 4980,
-      likes: 780,
-      shares: 87,
-      comments: 110,
-      clickThroughRate: 3.9
-    },
-    tiktok: {
-      impressions: 1250,
-      likes: 200,
-      shares: 45,
-      comments: 32,
-      clickThroughRate: 2.8
-    },
-    twitter: {
-      impressions: 300,
-      likes: 52,
-      shares: 23,
-      comments: 15,
-      clickThroughRate: 1.2
-    }
-  }
-};
+// Data type for analytics
+interface AnalyticsData {
+  followers: { name: string; count: number }[];
+  engagement: { name: string; rate: number }[];
+  posts: { name: string; count: number }[];
+  colors: {
+    primary: string;
+    secondary: string;
+    tertiary: string;
+  };
+}
 
-const mockPostsData: PostData[] = [
-  {
-    id: 1,
-    platform: "instagram",
-    date: "05/04/2023",
-    caption: "מבצע מיוחד לקיץ - 20% הנחה...",
-    impressions: 1200,
-    engagement: 8.7,
-    linkClicks: 45,
-    status: "published",
-    image: "https://picsum.photos/seed/1/100"
-  },
-  {
-    id: 2,
-    platform: "facebook",
-    date: "01/04/2023",
-    caption: "טיפים לטיפול בציפורניים בקיץ...",
-    impressions: 980,
-    engagement: 6.2,
-    linkClicks: 32,
-    status: "published",
-    image: "https://picsum.photos/seed/2/100"
-  },
-  {
-    id: 3,
-    platform: "instagram",
-    date: "28/03/2023",
-    caption: "מראה חדש לאביב...",
-    impressions: 1550,
-    engagement: 9.4,
-    linkClicks: 58,
-    status: "published",
-    image: "https://picsum.photos/seed/3/100"
-  },
-  {
-    id: 4,
-    platform: "tiktok",
-    date: "25/03/2023",
-    caption: "טוטוריאל: איך ליצור עיצוב...",
-    impressions: 870,
-    engagement: 7.8,
-    linkClicks: 12,
-    status: "published",
-    image: "https://picsum.photos/seed/4/100"
-  },
-  {
-    id: 5,
-    platform: "facebook",
-    date: "15/04/2023",
-    caption: "נפתחו תורים לחודש מאי...",
-    impressions: 0,
-    engagement: 0,
-    linkClicks: 0,
-    status: "scheduled",
-    image: "https://picsum.photos/seed/5/100"
-  }
-];
+interface AnalyticsContentProps {
+  analyticsData?: AnalyticsData;
+}
 
-const impressionsData = [
-  { name: "ינואר", instagram: 4000, facebook: 2400, tiktok: 1800, twitter: 1000 },
-  { name: "פברואר", instagram: 3000, facebook: 1398, tiktok: 2800, twitter: 800 },
-  { name: "מרץ", instagram: 5000, facebook: 3800, tiktok: 1500, twitter: 1200 },
-  { name: "אפריל", instagram: 2780, facebook: 3908, tiktok: 2500, twitter: 1100 },
-  { name: "מאי", instagram: 1890, facebook: 4800, tiktok: 2800, twitter: 900 },
-  { name: "יוני", instagram: 2390, facebook: 3800, tiktok: 3100, twitter: 1400 }
-];
+const AnalyticsContent = ({ analyticsData }: AnalyticsContentProps) => {
+  const [selectedPlatform, setSelectedPlatform] = useState<string>("all");
 
-const engagementData = [
-  { name: "ינואר", instagram: 2.8, facebook: 1.5, tiktok: 4.2, twitter: 0.8 },
-  { name: "פברואר", instagram: 3.2, facebook: 1.9, tiktok: 5.1, twitter: 1.2 },
-  { name: "מרץ", instagram: 4.5, facebook: 2.4, tiktok: 6.8, twitter: 1.1 },
-  { name: "אפריל", instagram: 2.9, facebook: 3.1, tiktok: 5.3, twitter: 0.9 },
-  { name: "מאי", instagram: 3.6, facebook: 2.7, tiktok: 4.9, twitter: 1.3 },
-  { name: "יוני", instagram: 4.2, facebook: 3.0, tiktok: 6.2, twitter: 1.2 }
-];
-
-const AnalyticsContent = () => {
-  const [activePlatformTab, setActivePlatformTab] = useState("all");
-  const [metricView, setMetricView] = useState("impressions");
-  const { toast } = useToast();
-
-  const handleDownloadReport = () => {
-    toast({
-      title: "דוח מוכן להורדה",
-      description: "הדוח הורד בהצלחה",
-    });
+  // Use default colors if not provided
+  const colors = analyticsData?.colors || {
+    primary: "#606c38", // oliveGreen
+    secondary: "#e07a5f", // softRose
+    tertiary: "#ddbea9", // roseGold
   };
 
-  const filteredPosts = activePlatformTab === "all" 
-    ? mockPostsData 
-    : mockPostsData.filter(post => post.platform === activePlatformTab);
+  // Mock platform data
+  const platformData = [
+    { name: "Instagram", followers: 1250, engagement: 7.5, posts: 45, color: colors.primary },
+    { name: "Facebook", followers: 950, engagement: 5.2, posts: 35, color: colors.secondary },
+    { name: "TikTok", followers: 720, engagement: 8.3, posts: 28, color: colors.tertiary },
+    { name: "Twitter", followers: 520, engagement: 4.1, posts: 25, color: "#90BE6D" }
+  ];
+
+  // Mock follower growth data
+  const followerGrowthData = analyticsData?.followers || [
+    { name: "ינואר", count: 320 },
+    { name: "פברואר", count: 350 },
+    { name: "מרץ", count: 410 },
+    { name: "אפריל", count: 490 },
+    { name: "מאי", count: 550 },
+    { name: "יוני", count: 590 },
+  ];
+
+  // Mock engagement rate data
+  const engagementRateData = analyticsData?.engagement || [
+    { name: "ינואר", rate: 5.2 },
+    { name: "פברואר", rate: 5.8 },
+    { name: "מרץ", rate: 6.5 },
+    { name: "אפריל", rate: 7.2 },
+    { name: "מאי", rate: 8.0 },
+    { name: "יוני", rate: 8.5 },
+  ];
+
+  // Mock post frequency data
+  const postFrequencyData = analyticsData?.posts || [
+    { name: "ינואר", count: 10 },
+    { name: "פברואר", count: 12 },
+    { name: "מרץ", count: 14 },
+    { name: "אפריל", count: 15 },
+    { name: "מאי", count: 18 },
+    { name: "יוני", count: 16 },
+  ];
+
+  // Top performing content
+  const topContent = [
+    {
+      id: 1,
+      title: "טיפים לשמירה על לק ג'ל",
+      platform: "Instagram",
+      engagement: 245,
+      date: "15/6/2025",
+    },
+    {
+      id: 2,
+      title: "עיצובי קיץ חדשים",
+      platform: "Facebook",
+      engagement: 198,
+      date: "02/6/2025",
+    },
+    {
+      id: 3,
+      title: "מבצע מיוחד לחג",
+      platform: "Instagram",
+      engagement: 172,
+      date: "10/5/2025",
+    },
+  ];
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <Button onClick={handleDownloadReport} variant="outline" className="gap-2">
-          <Download size={16} />
-          הורד דוח
-        </Button>
-        <h2 className="text-xl font-medium">אנליטיקס מדיה חברתית</h2>
-        <div className="w-32" /> {/* Spacer for symmetry */}
+    <div className="space-y-6" dir="rtl">
+      <div className="grid gap-4 md:grid-cols-4">
+        {platformData.map((platform) => (
+          <Card key={platform.name} className={`${selectedPlatform === platform.name.toLowerCase() ? 'ring-2 ring-primary' : ''}`}>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base">{platform.name}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">עוקבים:</span>
+                  <span className="font-medium">{platform.followers}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">אחוז מעורבות:</span>
+                  <span className="font-medium">{platform.engagement}%</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">פוסטים:</span>
+                  <span className="font-medium">{platform.posts}</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
       </div>
-      
-      {/* KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+
+      <div className="grid gap-4 md:grid-cols-2">
+        {/* Follower Growth */}
         <Card>
-          <CardContent className="p-4 flex flex-col items-center text-center">
-            <h3 className="text-lg font-medium">סה״כ חשיפות</h3>
-            <p className="text-3xl font-bold mt-2">{mockAnalyticsData.totalReach.toLocaleString()}</p>
-            <p className="text-xs text-muted-foreground mt-1">ב-30 הימים האחרונים</p>
+          <CardHeader>
+            <CardTitle>גידול במספר העוקבים</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <RechartsLineChart data={followerGrowthData}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <Tooltip labelFormatter={(label) => `חודש: ${label}`} />
+                  <Line 
+                    type="monotone" 
+                    dataKey="count" 
+                    name="מספר עוקבים"
+                    stroke={colors.primary} 
+                    activeDot={{ r: 8 }} 
+                    strokeWidth={2}
+                  />
+                </RechartsLineChart>
+              </ResponsiveContainer>
+            </div>
           </CardContent>
         </Card>
-        
+
+        {/* Engagement Rate */}
         <Card>
-          <CardContent className="p-4 flex flex-col items-center text-center">
-            <h3 className="text-lg font-medium">אחוז מעורבות</h3>
-            <p className="text-3xl font-bold mt-2">{mockAnalyticsData.engagementRate}%</p>
-            <p className="text-xs text-muted-foreground mt-1">ממוצע לפוסט</p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="p-4 flex flex-col items-center text-center">
-            <h3 className="text-lg font-medium">צמיחת עוקבים</h3>
-            <p className="text-3xl font-bold mt-2">+{mockAnalyticsData.followerGrowth}</p>
-            <p className="text-xs text-muted-foreground mt-1">בחודש האחרון</p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="p-4 flex flex-col items-center text-center">
-            <h3 className="text-lg font-medium">סה״כ פוסטים</h3>
-            <p className="text-3xl font-bold mt-2">{mockAnalyticsData.totalPosts}</p>
-            <p className="text-xs text-muted-foreground mt-1">פורסמו או תוזמנו</p>
+          <CardHeader>
+            <CardTitle>אחוזי מעורבות</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <RechartsBarChart data={engagementRateData}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <Tooltip labelFormatter={(label) => `חודש: ${label}`} />
+                  <Bar 
+                    dataKey="rate" 
+                    name="אחוז מעורבות"
+                    fill={colors.secondary} 
+                    radius={[4, 4, 0, 0]}
+                    fillOpacity={0.7}
+                  />
+                </RechartsBarChart>
+              </ResponsiveContainer>
+            </div>
           </CardContent>
         </Card>
       </div>
-      
-      {/* Platform Performance */}
+
+      <div className="grid gap-4 md:grid-cols-2">
+        {/* Post Frequency */}
+        <Card>
+          <CardHeader>
+            <CardTitle>תדירות פרסום</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <RechartsBarChart data={postFrequencyData}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <Tooltip labelFormatter={(label) => `חודש: ${label}`} />
+                  <Bar 
+                    dataKey="count" 
+                    name="מספר פוסטים"
+                    fill={colors.tertiary} 
+                    radius={[4, 4, 0, 0]}
+                    fillOpacity={0.7}
+                  />
+                </RechartsBarChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Platform Distribution */}
+        <Card>
+          <CardHeader>
+            <CardTitle>התפלגות לפי פלטפורמה</CardTitle>
+          </CardHeader>
+          <CardContent className="flex justify-center">
+            <div className="h-[300px] w-full max-w-[400px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <RechartsPieChart>
+                  <Pie
+                    data={platformData}
+                    dataKey="followers"
+                    nameKey="name"
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={80}
+                    fill="#8884d8"
+                    label={(entry) => entry.name}
+                  >
+                    {platformData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip formatter={(value) => [`${value} עוקבים`, '']} />
+                  <Legend layout="vertical" verticalAlign="middle" align="right" />
+                </RechartsPieChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Top Performing Content */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-center">ביצועים לפי פלטפורמה</CardTitle>
+          <CardTitle>תוכן מצליח במיוחד</CardTitle>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue={activePlatformTab} value={activePlatformTab} onValueChange={setActivePlatformTab} className="w-full">
-            <TabsList className="grid grid-cols-5 mb-4">
-              <TabsTrigger value="all">הכל</TabsTrigger>
-              <TabsTrigger value="instagram">אינסטגרם</TabsTrigger>
-              <TabsTrigger value="facebook">פייסבוק</TabsTrigger>
-              <TabsTrigger value="tiktok">טיקטוק</TabsTrigger>
-              <TabsTrigger value="twitter">טוויטר</TabsTrigger>
-            </TabsList>
-            
-            <div className="mb-6">
-              <Tabs defaultValue={metricView} value={metricView} onValueChange={setMetricView} className="w-full">
-                <TabsList className="w-full grid grid-cols-2 mb-4">
-                  <TabsTrigger value="impressions">חשיפות</TabsTrigger>
-                  <TabsTrigger value="engagement">מעורבות</TabsTrigger>
-                </TabsList>
-                
-                <TabsContent value="impressions">
-                  <div className="h-[300px] w-full">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={impressionsData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="name" />
-                        <YAxis />
-                        <Tooltip />
-                        <Legend />
-                        <Bar dataKey="instagram" name="אינסטגרם" fill="#E1306C" />
-                        <Bar dataKey="facebook" name="פייסבוק" fill="#4267B2" />
-                        <Bar dataKey="tiktok" name="טיקטוק" fill="#25F4EE" />
-                        <Bar dataKey="twitter" name="טוויטר" fill="#1DA1F2" />
-                      </BarChart>
-                    </ResponsiveContainer>
+          <div className="space-y-4">
+            {topContent.map((content) => (
+              <div
+                key={content.id}
+                className="flex items-center justify-between p-3 border rounded-lg"
+              >
+                <div className="flex items-center">
+                  <div className="w-10 h-10 bg-accent rounded-full flex items-center justify-center mr-3">
+                    <span className="text-sm font-medium">{content.platform.charAt(0)}</span>
                   </div>
-                </TabsContent>
-                
-                <TabsContent value="engagement">
-                  <div className="h-[300px] w-full">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <LineChart data={engagementData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="name" />
-                        <YAxis />
-                        <Tooltip />
-                        <Legend />
-                        <Line type="monotone" dataKey="instagram" name="אינסטגרם" stroke="#E1306C" />
-                        <Line type="monotone" dataKey="facebook" name="פייסבוק" stroke="#4267B2" />
-                        <Line type="monotone" dataKey="tiktok" name="טיקטוק" stroke="#25F4EE" />
-                        <Line type="monotone" dataKey="twitter" name="טוויטר" stroke="#1DA1F2" />
-                      </LineChart>
-                    </ResponsiveContainer>
+                  <div>
+                    <p className="font-medium">{content.title}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {content.platform} • {content.date}
+                    </p>
                   </div>
-                </TabsContent>
-              </Tabs>
-            </div>
-          </Tabs>
-        </CardContent>
-      </Card>
-      
-      {/* Post Performance Table */}
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>ביצועי פוסטים</CardTitle>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" className="gap-1">
-              <CalendarIcon size={16} />
-              לפי תאריך
-            </Button>
-            <Button variant="outline" size="sm" className="gap-1">
-              <FileText size={16} />
-              ייצא
-            </Button>
+                </div>
+                <div className="text-right">
+                  <p className="font-semibold text-primary">{content.engagement}</p>
+                  <p className="text-xs text-muted-foreground">אינטראקציות</p>
+                </div>
+              </div>
+            ))}
           </div>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>פוסט</TableHead>
-                <TableHead>פלטפורמה</TableHead>
-                <TableHead>תאריך</TableHead>
-                <TableHead>חשיפות</TableHead>
-                <TableHead>מעורבות</TableHead>
-                <TableHead>קליקים</TableHead>
-                <TableHead>סטטוס</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredPosts.map((post) => (
-                <TableRow key={post.id}>
-                  <TableCell className="flex items-center gap-3">
-                    {post.image && (
-                      <div className="w-10 h-10 rounded overflow-hidden">
-                        <img src={post.image} alt="Post" className="w-full h-full object-cover" />
-                      </div>
-                    )}
-                    <span className="line-clamp-1">{post.caption}</span>
-                  </TableCell>
-                  <TableCell>{post.platform}</TableCell>
-                  <TableCell>{post.date}</TableCell>
-                  <TableCell>{post.impressions.toLocaleString()}</TableCell>
-                  <TableCell>{post.engagement}%</TableCell>
-                  <TableCell>{post.linkClicks}</TableCell>
-                  <TableCell>
-                    <span className={`text-xs px-2 py-1 rounded-full ${
-                      post.status === 'published' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'
-                    }`}>
-                      {post.status === 'published' ? 'פורסם' : 'מתוזמן'}
-                    </span>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-          
-          {filteredPosts.length === 0 && (
-            <div className="text-center py-8">
-              <p className="text-muted-foreground">לא נמצאו פוסטים להצגה</p>
-            </div>
-          )}
         </CardContent>
       </Card>
     </div>

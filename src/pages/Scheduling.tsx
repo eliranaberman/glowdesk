@@ -16,10 +16,18 @@ const Scheduling = () => {
   const generateRandomAppointments = () => {
     const currentDate = new Date();
     const appointments = [];
+    
+    // Extended list of client names
     const clientNames = [
       'שרה כהן', 'אמילי לוי', 'ליאת ונג', 'מיכל אברהם', 'רחל גולן',
       'דנה ישראלי', 'יעל מור', 'נופר דהן', 'טלי ברק', 'מירי אלון',
-      'רוני שטרן', 'נועה אדלר', 'קרן לוי', 'דפנה גבאי', 'הילה שגיא'
+      'רוני שטרן', 'נועה אדלר', 'קרן לוי', 'דפנה גבאי', 'הילה שגיא',
+      'מאיה ברגר', 'שירה אוחנה', 'איילת בן דוד', 'רותם זהבי', 'עדי מזרחי',
+      'שני גרינברג', 'ליטל כץ', 'אורטל נחום', 'גלי אשכנזי', 'יפעת אוזן',
+      'לירון פישר', 'ענבר חן', 'חני לויד', 'הודיה פרץ', 'עדן שפירא',
+      'אביגיל מנחם', 'ספיר דנינו', 'אופיר יעקב', 'חן אסולין', 'ליאור גולדשטיין',
+      'רבקה כהן', 'סיגל לוי', 'אורית שלום', 'נטע ברזילי', 'גלית גוטמן',
+      'שלומית מלכה', 'מיטל יצחקי', 'תמי ממן', 'ורד אזולאי', 'טובה שמעוני'
     ];
     
     const services = [
@@ -31,15 +39,20 @@ const Scheduling = () => {
       { name: 'טיפול יופי', duration: 90, color: 'rgba(156, 61, 167, 0.3)', price: 160 }
     ];
     
-    const startTimes = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00'];
+    // Extended list of start times for better distribution
+    const startTimes = [
+      '08:00', '08:30', '09:00', '09:30', '10:00', '10:30', '11:00', '11:30', 
+      '12:00', '12:30', '13:00', '13:30', '14:00', '14:30', '15:00', '15:30', 
+      '16:00', '16:30', '17:00', '17:30', '18:00', '18:30', '19:00', '19:30'
+    ];
     
     // Create 30 days of random appointments (more appointments for realistic testing)
     for (let i = 0; i < 30; i++) {
       const appointmentDate = new Date(currentDate);
       appointmentDate.setDate(currentDate.getDate() + i);
       
-      // Random number of appointments per day (1-6)
-      const numAppointments = Math.floor(Math.random() * 6) + 1;
+      // Random number of appointments per day (2-8)
+      const numAppointments = Math.floor(Math.random() * 7) + 2;
       const usedTimes = new Set();
       
       for (let j = 0; j < numAppointments; j++) {
@@ -144,7 +157,7 @@ const Scheduling = () => {
         <CalendarSync />
         
         <GanttChart
-          appointments={filteredAppointments}
+          appointments={allAppointments}
           date={selectedDate}
           onDateChange={setSelectedDate}
         />

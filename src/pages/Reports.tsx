@@ -99,8 +99,8 @@ const Reports = () => {
                 <CardContent>
                   <div className="flex flex-col gap-4">
                     <div className="flex items-center">
-                      <div>{report.icon}</div>
-                      <p className="text-sm text-muted-foreground mr-2">{report.description}</p>
+                      <div className="ml-2">{report.icon}</div>
+                      <p className="text-sm text-muted-foreground">{report.description}</p>
                     </div>
                     <Button size="sm" 
                       onClick={() => handleDownload(report.id)}
@@ -109,11 +109,11 @@ const Reports = () => {
                     >
                       {isGenerating && selectedReport === report.id ? (
                         <span className="flex items-center">
-                          <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-b-transparent"></div>
+                          <div className="ml-2 h-4 w-4 animate-spin rounded-full border-2 border-b-transparent"></div>
                           מכין דו״ח...
                         </span>
                       ) : (
-                        <><Download className="h-4 w-4 mr-2" /> הורדה</>
+                        <><Download className="h-4 w-4 ml-2" /> הורדה</>
                       )}
                     </Button>
                   </div>

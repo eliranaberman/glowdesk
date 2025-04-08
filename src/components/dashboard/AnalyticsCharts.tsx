@@ -35,6 +35,11 @@ const AnalyticsCharts: React.FC<AnalyticsChartsProps> = ({
     הוצאות: item.expenses
   })) : mockAnalyticsData;
 
+  // Cash flow forecast colors (matching CashFlowForecast component)
+  const incomeColor = "#606c38"; // oliveGreen
+  const expensesColor = "#e07a5f"; // softRose
+  const profitColor = "#ddbea9"; // roseGold
+
   return (
     <Card>
       <CardHeader>
@@ -77,8 +82,8 @@ const AnalyticsCharts: React.FC<AnalyticsChartsProps> = ({
                     formatter={(value) => <span style={{marginRight: 10}}>{value}</span>}
                     align="right" 
                   />
-                  <Bar dataKey="הכנסות" fill="#8884d8" />
-                  <Bar dataKey="הוצאות" fill="#82ca9d" />
+                  <Bar dataKey="הכנסות" fill={incomeColor} fillOpacity={0.7} />
+                  <Bar dataKey="הוצאות" fill={expensesColor} fillOpacity={0.7} />
                 </RechartsBarChart>
               </ResponsiveContainer>
             </div>
@@ -102,8 +107,8 @@ const AnalyticsCharts: React.FC<AnalyticsChartsProps> = ({
                     formatter={(value) => <span style={{marginRight: 10}}>{value}</span>}
                     align="right" 
                   />
-                  <Line type="monotone" dataKey="הכנסות" stroke="#8884d8" activeDot={{ r: 8 }} />
-                  <Line type="monotone" dataKey="הוצאות" stroke="#82ca9d" />
+                  <Line type="monotone" dataKey="הכנסות" stroke={incomeColor} activeDot={{ r: 8 }} />
+                  <Line type="monotone" dataKey="הוצאות" stroke={expensesColor} />
                 </RechartsLineChart>
               </ResponsiveContainer>
             </div>
@@ -122,8 +127,8 @@ const AnalyticsCharts: React.FC<AnalyticsChartsProps> = ({
                       </div>
                       <div className="bg-muted h-2 rounded-full">
                         <div 
-                          className="bg-primary h-2 rounded-full" 
-                          style={{ width: `${Math.min(100, (month.הכנסות / month.הוצאות) * 50)}%` }}
+                          className="h-2 rounded-full" 
+                          style={{ width: `${Math.min(100, (month.הכנסות / month.הוצאות) * 50)}%`, backgroundColor: incomeColor }}
                         ></div>
                       </div>
                     </div>
@@ -147,7 +152,7 @@ const AnalyticsCharts: React.FC<AnalyticsChartsProps> = ({
                   </div>
                   <div className="flex justify-between pt-2 border-t">
                     <span>רווח נקי:</span>
-                    <span className="font-bold text-green-600">
+                    <span className="font-bold" style={{ color: incomeColor }}>
                       ₪{(chartData.reduce((sum, month) => sum + month.הכנסות - month.הוצאות, 0)).toLocaleString()}
                     </span>
                   </div>
