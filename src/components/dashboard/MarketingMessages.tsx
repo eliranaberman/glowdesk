@@ -47,8 +47,8 @@ const MarketingMessages = () => {
       <CardContent>
         <Tabs defaultValue={activeTab} value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid grid-cols-2 mb-4">
-            <TabsTrigger value="templates" className="text-right">תבניות מוכנות</TabsTrigger>
             <TabsTrigger value="campaigns" className="text-right">קמפיינים קודמים</TabsTrigger>
+            <TabsTrigger value="templates" className="text-right">תבניות מוכנות</TabsTrigger>
           </TabsList>
 
           <TabsContent value="templates" className="space-y-4">
