@@ -1,3 +1,4 @@
+
 import { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
@@ -49,15 +50,20 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
   const navigate = useNavigate();
   
   const getAppointmentPosition = (startTime: string) => {
-    const [hours, minutes] = startTime.split(':').map(Number);
-    const hourIndex = HOURS.findIndex(h => h === hours);
+    // Parse the time to get hours and minutes
+    const [hoursStr, minutesStr] = startTime.split(':');
+    const hours = parseInt(hoursStr, 10);
+    const minutes = parseInt(minutesStr, 10);
     
-    if (hourIndex === -1) return 0;
+    // Calculate position based on 8:00 being the start (hours - 8)
+    // This ensures appointments are positioned correctly on the timeline
+    const hourPosition = hours - 8; // Subtract 8 as our timeline starts at 8:00
+    const minutePercentage = minutes / 60;
     
-    const hourWidth = 100 / HOURS.length;
-    const position = hourIndex * hourWidth + (minutes / 60) * hourWidth;
+    // Calculate percentage position on the timeline
+    const timelinePercentage = (hourPosition + minutePercentage) / HOURS.length * 100;
     
-    return position;
+    return Math.max(0, Math.min(timelinePercentage, 100)); // Constrain between 0-100%
   };
   
   const getAppointmentWidth = (duration: number) => {
@@ -181,16 +187,17 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
     }
   };
 
+  // Sort appointments by time to ensure proper layering
   const sortedAppointments = useMemo(() => {
     return [...filteredAppointments].sort((a, b) => {
       const timeA = a.startTime.split(':').map(Number);
       const timeB = b.startTime.split(':').map(Number);
       
       if (timeA[0] !== timeB[0]) {
-        return timeA[0] - timeB[0];
+        return timeA[0] - timeB[0]; // Sort by hour
       }
       
-      return timeA[1] - timeB[1];
+      return timeA[1] - timeB[1]; // Then by minute
     });
   }, [filteredAppointments]);
 
@@ -199,15 +206,64 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
     const currentHour = now.getHours();
     const currentMinute = now.getMinutes();
     
+    // Check if current time is within our timeline bounds
     if (currentHour < 8 || currentHour >= 24) {
-      return -1;
+      return -1; // Out of bounds
     }
     
-    const hourIndex = currentHour - 8;
-    const hourWidth = 100 / HOURS.length;
-    const position = hourIndex * hourWidth + (currentMinute / 60) * hourWidth;
+    // Calculate position based on 8:00 being the start (currentHour - 8)
+    const hourPosition = currentHour - 8;
+    const minutePercentage = currentMinute / 60;
     
-    return position;
+    // Calculate percentage position on the timeline
+    const timelinePercentage = (hourPosition + minutePercentage) / HOURS.length * 100;
+    
+    return Math.max(0, Math.min(timelinePercentage, 100)); // Constrain between 0-100%
+  };
+
+  // Calculate vertical positions to prevent overlaps
+  const getAppointmentVerticalPosition = (appointment: Appointment, index: number) => {
+    // Group appointments by time slots to avoid overlaps
+    const overlappingAppointments = sortedAppointments.filter((app, i) => {
+      if (i >= index) return false; // Only check previous appointments
+      
+      // Parse times
+      const [appStartHour, appStartMin] = app.startTime.split(':').map(Number);
+      const appEndHour = appStartHour + Math.floor(app.duration / 60);
+      const appEndMin = (appStartMin + app.duration % 60) % 60;
+      
+      const [currentStartHour, currentStartMin] = appointment.startTime.split(':').map(Number);
+      const currentEndHour = currentStartHour + Math.floor(appointment.duration / 60);
+      const currentEndMin = (currentStartMin + appointment.duration % 60) % 60;
+      
+      // Check for time overlap
+      if (currentStartHour < appEndHour || (currentStartHour === appEndHour && currentStartMin < appEndMin)) {
+        if (appStartHour < currentEndHour || (appStartHour === currentEndHour && appStartMin < currentEndMin)) {
+          return true; // Appointments overlap
+        }
+      }
+      
+      return false;
+    });
+    
+    // Calculate vertical position based on overlaps
+    // For each overlapping appointment, try to find a row that's free
+    const usedRows = overlappingAppointments.map(app => {
+      const appIndex = sortedAppointments.findIndex(a => a.id === app.id);
+      return sortedAppointments[appIndex]._verticalPosition;
+    });
+    
+    // Find the first available row
+    let row = 0;
+    while (usedRows.includes(row)) {
+      row++;
+    }
+    
+    // Store the calculated vertical position
+    appointment._verticalPosition = row;
+    
+    // Return percentage value for CSS positioning
+    return row * 33; // 33% of height per row
   };
 
   return (
@@ -336,10 +392,12 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
                   ) : (
                     <div className="relative w-full h-full">
                       {sortedAppointments.map((appointment, index) => {
+                        // Calculate position correctly based on appointment time
                         const leftPosition = getAppointmentPosition(appointment.startTime);
                         const width = getAppointmentWidth(appointment.duration);
                         
-                        const verticalPosition = (index % 3) * 33;
+                        // Calculate vertical position to prevent overlaps
+                        const verticalPosition = getAppointmentVerticalPosition(appointment, index);
                         
                         return (
                           <div

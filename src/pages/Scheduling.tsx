@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import GanttChart from '../components/scheduling/GanttChart';
 import CalendarSync from '../components/scheduling/CalendarSync';
