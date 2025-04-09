@@ -1,11 +1,9 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BarChart, LineChart, PieChart } from "lucide-react";
 import { ResponsiveContainer, BarChart as RechartsBarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, LineChart as RechartsLineChart, Line, PieChart as RechartsPieChart, Pie, Cell } from "recharts";
 
-// Data type for analytics
 interface AnalyticsData {
   followers: { name: string; count: number }[];
   engagement: { name: string; rate: number }[];
@@ -24,17 +22,15 @@ interface AnalyticsContentProps {
 const AnalyticsContent = ({ analyticsData }: AnalyticsContentProps) => {
   const [selectedPlatform, setSelectedPlatform] = useState<string>("all");
 
-  // Use colors matching CashFlowForecast
   const colors = {
-    primary: "#606c38", // oliveGreen
-    secondary: "#e07a5f", // softRose
-    tertiary: "#ddbea9", // roseGold
-    income: "#606c38",    // For income (matching CashFlowForecast)
-    expenses: "#e07a5f",  // For expenses (matching CashFlowForecast)
-    profit: "#ddbea9"     // For profit (matching CashFlowForecast)
+    primary: "#606c38",
+    secondary: "#e07a5f",
+    tertiary: "#ddbea9",
+    income: "#606c38",
+    expenses: "#e07a5f",
+    profit: "#ddbea9"
   };
 
-  // Mock platform data
   const platformData = [
     { name: "Instagram", followers: 1250, engagement: 7.5, posts: 45, color: colors.income },
     { name: "Facebook", followers: 950, engagement: 5.2, posts: 35, color: colors.expenses },
@@ -42,7 +38,6 @@ const AnalyticsContent = ({ analyticsData }: AnalyticsContentProps) => {
     { name: "Twitter", followers: 520, engagement: 4.1, posts: 25, color: "#90BE6D" }
   ];
 
-  // Follower growth data
   const followerGrowthData = analyticsData?.followers || [
     { name: "ינואר", count: 320 },
     { name: "פברואר", count: 350 },
@@ -52,7 +47,6 @@ const AnalyticsContent = ({ analyticsData }: AnalyticsContentProps) => {
     { name: "יוני", count: 590 },
   ];
 
-  // Engagement rate data
   const engagementRateData = analyticsData?.engagement || [
     { name: "ינואר", rate: 5.2 },
     { name: "פברואר", rate: 5.8 },
@@ -62,7 +56,6 @@ const AnalyticsContent = ({ analyticsData }: AnalyticsContentProps) => {
     { name: "יוני", rate: 8.5 },
   ];
 
-  // Post frequency data
   const postFrequencyData = analyticsData?.posts || [
     { name: "ינואר", count: 10 },
     { name: "פברואר", count: 12 },
@@ -72,7 +65,6 @@ const AnalyticsContent = ({ analyticsData }: AnalyticsContentProps) => {
     { name: "יוני", count: 16 },
   ];
 
-  // Top performing content
   const topContent = [
     {
       id: 1,
@@ -97,10 +89,9 @@ const AnalyticsContent = ({ analyticsData }: AnalyticsContentProps) => {
     },
   ];
 
-  // Custom render function for pie chart labels to ensure visibility
   const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, index, name }: any) => {
     const RADIAN = Math.PI / 180;
-    const radius = outerRadius * 1.35;
+    const radius = outerRadius * 1.6;
     const x = cx + radius * Math.cos(-midAngle * RADIAN);
     const y = cy + radius * Math.sin(-midAngle * RADIAN);
 
@@ -111,7 +102,8 @@ const AnalyticsContent = ({ analyticsData }: AnalyticsContentProps) => {
         fill={platformData[index].color}
         textAnchor={x > cx ? 'start' : 'end'}
         dominantBaseline="central"
-        className="text-xs font-medium"
+        className="text-xs font-semibold"
+        style={{ textShadow: '0px 0px 2px rgba(255,255,255,0.7)' }}
       >
         {name}
       </text>
@@ -147,7 +139,6 @@ const AnalyticsContent = ({ analyticsData }: AnalyticsContentProps) => {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
-        {/* Follower Growth */}
         <Card>
           <CardHeader>
             <CardTitle>גידול במספר העוקבים</CardTitle>
@@ -174,7 +165,6 @@ const AnalyticsContent = ({ analyticsData }: AnalyticsContentProps) => {
           </CardContent>
         </Card>
 
-        {/* Engagement Rate */}
         <Card>
           <CardHeader>
             <CardTitle>אחוזי מעורבות</CardTitle>
@@ -202,7 +192,6 @@ const AnalyticsContent = ({ analyticsData }: AnalyticsContentProps) => {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
-        {/* Post Frequency */}
         <Card>
           <CardHeader>
             <CardTitle>תדירות פרסום</CardTitle>
@@ -228,7 +217,6 @@ const AnalyticsContent = ({ analyticsData }: AnalyticsContentProps) => {
           </CardContent>
         </Card>
 
-        {/* Platform Distribution */}
         <Card>
           <CardHeader>
             <CardTitle>התפלגות לפי פלטפורמה</CardTitle>
@@ -243,7 +231,7 @@ const AnalyticsContent = ({ analyticsData }: AnalyticsContentProps) => {
                     nameKey="name"
                     cx="50%"
                     cy="50%"
-                    outerRadius={70}
+                    outerRadius={60}
                     fill="#8884d8"
                     labelLine={true}
                     label={renderCustomizedLabel}
@@ -261,7 +249,6 @@ const AnalyticsContent = ({ analyticsData }: AnalyticsContentProps) => {
         </Card>
       </div>
 
-      {/* Top Performing Content */}
       <Card>
         <CardHeader>
           <CardTitle>תוכן מצליח במיוחד</CardTitle>
