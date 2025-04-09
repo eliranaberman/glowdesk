@@ -39,11 +39,13 @@ const Scheduling = () => {
       { name: 'טיפול יופי', duration: 90, color: '#FDE1D3', price: 160 }
     ];
     
-    // Business hours from 8:00 AM to 7:00 PM
+    // Business hours from 8:00 AM to 7:00 PM - generate proper time slots
     const startTimes = [];
     for (let hour = 8; hour <= 19; hour++) {
       startTimes.push(`${hour.toString().padStart(2, '0')}:00`);
-      startTimes.push(`${hour.toString().padStart(2, '0')}:30`);
+      if (hour < 19) {  // Don't add 19:30 as it would go beyond business hours
+        startTimes.push(`${hour.toString().padStart(2, '0')}:30`);
+      }
     }
     
     // Create 30 days of random appointments with better time distribution
@@ -79,7 +81,20 @@ const Scheduling = () => {
       }
     }
     
-    return appointments;
+    // Sort appointments by date and time for consistency
+    return appointments.sort((a, b) => {
+      // First compare by date
+      const dateComparison = a.date.getTime() - b.date.getTime();
+      if (dateComparison !== 0) return dateComparison;
+      
+      // If same date, compare by time
+      const getMinutes = (timeStr: string) => {
+        const [hours, minutes] = timeStr.split(':').map(Number);
+        return hours * 60 + minutes;
+      };
+      
+      return getMinutes(a.startTime) - getMinutes(b.startTime);
+    });
   };
   
   // Mock appointments data
