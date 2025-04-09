@@ -70,7 +70,7 @@ const Scheduling = () => {
           id: `${i}-${j}`,
           customer: clientName,
           service: service.name,
-          startTime: startTime, // Make sure this is in the format 'HH:MM'
+          startTime: startTime, // Format: 'HH:MM'
           duration: service.duration,
           color: service.color,
           date: new Date(appointmentDate),
