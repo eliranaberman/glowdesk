@@ -2,10 +2,25 @@
 import { useState, useMemo, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
-import { Calendar as CalendarIcon, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { format, addDays, startOfWeek, endOfWeek, addMonths, startOfMonth, endOfMonth, isWithinInterval, isSameDay } from 'date-fns';
+import { format, addDays, startOfWeek, endOfWeek, addMonths, startOfMonth, endOfMonth, isWithinInterval, isSameDay, isSameMonth, parseISO } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
+import { Calendar } from '@/components/ui/calendar';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Badge } from '@/components/ui/badge';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Separator } from '@/components/ui/separator';
 
 interface Appointment {
   id: string;
@@ -26,9 +41,12 @@ interface GanttChartProps {
 
 const HOURS = Array.from({ length: 16 }, (_, i) => i + 8); // 8:00 to 23:00
 const CELL_HEIGHT = 60; // Height of appointment cell in pixels
+const DAYS_OF_WEEK = ['יום א׳', 'יום ב׳', 'יום ג׳', 'יום ד׳', 'יום ה׳', 'יום ו׳', 'שבת'];
 
 const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
   const [view, setView] = useState<'day' | 'week' | 'month'>('day');
+  const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
+  const [isAppointmentDetailsOpen, setIsAppointmentDetailsOpen] = useState(false);
   const navigate = useNavigate();
   
   // Helper function to calculate position and height based on time
@@ -97,14 +115,25 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
       });
     }
   }, [appointments, view, date]);
-  
-  // Format the date nicely
-  const formattedDate = new Intl.DateTimeFormat('he-IL', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  }).format(date);
+
+  // Get the formatted date based on current view and locale
+  const getViewTitle = () => {
+    if (view === 'day') {
+      return new Intl.DateTimeFormat('he-IL', { 
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long', 
+        day: 'numeric' 
+      }).format(date);
+    } else if (view === 'week') {
+      const startDate = startOfWeek(date, { weekStartsOn: 0 });
+      const endDate = endOfWeek(date, { weekStartsOn: 0 });
+      return `${new Intl.DateTimeFormat('he-IL', { day: 'numeric' }).format(startDate)} - ${new Intl.DateTimeFormat('he-IL', { day: 'numeric', month: 'long', year: 'numeric' }).format(endDate)}`;
+    } else if (view === 'month') {
+      return new Intl.DateTimeFormat('he-IL', { month: 'long', year: 'numeric' }).format(date);
+    }
+    return '';
+  };
 
   // Navigation functions
   const nextPeriod = () => {
@@ -131,21 +160,8 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
     onDateChange(newDate);
   };
 
-  const today = () => {
+  const goToToday = () => {
     onDateChange(new Date());
-  };
-
-  const getViewTitle = () => {
-    if (view === 'day') {
-      return formattedDate;
-    } else if (view === 'week') {
-      const startDate = startOfWeek(date, { weekStartsOn: 0 });
-      const endDate = endOfWeek(date, { weekStartsOn: 0 });
-      return `${new Intl.DateTimeFormat('he-IL', { month: 'long', day: 'numeric' }).format(startDate)} - ${new Intl.DateTimeFormat('he-IL', { month: 'long', day: 'numeric', year: 'numeric' }).format(endDate)}`;
-    } else if (view === 'month') {
-      return new Intl.DateTimeFormat('he-IL', { month: 'long', year: 'numeric' }).format(date);
-    }
-    return '';
   };
 
   // Format hours in 24-hour format
@@ -154,73 +170,105 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
   };
 
   // Handle appointment click
-  const handleAppointmentClick = (id: string) => {
-    navigate(`/scheduling/edit/${id}`);
+  const handleAppointmentClick = (appointment: Appointment) => {
+    setSelectedAppointment(appointment);
+    setIsAppointmentDetailsOpen(true);
+  };
+
+  // Handle edit appointment
+  const handleEditAppointment = () => {
+    if (selectedAppointment) {
+      navigate(`/scheduling/edit/${selectedAppointment.id}`);
+    }
   };
 
   return (
-    <Card>
+    <Card className="shadow-md border-muted">
       <CardHeader className="flex flex-row items-center justify-between pb-2" dir="rtl">
-        <CardTitle>פגישות</CardTitle>
+        <CardTitle className="text-xl font-bold">פגישות</CardTitle>
         <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            className={cn(
-              view === 'day' && 'bg-primary text-primary-foreground hover:bg-primary/90'
-            )}
-            onClick={() => setView('day')}
-          >
-            יום
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            className={cn(
-              view === 'week' && 'bg-primary text-primary-foreground hover:bg-primary/90'
-            )}
-            onClick={() => setView('week')}
-          >
-            שבוע
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            className={cn(
-              view === 'month' && 'bg-primary text-primary-foreground hover:bg-primary/90'
-            )}
-            onClick={() => setView('month')}
-          >
-            חודש
-          </Button>
+          <div className="flex rounded-lg overflow-hidden border">
+            <Button
+              variant={view === 'day' ? 'default' : 'outline'}
+              size="sm"
+              className={cn(
+                "rounded-none border-0",
+                view === 'day' && 'bg-primary text-primary-foreground hover:bg-primary/90'
+              )}
+              onClick={() => setView('day')}
+            >
+              יום
+            </Button>
+            <Button
+              variant={view === 'week' ? 'default' : 'outline'}
+              size="sm"
+              className={cn(
+                "rounded-none border-0 border-r border-l",
+                view === 'week' && 'bg-primary text-primary-foreground hover:bg-primary/90'
+              )}
+              onClick={() => setView('week')}
+            >
+              שבוע
+            </Button>
+            <Button
+              variant={view === 'month' ? 'default' : 'outline'}
+              size="sm"
+              className={cn(
+                "rounded-none border-0",
+                view === 'month' && 'bg-primary text-primary-foreground hover:bg-primary/90'
+              )}
+              onClick={() => setView('month')}
+            >
+              חודש
+            </Button>
+          </div>
         </div>
       </CardHeader>
-      <CardContent>
-        <div className="flex items-center justify-between mb-4 mt-2" dir="rtl">
+      <CardContent className="p-0">
+        <div className="flex items-center justify-between p-4 border-b bg-muted/20" dir="rtl">
           <div className="flex items-center gap-3">
-            <Button variant="outline" size="icon" onClick={prevPeriod}>
+            <Button variant="outline" size="icon" onClick={prevPeriod} className="h-8 w-8">
               <ChevronRight className="h-4 w-4" />
             </Button>
-            <div className="flex items-center">
-              <CalendarIcon className="ml-2 h-4 w-4" />
-              <span>{getViewTitle()}</span>
-            </div>
-            <Button variant="outline" size="icon" onClick={nextPeriod}>
+            
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className="px-2 flex items-center gap-2">
+                  <CalendarIcon className="h-4 w-4" />
+                  <span className="font-medium">{getViewTitle()}</span>
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="center">
+                <Calendar
+                  mode="single"
+                  selected={date}
+                  onSelect={(newDate) => newDate && onDateChange(newDate)}
+                  className="pointer-events-auto"
+                />
+              </PopoverContent>
+            </Popover>
+            
+            <Button variant="outline" size="icon" onClick={nextPeriod} className="h-8 w-8">
               <ChevronLeft className="h-4 w-4" />
             </Button>
           </div>
-          <Button variant="outline" size="sm" onClick={today}>
+          
+          <Button variant="outline" size="sm" onClick={goToToday} className="text-xs px-3">
             היום
           </Button>
         </div>
 
-        <div className="border rounded-lg mt-4 overflow-hidden">
+        <div className="border-t rounded-b-lg overflow-hidden">
           {view === 'day' ? (
-            <div className="gantt-container relative overflow-x-auto">
-              <div className="gantt-timeline grid grid-cols-1 border-b">
-                <div className="hours-header flex justify-between border-b bg-muted/30 text-right">
+            <div className="gantt-container relative overflow-x-auto min-h-[600px] bg-white">
+              <div className="gantt-timeline">
+                {/* Hour markers */}
+                <div className="hours-header flex border-b bg-muted/10">
                   {HOURS.map((hour) => (
-                    <div key={hour} className="hour-cell text-center py-2 text-sm font-medium border-l last:border-l-0 w-[6.25%]">
+                    <div 
+                      key={hour} 
+                      className="hour-cell text-center py-2 text-xs font-medium w-[calc(100%/16)] border-l last:border-l-0"
+                    >
                       {formatHour(hour)}
                     </div>
                   ))}
@@ -228,22 +276,11 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
 
                 {/* Gantt Timeline */}
                 <div className="relative h-[600px]">
-                  {/* Time grid lines */}
-                  <div className="absolute inset-0">
-                    {HOURS.map((hour, index) => (
-                      <div 
-                        key={hour} 
-                        className="absolute border-l h-full bg-muted/10"
-                        style={{right: `${(HOURS.length - index - 1) * (100 / HOURS.length)}%`, width: `${100 / HOURS.length}%`}}
-                      ></div>
-                    ))}
-                  </div>
-
-                  {/* Hour markers (vertical lines) */}
-                  {Array.from({ length: 16 }, (_, i) => i + 8).map((hour) => (
+                  {/* Hour lines */}
+                  {HOURS.map((hour, index) => (
                     <div 
                       key={`hour-${hour}`}
-                      className="absolute border-t border-muted w-full"
+                      className="absolute border-t border-muted/30 w-full"
                       style={{ top: `${(hour - 8) * CELL_HEIGHT}px` }}
                     >
                       <span className="absolute -top-3 right-1 text-xs font-medium text-muted-foreground">
@@ -252,134 +289,284 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
                     </div>
                   ))}
 
+                  {/* Current time indicator */}
+                  {isSameDay(date, new Date()) && (
+                    <div 
+                      className="absolute w-full border-t-2 border-red-500 z-10"
+                      style={{ 
+                        top: `${((new Date().getHours() - 8) + (new Date().getMinutes() / 60)) * CELL_HEIGHT}px` 
+                      }}
+                    >
+                      <div className="absolute -top-2 -right-1 h-4 w-4 rounded-full bg-red-500"></div>
+                    </div>
+                  )}
+
                   {/* Appointments */}
-                  {filteredAppointments.map((appointment, index) => {
-                    const style = getAppointmentStyle(appointment.startTime, appointment.duration);
-                    // Calculate horizontal positioning to avoid overlaps
-                    const column = index % 3;
-                    const width = Math.min(30, 90 / Math.min(filteredAppointments.length, 3));
-                    
-                    return (
-                      <div
-                        key={appointment.id}
-                        className="absolute rounded-md p-3 transition-all hover:ring-2 hover:ring-primary cursor-pointer shadow-sm text-right"
-                        style={{
-                          ...style,
-                          backgroundColor: appointment.color || 'var(--nail-200)',
-                          right: `${column * width}%`,
-                          width: `${width}%`,
-                          zIndex: 10 - index, // Higher index, lower z-index
-                        }}
-                        onClick={() => handleAppointmentClick(appointment.id)}
-                      >
-                        <p className="font-medium text-sm truncate">{appointment.customer}</p>
-                        <p className="text-xs truncate">{appointment.service}</p>
-                        <p className="text-xs opacity-70">{appointment.startTime} ({appointment.duration} דקות)</p>
-                        {appointment.price && <p className="text-xs font-semibold">{appointment.price}</p>}
-                      </div>
-                    );
-                  })}
+                  {filteredAppointments.length === 0 ? (
+                    <div className="flex justify-center items-center h-full text-muted-foreground">
+                      אין פגישות להיום
+                    </div>
+                  ) : (
+                    filteredAppointments.map((appointment, index) => {
+                      const style = getAppointmentStyle(appointment.startTime, appointment.duration);
+                      // Calculate horizontal positioning to avoid overlaps
+                      const column = index % 3;
+                      const width = Math.min(30, 90 / Math.min(filteredAppointments.length, 3));
+                      
+                      return (
+                        <div
+                          key={appointment.id}
+                          className="absolute rounded-md p-3 transition-all hover:ring-2 hover:ring-primary cursor-pointer shadow-sm text-right"
+                          style={{
+                            ...style,
+                            backgroundColor: appointment.color || 'var(--nail-200)',
+                            right: `${column * width}%`,
+                            width: `${width}%`,
+                            zIndex: 5,
+                          }}
+                          onClick={() => handleAppointmentClick(appointment)}
+                        >
+                          <p className="font-medium text-sm truncate">{appointment.customer}</p>
+                          <p className="text-xs truncate">{appointment.service}</p>
+                          <div className="flex items-center text-xs opacity-80 mt-1 gap-1">
+                            <Clock className="h-3 w-3" />
+                            <span>
+                              {appointment.startTime} ({appointment.duration} דקות)
+                            </span>
+                          </div>
+                          {appointment.price && (
+                            <Badge variant="outline" className="mt-1 bg-white/80 text-xs font-medium">
+                              {appointment.price}
+                            </Badge>
+                          )}
+                        </div>
+                      );
+                    })
+                  )}
                 </div>
               </div>
             </div>
           ) : view === 'week' ? (
-            <div className="grid grid-cols-7 gap-2 p-4" dir="rtl">
-              {viewDates.map((dayDate) => (
-                <div key={dayDate.toISOString()} className="border rounded p-2 text-right">
-                  <h3 className="text-center font-medium mb-2">
-                    {new Intl.DateTimeFormat('he-IL', { weekday: 'short' }).format(dayDate)}
-                    <br />
-                    {new Intl.DateTimeFormat('he-IL', { day: 'numeric' }).format(dayDate)}
-                  </h3>
-                  <div className="space-y-2">
-                    {filteredAppointments
-                      .filter(app => app.date ? isSameDay(app.date, dayDate) : false)
-                      .map(appointment => (
-                        <div
-                          key={appointment.id}
-                          className="rounded-md p-2 transition-all hover:ring-2 hover:ring-primary cursor-pointer shadow-sm text-right"
-                          style={{
-                            backgroundColor: appointment.color || 'var(--nail-200)',
-                          }}
-                          onClick={() => handleAppointmentClick(appointment.id)}
-                        >
-                          <p className="font-medium text-sm truncate">{appointment.customer}</p>
-                          <p className="text-xs truncate">{appointment.service}</p>
-                          <p className="text-xs opacity-70">{appointment.startTime}</p>
-                        </div>
-                      ))}
+            <div className="week-view bg-white">
+              <div className="grid grid-cols-7 bg-muted/10 border-b">
+                {DAYS_OF_WEEK.map((day, index) => (
+                  <div key={day} className="text-center py-2 font-medium text-sm border-l last:border-l-0">
+                    {day}
                   </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="grid grid-cols-7 gap-1 p-2" dir="rtl">
-              {/* Month header (days of week) */}
-              {['יום א׳', 'יום ב׳', 'יום ג׳', 'יום ד׳', 'יום ה׳', 'יום ו׳', 'שבת'].map((day) => (
-                <div key={day} className="text-center font-medium p-2">
-                  {day}
-                </div>
-              ))}
-              
-              {/* Month grid */}
-              {viewDates.map((dayDate) => {
-                const dayAppointments = filteredAppointments.filter(app => 
-                  app.date ? isSameDay(app.date, dayDate) : false
-                );
-                
-                return (
-                  <div 
-                    key={dayDate.toISOString()} 
-                    className={cn(
-                      "border min-h-[100px] p-1 hover:bg-accent/50 cursor-pointer",
-                      isSameDay(dayDate, new Date()) && "bg-accent/20"
-                    )}
-                    onClick={() => {
-                      onDateChange(dayDate);
-                      setView('day');
-                    }}
-                  >
-                    <div className="text-right font-medium text-sm">
-                      {dayDate.getDate()}
-                    </div>
-                    {dayAppointments.length > 0 ? (
-                      <div className="mt-1">
-                        {dayAppointments.length > 2 ? (
-                          <>
-                            <div 
-                              className="text-xs p-1 rounded mb-1 truncate text-right" 
-                              style={{ backgroundColor: dayAppointments[0].color || 'var(--nail-200)' }}
-                            >
-                              {dayAppointments[0].customer}
-                            </div>
-                            <div className="text-xs text-center">
-                              +{dayAppointments.length - 1} עוד
-                            </div>
-                          </>
+                ))}
+              </div>
+
+              <div className="grid grid-cols-7 h-[600px] overflow-y-auto">
+                {viewDates.map((dayDate) => {
+                  const isToday = isSameDay(dayDate, new Date());
+                  const dayAppointments = appointments.filter(app => 
+                    app.date ? isSameDay(app.date, dayDate) : false
+                  );
+                  
+                  return (
+                    <div 
+                      key={dayDate.toISOString()} 
+                      className={cn(
+                        "min-h-full border-l last:border-l-0 p-2",
+                        isToday && "bg-muted/10"
+                      )}
+                    >
+                      <div 
+                        className={cn(
+                          "text-center mb-2 p-1 rounded-full w-8 h-8 flex items-center justify-center mx-auto",
+                          isToday && "bg-primary text-primary-foreground"
+                        )}
+                        onClick={() => {
+                          onDateChange(dayDate);
+                          setView('day');
+                        }}
+                      >
+                        {dayDate.getDate()}
+                      </div>
+                      
+                      <div className="space-y-1">
+                        {dayAppointments.length === 0 ? (
+                          <div className="text-xs text-center text-muted-foreground mt-4">
+                            אין פגישות
+                          </div>
                         ) : (
-                          dayAppointments.map(app => (
-                            <div 
-                              key={app.id}
-                              className="text-xs p-1 rounded mb-1 truncate text-right" 
-                              style={{ backgroundColor: app.color || 'var(--nail-200)' }}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleAppointmentClick(app.id);
+                          dayAppointments.map(appointment => (
+                            <div
+                              key={appointment.id}
+                              className="rounded-md p-2 transition-all hover:ring-1 hover:ring-primary cursor-pointer shadow-sm text-right text-xs bg-white"
+                              style={{
+                                backgroundColor: appointment.color || 'var(--nail-200)',
                               }}
+                              onClick={() => handleAppointmentClick(appointment)}
                             >
-                              {app.customer}
+                              <div className="font-medium truncate">{appointment.customer}</div>
+                              <div className="opacity-75 truncate">{appointment.service}</div>
+                              <div className="flex items-center gap-1 mt-1 opacity-80">
+                                <Clock className="h-3 w-3" />
+                                <span>{appointment.startTime}</span>
+                              </div>
                             </div>
                           ))
                         )}
                       </div>
-                    ) : null}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ) : (
+            <div className="month-view bg-white">
+              <div className="grid grid-cols-7 bg-muted/10 border-b">
+                {DAYS_OF_WEEK.map((day) => (
+                  <div key={day} className="text-center py-2 font-medium text-sm">
+                    {day}
                   </div>
-                );
-              })}
+                ))}
+              </div>
+              
+              <div className="grid grid-cols-7 auto-rows-fr">
+                {/* Fill in the days from previous month if needed */}
+                {(() => {
+                  const firstDay = startOfMonth(date).getDay();
+                  const prevMonthDays = [];
+                  
+                  for (let i = 0; i < firstDay; i++) {
+                    const prevDate = addDays(startOfMonth(date), -(firstDay - i));
+                    prevMonthDays.push(
+                      <div 
+                        key={`prev-${i}`} 
+                        className="border min-h-[100px] p-2 bg-muted/5 text-muted-foreground"
+                      >
+                        <div className="text-right opacity-50 text-sm">{prevDate.getDate()}</div>
+                      </div>
+                    );
+                  }
+                  return prevMonthDays;
+                })()}
+                
+                {/* Current month days */}
+                {viewDates.map((dayDate) => {
+                  const isToday = isSameDay(dayDate, new Date());
+                  const dayAppointments = appointments.filter(app => 
+                    app.date ? isSameDay(app.date, dayDate) : false
+                  );
+                  
+                  return (
+                    <div 
+                      key={dayDate.toISOString()} 
+                      className={cn(
+                        "border min-h-[100px] p-2 hover:bg-muted/10 cursor-pointer",
+                        isToday && "bg-muted/10",
+                        !isSameMonth(dayDate, date) && "bg-muted/5 text-muted-foreground"
+                      )}
+                      onClick={() => {
+                        onDateChange(dayDate);
+                        setView('day');
+                      }}
+                    >
+                      <div className={cn(
+                        "text-right font-medium text-sm w-6 h-6 flex items-center justify-center rounded-full",
+                        isToday && "bg-primary text-primary-foreground"
+                      )}>
+                        {dayDate.getDate()}
+                      </div>
+                      
+                      {dayAppointments.length > 0 ? (
+                        <div className="mt-1">
+                          {dayAppointments.length > 2 ? (
+                            <>
+                              <div 
+                                className="text-xs p-1 rounded mb-1 truncate text-right" 
+                                style={{ backgroundColor: dayAppointments[0].color || 'var(--nail-200)' }}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleAppointmentClick(dayAppointments[0]);
+                                }}
+                              >
+                                {dayAppointments[0].customer}
+                              </div>
+                              <div className="text-xs text-center">
+                                +{dayAppointments.length - 1} עוד
+                              </div>
+                            </>
+                          ) : (
+                            dayAppointments.map(app => (
+                              <div 
+                                key={app.id}
+                                className="text-xs p-1 rounded mb-1 truncate text-right" 
+                                style={{ backgroundColor: app.color || 'var(--nail-200)' }}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleAppointmentClick(app);
+                                }}
+                              >
+                                {app.customer}
+                              </div>
+                            ))
+                          )}
+                        </div>
+                      ) : null}
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           )}
         </div>
       </CardContent>
+
+      {/* Appointment Details Dialog */}
+      {selectedAppointment && (
+        <Dialog open={isAppointmentDetailsOpen} onOpenChange={setIsAppointmentDetailsOpen}>
+          <DialogContent className="text-right">
+            <DialogHeader>
+              <DialogTitle className="text-xl">{selectedAppointment.customer}</DialogTitle>
+              <DialogDescription>
+                פרטי פגישה
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="space-y-3 mt-2">
+              <div className="flex items-center gap-2">
+                <Badge variant="outline" className="bg-white">
+                  {selectedAppointment.service}
+                </Badge>
+                {selectedAppointment.price && (
+                  <Badge variant="secondary">
+                    {selectedAppointment.price}
+                  </Badge>
+                )}
+              </div>
+              
+              <Separator />
+              
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">תאריך</p>
+                  <p>{selectedAppointment.date ? format(selectedAppointment.date, 'dd/MM/yyyy') : 'לא צוין'}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">שעה</p>
+                  <p>{selectedAppointment.startTime}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">משך</p>
+                  <p>{selectedAppointment.duration} דקות</p>
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex justify-end gap-2 mt-4">
+              <Button variant="outline" onClick={() => setIsAppointmentDetailsOpen(false)}>
+                סגור
+              </Button>
+              <Button onClick={handleEditAppointment}>
+                ערוך פגישה
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </Card>
   );
 };
