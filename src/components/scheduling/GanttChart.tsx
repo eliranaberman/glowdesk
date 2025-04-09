@@ -191,6 +191,25 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
     }
   };
 
+  // Group appointments by time for better organization
+  const organizeAppointmentsByTime = (appointments: Appointment[]) => {
+    const timeSlots: Record<string, Appointment[]> = {};
+    
+    appointments.forEach(appointment => {
+      if (!timeSlots[appointment.startTime]) {
+        timeSlots[appointment.startTime] = [];
+      }
+      timeSlots[appointment.startTime].push(appointment);
+    });
+    
+    return timeSlots;
+  };
+  
+  // Organize appointments for day view
+  const organizedAppointments = useMemo(() => {
+    return organizeAppointmentsByTime(filteredAppointments);
+  }, [filteredAppointments]);
+
   return (
     <Card className="shadow-md border-muted overflow-hidden">
       <CardHeader className="flex flex-row items-center justify-between pb-2 bg-white" dir="rtl">
@@ -312,44 +331,51 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
                       אין פגישות להיום
                     </div>
                   ) : (
-                    filteredAppointments.map((appointment, index) => {
-                      const style = getAppointmentStyle(appointment.startTime, appointment.duration);
-                      // Calculate horizontal positioning for better distribution
-                      const columnCount = 3;
-                      const column = index % columnCount;
-                      const width = Math.min(30, 90 / Math.min(filteredAppointments.length, columnCount));
+                    Object.entries(organizedAppointments).map(([startTime, appointmentsAtTime]) => {
+                      const [hours, minutes] = startTime.split(':').map(Number);
+                      const startPosition = (hours + minutes / 60 - 8) * CELL_HEIGHT;
                       
                       return (
-                        <div
-                          key={appointment.id}
-                          className="absolute rounded-md border border-white/30 shadow-sm transition-all hover:shadow-md hover:ring-1 hover:ring-primary cursor-pointer"
-                          style={{
-                            ...style,
-                            backgroundColor: appointment.color || '#E5DEFF',
-                            right: `${column * width}%`,
-                            width: `${width}%`,
-                            zIndex: 5,
-                            minHeight: '40px', // Ensure minimum height
-                          }}
-                          onClick={() => handleAppointmentClick(appointment)}
+                        <div 
+                          key={startTime}
+                          className="absolute w-full flex flex-row-reverse gap-2 pr-2"
+                          style={{ top: `${startPosition}px` }}
                         >
-                          <div className="p-2 h-full flex flex-col">
-                            <div className="flex-1">
-                              <p className="font-medium text-sm truncate text-gray-800">{appointment.customer}</p>
-                              <p className="text-xs truncate text-gray-600">{appointment.service}</p>
-                            </div>
-                            <div className="flex items-center justify-between mt-auto">
-                              <div className="flex items-center text-xs opacity-80 gap-1 text-gray-700">
-                                <Clock className="h-3 w-3" />
-                                <span>{appointment.startTime}</span>
+                          {appointmentsAtTime.map((appointment, index) => {
+                            const width = Math.min(30, 90 / appointmentsAtTime.length);
+                            
+                            return (
+                              <div
+                                key={appointment.id}
+                                className="rounded-md border shadow-sm transition-all hover:shadow-md hover:ring-1 hover:ring-primary cursor-pointer"
+                                style={{
+                                  backgroundColor: appointment.color || '#E5DEFF',
+                                  width: `${width}%`,
+                                  height: `${(appointment.duration / 60) * CELL_HEIGHT}px`,
+                                  minHeight: '40px',
+                                }}
+                                onClick={() => handleAppointmentClick(appointment)}
+                              >
+                                <div className="p-2 h-full flex flex-col">
+                                  <div className="flex-1">
+                                    <p className="font-medium text-sm truncate text-gray-800">{appointment.customer}</p>
+                                    <p className="text-xs truncate text-gray-600">{appointment.service}</p>
+                                  </div>
+                                  <div className="flex items-center justify-between mt-auto">
+                                    <div className="flex items-center text-xs opacity-80 gap-1 text-gray-700">
+                                      <Clock className="h-3 w-3" />
+                                      <span>{appointment.startTime}</span>
+                                    </div>
+                                    {appointment.price && (
+                                      <Badge variant="outline" className="bg-white/70 text-xs font-medium">
+                                        {appointment.price}
+                                      </Badge>
+                                    )}
+                                  </div>
+                                </div>
                               </div>
-                              {appointment.price && (
-                                <Badge variant="outline" className="bg-white/70 text-xs font-medium">
-                                  {appointment.price}
-                                </Badge>
-                              )}
-                            </div>
-                          </div>
+                            );
+                          })}
                         </div>
                       );
                     })

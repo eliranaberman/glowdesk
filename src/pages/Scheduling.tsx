@@ -4,8 +4,7 @@ import GanttChart from '../components/scheduling/GanttChart';
 import CalendarSync from '../components/scheduling/CalendarSync';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import { CalendarPlus, Filter } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { CalendarPlus } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 
 const Scheduling = () => {
