@@ -47,24 +47,20 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
   const [view, setView] = useState<'day' | 'week' | 'month'>('day');
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
   const [isAppointmentDetailsOpen, setIsAppointmentDetailsOpen] = useState(false);
+  const [isCurrentTimeVisible, setIsCurrentTimeVisible] = useState<boolean>(false);
   const navigate = useNavigate();
   
-  // Convert startTime string to percentage position on timeline
   const getAppointmentPosition = (startTime: string): number => {
-    // Parse the time to get hours and minutes
     const [hoursStr, minutesStr] = startTime.split(':');
     const hours = parseInt(hoursStr, 10);
     const minutes = parseInt(minutesStr, 10);
     
-    // Calculate position based on 8:00 being the start (hours - 8)
-    const hourPosition = hours - 8; // Subtract 8 as our timeline starts at 8:00
+    const hourPosition = hours - 8;
     const minutePercentage = minutes / 60;
     
-    // Calculate percentage position on the timeline
     return (hourPosition + minutePercentage) / HOURS.length * 100;
   };
-  
-  // Calculate width based on appointment duration
+
   const getAppointmentWidth = (duration: number): number => {
     const hourWidth = 100 / HOURS.length;
     return (duration / 60) * hourWidth;
@@ -270,10 +266,15 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
   const [currentTimePos, setCurrentTimePos] = useState<number>(getCurrentTimePosition());
   
   useEffect(() => {
-    if (view !== 'day' || !isSameDay(date, new Date())) return;
+    if (view !== 'day' || !isSameDay(date, new Date())) {
+      setIsCurrentTimeVisible(false);
+      return;
+    }
     
     const updateCurrentTime = () => {
-      setCurrentTimePos(getCurrentTimePosition());
+      const position = getCurrentTimePosition();
+      setCurrentTimePos(position);
+      setIsCurrentTimeVisible(position >= 0);
     };
     
     updateCurrentTime();
@@ -397,19 +398,15 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
                     />
                   ))}
 
-                  {isSameDay(date, new Date()) && (
-                    <>
-                      {currentTimePos >= 0 && (
-                        <div 
-                          className="absolute h-full border-r-2 border-red-500 z-10 animate-pulse"
-                          style={{ 
-                            left: `${currentTimePos}%` 
-                          }}
-                        >
-                          <div className="absolute -left-2 -top-1 h-4 w-4 rounded-full bg-red-500"></div>
-                        </div>
-                      )}
-                    </>
+                  {isSameDay(date, new Date()) && isCurrentTimeVisible && (
+                    <div 
+                      className="absolute h-full border-r-2 border-red-500 z-10"
+                      style={{ 
+                        left: `${currentTimePos}%` 
+                      }}
+                    >
+                      <div className="absolute -left-2 -top-1 h-4 w-4 rounded-full bg-red-500"></div>
+                    </div>
                   )}
 
                   {slottedAppointments.length === 0 ? (
