@@ -48,32 +48,28 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
   const [isAppointmentDetailsOpen, setIsAppointmentDetailsOpen] = useState(false);
   const navigate = useNavigate();
   
-  // Helper function to calculate position based on time
   const getAppointmentPosition = (startTime: string) => {
     const [hours, minutes] = startTime.split(':').map(Number);
     const hourIndex = HOURS.findIndex(h => h === hours);
     
     if (hourIndex === -1) return 0;
     
-    // Calculate the exact position within the timeline
-    const hourWidth = 100 / HOURS.length; // Width of each hour cell in percentage
+    const hourWidth = 100 / HOURS.length;
     const position = hourIndex * hourWidth + (minutes / 60) * hourWidth;
     
     return position;
   };
   
-  // Calculate width based on duration
   const getAppointmentWidth = (duration: number) => {
-    const hourWidth = 100 / HOURS.length; // Width of each hour cell in percentage
+    const hourWidth = 100 / HOURS.length;
     return (duration / 60) * hourWidth;
   };
 
-  // Get dates for the current view
   const viewDates = useMemo(() => {
     if (view === 'day') {
       return [date];
     } else if (view === 'week') {
-      const start = startOfWeek(date, { weekStartsOn: 0 }); // Sunday
+      const start = startOfWeek(date, { weekStartsOn: 0 });
       return Array.from({ length: 7 }, (_, i) => addDays(start, i));
     } else if (view === 'month') {
       const start = startOfMonth(date);
@@ -89,20 +85,16 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
     return [date];
   }, [view, date]);
 
-  // Filter appointments for the current view
   const filteredAppointments = useMemo(() => {
     if (view === 'day') {
-      // For day view, filter appointments for the selected date
       return appointments.filter(appointment => {
         if (appointment.date) {
           return isSameDay(appointment.date, date);
         }
-        return true; // If no date specified, show on the current date
+        return true;
       });
     } else {
-      // For week and month views, filter by date range
       return appointments.filter(appointment => {
-        // If appointment has a date, check if it's in the current view
         if (appointment.date) {
           if (view === 'week') {
             return isWithinInterval(appointment.date, {
@@ -116,13 +108,11 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
             });
           }
         }
-        // If no date specified, only show on the selected date
         return isSameDay(new Date(), date);
       });
     }
   }, [appointments, view, date]);
 
-  // Get the formatted date based on current view and locale
   const getViewTitle = () => {
     if (view === 'day') {
       return new Intl.DateTimeFormat('he-IL', { 
@@ -141,7 +131,6 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
     return '';
   };
 
-  // Navigation functions
   const nextPeriod = () => {
     const newDate = new Date(date);
     if (view === 'day') {
@@ -170,48 +159,56 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
     onDateChange(new Date());
   };
 
-  // Format hours in 24-hour format
   const formatHour = (hour: number) => {
     return `${hour.toString().padStart(2, '0')}:00`;
   };
 
-  // Handle appointment click
   const handleAppointmentClick = (appointment: Appointment) => {
     setSelectedAppointment(appointment);
     setIsAppointmentDetailsOpen(true);
   };
 
-  // Handle edit appointment
   const handleEditAppointment = () => {
     if (selectedAppointment) {
       navigate(`/scheduling/edit/${selectedAppointment.id}`);
     }
   };
 
-  // Handle delete appointment (stub for future implementation)
   const handleDeleteAppointment = () => {
     if (selectedAppointment) {
       setIsAppointmentDetailsOpen(false);
       setSelectedAppointment(null);
-      // Future implementation would delete the appointment
     }
   };
 
-  // Sort appointments by start time for day view
   const sortedAppointments = useMemo(() => {
     return [...filteredAppointments].sort((a, b) => {
       const timeA = a.startTime.split(':').map(Number);
       const timeB = b.startTime.split(':').map(Number);
       
-      // Compare hours
       if (timeA[0] !== timeB[0]) {
         return timeA[0] - timeB[0];
       }
       
-      // If hours are the same, compare minutes
       return timeA[1] - timeB[1];
     });
   }, [filteredAppointments]);
+
+  const getCurrentTimePosition = () => {
+    const now = new Date();
+    const currentHour = now.getHours();
+    const currentMinute = now.getMinutes();
+    
+    if (currentHour < 8 || currentHour >= 24) {
+      return -1;
+    }
+    
+    const hourIndex = currentHour - 8;
+    const hourWidth = 100 / HOURS.length;
+    const position = hourIndex * hourWidth + (currentMinute / 60) * hourWidth;
+    
+    return position;
+  };
 
   return (
     <Card className="shadow-md border-muted overflow-hidden">
@@ -293,7 +290,6 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
           {view === 'day' ? (
             <div className="gantt-container relative overflow-x-auto min-h-[600px] bg-white">
               <div className="gantt-timeline">
-                {/* Hours header at the top */}
                 <div className="hours-header flex border-b bg-muted/10">
                   {HOURS.map((hour) => (
                     <div 
@@ -306,9 +302,7 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
                   ))}
                 </div>
 
-                {/* Gantt Timeline */}
                 <div className="relative h-[600px] p-2">
-                  {/* Hour guide lines */}
                   {HOURS.map((hour, index) => (
                     <div 
                       key={`hour-${hour}`}
@@ -320,19 +314,21 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
                     />
                   ))}
 
-                  {/* Current time indicator */}
                   {isSameDay(date, new Date()) && (
-                    <div 
-                      className="absolute h-full border-r-2 border-red-500 z-10"
-                      style={{ 
-                        left: `${((new Date().getHours() - 8) + (new Date().getMinutes() / 60)) * (100 / HOURS.length)}%` 
-                      }}
-                    >
-                      <div className="absolute -left-2 -top-1 h-4 w-4 rounded-full bg-red-500"></div>
-                    </div>
+                    <>
+                      {getCurrentTimePosition() >= 0 && (
+                        <div 
+                          className="absolute h-full border-r-2 border-red-500 z-10"
+                          style={{ 
+                            left: `${getCurrentTimePosition()}%` 
+                          }}
+                        >
+                          <div className="absolute -left-2 -top-1 h-4 w-4 rounded-full bg-red-500"></div>
+                        </div>
+                      )}
+                    </>
                   )}
 
-                  {/* Appointments */}
                   {sortedAppointments.length === 0 ? (
                     <div className="flex justify-center items-center h-full text-muted-foreground">
                       אין פגישות להיום
@@ -343,8 +339,7 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
                         const leftPosition = getAppointmentPosition(appointment.startTime);
                         const width = getAppointmentWidth(appointment.duration);
                         
-                        // Stagger vertical positioning to prevent overlapping
-                        const verticalPosition = (index % 3) * 33; // Stagger in three rows
+                        const verticalPosition = (index % 3) * 33;
                         
                         return (
                           <div
@@ -355,8 +350,8 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
                               left: `${leftPosition}%`,
                               width: `${width}%`,
                               top: `${verticalPosition}%`,
-                              height: '30%', // Fixed height of 30% of the container
-                              minWidth: '120px', // Minimum width to ensure content is visible
+                              height: '30%',
+                              minWidth: '120px',
                             }}
                             onClick={() => handleAppointmentClick(appointment)}
                           >
@@ -561,7 +556,6 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
         </div>
       </CardContent>
 
-      {/* Appointment Details Dialog */}
       {selectedAppointment && (
         <Dialog open={isAppointmentDetailsOpen} onOpenChange={setIsAppointmentDetailsOpen}>
           <DialogContent className="text-right max-w-md">
