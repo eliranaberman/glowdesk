@@ -1,10 +1,10 @@
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
-import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Clock } from 'lucide-react';
+import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Clock, Edit, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { format, addDays, startOfWeek, endOfWeek, addMonths, startOfMonth, endOfMonth, isWithinInterval, isSameDay, isSameMonth, parseISO } from 'date-fns';
+import { format, addDays, startOfWeek, endOfWeek, addMonths, startOfMonth, endOfMonth, isWithinInterval, isSameDay, isSameMonth } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 import { Calendar } from '@/components/ui/calendar';
 import {
@@ -182,9 +182,18 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
     }
   };
 
+  // Handle delete appointment (stub for future implementation)
+  const handleDeleteAppointment = () => {
+    if (selectedAppointment) {
+      setIsAppointmentDetailsOpen(false);
+      setSelectedAppointment(null);
+      // Future implementation would delete the appointment
+    }
+  };
+
   return (
-    <Card className="shadow-md border-muted">
-      <CardHeader className="flex flex-row items-center justify-between pb-2" dir="rtl">
+    <Card className="shadow-md border-muted overflow-hidden">
+      <CardHeader className="flex flex-row items-center justify-between pb-2 bg-white" dir="rtl">
         <CardTitle className="text-xl font-bold">פגישות</CardTitle>
         <div className="flex items-center gap-2">
           <div className="flex rounded-lg overflow-hidden border">
@@ -262,7 +271,7 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
           {view === 'day' ? (
             <div className="gantt-container relative overflow-x-auto min-h-[600px] bg-white">
               <div className="gantt-timeline">
-                {/* Hour markers */}
+                {/* Hours header - shown only once at the top */}
                 <div className="hours-header flex border-b bg-muted/10">
                   {HOURS.map((hour) => (
                     <div 
@@ -276,17 +285,13 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
 
                 {/* Gantt Timeline */}
                 <div className="relative h-[600px]">
-                  {/* Hour lines */}
+                  {/* Hour lines - no labels on the right side */}
                   {HOURS.map((hour, index) => (
                     <div 
                       key={`hour-${hour}`}
                       className="absolute border-t border-muted/30 w-full"
                       style={{ top: `${(hour - 8) * CELL_HEIGHT}px` }}
-                    >
-                      <span className="absolute -top-3 right-1 text-xs font-medium text-muted-foreground">
-                        {formatHour(hour)}
-                      </span>
-                    </div>
+                    />
                   ))}
 
                   {/* Current time indicator */}
@@ -309,36 +314,42 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
                   ) : (
                     filteredAppointments.map((appointment, index) => {
                       const style = getAppointmentStyle(appointment.startTime, appointment.duration);
-                      // Calculate horizontal positioning to avoid overlaps
-                      const column = index % 3;
-                      const width = Math.min(30, 90 / Math.min(filteredAppointments.length, 3));
+                      // Calculate horizontal positioning for better distribution
+                      const columnCount = 3;
+                      const column = index % columnCount;
+                      const width = Math.min(30, 90 / Math.min(filteredAppointments.length, columnCount));
                       
                       return (
                         <div
                           key={appointment.id}
-                          className="absolute rounded-md p-3 transition-all hover:ring-2 hover:ring-primary cursor-pointer shadow-sm text-right"
+                          className="absolute rounded-md border border-white/30 shadow-sm transition-all hover:shadow-md hover:ring-1 hover:ring-primary cursor-pointer"
                           style={{
                             ...style,
-                            backgroundColor: appointment.color || 'var(--nail-200)',
+                            backgroundColor: appointment.color || '#E5DEFF',
                             right: `${column * width}%`,
                             width: `${width}%`,
                             zIndex: 5,
+                            minHeight: '40px', // Ensure minimum height
                           }}
                           onClick={() => handleAppointmentClick(appointment)}
                         >
-                          <p className="font-medium text-sm truncate">{appointment.customer}</p>
-                          <p className="text-xs truncate">{appointment.service}</p>
-                          <div className="flex items-center text-xs opacity-80 mt-1 gap-1">
-                            <Clock className="h-3 w-3" />
-                            <span>
-                              {appointment.startTime} ({appointment.duration} דקות)
-                            </span>
+                          <div className="p-2 h-full flex flex-col">
+                            <div className="flex-1">
+                              <p className="font-medium text-sm truncate text-gray-800">{appointment.customer}</p>
+                              <p className="text-xs truncate text-gray-600">{appointment.service}</p>
+                            </div>
+                            <div className="flex items-center justify-between mt-auto">
+                              <div className="flex items-center text-xs opacity-80 gap-1 text-gray-700">
+                                <Clock className="h-3 w-3" />
+                                <span>{appointment.startTime}</span>
+                              </div>
+                              {appointment.price && (
+                                <Badge variant="outline" className="bg-white/70 text-xs font-medium">
+                                  {appointment.price}
+                                </Badge>
+                              )}
+                            </div>
                           </div>
-                          {appointment.price && (
-                            <Badge variant="outline" className="mt-1 bg-white/80 text-xs font-medium">
-                              {appointment.price}
-                            </Badge>
-                          )}
                         </div>
                       );
                     })
@@ -373,7 +384,7 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
                     >
                       <div 
                         className={cn(
-                          "text-center mb-2 p-1 rounded-full w-8 h-8 flex items-center justify-center mx-auto",
+                          "text-center mb-2 p-1 rounded-full w-8 h-8 flex items-center justify-center mx-auto cursor-pointer",
                           isToday && "bg-primary text-primary-foreground"
                         )}
                         onClick={() => {
@@ -393,17 +404,24 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
                           dayAppointments.map(appointment => (
                             <div
                               key={appointment.id}
-                              className="rounded-md p-2 transition-all hover:ring-1 hover:ring-primary cursor-pointer shadow-sm text-right text-xs bg-white"
+                              className="rounded-md p-2 border border-white/20 shadow-sm hover:shadow-md hover:ring-1 hover:ring-primary cursor-pointer text-right text-xs bg-white"
                               style={{
-                                backgroundColor: appointment.color || 'var(--nail-200)',
+                                backgroundColor: appointment.color || '#E5DEFF',
                               }}
                               onClick={() => handleAppointmentClick(appointment)}
                             >
                               <div className="font-medium truncate">{appointment.customer}</div>
                               <div className="opacity-75 truncate">{appointment.service}</div>
-                              <div className="flex items-center gap-1 mt-1 opacity-80">
-                                <Clock className="h-3 w-3" />
-                                <span>{appointment.startTime}</span>
+                              <div className="flex items-center justify-between mt-1">
+                                <div className="flex items-center gap-1 opacity-80">
+                                  <Clock className="h-3 w-3" />
+                                  <span>{appointment.startTime}</span>
+                                </div>
+                                {appointment.price && (
+                                  <Badge variant="outline" className="bg-white/70 text-xs">
+                                    {appointment.price}
+                                  </Badge>
+                                )}
                               </div>
                             </div>
                           ))
@@ -465,47 +483,49 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
                       }}
                     >
                       <div className={cn(
-                        "text-right font-medium text-sm w-6 h-6 flex items-center justify-center rounded-full",
+                        "text-right font-medium text-sm w-6 h-6 flex items-center justify-center rounded-full float-right mb-1",
                         isToday && "bg-primary text-primary-foreground"
                       )}>
                         {dayDate.getDate()}
                       </div>
                       
-                      {dayAppointments.length > 0 ? (
-                        <div className="mt-1">
-                          {dayAppointments.length > 2 ? (
-                            <>
-                              <div 
-                                className="text-xs p-1 rounded mb-1 truncate text-right" 
-                                style={{ backgroundColor: dayAppointments[0].color || 'var(--nail-200)' }}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleAppointmentClick(dayAppointments[0]);
-                                }}
-                              >
-                                {dayAppointments[0].customer}
-                              </div>
-                              <div className="text-xs text-center">
-                                +{dayAppointments.length - 1} עוד
-                              </div>
-                            </>
-                          ) : (
-                            dayAppointments.map(app => (
-                              <div 
-                                key={app.id}
-                                className="text-xs p-1 rounded mb-1 truncate text-right" 
-                                style={{ backgroundColor: app.color || 'var(--nail-200)' }}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleAppointmentClick(app);
-                                }}
-                              >
-                                {app.customer}
-                              </div>
-                            ))
-                          )}
-                        </div>
-                      ) : null}
+                      <div className="clear-both">
+                        {dayAppointments.length > 0 ? (
+                          <div className="mt-1">
+                            {dayAppointments.length > 2 ? (
+                              <>
+                                <div 
+                                  className="text-xs p-1 mb-1 truncate text-right rounded-md border border-white/20 shadow-sm" 
+                                  style={{ backgroundColor: dayAppointments[0].color || '#E5DEFF' }}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleAppointmentClick(dayAppointments[0]);
+                                  }}
+                                >
+                                  {dayAppointments[0].customer}
+                                </div>
+                                <div className="text-xs text-center">
+                                  +{dayAppointments.length - 1} עוד
+                                </div>
+                              </>
+                            ) : (
+                              dayAppointments.map(app => (
+                                <div 
+                                  key={app.id}
+                                  className="text-xs p-1 rounded-md mb-1 truncate text-right border border-white/20 shadow-sm" 
+                                  style={{ backgroundColor: app.color || '#E5DEFF' }}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleAppointmentClick(app);
+                                  }}
+                                >
+                                  {app.customer}
+                                </div>
+                              ))
+                            )}
+                          </div>
+                        ) : null}
+                      </div>
                     </div>
                   );
                 })}
@@ -518,7 +538,7 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
       {/* Appointment Details Dialog */}
       {selectedAppointment && (
         <Dialog open={isAppointmentDetailsOpen} onOpenChange={setIsAppointmentDetailsOpen}>
-          <DialogContent className="text-right">
+          <DialogContent className="text-right max-w-md">
             <DialogHeader>
               <DialogTitle className="text-xl">{selectedAppointment.customer}</DialogTitle>
               <DialogDescription>
@@ -526,8 +546,8 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
               </DialogDescription>
             </DialogHeader>
             
-            <div className="space-y-3 mt-2">
-              <div className="flex items-center gap-2">
+            <div className="space-y-4 mt-2">
+              <div className="flex items-center gap-2 justify-end">
                 <Badge variant="outline" className="bg-white">
                   {selectedAppointment.service}
                 </Badge>
@@ -540,29 +560,37 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
               
               <Separator />
               
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 gap-4 text-right">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">תאריך</p>
+                  <p className="text-sm font-medium text-muted-foreground mb-1">תאריך</p>
                   <p>{selectedAppointment.date ? format(selectedAppointment.date, 'dd/MM/yyyy') : 'לא צוין'}</p>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">שעה</p>
+                  <p className="text-sm font-medium text-muted-foreground mb-1">שעה</p>
                   <p>{selectedAppointment.startTime}</p>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">משך</p>
+                  <p className="text-sm font-medium text-muted-foreground mb-1">משך</p>
                   <p>{selectedAppointment.duration} דקות</p>
                 </div>
               </div>
             </div>
             
-            <div className="flex justify-end gap-2 mt-4">
-              <Button variant="outline" onClick={() => setIsAppointmentDetailsOpen(false)}>
-                סגור
+            <div className="flex justify-between gap-2 mt-6">
+              <Button variant="destructive" size="sm" onClick={handleDeleteAppointment} className="gap-1">
+                <Trash2 className="h-4 w-4" />
+                מחק
               </Button>
-              <Button onClick={handleEditAppointment}>
-                ערוך פגישה
-              </Button>
+              
+              <div className="flex gap-2">
+                <Button variant="outline" onClick={() => setIsAppointmentDetailsOpen(false)}>
+                  סגור
+                </Button>
+                <Button onClick={handleEditAppointment} className="gap-1">
+                  <Edit className="h-4 w-4" />
+                  ערוך
+                </Button>
+              </div>
             </div>
           </DialogContent>
         </Dialog>

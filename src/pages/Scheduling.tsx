@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { CalendarPlus, Filter } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Card, CardContent } from '@/components/ui/card';
 
 const Scheduling = () => {
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -31,12 +32,12 @@ const Scheduling = () => {
     ];
     
     const services = [
-      { name: 'מניקור ג\'ל', duration: 60, color: 'rgba(198, 113, 211, 0.3)', price: 120 },
-      { name: 'אקריליק מלא', duration: 90, color: 'rgba(181, 75, 194, 0.3)', price: 180 },
-      { name: 'פדיקור', duration: 75, color: 'rgba(156, 61, 167, 0.3)', price: 140 },
-      { name: 'לק ג\'ל', duration: 45, color: 'rgba(198, 113, 211, 0.3)', price: 100 },
-      { name: 'בניית ציפורניים', duration: 120, color: 'rgba(181, 75, 194, 0.3)', price: 220 },
-      { name: 'טיפול יופי', duration: 90, color: 'rgba(156, 61, 167, 0.3)', price: 160 }
+      { name: 'מניקור ג\'ל', duration: 60, color: '#F2FCE2', price: 120 },
+      { name: 'אקריליק מלא', duration: 90, color: '#FEF7CD', price: 180 },
+      { name: 'פדיקור', duration: 75, color: '#FEC6A1', price: 140 },
+      { name: 'לק ג\'ל', duration: 45, color: '#E5DEFF', price: 100 },
+      { name: 'בניית ציפורניים', duration: 120, color: '#FFDEE2', price: 220 },
+      { name: 'טיפול יופי', duration: 90, color: '#FDE1D3', price: 160 }
     ];
     
     // Extended list of start times for better distribution
@@ -154,7 +155,11 @@ const Scheduling = () => {
       </div>
       
       <div className="space-y-6">
-        <CalendarSync />
+        <Card className="shadow-sm">
+          <CardContent className="p-4">
+            <CalendarSync />
+          </CardContent>
+        </Card>
         
         <GanttChart
           appointments={allAppointments}
