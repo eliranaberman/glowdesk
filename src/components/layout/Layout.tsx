@@ -55,7 +55,7 @@ const Layout = ({ children }: LayoutProps) => {
 
   // Handle back button click
   const handleBackClick = () => {
-    navigate(-1);
+    navigate(-1); // Navigate to the previous page in history
   };
 
   // Effect to close sidebar when route changes

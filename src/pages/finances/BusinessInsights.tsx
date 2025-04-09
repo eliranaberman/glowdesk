@@ -1,14 +1,16 @@
+
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { ArrowRight, BarChart as BarChartIcon, LineChart as LineChartIcon, Lightbulb, TrendingUp } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Progress } from '@/components/ui/progress';
 
 const BusinessInsights = () => {
   const [activeTab, setActiveTab] = useState('goals');
+  const navigate = useNavigate();
 
   // Mock data
   const performanceData = [
@@ -45,6 +47,10 @@ const BusinessInsights = () => {
     { name: 'שיעור חזרה', current: 68, target: 80, percentage: 85 },
     { name: 'טיפולים בשבוע', current: 32, target: 40, percentage: 80 },
   ];
+
+  const handleBackClick = () => {
+    navigate(-1);
+  };
 
   return (
     <div className="space-y-6">
