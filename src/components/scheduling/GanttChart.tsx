@@ -31,6 +31,7 @@ interface Appointment {
   color?: string;
   date?: Date; // Optional date field for week/month views
   price?: string;
+  verticalPosition?: number; // Added this property to fix TypeScript error
 }
 
 interface GanttChartProps {
@@ -56,7 +57,6 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
     const minutes = parseInt(minutesStr, 10);
     
     // Calculate position based on 8:00 being the start (hours - 8)
-    // This ensures appointments are positioned correctly on the timeline
     const hourPosition = hours - 8; // Subtract 8 as our timeline starts at 8:00
     const minutePercentage = minutes / 60;
     
@@ -250,7 +250,7 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
     // For each overlapping appointment, try to find a row that's free
     const usedRows = overlappingAppointments.map(app => {
       const appIndex = sortedAppointments.findIndex(a => a.id === app.id);
-      return sortedAppointments[appIndex]._verticalPosition;
+      return sortedAppointments[appIndex].verticalPosition || 0;
     });
     
     // Find the first available row
@@ -260,7 +260,7 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
     }
     
     // Store the calculated vertical position
-    appointment._verticalPosition = row;
+    appointment.verticalPosition = row;
     
     // Return percentage value for CSS positioning
     return row * 33; // 33% of height per row

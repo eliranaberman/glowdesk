@@ -39,9 +39,9 @@ const Scheduling = () => {
       { name: 'טיפול יופי', duration: 90, color: '#FDE1D3', price: 160 }
     ];
     
-    // Improved distribution of start times throughout the day
+    // Business hours from 8:00 AM to 7:00 PM
     const startTimes = [];
-    for (let hour = 8; hour <= 19; hour++) { // 8:00 AM to 7:00 PM
+    for (let hour = 8; hour <= 19; hour++) {
       startTimes.push(`${hour.toString().padStart(2, '0')}:00`);
       startTimes.push(`${hour.toString().padStart(2, '0')}:30`);
     }
@@ -70,7 +70,7 @@ const Scheduling = () => {
           id: `${i}-${j}`,
           customer: clientName,
           service: service.name,
-          startTime: startTime,
+          startTime: startTime, // Make sure this is in the format 'HH:MM'
           duration: service.duration,
           color: service.color,
           date: new Date(appointmentDate),
