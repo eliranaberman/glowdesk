@@ -1,4 +1,3 @@
-
 import { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
@@ -49,17 +48,24 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
   const [isAppointmentDetailsOpen, setIsAppointmentDetailsOpen] = useState(false);
   const navigate = useNavigate();
   
-  // Helper function to calculate position and height based on time
-  const getAppointmentStyle = (startTime: string, duration: number) => {
+  // Helper function to calculate position based on time
+  const getAppointmentPosition = (startTime: string) => {
     const [hours, minutes] = startTime.split(':').map(Number);
-    const startHour = hours + minutes / 60;
-    const startPosition = (startHour - 8) * CELL_HEIGHT; // 8:00 is the start time
-    const height = (duration / 60) * CELL_HEIGHT;
+    const hourIndex = HOURS.findIndex(h => h === hours);
     
-    return {
-      top: `${startPosition}px`,
-      height: `${height}px`,
-    };
+    if (hourIndex === -1) return 0;
+    
+    // Calculate the exact position within the timeline
+    const hourWidth = 100 / HOURS.length; // Width of each hour cell in percentage
+    const position = hourIndex * hourWidth + (minutes / 60) * hourWidth;
+    
+    return position;
+  };
+  
+  // Calculate width based on duration
+  const getAppointmentWidth = (duration: number) => {
+    const hourWidth = 100 / HOURS.length; // Width of each hour cell in percentage
+    return (duration / 60) * hourWidth;
   };
 
   // Get dates for the current view
@@ -191,23 +197,20 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
     }
   };
 
-  // Group appointments by time for better organization
-  const organizeAppointmentsByTime = (appointments: Appointment[]) => {
-    const timeSlots: Record<string, Appointment[]> = {};
-    
-    appointments.forEach(appointment => {
-      if (!timeSlots[appointment.startTime]) {
-        timeSlots[appointment.startTime] = [];
+  // Sort appointments by start time for day view
+  const sortedAppointments = useMemo(() => {
+    return [...filteredAppointments].sort((a, b) => {
+      const timeA = a.startTime.split(':').map(Number);
+      const timeB = b.startTime.split(':').map(Number);
+      
+      // Compare hours
+      if (timeA[0] !== timeB[0]) {
+        return timeA[0] - timeB[0];
       }
-      timeSlots[appointment.startTime].push(appointment);
+      
+      // If hours are the same, compare minutes
+      return timeA[1] - timeB[1];
     });
-    
-    return timeSlots;
-  };
-  
-  // Organize appointments for day view
-  const organizedAppointments = useMemo(() => {
-    return organizeAppointmentsByTime(filteredAppointments);
   }, [filteredAppointments]);
 
   return (
@@ -290,12 +293,13 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
           {view === 'day' ? (
             <div className="gantt-container relative overflow-x-auto min-h-[600px] bg-white">
               <div className="gantt-timeline">
-                {/* Hours header - shown only once at the top */}
+                {/* Hours header at the top */}
                 <div className="hours-header flex border-b bg-muted/10">
                   {HOURS.map((hour) => (
                     <div 
                       key={hour} 
-                      className="hour-cell text-center py-2 text-xs font-medium w-[calc(100%/16)] border-l last:border-l-0"
+                      className="hour-cell text-center py-2 text-xs font-medium"
+                      style={{ width: `${100 / HOURS.length}%` }}
                     >
                       {formatHour(hour)}
                     </div>
@@ -303,82 +307,80 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
                 </div>
 
                 {/* Gantt Timeline */}
-                <div className="relative h-[600px]">
-                  {/* Hour lines - no labels on the right side */}
+                <div className="relative h-[600px] p-2">
+                  {/* Hour guide lines */}
                   {HOURS.map((hour, index) => (
                     <div 
                       key={`hour-${hour}`}
-                      className="absolute border-t border-muted/30 w-full"
-                      style={{ top: `${(hour - 8) * CELL_HEIGHT}px` }}
+                      className="absolute border-r border-muted/30 h-full"
+                      style={{ 
+                        left: `${(index / HOURS.length) * 100}%`,
+                        top: 0
+                      }}
                     />
                   ))}
 
                   {/* Current time indicator */}
                   {isSameDay(date, new Date()) && (
                     <div 
-                      className="absolute w-full border-t-2 border-red-500 z-10"
+                      className="absolute h-full border-r-2 border-red-500 z-10"
                       style={{ 
-                        top: `${((new Date().getHours() - 8) + (new Date().getMinutes() / 60)) * CELL_HEIGHT}px` 
+                        left: `${((new Date().getHours() - 8) + (new Date().getMinutes() / 60)) * (100 / HOURS.length)}%` 
                       }}
                     >
-                      <div className="absolute -top-2 -right-1 h-4 w-4 rounded-full bg-red-500"></div>
+                      <div className="absolute -left-2 -top-1 h-4 w-4 rounded-full bg-red-500"></div>
                     </div>
                   )}
 
                   {/* Appointments */}
-                  {filteredAppointments.length === 0 ? (
+                  {sortedAppointments.length === 0 ? (
                     <div className="flex justify-center items-center h-full text-muted-foreground">
                       אין פגישות להיום
                     </div>
                   ) : (
-                    Object.entries(organizedAppointments).map(([startTime, appointmentsAtTime]) => {
-                      const [hours, minutes] = startTime.split(':').map(Number);
-                      const startPosition = (hours + minutes / 60 - 8) * CELL_HEIGHT;
-                      
-                      return (
-                        <div 
-                          key={startTime}
-                          className="absolute w-full flex flex-row-reverse gap-2 pr-2"
-                          style={{ top: `${startPosition}px` }}
-                        >
-                          {appointmentsAtTime.map((appointment, index) => {
-                            const width = Math.min(30, 90 / appointmentsAtTime.length);
-                            
-                            return (
-                              <div
-                                key={appointment.id}
-                                className="rounded-md border shadow-sm transition-all hover:shadow-md hover:ring-1 hover:ring-primary cursor-pointer"
-                                style={{
-                                  backgroundColor: appointment.color || '#E5DEFF',
-                                  width: `${width}%`,
-                                  height: `${(appointment.duration / 60) * CELL_HEIGHT}px`,
-                                  minHeight: '40px',
-                                }}
-                                onClick={() => handleAppointmentClick(appointment)}
-                              >
-                                <div className="p-2 h-full flex flex-col">
-                                  <div className="flex-1">
-                                    <p className="font-medium text-sm truncate text-gray-800">{appointment.customer}</p>
-                                    <p className="text-xs truncate text-gray-600">{appointment.service}</p>
-                                  </div>
-                                  <div className="flex items-center justify-between mt-auto">
-                                    <div className="flex items-center text-xs opacity-80 gap-1 text-gray-700">
-                                      <Clock className="h-3 w-3" />
-                                      <span>{appointment.startTime}</span>
-                                    </div>
-                                    {appointment.price && (
-                                      <Badge variant="outline" className="bg-white/70 text-xs font-medium">
-                                        {appointment.price}
-                                      </Badge>
-                                    )}
-                                  </div>
-                                </div>
+                    <div className="relative w-full h-full">
+                      {sortedAppointments.map((appointment, index) => {
+                        const leftPosition = getAppointmentPosition(appointment.startTime);
+                        const width = getAppointmentWidth(appointment.duration);
+                        
+                        // Stagger vertical positioning to prevent overlapping
+                        const verticalPosition = (index % 3) * 33; // Stagger in three rows
+                        
+                        return (
+                          <div
+                            key={appointment.id}
+                            className="absolute rounded-md border shadow-sm transition-all hover:shadow-md hover:ring-1 hover:ring-primary cursor-pointer"
+                            style={{
+                              backgroundColor: appointment.color || '#E5DEFF',
+                              left: `${leftPosition}%`,
+                              width: `${width}%`,
+                              top: `${verticalPosition}%`,
+                              height: '30%', // Fixed height of 30% of the container
+                              minWidth: '120px', // Minimum width to ensure content is visible
+                            }}
+                            onClick={() => handleAppointmentClick(appointment)}
+                          >
+                            <div className="p-2 h-full flex flex-col overflow-hidden">
+                              <div className="flex-1">
+                                <p className="font-medium text-sm truncate text-gray-800">{appointment.customer}</p>
+                                <p className="text-xs truncate text-gray-600">{appointment.service}</p>
                               </div>
-                            );
-                          })}
-                        </div>
-                      );
-                    })
+                              <div className="flex items-center justify-between mt-auto">
+                                <div className="flex items-center text-xs opacity-80 gap-1 text-gray-700">
+                                  <Clock className="h-3 w-3" />
+                                  <span>{appointment.startTime}</span>
+                                </div>
+                                {appointment.price && (
+                                  <Badge variant="outline" className="bg-white/70 text-xs font-medium">
+                                    {appointment.price}
+                                  </Badge>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
                   )}
                 </div>
               </div>
@@ -469,7 +471,6 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
               </div>
               
               <div className="grid grid-cols-7 auto-rows-fr">
-                {/* Fill in the days from previous month if needed */}
                 {(() => {
                   const firstDay = startOfMonth(date).getDay();
                   const prevMonthDays = [];
@@ -488,7 +489,6 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
                   return prevMonthDays;
                 })()}
                 
-                {/* Current month days */}
                 {viewDates.map((dayDate) => {
                   const isToday = isSameDay(dayDate, new Date());
                   const dayAppointments = appointments.filter(app => 
