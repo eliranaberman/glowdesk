@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -10,7 +9,7 @@ import { Progress } from '@/components/ui/progress';
 
 const BusinessInsights = () => {
   const [activeRange, setActiveRange] = useState('month');
-  const [activeTab, setActiveTab] = useState('performance');
+  const [activeTab, setActiveTab] = useState('goals');
 
   // Mock data
   const performanceData = [
@@ -100,13 +99,13 @@ const BusinessInsights = () => {
           <CardContent>
             <Tabs defaultValue={activeTab} value={activeTab} onValueChange={setActiveTab}>
               <TabsList className="grid grid-cols-2 mb-6">
-                <TabsTrigger value="performance" className="flex items-center gap-2">
-                  <BarChartIcon className="h-4 w-4" />
-                  ביצועים
-                </TabsTrigger>
                 <TabsTrigger value="goals" className="flex items-center gap-2">
                   <TrendingUp className="h-4 w-4" />
                   יעדים
+                </TabsTrigger>
+                <TabsTrigger value="performance" className="flex items-center gap-2">
+                  <BarChartIcon className="h-4 w-4" />
+                  ביצועים
                 </TabsTrigger>
               </TabsList>
               
