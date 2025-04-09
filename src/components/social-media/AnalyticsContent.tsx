@@ -97,6 +97,27 @@ const AnalyticsContent = ({ analyticsData }: AnalyticsContentProps) => {
     },
   ];
 
+  // Custom render function for pie chart labels to ensure visibility
+  const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, index, name }: any) => {
+    const RADIAN = Math.PI / 180;
+    const radius = outerRadius * 1.35;
+    const x = cx + radius * Math.cos(-midAngle * RADIAN);
+    const y = cy + radius * Math.sin(-midAngle * RADIAN);
+
+    return (
+      <text 
+        x={x} 
+        y={y} 
+        fill={platformData[index].color}
+        textAnchor={x > cx ? 'start' : 'end'}
+        dominantBaseline="central"
+        className="text-xs font-medium"
+      >
+        {name}
+      </text>
+    );
+  };
+
   return (
     <div className="space-y-6" dir="rtl">
       <div className="grid gap-4 md:grid-cols-4">
@@ -212,8 +233,8 @@ const AnalyticsContent = ({ analyticsData }: AnalyticsContentProps) => {
           <CardHeader>
             <CardTitle>התפלגות לפי פלטפורמה</CardTitle>
           </CardHeader>
-          <CardContent className="flex justify-center">
-            <div className="h-[300px] w-full max-w-[400px]">
+          <CardContent>
+            <div className="h-[300px] w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <RechartsPieChart>
                   <Pie
@@ -222,16 +243,17 @@ const AnalyticsContent = ({ analyticsData }: AnalyticsContentProps) => {
                     nameKey="name"
                     cx="50%"
                     cy="50%"
-                    outerRadius={80}
+                    outerRadius={70}
                     fill="#8884d8"
-                    label={(entry) => entry.name}
+                    labelLine={true}
+                    label={renderCustomizedLabel}
                   >
                     {platformData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
                   </Pie>
                   <Tooltip formatter={(value) => [`${value} עוקבים`, '']} />
-                  <Legend layout="vertical" verticalAlign="middle" align="right" />
+                  <Legend layout="horizontal" verticalAlign="bottom" align="center" />
                 </RechartsPieChart>
               </ResponsiveContainer>
             </div>
