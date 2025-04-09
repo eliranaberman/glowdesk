@@ -91,12 +91,12 @@ const AnalyticsContent = ({ analyticsData }: AnalyticsContentProps) => {
 
   const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, index, name }: any) => {
     const RADIAN = Math.PI / 180;
-    const radius = outerRadius * 2.0;
+    const radius = outerRadius * 2.2;
     const x = cx + radius * Math.cos(-midAngle * RADIAN);
     const y = cy + radius * Math.sin(-midAngle * RADIAN);
 
-    const lineX1 = cx + (outerRadius + 10) * Math.cos(-midAngle * RADIAN);
-    const lineY1 = cy + (outerRadius + 10) * Math.sin(-midAngle * RADIAN);
+    const lineX1 = cx + (outerRadius + 5) * Math.cos(-midAngle * RADIAN);
+    const lineY1 = cy + (outerRadius + 5) * Math.sin(-midAngle * RADIAN);
     const lineX2 = x - (x > cx ? 10 : -10);
     const lineY2 = y;
 
@@ -108,7 +108,7 @@ const AnalyticsContent = ({ analyticsData }: AnalyticsContentProps) => {
           x2={lineX2}
           y2={lineY2}
           stroke={platformData[index].color}
-          strokeWidth={1}
+          strokeWidth={1.5}
         />
         <text 
           x={x} 
@@ -240,7 +240,7 @@ const AnalyticsContent = ({ analyticsData }: AnalyticsContentProps) => {
             <CardTitle>התפלגות לפי פלטפורמה</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="h-[350px]">
+            <div className="h-[400px]">
               <ResponsiveContainer width="100%" height="100%">
                 <RechartsPieChart>
                   <Pie
@@ -249,7 +249,7 @@ const AnalyticsContent = ({ analyticsData }: AnalyticsContentProps) => {
                     nameKey="name"
                     cx="50%"
                     cy="50%"
-                    outerRadius={55}
+                    outerRadius={70}
                     fill="#8884d8"
                     labelLine={false}
                     label={renderCustomizedLabel}
