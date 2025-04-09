@@ -91,22 +91,40 @@ const AnalyticsContent = ({ analyticsData }: AnalyticsContentProps) => {
 
   const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, index, name }: any) => {
     const RADIAN = Math.PI / 180;
-    const radius = outerRadius * 1.6;
+    const radius = outerRadius * 2.0;
     const x = cx + radius * Math.cos(-midAngle * RADIAN);
     const y = cy + radius * Math.sin(-midAngle * RADIAN);
 
+    const lineX1 = cx + (outerRadius + 10) * Math.cos(-midAngle * RADIAN);
+    const lineY1 = cy + (outerRadius + 10) * Math.sin(-midAngle * RADIAN);
+    const lineX2 = x - (x > cx ? 10 : -10);
+    const lineY2 = y;
+
     return (
-      <text 
-        x={x} 
-        y={y} 
-        fill={platformData[index].color}
-        textAnchor={x > cx ? 'start' : 'end'}
-        dominantBaseline="central"
-        className="text-xs font-semibold"
-        style={{ textShadow: '0px 0px 2px rgba(255,255,255,0.7)' }}
-      >
-        {name}
-      </text>
+      <g>
+        <line
+          x1={lineX1}
+          y1={lineY1}
+          x2={lineX2}
+          y2={lineY2}
+          stroke={platformData[index].color}
+          strokeWidth={1}
+        />
+        <text 
+          x={x} 
+          y={y} 
+          fill={platformData[index].color}
+          textAnchor={x > cx ? 'start' : 'end'}
+          dominantBaseline="central"
+          className="text-sm font-bold"
+          style={{ 
+            textShadow: '0px 0px 3px rgba(255,255,255,0.9)', 
+            letterSpacing: '0.5px'
+          }}
+        >
+          {name}
+        </text>
+      </g>
     );
   };
 
@@ -222,7 +240,7 @@ const AnalyticsContent = ({ analyticsData }: AnalyticsContentProps) => {
             <CardTitle>התפלגות לפי פלטפורמה</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="h-[300px] w-full">
+            <div className="h-[350px]">
               <ResponsiveContainer width="100%" height="100%">
                 <RechartsPieChart>
                   <Pie
@@ -231,9 +249,9 @@ const AnalyticsContent = ({ analyticsData }: AnalyticsContentProps) => {
                     nameKey="name"
                     cx="50%"
                     cy="50%"
-                    outerRadius={60}
+                    outerRadius={55}
                     fill="#8884d8"
-                    labelLine={true}
+                    labelLine={false}
                     label={renderCustomizedLabel}
                   >
                     {platformData.map((entry, index) => (
