@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, TrendingUp, Calendar, AlertTriangle, DollarSign } from 'lucide-react';
@@ -143,12 +142,6 @@ const CashFlowForecast = ({ activeRange = 'week' }: CashFlowForecastProps) => {
               תחזית הכנסות והוצאות {activeRange === 'day' ? 'ליום הקרוב' : activeRange === 'week' ? 'לשבוע הקרוב' : 'לחודש הקרוב'}
             </CardDescription>
           </div>
-          <Link to="/finances/cash-flow">
-            <Button variant="ghost" size="sm" className="gap-1">
-              לכל הנתונים הפיננסיים
-              <ArrowRight className="h-4 w-4 mr-1" />
-            </Button>
-          </Link>
         </div>
       </CardHeader>
       <CardContent>
