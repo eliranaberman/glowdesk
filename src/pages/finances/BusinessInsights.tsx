@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -6,10 +7,11 @@ import { Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Too
 import { ArrowRight, BarChart as BarChartIcon, LineChart as LineChartIcon, Lightbulb, TrendingUp, Download } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Progress } from '@/components/ui/progress';
+import { useNavigate } from 'react-router-dom';
 
 const BusinessInsights = () => {
-  const [activeRange, setActiveRange] = useState('month');
   const [activeTab, setActiveTab] = useState('goals');
+  const navigate = useNavigate();
 
   // Mock data
   const performanceData = [
@@ -47,6 +49,10 @@ const BusinessInsights = () => {
     { name: 'טיפולים בשבוע', current: 32, target: 40, percentage: 80 },
   ];
 
+  const handleDownloadReport = () => {
+    navigate('/reports', { state: { openGenerator: true } });
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -55,36 +61,8 @@ const BusinessInsights = () => {
           <p className="text-muted-foreground">ניתוח הביצועים העסקיים שלך והצעות לשיפור</p>
         </div>
         
-        <div className="flex gap-2">
-          {/* Date range buttons in RTL order */}
-          <div className="filter-button-group flex">
-            <Button 
-              variant={activeRange === 'day' ? 'default' : 'ghost'} 
-              size="sm" 
-              onClick={() => setActiveRange('day')}
-              className={activeRange === 'day' ? "filter-button-active" : ""}
-            >
-              יום
-            </Button>
-            <Button 
-              variant={activeRange === 'week' ? 'default' : 'ghost'} 
-              size="sm" 
-              onClick={() => setActiveRange('week')}
-              className={activeRange === 'week' ? "filter-button-active" : ""}
-            >
-              שבוע
-            </Button>
-            <Button 
-              variant={activeRange === 'month' ? 'default' : 'ghost'} 
-              size="sm" 
-              onClick={() => setActiveRange('month')}
-              className={activeRange === 'month' ? "filter-button-active" : ""}
-            >
-              חודש
-            </Button>
-          </div>
-          
-          <Button variant="outline" size="sm" className="flex gap-1">
+        <div>
+          <Button variant="outline" size="sm" className="flex gap-1" onClick={handleDownloadReport}>
             <Download className="h-4 w-4 ml-1" />
             הורדת דוח
           </Button>
