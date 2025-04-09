@@ -91,14 +91,17 @@ const AnalyticsContent = ({ analyticsData }: AnalyticsContentProps) => {
 
   const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, index, name }: any) => {
     const RADIAN = Math.PI / 180;
-    const radius = outerRadius * 2.2;
+    const radius = outerRadius * 1.6;
     const x = cx + radius * Math.cos(-midAngle * RADIAN);
     const y = cy + radius * Math.sin(-midAngle * RADIAN);
 
-    const lineX1 = cx + (outerRadius + 5) * Math.cos(-midAngle * RADIAN);
-    const lineY1 = cy + (outerRadius + 5) * Math.sin(-midAngle * RADIAN);
-    const lineX2 = x - (x > cx ? 10 : -10);
-    const lineY2 = y;
+    const lineX1 = cx + (outerRadius + 3) * Math.cos(-midAngle * RADIAN);
+    const lineY1 = cy + (outerRadius + 3) * Math.sin(-midAngle * RADIAN);
+    const lineX2 = cx + (radius - 15) * Math.cos(-midAngle * RADIAN);
+    const lineY2 = cy + (radius - 15) * Math.sin(-midAngle * RADIAN);
+
+    const textAdjustX = name.length > 6 ? (x > cx ? 10 : -10) : 0;
+    const textAdjustY = 0;
 
     return (
       <g>
@@ -111,8 +114,8 @@ const AnalyticsContent = ({ analyticsData }: AnalyticsContentProps) => {
           strokeWidth={1.5}
         />
         <text 
-          x={x} 
-          y={y} 
+          x={x + textAdjustX} 
+          y={y + textAdjustY} 
           fill={platformData[index].color}
           textAnchor={x > cx ? 'start' : 'end'}
           dominantBaseline="central"
@@ -249,7 +252,7 @@ const AnalyticsContent = ({ analyticsData }: AnalyticsContentProps) => {
                     nameKey="name"
                     cx="50%"
                     cy="50%"
-                    outerRadius={70}
+                    outerRadius={90}
                     fill="#8884d8"
                     labelLine={false}
                     label={renderCustomizedLabel}
