@@ -1,17 +1,14 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
-import { ArrowRight, BarChart as BarChartIcon, LineChart as LineChartIcon, Lightbulb, TrendingUp, Download } from 'lucide-react';
+import { ArrowRight, BarChart as BarChartIcon, LineChart as LineChartIcon, Lightbulb, TrendingUp } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Progress } from '@/components/ui/progress';
-import { useNavigate } from 'react-router-dom';
 
 const BusinessInsights = () => {
   const [activeTab, setActiveTab] = useState('goals');
-  const navigate = useNavigate();
 
   // Mock data
   const performanceData = [
@@ -49,23 +46,12 @@ const BusinessInsights = () => {
     { name: 'טיפולים בשבוע', current: 32, target: 40, percentage: 80 },
   ];
 
-  const handleDownloadReport = () => {
-    navigate('/reports', { state: { openGenerator: true } });
-  };
-
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-semibold mb-1">תובנות עסקיות</h1>
           <p className="text-muted-foreground">ניתוח הביצועים העסקיים שלך והצעות לשיפור</p>
-        </div>
-        
-        <div>
-          <Button variant="outline" size="sm" className="flex gap-1" onClick={handleDownloadReport}>
-            <Download className="h-4 w-4 ml-1" />
-            הורדת דוח
-          </Button>
         </div>
       </div>
 
