@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { format } from 'date-fns';
-import he from 'date-fns/locale/he';
+import { he } from 'date-fns/locale';
 import { 
   Table, 
   TableBody, 
@@ -276,7 +276,7 @@ const UserTable = ({ users, onUserAction }: UserTableProps) => {
                       <MoreHorizontal className="h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="left">
+                  <DropdownMenuContent align="end">
                     {user.banned_until ? (
                       <DropdownMenuItem 
                         onClick={() => prepareAction('activate', user.id)}

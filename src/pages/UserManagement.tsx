@@ -4,7 +4,7 @@ import { supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { Helmet } from 'react-helmet';
+import { Helmet } from 'react-helmet-async';
 import UserTable from '@/components/users/UserTable';
 import UserFilters from '@/components/users/UserFilters';
 import { Button } from '@/components/ui/button';
@@ -137,7 +137,7 @@ const UserManagement = () => {
           
           await supabase.auth.admin.updateUserById(
             userId,
-            { banned_until: banUntil.toISOString() }
+            { user_metadata: { banned_until: banUntil.toISOString() } }
           );
           
           toast({
@@ -149,7 +149,7 @@ const UserManagement = () => {
         case 'activate':
           await supabase.auth.admin.updateUserById(
             userId,
-            { banned_until: null }
+            { user_metadata: { banned_until: null } }
           );
           
           toast({
