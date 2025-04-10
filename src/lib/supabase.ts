@@ -1,14 +1,23 @@
 
 import { createClient } from '@supabase/supabase-js';
 
-// Get your Supabase URL and anon key from Supabase dashboard
-// These should be accessible via project settings
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+// Get Supabase URL and anon key from environment variables
+// These should be set in your Lovable environment variables
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-// Validate that we have the required environment variables
+// Validate environment variables
 if (!supabaseUrl || !supabaseAnonKey) {
-  console.error('Missing Supabase credentials. Make sure VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are set.');
+  console.error('Missing Supabase credentials. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your environment variables.');
+  
+  // Use placeholder values for development to prevent app from crashing
+  // This allows the app to load, though Supabase functionality won't work
+  const devUrl = 'https://placeholder-project.supabase.co';
+  const devKey = 'placeholder-key';
+  
+  // Create and export the client with placeholder values
+  export const supabase = createClient(devUrl, devKey);
+} else {
+  // Create and export the client with proper credentials
+  export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 }
-
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
