@@ -31,6 +31,7 @@ import ForgotPassword from "@/pages/auth/ForgotPassword";
 import ResetPassword from "@/pages/auth/ResetPassword";
 import ProtectedRouteWrapper from "@/components/auth/ProtectedRouteWrapper";
 
+// Auth routes - accessible without authentication
 export const authRoutes = [
   { path: "/login", element: <Login /> },
   { path: "/register", element: <Register /> },
@@ -47,6 +48,7 @@ const wrapWithLayout = (Component: React.ComponentType) => (
   </ProtectedRouteWrapper>
 );
 
+// Protected routes - require authentication
 export const protectedRoutes = [
   { path: "/", element: <Navigate to="/dashboard" replace /> },
   { path: "/dashboard", element: wrapWithLayout(Dashboard) },
@@ -74,6 +76,8 @@ export const protectedRoutes = [
   { path: "/marketing/templates", element: wrapWithLayout(MarketingTemplates) },
 ];
 
+// Fallback route for non-existent paths
 export const fallbackRoute = { path: "*", element: <NotFound /> };
 
+// Combine all routes for easier access
 export const allRoutes = [...authRoutes, ...protectedRoutes, fallbackRoute];

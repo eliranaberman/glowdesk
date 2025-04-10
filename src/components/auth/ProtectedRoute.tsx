@@ -15,6 +15,8 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const { toast } = useToast();
 
   useEffect(() => {
+    console.log("🔒 ProtectedRoute - Auth state:", { user: !!user, isLoading });
+    
     // Show toast message if redirected due to unauthorized access
     if (!isLoading && !user && location.state?.from) {
       toast({
@@ -27,6 +29,7 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
 
   // Show loading state while checking auth
   if (isLoading) {
+    console.log("🔄 Auth is still loading...");
     return (
       <div className="flex flex-col items-center justify-center min-h-screen p-4">
         <div className="w-full max-w-md space-y-6">
@@ -43,10 +46,12 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
 
   // Redirect to login if not authenticated, preserving the intended destination
   if (!user) {
+    console.log("🚫 User not authenticated, redirecting to login");
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
   // Show children if authenticated
+  console.log("✅ User authenticated, showing protected content");
   return <>{children}</>;
 };
 

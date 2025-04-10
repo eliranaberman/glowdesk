@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { z } from 'zod';
@@ -7,11 +7,11 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Eye, EyeOff, LogIn } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
 
 // Define form schema
 const loginSchema = z.object({
@@ -23,14 +23,24 @@ const loginSchema = z.object({
 type LoginFormValues = z.infer<typeof loginSchema>;
 
 const Login = () => {
-  const { signIn } = useAuth();
+  const { signIn, user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [loginError, setLoginError] = useState<string | null>(null);
   
   // Get the intended destination after login
-  const from = (location.state as any)?.from?.pathname || '/';
+  const from = (location.state as any)?.from?.pathname || '/dashboard';
+
+  // Check if already logged in
+  useEffect(() => {
+    console.log("Login page - User state:", !!user);
+    if (user) {
+      console.log("Already logged in, redirecting to dashboard");
+      navigate('/dashboard', { replace: true });
+    }
+  }, [user, navigate]);
 
   // Initialize form
   const form = useForm<LoginFormValues>({
@@ -45,8 +55,11 @@ const Login = () => {
   // Handle form submission
   const onSubmit = async (values: LoginFormValues) => {
     setIsLoading(true);
+    setLoginError(null);
     
     try {
+      console.log("🔄 Attempting to sign in:", values.email);
+      
       const { success, error } = await signIn(
         values.email, 
         values.password, 
@@ -54,12 +67,15 @@ const Login = () => {
       );
       
       if (success) {
+        console.log("✅ Login successful, navigating to:", from);
         navigate(from, { replace: true });
       } else {
-        form.setError('root', { 
-          message: error || 'שם משתמש או סיסמה שגויים'
-        });
+        setLoginError(error || 'שם משתמש או סיסמה שגויים');
+        console.error("❌ Login failed:", error);
       }
+    } catch (error) {
+      console.error("❌ Unexpected error during login:", error);
+      setLoginError('התרחשה שגיאה בהתחברות. אנא נסו שוב.');
     } finally {
       setIsLoading(false);
     }
@@ -144,9 +160,9 @@ const Login = () => {
                 </Label>
               </div>
 
-              {form.formState.errors.root && (
+              {loginError && (
                 <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
-                  {form.formState.errors.root.message}
+                  {loginError}
                 </div>
               )}
 

@@ -38,16 +38,25 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    console.log("🔐 AuthProvider initialized");
+    
     // Check for active session on mount
     const getInitialSession = async () => {
       setIsLoading(true);
       
       try {
+        console.log("🔄 Fetching initial session...");
         // Get current session
         const { data: { session }, error } = await supabase.auth.getSession();
         
         if (error) {
           console.error('Error fetching session:', error);
+        }
+        
+        if (session) {
+          console.log("✅ Session found:", session.user.email);
+        } else {
+          console.log("ℹ️ No active session found");
         }
         
         setSession(session);
@@ -64,7 +73,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     // Set up auth subscription for real-time monitoring
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('Auth state changed:', event, session);
+        console.log('Auth state changed:', event, session?.user?.email);
         
         setSession(session);
         setUser(session?.user ?? null);
@@ -79,7 +88,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         } else if (event === 'SIGNED_IN') {
           // Navigate to dashboard on sign in if already on login page
           if (window.location.pathname === '/login' || window.location.pathname === '/register') {
-            navigate('/');
+            navigate('/dashboard');
           }
         } else if (event === 'TOKEN_REFRESHED') {
           console.log('Session token refreshed successfully');
@@ -98,6 +107,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   // Sign up a new user
   const signUp = async (email: string, password: string, fullName: string) => {
     try {
+      console.log("🔄 Attempting to sign up user:", email);
+      
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -109,9 +120,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       });
 
       if (error) {
+        console.error("❌ Sign up error:", error.message);
         return { success: false, error: error.message };
       }
 
+      console.log("✅ User signed up successfully:", data);
+      
       toast({
         title: "נרשמתם בהצלחה",
         description: "נשלח מייל אימות לכתובת הדוא״ל שלך",
@@ -130,23 +144,21 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   // Sign in an existing user with Remember Me option
   const signIn = async (email: string, password: string, rememberMe = false) => {
     try {
-      // Fix: Use global auth config instead of options to respect rememberMe
-      // First, set the session lifetime based on rememberMe
-      await supabase.auth.setSession({
-        access_token: '',
-        refresh_token: ''
-      });
+      console.log("🔄 Attempting to sign in user:", email);
       
-      // Then sign in with email and password
+      // Sign in with email and password
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (error) {
+        console.error("❌ Sign in error:", error.message);
         return { success: false, error: error.message };
       }
 
+      console.log("✅ User signed in successfully:", data.user?.email);
+      
       toast({
         title: "התחברות בוצעה בהצלחה",
         description: "ברוכים הבאים לGlowDesk",
@@ -165,7 +177,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   // Sign out the current user
   const signOut = async () => {
     try {
+      console.log("🔄 Signing out user");
       await supabase.auth.signOut();
+      console.log("✅ User signed out successfully");
       // Toast notification is handled by the auth state change listener
     } catch (error) {
       console.error('Sign out error:', error);
