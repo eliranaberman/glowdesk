@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -48,7 +47,11 @@ import { Search, Filter, MoreVertical, Eye, Edit, Bell, X, Mail, Phone, Calendar
 import { Skeleton } from '@/components/ui/skeleton';
 import { format } from 'date-fns';
 
-const CustomerListView = () => {
+interface CustomerListViewProps {
+  onError?: (errorMessage: string) => void;
+}
+
+const CustomerListView = ({ onError }: CustomerListViewProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user, isAdmin } = useAuth();
@@ -90,18 +93,22 @@ const CustomerListView = () => {
         }
       } catch (error) {
         console.error('Error loading customers:', error);
-        toast({
-          title: 'שגיאה בטעינת לקוחות',
-          description: 'אירעה שגיאה בטעינת רשימת הלקוחות. אנא נסה שוב מאוחר יותר.',
-          variant: 'destructive',
-        });
+        if (onError) {
+          onError(error instanceof Error ? error.message : 'Failed to load customers');
+        } else {
+          toast({
+            title: 'שגיאה בטעינת לקוחות',
+            description: 'אירעה שגיאה בטעינת רשימת הלקוחות. אנא נסה שוב מאוחר יותר.',
+            variant: 'destructive',
+          });
+        }
       } finally {
         setLoading(false);
       }
     };
     
     loadData();
-  }, [filter, toast]);
+  }, [filter, toast, onError]);
   
   // Handle filter changes
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -170,11 +177,15 @@ const CustomerListView = () => {
       });
     } catch (error) {
       console.error('Error marking customer inactive:', error);
-      toast({
-        title: 'שגיאה בעדכון סטטוס',
-        description: 'אירעה שגיאה בעדכון סטטוס הלקוח. אנא נסה שוב מאוחר יותר.',
-        variant: 'destructive',
-      });
+      if (onError) {
+        onError(error instanceof Error ? error.message : 'Failed to update customer status');
+      } else {
+        toast({
+          title: 'שגיאה בעדכון סטטוס',
+          description: 'אירעה שגיאה בעדכון סטטוס הלקוח. אנא נסה שוב מאוחר יותר.',
+          variant: 'destructive',
+        });
+      }
     } finally {
       setShowInactiveDialog(false);
       setCustomerToDeactivate(null);
@@ -198,11 +209,15 @@ const CustomerListView = () => {
       });
     } catch (error) {
       console.error(`Error sending ${method} reminder:`, error);
-      toast({
-        title: 'שגיאה בשליחת תזכורת',
-        description: 'אירעה שגיאה בשליחת התזכורת. אנא נסה שוב מאוחר יותר.',
-        variant: 'destructive',
-      });
+      if (onError) {
+        onError(error instanceof Error ? error.message : `Failed to send ${method} reminder`);
+      } else {
+        toast({
+          title: 'שגיאה בשליחת תזכורת',
+          description: 'אירעה שגיאה בשליחת התזכורת. אנא נסה שוב מאוחר יותר.',
+          variant: 'destructive',
+        });
+      }
     } finally {
       setShowReminderDialog(false);
       setReminderCustomerId(null);
