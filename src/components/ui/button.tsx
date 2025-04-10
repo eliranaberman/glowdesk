@@ -41,6 +41,7 @@ const buttonVariants = cva(
   }
 )
 
+// Update the VariantProps to include all the new variant options
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
