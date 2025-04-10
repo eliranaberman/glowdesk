@@ -9,6 +9,7 @@ type AuthContextType = {
   user: User | null;
   session: Session | null;
   isLoading: boolean;
+  isAdmin: boolean; // Added isAdmin property
   signUp: (email: string, password: string, fullName: string) => Promise<{
     success: boolean;
     error: string | null;
@@ -34,8 +35,38 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
+
+  // Check if the current user is an admin
+  useEffect(() => {
+    const checkAdminStatus = async () => {
+      if (!user) {
+        setIsAdmin(false);
+        return;
+      }
+
+      try {
+        const { data, error } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', user.id)
+          .single();
+
+        if (!error && data && data.role === 'admin') {
+          setIsAdmin(true);
+        } else {
+          setIsAdmin(false);
+        }
+      } catch (error) {
+        console.error('Error checking admin status:', error);
+        setIsAdmin(false);
+      }
+    };
+
+    checkAdminStatus();
+  }, [user]);
 
   useEffect(() => {
     console.log("🔐 AuthProvider initialized");
@@ -243,6 +274,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     user,
     session,
     isLoading,
+    isAdmin,
     signUp,
     signIn,
     signOut,

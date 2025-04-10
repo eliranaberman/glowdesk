@@ -32,10 +32,10 @@ import {
 } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, CalendarIcon } from 'lucide-react';
+import { Calendar as CalendarIcon } from 'lucide-react';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { format } from 'date-fns';
+import { format, parse } from 'date-fns';
 import { X, Plus } from 'lucide-react';
 
 // Form schema validation
@@ -91,10 +91,10 @@ const CustomerForm = ({ isEdit = false }: CustomerFormProps) => {
         setLoading(true);
         const data = await getCustomerById(id);
         
-        // Convert string dates to Date objects
+        // Convert string dates to Date objects for the form
         const formattedData = {
           ...data,
-          registration_date: new Date(data.registration_date),
+          registration_date: data.registration_date ? new Date(data.registration_date) : new Date(),
           last_appointment: data.last_appointment ? new Date(data.last_appointment) : null,
         };
         
@@ -122,10 +122,17 @@ const CustomerForm = ({ isEdit = false }: CustomerFormProps) => {
     try {
       setLoading(true);
       
-      // Prepare data
+      // Prepare data with required fields and correct format
       const customerData = {
-        ...data,
-        tags,
+        full_name: data.full_name,
+        email: data.email,
+        phone_number: data.phone_number,
+        status: data.status,
+        loyalty_level: data.loyalty_level,
+        notes: data.notes || '',
+        registration_date: data.registration_date,
+        last_appointment: data.last_appointment,
+        tags: tags,
       };
       
       if (isEdit && id) {
@@ -137,7 +144,7 @@ const CustomerForm = ({ isEdit = false }: CustomerFormProps) => {
         });
       } else {
         // Create new customer
-        await createCustomer(customerData);
+        await createCustomer(customerData as Omit<Customer, 'id'>);
         toast({
           title: 'לקוח נוסף בהצלחה',
           description: 'הלקוח החדש נוסף למערכת.',
