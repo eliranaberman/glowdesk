@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import CustomerListView from '@/components/customers/CustomerListView';
 import { Helmet } from 'react-helmet-async';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, Database } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from '@/components/ui/button';
 
@@ -16,6 +16,8 @@ const Customers = () => {
   const retryLoading = () => {
     setError(null);
   };
+
+  const isTableMissingError = error?.includes('relation "public.customers" does not exist');
 
   return (
     <div>
@@ -32,13 +34,26 @@ const Customers = () => {
 
       {error ? (
         <div className="space-y-4">
-          <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
-            <AlertTitle>שגיאה בטעינת הלקוחות</AlertTitle>
-            <AlertDescription>
-              {error}
-            </AlertDescription>
-          </Alert>
+          {isTableMissingError ? (
+            <Alert variant="destructive">
+              <Database className="h-4 w-4" />
+              <AlertTitle>שגיאה בטעינת הלקוחות</AlertTitle>
+              <AlertDescription className="space-y-2">
+                <p>טבלת הלקוחות לא קיימת במסד הנתונים. עליך ליצור טבלה בשם "customers" בסופאבייס.</p>
+                <p className="text-sm mt-2">
+                  השגיאה המלאה: {error}
+                </p>
+              </AlertDescription>
+            </Alert>
+          ) : (
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>שגיאה בטעינת הלקוחות</AlertTitle>
+              <AlertDescription>
+                {error}
+              </AlertDescription>
+            </Alert>
+          )}
           <Button onClick={retryLoading}>נסה שוב</Button>
         </div>
       ) : (
