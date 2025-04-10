@@ -28,6 +28,7 @@ import CashFlow from "./pages/finances/CashFlow";
 import BusinessInsights from "./pages/finances/BusinessInsights";
 import MarketingTemplates from "./pages/marketing/MarketingTemplates";
 import FinancialReports from "./pages/finances/FinancialReports";
+import UserManagement from "./pages/UserManagement";
 
 // Auth pages
 import Login from "./pages/auth/Login";
@@ -180,6 +181,14 @@ const App = () => (
                 <ProtectedRoute>
                   <Layout>
                     <NewPayment />
+                  </Layout>
+                </ProtectedRoute>
+              } />
+              {/* User Management page (admin only) */}
+              <Route path="/user-management" element={
+                <ProtectedRoute>
+                  <Layout>
+                    <UserManagement />
                   </Layout>
                 </ProtectedRoute>
               } />

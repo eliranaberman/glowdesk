@@ -1,3 +1,4 @@
+
 import { useState, useRef, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -19,7 +20,10 @@ import {
   Share2,
   DollarSign,
   TrendingUp,
+  UserCog,
 } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/contexts/AuthContext';
 
 const navItems = [
   { 
@@ -86,14 +90,45 @@ interface SidebarProps {
 
 const Sidebar = ({ onLinkClick }: SidebarProps) => {
   const [collapsed, setCollapsed] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const location = useLocation();
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const { user } = useAuth();
 
   const handleLinkClick = () => {
     if (onLinkClick) {
       onLinkClick();
     }
   };
+
+  // Check if the current user is an admin
+  useEffect(() => {
+    const checkAdminStatus = async () => {
+      if (!user) {
+        setIsAdmin(false);
+        return;
+      }
+
+      try {
+        const { data, error } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', user.id)
+          .single();
+
+        if (!error && data && data.role === 'admin') {
+          setIsAdmin(true);
+        } else {
+          setIsAdmin(false);
+        }
+      } catch (error) {
+        console.error('Error checking admin status:', error);
+        setIsAdmin(false);
+      }
+    };
+
+    checkAdminStatus();
+  }, [user]);
 
   useEffect(() => {
     if (!collapsed && scrollAreaRef.current) {
@@ -163,6 +198,25 @@ const Sidebar = ({ onLinkClick }: SidebarProps) => {
                 {item.icon}
               </NavLink>
             ))}
+            
+            {/* Admin-only link */}
+            {isAdmin && (
+              <NavLink
+                to="/user-management"
+                className={({ isActive }) => 
+                  cn(
+                    "nav-link flex items-center",
+                    isActive ? "bg-accent/50 font-medium text-primary shadow-card" : "hover:bg-accent/30",
+                    collapsed ? "justify-center" : "justify-start"
+                  )
+                }
+                data-state={({ isActive }: {isActive: boolean}) => isActive ? "active" : "inactive"}
+                onClick={handleLinkClick}
+              >
+                {!collapsed && <span className="text-right flex-grow">ניהול משתמשים</span>}
+                <UserCog className="w-5 h-5" />
+              </NavLink>
+            )}
           </div>
 
           <div>
