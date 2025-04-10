@@ -5,6 +5,7 @@ import Dashboard from "@/pages/Dashboard";
 import Customers from "@/pages/Customers";
 import NewCustomer from "@/pages/customers/NewCustomer";
 import EditCustomer from "@/pages/customers/EditCustomer";
+import ViewCustomer from "@/pages/customers/ViewCustomer";
 import Scheduling from "@/pages/Scheduling";
 import NewAppointment from "@/pages/scheduling/NewAppointment";
 import EditAppointment from "@/pages/scheduling/EditAppointment";
@@ -54,6 +55,7 @@ export const protectedRoutes = [
   { path: "/dashboard", element: wrapWithLayout(Dashboard) },
   { path: "/customers", element: wrapWithLayout(Customers) },
   { path: "/customers/new", element: wrapWithLayout(NewCustomer) },
+  { path: "/customers/:id", element: wrapWithLayout(ViewCustomer) },
   { path: "/customers/edit/:id", element: wrapWithLayout(EditCustomer) },
   { path: "/scheduling", element: wrapWithLayout(Scheduling) },
   { path: "/scheduling/new", element: wrapWithLayout(NewAppointment) },
