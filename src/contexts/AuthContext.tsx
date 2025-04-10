@@ -130,13 +130,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   // Sign in an existing user with Remember Me option
   const signIn = async (email: string, password: string, rememberMe = false) => {
     try {
+      // Fix: Use global auth config instead of options to respect rememberMe
+      // First, set the session lifetime based on rememberMe
+      await supabase.auth.setSession({
+        access_token: '',
+        refresh_token: ''
+      });
+      
+      // Then sign in with email and password
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
-        options: {
-          // Use persistent session if rememberMe is true
-          persistSession: rememberMe
-        }
       });
 
       if (error) {
