@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -56,11 +57,7 @@ const queryClient = new QueryClient({
 const App = () => {
   useEffect(() => {
     console.log("🔄 App component mounted");
-    
-    // Check if we're on the root route
-    if (window.location.pathname === '/') {
-      console.log("📍 Currently on root route");
-    }
+    console.log("Current pathname:", window.location.pathname);
   }, []);
 
   return (
@@ -70,10 +67,25 @@ const App = () => {
           <Toaster />
           <Sonner />
           <HelmetProvider>
-            <Suspense fallback={<div>Loading...</div>}>
+            <Suspense fallback={<div className="p-8 text-center">Loading application...</div>}>
               <BrowserRouter>
                 <AuthProvider>
                   <Routes>
+                    {/* Index Route - Redirect to Dashboard */}
+                    <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                    
+                    {/* Dashboard Route */}
+                    <Route 
+                      path="/dashboard" 
+                      element={
+                        <ProtectedRouteWrapper>
+                          <Layout>
+                            <Dashboard />
+                          </Layout>
+                        </ProtectedRouteWrapper>
+                      } 
+                    />
+                    
                     {/* Auth Routes */}
                     <Route path="/login" element={<Login />} />
                     <Route path="/register" element={<Register />} />

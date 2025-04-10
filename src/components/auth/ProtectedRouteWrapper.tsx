@@ -6,10 +6,18 @@ import ProtectedRoute from './ProtectedRoute';
 const ProtectedRouteWrapper = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     console.log("🔒 ProtectedRouteWrapper rendered");
-    console.log("🔑 Authentication status being checked");
+    console.log("🔑 Authentication check starting");
+    
+    return () => {
+      console.log("🔒 ProtectedRouteWrapper unmounting");
+    };
   }, []);
 
-  return <ProtectedRoute>{children}</ProtectedRoute>;
+  return (
+    <div className="protected-route-container">
+      <ProtectedRoute>{children}</ProtectedRoute>
+    </div>
+  );
 };
 
 export default ProtectedRouteWrapper;

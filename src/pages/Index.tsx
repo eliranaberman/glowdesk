@@ -4,11 +4,12 @@ import { useEffect } from 'react';
 
 const Index = () => {
   useEffect(() => {
-    console.log("📍 Index component rendered, redirecting to dashboard");
+    console.log("📍 Index component rendered");
+    document.title = "Home | Salon Management System";
   }, []);
 
   // Redirect to the dashboard
-  return <Navigate to="/" replace />;
+  return <Navigate to="/dashboard" replace />;
 };
 
 export default Index;
