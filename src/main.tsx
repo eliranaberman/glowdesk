@@ -1,9 +1,20 @@
 
-import { createRoot } from 'react-dom/client'
-import App from './App.tsx'
-import './index.css'
+import { createRoot } from 'react-dom/client';
+import App from './App.tsx';
+import './index.css';
+
+console.log("main.tsx is executing");
 
 const rootElement = document.getElementById("root");
-if (!rootElement) throw new Error("Failed to find the root element");
+console.log("Root element:", rootElement);
 
-createRoot(rootElement).render(<App />);
+if (!rootElement) {
+  console.error("Failed to find the root element");
+  throw new Error("Failed to find the root element");
+}
+
+const root = createRoot(rootElement);
+console.log("Root created, rendering app");
+
+root.render(<App />);
+console.log("App rendered");
