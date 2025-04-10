@@ -9,15 +9,12 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 // Validate environment variables
 if (!supabaseUrl || !supabaseAnonKey) {
   console.error('Missing Supabase credentials. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your environment variables.');
-  
-  // Use placeholder values for development to prevent app from crashing
-  // This allows the app to load, though Supabase functionality won't work
-  const devUrl = 'https://placeholder-project.supabase.co';
-  const devKey = 'placeholder-key';
-  
-  // Create and export the client with placeholder values
-  export const supabase = createClient(devUrl, devKey);
-} else {
-  // Create and export the client with proper credentials
-  export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 }
+
+// Create and export the client
+// If credentials are missing, use placeholder values that allow the app to load
+// but Supabase functionality won't work properly until real credentials are provided
+export const supabase = createClient(
+  supabaseUrl || 'https://placeholder-project.supabase.co', 
+  supabaseAnonKey || 'placeholder-key'
+);
