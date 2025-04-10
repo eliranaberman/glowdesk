@@ -4,7 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
-import { useEffect } from "react";
+import { useEffect, Suspense } from "react";
 import Layout from "./components/layout/Layout";
 import Dashboard from "./pages/Dashboard";
 import Customers from "./pages/Customers";
@@ -40,14 +40,27 @@ import ProtectedRoute from "./components/auth/ProtectedRoute";
 
 // Auth context
 import { AuthProvider } from "./contexts/AuthContext";
+import ProtectedRouteWrapper from "./components/auth/ProtectedRouteWrapper";
 
-console.log("App component is being loaded");
+console.log("🔄 App component is being loaded");
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 const App = () => {
   useEffect(() => {
-    console.log("App component mounted");
+    console.log("🔄 App component mounted");
+    
+    // Check if we're on the root route
+    if (window.location.pathname === '/') {
+      console.log("📍 Currently on root route");
+    }
   }, []);
 
   return (
@@ -57,185 +70,188 @@ const App = () => {
           <Toaster />
           <Sonner />
           <HelmetProvider>
-            <BrowserRouter>
-              <AuthProvider>
-                <Routes>
-                  {/* Auth Routes */}
-                  <Route path="/login" element={<Login />} />
-                  <Route path="/register" element={<Register />} />
-                  <Route path="/forgot-password" element={<ForgotPassword />} />
-                  <Route path="/reset-password" element={<ResetPassword />} />
-                  
-                  {/* Protected Routes */}
-                  <Route 
-                    path="/" 
-                    element={
-                      <ProtectedRoute>
-                        <Layout>
-                          <Dashboard />
-                        </Layout>
-                      </ProtectedRoute>
-                    } 
-                  />
+            <Suspense fallback={<div>Loading...</div>}>
+              <BrowserRouter>
+                <AuthProvider>
+                  <Routes>
+                    {/* Auth Routes */}
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/register" element={<Register />} />
+                    <Route path="/forgot-password" element={<ForgotPassword />} />
+                    <Route path="/reset-password" element={<ResetPassword />} />
+                    
+                    {/* Protected Routes */}
+                    <Route 
+                      path="/" 
+                      element={
+                        <ProtectedRouteWrapper>
+                          <Layout>
+                            <Dashboard />
+                          </Layout>
+                        </ProtectedRouteWrapper>
+                      } 
+                    />
                   <Route path="/customers" element={
-                    <ProtectedRoute>
+                    <ProtectedRouteWrapper>
                       <Layout>
                         <Customers />
                       </Layout>
-                    </ProtectedRoute>
+                    </ProtectedRouteWrapper>
                   } />
                   <Route path="/customers/new" element={
-                    <ProtectedRoute>
+                    <ProtectedRouteWrapper>
                       <Layout>
                         <NewCustomer />
                       </Layout>
-                    </ProtectedRoute>
+                    </ProtectedRouteWrapper>
                   } />
                   <Route path="/customers/edit/:id" element={
-                    <ProtectedRoute>
+                    <ProtectedRouteWrapper>
                       <Layout>
                         <EditCustomer />
                       </Layout>
-                    </ProtectedRoute>
+                    </ProtectedRouteWrapper>
                   } />
                   <Route path="/scheduling" element={
-                    <ProtectedRoute>
+                    <ProtectedRouteWrapper>
                       <Layout>
                         <Scheduling />
                       </Layout>
-                    </ProtectedRoute>
+                    </ProtectedRouteWrapper>
                   } />
                   <Route path="/scheduling/new" element={
-                    <ProtectedRoute>
+                    <ProtectedRouteWrapper>
                       <Layout>
                         <NewAppointment />
                       </Layout>
-                    </ProtectedRoute>
+                    </ProtectedRouteWrapper>
                   } />
                   <Route path="/scheduling/edit/:id" element={
-                    <ProtectedRoute>
+                    <ProtectedRouteWrapper>
                       <Layout>
                         <EditAppointment />
                       </Layout>
-                    </ProtectedRoute>
+                    </ProtectedRouteWrapper>
                   } />
                   <Route path="/reports" element={
-                    <ProtectedRoute>
+                    <ProtectedRouteWrapper>
                       <Layout>
                         <Reports />
                       </Layout>
-                    </ProtectedRoute>
+                    </ProtectedRouteWrapper>
                   } />
                   <Route path="/inventory" element={
-                    <ProtectedRoute>
+                    <ProtectedRouteWrapper>
                       <Layout>
                         <Inventory />
                       </Layout>
-                    </ProtectedRoute>
+                    </ProtectedRouteWrapper>
                   } />
                   <Route path="/inventory/new" element={
-                    <ProtectedRoute>
+                    <ProtectedRouteWrapper>
                       <Layout>
                         <NewInventoryItem />
                       </Layout>
-                    </ProtectedRoute>
+                    </ProtectedRouteWrapper>
                   } />
                   <Route path="/expenses" element={
-                    <ProtectedRoute>
+                    <ProtectedRouteWrapper>
                       <Layout>
                         <Expenses />
                       </Layout>
-                    </ProtectedRoute>
+                    </ProtectedRouteWrapper>
                   } />
                   <Route path="/tasks" element={
-                    <ProtectedRoute>
+                    <ProtectedRouteWrapper>
                       <Layout>
                         <Tasks />
                       </Layout>
-                    </ProtectedRoute>
+                    </ProtectedRouteWrapper>
                   } />
                   <Route path="/social-media" element={
-                    <ProtectedRoute>
+                    <ProtectedRouteWrapper>
                       <Layout>
                         <SocialMedia />
                       </Layout>
-                    </ProtectedRoute>
+                    </ProtectedRouteWrapper>
                   } />
                   <Route path="/loyalty" element={
-                    <ProtectedRoute>
+                    <ProtectedRouteWrapper>
                       <Layout>
                         <LoyaltyPage />
                       </Layout>
-                    </ProtectedRoute>
+                    </ProtectedRouteWrapper>
                   } />
                   <Route path="/notifications" element={
-                    <ProtectedRoute>
+                    <ProtectedRouteWrapper>
                       <Layout>
                         <Notifications />
                       </Layout>
-                    </ProtectedRoute>
+                    </ProtectedRouteWrapper>
                   } />
                   <Route path="/settings" element={
-                    <ProtectedRoute>
+                    <ProtectedRouteWrapper>
                       <Layout>
                         <Settings />
                       </Layout>
-                    </ProtectedRoute>
+                    </ProtectedRouteWrapper>
                   } />
                   <Route path="/online-booking" element={
-                    <ProtectedRoute>
+                    <ProtectedRouteWrapper>
                       <Layout>
                         <OnlineBooking />
                       </Layout>
-                    </ProtectedRoute>
+                    </ProtectedRouteWrapper>
                   } />
                   <Route path="/payments/new" element={
-                    <ProtectedRoute>
+                    <ProtectedRouteWrapper>
                       <Layout>
                         <NewPayment />
                       </Layout>
-                    </ProtectedRoute>
+                    </ProtectedRouteWrapper>
                   } />
                   <Route path="/user-management" element={
-                    <ProtectedRoute>
+                    <ProtectedRouteWrapper>
                       <Layout>
                         <UserManagement />
                       </Layout>
-                    </ProtectedRoute>
+                    </ProtectedRouteWrapper>
                   } />
                   <Route path="/finances/cash-flow" element={
-                    <ProtectedRoute>
+                    <ProtectedRouteWrapper>
                       <Layout>
                         <CashFlow />
                       </Layout>
-                    </ProtectedRoute>
+                    </ProtectedRouteWrapper>
                   } />
                   <Route path="/finances/insights" element={
-                    <ProtectedRoute>
+                    <ProtectedRouteWrapper>
                       <Layout>
                         <BusinessInsights />
                       </Layout>
-                    </ProtectedRoute>
+                    </ProtectedRouteWrapper>
                   } />
                   <Route path="/finances/reports" element={
-                    <ProtectedRoute>
+                    <ProtectedRouteWrapper>
                       <Layout>
                         <FinancialReports />
                       </Layout>
-                    </ProtectedRoute>
+                    </ProtectedRouteWrapper>
                   } />
                   <Route path="/marketing/templates" element={
-                    <ProtectedRoute>
+                    <ProtectedRouteWrapper>
                       <Layout>
                         <MarketingTemplates />
                       </Layout>
-                    </ProtectedRoute>
+                    </ProtectedRouteWrapper>
                   } />
-                  {/* Default route */}
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </AuthProvider>
-            </BrowserRouter>
+                    
+                    {/* Default route - catch all */}
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </AuthProvider>
+              </BrowserRouter>
+            </Suspense>
           </HelmetProvider>
         </div>
       </TooltipProvider>
