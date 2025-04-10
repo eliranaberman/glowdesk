@@ -29,6 +29,7 @@ interface HeaderProps {
 const Header = ({ pageTitle, toggleMobileSidebar, handleLogout, user }: HeaderProps) => {
   const [notificationCount] = useState(3);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -80,6 +81,24 @@ const Header = ({ pageTitle, toggleMobileSidebar, handleLogout, user }: HeaderPr
       }
       
       setSearchQuery('');
+    }
+  };
+
+  // Enhanced logout with loading state
+  const performLogout = async () => {
+    try {
+      setIsLoggingOut(true);
+      await handleLogout();
+      // Navigation is handled in AuthContext
+    } catch (error) {
+      console.error('Logout error:', error);
+      toast({
+        title: "שגיאה בהתנתקות",
+        description: "אירעה שגיאה בתהליך ההתנתקות, אנא נסו שוב",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoggingOut(false);
     }
   };
 
@@ -166,15 +185,28 @@ const Header = ({ pageTitle, toggleMobileSidebar, handleLogout, user }: HeaderPr
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56 text-right">
-              <DropdownMenuLabel className="text-right">החשבון שלי</DropdownMenuLabel>
+              <DropdownMenuLabel className="font-normal">
+                <div className="flex flex-col space-y-1">
+                  <p className="text-sm font-medium leading-none">{getDisplayName()}</p>
+                  <p className="text-xs leading-none text-muted-foreground">
+                    {user?.email}
+                  </p>
+                </div>
+              </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem className="flex justify-end gap-2" onClick={() => navigate("/settings")}>
                 <div>הגדרות</div>
                 <User className="h-4 w-4" />
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="flex justify-end gap-2 text-destructive" onClick={handleLogout}>
-                <div>התנתקות</div>
+              <DropdownMenuItem 
+                className="flex justify-end gap-2 text-destructive" 
+                onClick={performLogout}
+                disabled={isLoggingOut}
+              >
+                <div>
+                  {isLoggingOut ? 'מתנתק...' : 'התנתקות'}
+                </div>
                 <LogOut className="h-4 w-4" />
               </DropdownMenuItem>
             </DropdownMenuContent>

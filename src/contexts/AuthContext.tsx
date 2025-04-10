@@ -3,6 +3,7 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
+import { useNavigate } from 'react-router-dom';
 
 type AuthContextType = {
   user: User | null;
@@ -12,7 +13,7 @@ type AuthContextType = {
     success: boolean;
     error: string | null;
   }>;
-  signIn: (email: string, password: string) => Promise<{
+  signIn: (email: string, password: string, rememberMe?: boolean) => Promise<{
     success: boolean;
     error: string | null;
   }>;
@@ -34,6 +35,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Check for active session on mount
@@ -59,11 +61,30 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     getInitialSession();
 
-    // Set up auth subscription
+    // Set up auth subscription for real-time monitoring
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
+      async (event, session) => {
+        console.log('Auth state changed:', event, session);
+        
         setSession(session);
         setUser(session?.user ?? null);
+        
+        if (event === 'SIGNED_OUT') {
+          // Redirect to login when user signs out
+          navigate('/login');
+          toast({
+            title: "התנתקות בוצעה בהצלחה",
+            description: "להתראות!",
+          });
+        } else if (event === 'SIGNED_IN') {
+          // Navigate to dashboard on sign in if already on login page
+          if (window.location.pathname === '/login' || window.location.pathname === '/register') {
+            navigate('/');
+          }
+        } else if (event === 'TOKEN_REFRESHED') {
+          console.log('Session token refreshed successfully');
+        }
+        
         setIsLoading(false);
       }
     );
@@ -72,7 +93,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return () => {
       subscription.unsubscribe();
     };
-  }, []);
+  }, [navigate, toast]);
 
   // Sign up a new user
   const signUp = async (email: string, password: string, fullName: string) => {
@@ -106,12 +127,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  // Sign in an existing user
-  const signIn = async (email: string, password: string) => {
+  // Sign in an existing user with Remember Me option
+  const signIn = async (email: string, password: string, rememberMe = false) => {
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
+        options: {
+          // Use persistent session if rememberMe is true
+          persistSession: rememberMe
+        }
       });
 
       if (error) {
@@ -137,9 +162,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const signOut = async () => {
     try {
       await supabase.auth.signOut();
-      toast({
-        title: "התנתקות בוצעה בהצלחה",
-      });
+      // Toast notification is handled by the auth state change listener
     } catch (error) {
       console.error('Sign out error:', error);
       toast({

@@ -11,11 +11,13 @@ import { Label } from '@/components/ui/label';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Eye, EyeOff, LogIn } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
 
 // Define form schema
 const loginSchema = z.object({
   email: z.string().email({ message: 'נא להזין כתובת מייל תקינה' }),
   password: z.string().min(6, { message: 'סיסמה חייבת להכיל לפחות 6 תווים' }),
+  rememberMe: z.boolean().optional().default(false),
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
@@ -36,6 +38,7 @@ const Login = () => {
     defaultValues: {
       email: '',
       password: '',
+      rememberMe: false,
     },
   });
 
@@ -44,7 +47,11 @@ const Login = () => {
     setIsLoading(true);
     
     try {
-      const { success, error } = await signIn(values.email, values.password);
+      const { success, error } = await signIn(
+        values.email, 
+        values.password, 
+        values.rememberMe
+      );
       
       if (success) {
         navigate(from, { replace: true });
@@ -123,6 +130,19 @@ const Login = () => {
                   <FormMessage>{form.formState.errors.password.message}</FormMessage>
                 )}
               </FormItem>
+
+              <div className="flex items-center space-x-2 space-x-reverse">
+                <Checkbox 
+                  id="rememberMe" 
+                  {...form.register('rememberMe')} 
+                />
+                <Label 
+                  htmlFor="rememberMe" 
+                  className="text-sm cursor-pointer"
+                >
+                  זכור אותי
+                </Label>
+              </div>
 
               {form.formState.errors.root && (
                 <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">

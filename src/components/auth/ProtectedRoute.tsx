@@ -2,6 +2,8 @@
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useEffect } from 'react';
+import { useToast } from '@/hooks/use-toast';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -10,6 +12,18 @@ interface ProtectedRouteProps {
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const { user, isLoading } = useAuth();
   const location = useLocation();
+  const { toast } = useToast();
+
+  useEffect(() => {
+    // Show toast message if redirected due to unauthorized access
+    if (!isLoading && !user && location.state?.from) {
+      toast({
+        title: "נדרשת התחברות",
+        description: "אנא התחברו כדי לצפות בדף זה",
+        variant: "destructive",
+      });
+    }
+  }, [isLoading, user, location.state, toast]);
 
   // Show loading state while checking auth
   if (isLoading) {
@@ -27,7 +41,7 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     );
   }
 
-  // Redirect to login if not authenticated
+  // Redirect to login if not authenticated, preserving the intended destination
   if (!user) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
