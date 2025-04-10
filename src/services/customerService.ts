@@ -16,6 +16,18 @@ export interface Customer {
   loyalty_level: 'bronze' | 'silver' | 'gold';
 }
 
+export interface CustomerFormData {
+  full_name: string;
+  email: string;
+  phone_number: string;
+  registration_date: Date;
+  last_appointment: Date | null;
+  status: 'active' | 'inactive';
+  notes: string;
+  tags: string[];
+  loyalty_level: 'bronze' | 'silver' | 'gold';
+}
+
 export interface CustomerFilter {
   search: string;
   status: 'active' | 'inactive' | 'all';
@@ -26,7 +38,7 @@ export interface CustomerFilter {
 }
 
 // Helper function to convert Date objects to strings for the database
-const prepareDateFields = (data: any) => {
+const prepareDateFields = (data: any): any => {
   const result = { ...data };
   
   if (data.registration_date instanceof Date) {
@@ -101,13 +113,13 @@ export const getCustomerById = async (id: string): Promise<Customer> => {
 };
 
 // Create a new customer
-export const createCustomer = async (customer: Omit<Customer, 'id'>): Promise<Customer> => {
+export const createCustomer = async (customerData: CustomerFormData): Promise<Customer> => {
   // Ensure required fields are present
-  if (!customer.full_name || !customer.email || !customer.phone_number) {
+  if (!customerData.full_name || !customerData.email || !customerData.phone_number) {
     throw new Error('Missing required customer information');
   }
   
-  const preparedCustomer = prepareDateFields(customer);
+  const preparedCustomer = prepareDateFields(customerData);
   
   const { data, error } = await supabase
     .from('customers')
@@ -124,7 +136,7 @@ export const createCustomer = async (customer: Omit<Customer, 'id'>): Promise<Cu
 };
 
 // Update an existing customer
-export const updateCustomer = async (id: string, updates: Partial<Customer>): Promise<Customer> => {
+export const updateCustomer = async (id: string, updates: Partial<CustomerFormData>): Promise<Customer> => {
   const preparedUpdates = prepareDateFields(updates);
   
   const { data, error } = await supabase

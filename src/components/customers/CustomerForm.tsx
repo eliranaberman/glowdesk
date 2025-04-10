@@ -6,6 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { 
   Customer, 
+  CustomerFormData,
   getCustomerById, 
   createCustomer, 
   updateCustomer 
@@ -122,8 +123,8 @@ const CustomerForm = ({ isEdit = false }: CustomerFormProps) => {
     try {
       setLoading(true);
       
-      // Prepare data with required fields and correct format
-      const customerData = {
+      // Prepare data with required fields
+      const customerData: CustomerFormData = {
         full_name: data.full_name,
         email: data.email,
         phone_number: data.phone_number,
@@ -144,7 +145,7 @@ const CustomerForm = ({ isEdit = false }: CustomerFormProps) => {
         });
       } else {
         // Create new customer
-        await createCustomer(customerData as Omit<Customer, 'id'>);
+        await createCustomer(customerData);
         toast({
           title: 'לקוח נוסף בהצלחה',
           description: 'הלקוח החדש נוסף למערכת.',
