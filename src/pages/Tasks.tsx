@@ -1,181 +1,472 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Filter } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
+import { 
+  Plus, 
+  Search, 
+  Calendar, 
+  User, 
+  AlertTriangle,
+  Filter
+} from "lucide-react";
+import { format } from "date-fns";
+import { he } from "date-fns/locale";
+import TaskCard from "@/components/tasks/TaskCard";
+import TaskForm from "@/components/tasks/TaskForm";
+import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/lib/supabase";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from "@/components/ui/select";
+import { TaskPriority, TaskStatus, Task, User as UserType } from "@/types/tasks";
 
 const Tasks = () => {
-  const [newTask, setNewTask] = useState("");
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [filteredTasks, setFilteredTasks] = useState<Task[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedUser, setSelectedUser] = useState<string | null>(null);
+  const [selectedPriority, setSelectedPriority] = useState<TaskPriority | null>(null);
+  const [selectedDueDate, setSelectedDueDate] = useState<string | null>(null);
+  const [users, setUsers] = useState<UserType[]>([]);
+  const [isTaskFormOpen, setIsTaskFormOpen] = useState(false);
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const { toast } = useToast();
+  const { user, isAdmin } = useAuth();
   
-  // Mock tasks data
-  const tasks = [
-    {
-      id: "1",
-      title: "הזמנת מלאי לק ג'ל",
-      completed: false,
-      priority: "גבוהה",
-      category: "מלאי",
-      dueDate: "08/04/2025",
-    },
-    {
-      id: "2",
-      title: "ניקוי מנורת UV",
-      completed: false,
-      priority: "רגילה",
-      category: "תחזוקה",
-      dueDate: "10/04/2025",
-    },
-    {
-      id: "3",
-      title: "התקשר ללקוחה חדשה",
-      completed: true,
-      priority: "רגילה",
-      category: "לקוחות",
-      dueDate: "05/04/2025",
-    },
-    {
-      id: "4",
-      title: "הזמנת אצטון",
-      completed: false,
-      priority: "גבוהה",
-      category: "מלאי",
-      dueDate: "08/04/2025",
-    },
-    {
-      id: "5",
-      title: "חידוש מכשיר לאקריליק",
-      completed: false,
-      priority: "נמוכה",
-      category: "ציוד",
-      dueDate: "20/04/2025",
-    },
-  ];
-
-  const handleAddTask = () => {
-    // Would add a new task in a real app
-    setNewTask("");
+  // Fetch tasks from Supabase
+  useEffect(() => {
+    const fetchTasks = async () => {
+      setIsLoading(true);
+      
+      try {
+        let query = supabase
+          .from('tasks')
+          .select(`
+            *,
+            assigned_to_user:users!assigned_to(id, full_name, email, avatar_url),
+            created_by_user:users!created_by(id, full_name)
+          `)
+          .order('created_at', { ascending: false });
+          
+        // If not admin, only show tasks assigned to current user
+        if (!isAdmin) {
+          query = query.eq('assigned_to', user?.id);
+        }
+        
+        const { data, error } = await query;
+        
+        if (error) {
+          throw error;
+        }
+        
+        setTasks(data || []);
+        setFilteredTasks(data || []);
+      } catch (error) {
+        console.error('Error fetching tasks:', error);
+        toast({
+          title: "שגיאה בטעינת משימות",
+          description: "אירעה שגיאה בטעינת המשימות. אנא נסה שוב מאוחר יותר",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    const fetchUsers = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('users')
+          .select('id, full_name, email, avatar_url, role')
+          .order('full_name');
+          
+        if (error) {
+          throw error;
+        }
+        
+        setUsers(data || []);
+      } catch (error) {
+        console.error('Error fetching users:', error);
+      }
+    };
+    
+    fetchTasks();
+    fetchUsers();
+    
+    // Set up realtime subscription
+    const tasksSubscription = supabase
+      .channel('tasks-changes')
+      .on('postgres_changes', 
+        { 
+          event: '*', 
+          schema: 'public', 
+          table: 'tasks'
+        }, 
+        (payload) => {
+          console.log('Realtime update:', payload);
+          // Refetch tasks when there's a change
+          fetchTasks();
+        }
+      )
+      .subscribe();
+      
+    return () => {
+      supabase.removeChannel(tasksSubscription);
+    };
+  }, [user?.id, isAdmin, toast]);
+  
+  // Apply filters when they change
+  useEffect(() => {
+    let result = [...tasks];
+    
+    // Apply search
+    if (searchTerm) {
+      const search = searchTerm.toLowerCase();
+      result = result.filter(
+        task => 
+          task.title.toLowerCase().includes(search) || 
+          (task.description && task.description.toLowerCase().includes(search))
+      );
+    }
+    
+    // Apply user filter
+    if (selectedUser) {
+      result = result.filter(task => task.assigned_to === selectedUser);
+    }
+    
+    // Apply priority filter
+    if (selectedPriority) {
+      result = result.filter(task => task.priority === selectedPriority);
+    }
+    
+    // Apply due date filter
+    if (selectedDueDate) {
+      if (selectedDueDate === 'today') {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        result = result.filter(task => {
+          if (!task.due_date) return false;
+          const dueDate = new Date(task.due_date);
+          dueDate.setHours(0, 0, 0, 0);
+          return dueDate.getTime() === today.getTime();
+        });
+      } else if (selectedDueDate === 'week') {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const oneWeek = new Date(today);
+        oneWeek.setDate(today.getDate() + 7);
+        
+        result = result.filter(task => {
+          if (!task.due_date) return false;
+          const dueDate = new Date(task.due_date);
+          return dueDate >= today && dueDate <= oneWeek;
+        });
+      } else if (selectedDueDate === 'overdue') {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        result = result.filter(task => {
+          if (!task.due_date) return false;
+          const dueDate = new Date(task.due_date);
+          dueDate.setHours(0, 0, 0, 0);
+          return dueDate < today && task.status !== 'completed';
+        });
+      }
+    }
+    
+    setFilteredTasks(result);
+  }, [tasks, searchTerm, selectedUser, selectedPriority, selectedDueDate]);
+  
+  const handleOpenTaskForm = (task: Task | null = null) => {
+    setEditingTask(task);
+    setIsTaskFormOpen(true);
   };
-
-  const getPriorityBadgeVariant = (priority: string) => {
-    switch (priority) {
-      case "גבוהה":
-        return "destructive";
-      case "רגילה":
-        return "secondary";
-      case "נמוכה":
-        return "outline";
-      default:
-        return "secondary";
+  
+  const handleTaskFormClose = () => {
+    setEditingTask(null);
+    setIsTaskFormOpen(false);
+  };
+  
+  const handleStatusChange = async (taskId: string, newStatus: TaskStatus) => {
+    try {
+      const { error } = await supabase
+        .from('tasks')
+        .update({ status: newStatus, updated_at: new Date().toISOString() })
+        .eq('id', taskId);
+      
+      if (error) throw error;
+      
+      toast({
+        title: "סטטוס משימה עודכן",
+        description: "סטטוס המשימה עודכן בהצלחה",
+      });
+      
+    } catch (error) {
+      console.error('Error updating task status:', error);
+      toast({
+        title: "שגיאה בעדכון סטטוס",
+        description: "אירעה שגיאה בעדכון סטטוס המשימה",
+        variant: "destructive",
+      });
     }
   };
-
-  // Count open tasks
-  const openTasksCount = tasks.filter((task) => !task.completed).length;
-  const highPriorityCount = tasks.filter(
-    (task) => !task.completed && task.priority === "גבוהה"
-  ).length;
-
+  
+  const handleDragStart = (e: React.DragEvent, taskId: string) => {
+    e.dataTransfer.setData('taskId', taskId);
+  };
+  
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+  };
+  
+  const handleDrop = (e: React.DragEvent, status: TaskStatus) => {
+    e.preventDefault();
+    const taskId = e.dataTransfer.getData('taskId');
+    handleStatusChange(taskId, status);
+  };
+  
+  // Filter tasks by status for each column
+  const openTasks = filteredTasks.filter(task => task.status === 'open');
+  const inProgressTasks = filteredTasks.filter(task => task.status === 'in_progress');
+  const completedTasks = filteredTasks.filter(task => task.status === 'completed');
+  
+  // Determine if we're showing the task form
+  const shouldShowTaskForm = isTaskFormOpen || editingTask;
+  
   return (
-    <div dir="rtl">
-      <h1 className="text-2xl font-bold mb-4">משימות</h1>
-      <p className="text-muted-foreground mb-6">
-        ניהול משימות יומיות ומעקב אחרי משימות דחופות.
-      </p>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm">משימות פתוחות</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold">{openTasksCount}</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm">משימות בעדיפות גבוהה</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold">{highPriorityCount}</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm">משימות שהושלמו</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold">
-              {tasks.filter((task) => task.completed).length}
-            </p>
-          </CardContent>
-        </Card>
+    <div dir="rtl" className="space-y-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h1 className="text-2xl font-bold">משימות</h1>
+          <p className="text-muted-foreground">
+            ניהול משימות צוות ומעקב אחר ביצועים
+          </p>
+        </div>
+        
+        <Button 
+          onClick={() => handleOpenTaskForm()}
+          className="shrink-0"
+        >
+          <Plus className="ml-2 h-4 w-4" />
+          משימה חדשה
+        </Button>
       </div>
-
+      
       <Card>
-        <CardHeader>
-          <div className="flex flex-col sm:flex-row justify-between gap-4">
-            <CardTitle>רשימת משימות</CardTitle>
-            <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm">
-                <Filter className="h-4 w-4 ml-1" />
-                סינון
-              </Button>
-              <div className="flex items-center gap-2 w-full sm:w-auto">
+        <CardHeader className="pb-3">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div className="w-full md:w-1/3">
+              <div className="relative">
+                <Search className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="הוסף משימה חדשה..."
-                  className="w-full sm:w-[300px]"
-                  value={newTask}
-                  onChange={(e) => setNewTask(e.target.value)}
+                  placeholder="חיפוש משימות..."
+                  className="pr-9"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
                 />
-                <Button onClick={handleAddTask}>
-                  <Plus className="h-4 w-4" />
-                </Button>
               </div>
+            </div>
+            
+            <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
+              <Select
+                value={selectedUser || ""}
+                onValueChange={(value) => setSelectedUser(value || null)}
+              >
+                <SelectTrigger className="w-full md:w-40">
+                  <SelectValue placeholder="סינון לפי משתמש" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">כל המשתמשים</SelectItem>
+                  {users.map((user) => (
+                    <SelectItem key={user.id} value={user.id}>
+                      {user.full_name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              
+              <Select
+                value={selectedPriority || ""}
+                onValueChange={(value) => 
+                  setSelectedPriority(value ? value as TaskPriority : null)
+                }
+              >
+                <SelectTrigger className="w-full md:w-32">
+                  <SelectValue placeholder="עדיפות" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">כל העדיפויות</SelectItem>
+                  <SelectItem value="high">גבוהה</SelectItem>
+                  <SelectItem value="medium">בינונית</SelectItem>
+                  <SelectItem value="low">נמוכה</SelectItem>
+                </SelectContent>
+              </Select>
+              
+              <Select
+                value={selectedDueDate || ""}
+                onValueChange={(value) => setSelectedDueDate(value || null)}
+              >
+                <SelectTrigger className="w-full md:w-36">
+                  <SelectValue placeholder="תאריך יעד" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">כל התאריכים</SelectItem>
+                  <SelectItem value="today">היום</SelectItem>
+                  <SelectItem value="week">השבוע</SelectItem>
+                  <SelectItem value="overdue">איחור</SelectItem>
+                </SelectContent>
+              </Select>
+              
+              <Button 
+                variant="outline" 
+                size="icon"
+                onClick={() => {
+                  setSearchTerm("");
+                  setSelectedUser(null);
+                  setSelectedPriority(null);
+                  setSelectedDueDate(null);
+                }}
+              >
+                <Filter className="h-4 w-4" />
+              </Button>
             </div>
           </div>
         </CardHeader>
+        
         <CardContent>
-          <div className="space-y-2">
-            {tasks.map((task) => (
+          {isLoading ? (
+            <div className="text-center py-10">
+              <p>טוען משימות...</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Open Tasks Column */}
               <div
-                key={task.id}
-                className={`flex items-start p-3 border rounded-lg hover:bg-accent/50 ${
-                  task.completed ? "bg-accent/20" : ""
-                }`}
+                className="space-y-4 p-4 bg-muted/30 rounded-lg"
+                onDragOver={handleDragOver}
+                onDrop={(e) => handleDrop(e, 'open')}
               >
-                <Checkbox
-                  checked={task.completed}
-                  className="mt-1 ml-2"
-                  id={`task-${task.id}`}
-                />
-                <div className="flex-1">
-                  <label
-                    htmlFor={`task-${task.id}`}
-                    className={`font-medium cursor-pointer ${
-                      task.completed ? "line-through text-muted-foreground" : ""
-                    }`}
-                  >
-                    {task.title}
-                  </label>
-                  <div className="flex flex-wrap items-center gap-2 mt-1">
-                    <Badge variant={getPriorityBadgeVariant(task.priority)}>
-                      {task.priority}
+                <div className="flex items-center justify-between">
+                  <h3 className="font-medium flex items-center">
+                    <Badge variant="outline" className="mr-2 bg-yellow-100">
+                      {openTasks.length}
                     </Badge>
-                    <span className="text-xs text-muted-foreground">
-                      {task.category} • לביצוע עד {task.dueDate}
-                    </span>
-                  </div>
+                    משימות פתוחות
+                  </h3>
+                </div>
+                
+                <div className="space-y-3">
+                  {openTasks.length === 0 ? (
+                    <div className="text-center py-8 text-muted-foreground text-sm border border-dashed rounded-lg bg-background/50">
+                      אין משימות פתוחות
+                    </div>
+                  ) : (
+                    openTasks.map((task) => (
+                      <TaskCard
+                        key={task.id}
+                        task={task}
+                        onEdit={() => handleOpenTaskForm(task)}
+                        onDragStart={(e) => handleDragStart(e, task.id)}
+                        users={users}
+                      />
+                    ))
+                  )}
                 </div>
               </div>
-            ))}
-          </div>
+              
+              {/* In Progress Tasks Column */}
+              <div
+                className="space-y-4 p-4 bg-muted/30 rounded-lg"
+                onDragOver={handleDragOver}
+                onDrop={(e) => handleDrop(e, 'in_progress')}
+              >
+                <div className="flex items-center justify-between">
+                  <h3 className="font-medium flex items-center">
+                    <Badge variant="outline" className="mr-2 bg-blue-100">
+                      {inProgressTasks.length}
+                    </Badge>
+                    בתהליך
+                  </h3>
+                </div>
+                
+                <div className="space-y-3">
+                  {inProgressTasks.length === 0 ? (
+                    <div className="text-center py-8 text-muted-foreground text-sm border border-dashed rounded-lg bg-background/50">
+                      אין משימות בתהליך
+                    </div>
+                  ) : (
+                    inProgressTasks.map((task) => (
+                      <TaskCard
+                        key={task.id}
+                        task={task}
+                        onEdit={() => handleOpenTaskForm(task)}
+                        onDragStart={(e) => handleDragStart(e, task.id)}
+                        users={users}
+                      />
+                    ))
+                  )}
+                </div>
+              </div>
+              
+              {/* Completed Tasks Column */}
+              <div
+                className="space-y-4 p-4 bg-muted/30 rounded-lg"
+                onDragOver={handleDragOver}
+                onDrop={(e) => handleDrop(e, 'completed')}
+              >
+                <div className="flex items-center justify-between">
+                  <h3 className="font-medium flex items-center">
+                    <Badge variant="outline" className="mr-2 bg-green-100">
+                      {completedTasks.length}
+                    </Badge>
+                    הושלמו
+                  </h3>
+                </div>
+                
+                <div className="space-y-3">
+                  {completedTasks.length === 0 ? (
+                    <div className="text-center py-8 text-muted-foreground text-sm border border-dashed rounded-lg bg-background/50">
+                      אין משימות שהושלמו
+                    </div>
+                  ) : (
+                    completedTasks.map((task) => (
+                      <TaskCard
+                        key={task.id}
+                        task={task}
+                        onEdit={() => handleOpenTaskForm(task)}
+                        onDragStart={(e) => handleDragStart(e, task.id)}
+                        users={users}
+                      />
+                    ))
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
+      
+      {shouldShowTaskForm && (
+        <TaskForm
+          task={editingTask}
+          onClose={handleTaskFormClose}
+          users={users}
+          isAdmin={isAdmin}
+          currentUser={user}
+        />
+      )}
     </div>
   );
 };
