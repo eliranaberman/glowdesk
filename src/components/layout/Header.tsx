@@ -1,10 +1,11 @@
 
 import { useState } from 'react';
-import { Bell, Search, Menu } from 'lucide-react';
+import { Bell, Search, Menu, User, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
+import { User as SupabaseUser } from '@supabase/supabase-js';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,17 +14,42 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  Avatar,
+  AvatarFallback,
+} from '@/components/ui/avatar';
 
 interface HeaderProps {
   pageTitle: string;
   toggleMobileSidebar: () => void;
+  handleLogout: () => Promise<void>;
+  user: SupabaseUser | null;
 }
 
-const Header = ({ pageTitle, toggleMobileSidebar }: HeaderProps) => {
+const Header = ({ pageTitle, toggleMobileSidebar, handleLogout, user }: HeaderProps) => {
   const [notificationCount] = useState(3);
   const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  // Get user initials for avatar
+  const getUserInitials = (): string => {
+    if (!user) return '';
+    
+    const fullName = user.user_metadata?.full_name || '';
+    if (!fullName) return user.email?.charAt(0).toUpperCase() || '';
+    
+    const nameParts = fullName.split(' ');
+    if (nameParts.length === 1) return nameParts[0].charAt(0).toUpperCase();
+    
+    return (nameParts[0].charAt(0) + nameParts[nameParts.length - 1].charAt(0)).toUpperCase();
+  };
+
+  // Get display name
+  const getDisplayName = (): string => {
+    if (!user) return '';
+    return user.user_metadata?.full_name || user.email || '';
+  };
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -124,6 +150,32 @@ const Header = ({ pageTitle, toggleMobileSidebar }: HeaderProps) => {
               <DropdownMenuSeparator />
               <DropdownMenuItem className="justify-center font-medium text-primary" onClick={() => navigate("/notifications")}>
                 צפה בכל ההתראות
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {/* User Menu */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="relative rounded-full h-8 w-8">
+                <Avatar className="h-8 w-8">
+                  <AvatarFallback className="bg-primary/10 text-primary text-sm">
+                    {getUserInitials()}
+                  </AvatarFallback>
+                </Avatar>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56 text-right">
+              <DropdownMenuLabel className="text-right">החשבון שלי</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem className="flex justify-end gap-2" onClick={() => navigate("/settings")}>
+                <div>הגדרות</div>
+                <User className="h-4 w-4" />
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem className="flex justify-end gap-2 text-destructive" onClick={handleLogout}>
+                <div>התנתקות</div>
+                <LogOut className="h-4 w-4" />
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

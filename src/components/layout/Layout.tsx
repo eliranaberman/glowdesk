@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -17,6 +18,7 @@ const Layout = ({ children }: LayoutProps) => {
   const location = useLocation();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
+  const { user, signOut } = useAuth();
 
   // Get page title based on current route (in Hebrew)
   const getPageTitle = (): string => {
@@ -56,6 +58,12 @@ const Layout = ({ children }: LayoutProps) => {
   // Handle back button click
   const handleBackClick = () => {
     navigate(-1); // Navigate to the previous page in history
+  };
+
+  // Handle logout
+  const handleLogout = async () => {
+    await signOut();
+    navigate('/login');
   };
 
   // Effect to close sidebar when route changes
@@ -109,7 +117,9 @@ const Layout = ({ children }: LayoutProps) => {
       <div className="flex flex-col flex-1 overflow-hidden w-full">
         <Header 
           pageTitle={getPageTitle()} 
-          toggleMobileSidebar={toggleMobileSidebar} 
+          toggleMobileSidebar={toggleMobileSidebar}
+          handleLogout={handleLogout}
+          user={user}
         />
         
         {/* Back button */}
