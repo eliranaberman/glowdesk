@@ -1,7 +1,7 @@
 
 // Assuming this file exists, let's update the Customer type and service functions
 import { supabase } from '@/lib/supabase';
-import { format } from 'date-fns';
+import { format, parse } from 'date-fns';
 
 export interface Customer {
   id: string;
@@ -50,6 +50,19 @@ const prepareDateFields = (data: any): any => {
   }
   
   return result;
+};
+
+// Helper function to convert string dates from the database to Date objects for the UI
+const formatDatesForUI = (customer: Customer): CustomerFormData => {
+  return {
+    ...customer,
+    registration_date: customer.registration_date 
+      ? parse(customer.registration_date, 'yyyy-MM-dd', new Date())
+      : new Date(),
+    last_appointment: customer.last_appointment
+      ? parse(customer.last_appointment, 'yyyy-MM-dd', new Date())
+      : null
+  };
 };
 
 // Get all customers with optional filtering
@@ -110,6 +123,12 @@ export const getCustomerById = async (id: string): Promise<Customer> => {
   }
   
   return data;
+};
+
+// Get a single customer by ID and format dates for UI
+export const getCustomerFormDataById = async (id: string): Promise<CustomerFormData> => {
+  const customer = await getCustomerById(id);
+  return formatDatesForUI(customer);
 };
 
 // Create a new customer
