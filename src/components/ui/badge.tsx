@@ -18,6 +18,10 @@ const badgeVariants = cva(
         outline: "text-foreground",
         success: 
           "border-transparent bg-oliveGreen/15 text-oliveGreen dark:bg-oliveGreen/20",
+        soft: 
+          "border-transparent bg-roseGold/20 text-deepNavy",
+        warm: 
+          "border-transparent bg-mutedPeach/40 text-primary",
       },
     },
     defaultVariants: {
