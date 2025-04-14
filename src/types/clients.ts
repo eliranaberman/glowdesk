@@ -10,6 +10,7 @@ export interface Client {
   full_name: string;
   phone_number: string;
   email: string;
+  birthday?: string;
   gender?: ClientGender;
   status: ClientStatus;
   registration_date: string;
