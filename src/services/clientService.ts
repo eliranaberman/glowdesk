@@ -11,12 +11,10 @@ export const getClients = async (
   pageSize: number = 20
 ) => {
   try {
+    // Start with a basic query that doesn't try to join with assigned_rep
     let query = supabase
       .from('clients')
-      .select(`
-        *,
-        assigned_rep_user:assigned_rep(id, full_name, avatar_url)
-      `, { count: 'exact' });
+      .select('*', { count: 'exact' });
 
     // Apply search filter if provided
     if (search) {
@@ -41,8 +39,18 @@ export const getClients = async (
 
     if (error) throw error;
 
+    // Map the result to include empty assigned_rep_user for now
+    const clients = data.map(client => ({
+      ...client,
+      assigned_rep_user: client.assigned_rep ? { 
+        id: client.assigned_rep,
+        full_name: "Unknown Rep", 
+        avatar_url: undefined
+      } : undefined
+    }));
+
     return {
-      clients: data as Client[],
+      clients: clients as Client[],
       count: count || 0,
     };
   } catch (error) {
@@ -55,16 +63,23 @@ export const getClient = async (id: string) => {
   try {
     const { data, error } = await supabase
       .from('clients')
-      .select(`
-        *,
-        assigned_rep_user:assigned_rep(id, full_name, avatar_url)
-      `)
+      .select('*')
       .eq('id', id)
       .single();
 
     if (error) throw error;
 
-    return data as Client;
+    // Map to include empty assigned_rep_user
+    const client = {
+      ...data,
+      assigned_rep_user: data.assigned_rep ? { 
+        id: data.assigned_rep,
+        full_name: "Unknown Rep", 
+        avatar_url: undefined
+      } : undefined
+    };
+
+    return client as Client;
   } catch (error) {
     console.error('Error fetching client:', error);
     throw error;
@@ -122,16 +137,23 @@ export const getClientActivities = async (clientId: string) => {
   try {
     const { data, error } = await supabase
       .from('client_activity')
-      .select(`
-        *,
-        created_by_user:created_by(id, full_name, avatar_url)
-      `)
+      .select('*')
       .eq('client_id', clientId)
       .order('date', { ascending: false });
 
     if (error) throw error;
 
-    return data as ClientActivity[];
+    // Map to include empty created_by_user
+    const activities = data.map(activity => ({
+      ...activity,
+      created_by_user: activity.created_by ? {
+        id: activity.created_by,
+        full_name: "Unknown User",
+        avatar_url: undefined
+      } : undefined
+    }));
+
+    return activities as ClientActivity[];
   } catch (error) {
     console.error('Error fetching client activities:', error);
     throw error;
