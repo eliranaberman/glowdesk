@@ -38,7 +38,7 @@ const navItems = [
   },
   { 
     name: 'לקוחות', 
-    path: '/customers', 
+    path: '/clients', 
     icon: <Users className="w-5 h-5" /> 
   },
   { 

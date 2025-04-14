@@ -33,6 +33,13 @@ import ForgotPassword from "@/pages/auth/ForgotPassword";
 import ResetPassword from "@/pages/auth/ResetPassword";
 import ProtectedRouteWrapper from "@/components/auth/ProtectedRouteWrapper";
 
+// Client management pages
+import ClientsPage from "@/pages/clients/ClientsPage";
+import ClientDetailPage from "@/pages/clients/ClientDetailPage";
+import NewClientPage from "@/pages/clients/NewClientPage";
+import EditClientPage from "@/pages/clients/EditClientPage";
+import NewActivityPage from "@/pages/clients/NewActivityPage";
+
 // Auth routes - accessible without authentication
 export const authRoutes = [
   { path: "/login", element: <Login /> },
@@ -78,6 +85,13 @@ export const protectedRoutes = [
   { path: "/finances/insights", element: wrapWithLayout(BusinessInsights) },
   { path: "/finances/reports", element: wrapWithLayout(FinancialReports) },
   { path: "/marketing/templates", element: wrapWithLayout(MarketingTemplates) },
+  
+  // Client management routes
+  { path: "/clients", element: wrapWithLayout(ClientsPage) },
+  { path: "/clients/new", element: wrapWithLayout(NewClientPage) },
+  { path: "/clients/:id", element: wrapWithLayout(ClientDetailPage) },
+  { path: "/clients/edit/:id", element: wrapWithLayout(EditClientPage) },
+  { path: "/clients/:id/activity/new", element: wrapWithLayout(NewActivityPage) },
 ];
 
 // Fallback route for non-existent paths
