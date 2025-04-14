@@ -170,18 +170,6 @@ const ClientForm = ({ initialData, onSubmit, isSubmitting }: ClientFormProps) =>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="birthday">תאריך לידה</Label>
-              <Input
-                id="birthday"
-                name="birthday"
-                type="date"
-                dir="ltr"
-                value={formData.birthday?.split('T')[0] || ''}
-                onChange={handleChange}
-              />
-            </div>
-
-            <div className="space-y-2">
               <Label htmlFor="gender">מגדר</Label>
               <Select
                 name="gender"
