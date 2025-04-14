@@ -122,7 +122,7 @@ const ClientForm = ({ initialData, onSubmit, isSubmitting }: ClientFormProps) =>
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} className="rtl">
       <Card className="mb-6">
         <CardHeader>
           <CardTitle>פרטים אישיים</CardTitle>
@@ -130,7 +130,7 @@ const ClientForm = ({ initialData, onSubmit, isSubmitting }: ClientFormProps) =>
         </CardHeader>
         <CardContent className="space-y-5">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            <div className="space-y-2">
+            <div className="space-y-2 text-right">
               <Label htmlFor="full_name">שם מלא *</Label>
               <Input
                 id="full_name"
@@ -139,10 +139,11 @@ const ClientForm = ({ initialData, onSubmit, isSubmitting }: ClientFormProps) =>
                 required
                 value={formData.full_name}
                 onChange={handleChange}
+                className="text-right"
               />
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2 text-right">
               <Label htmlFor="phone_number">מספר טלפון *</Label>
               <Input
                 id="phone_number"
@@ -152,10 +153,11 @@ const ClientForm = ({ initialData, onSubmit, isSubmitting }: ClientFormProps) =>
                 dir="ltr"
                 value={formData.phone_number}
                 onChange={handleChange}
+                className="text-left"
               />
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2 text-right">
               <Label htmlFor="email">אימייל *</Label>
               <Input
                 id="email"
@@ -166,10 +168,11 @@ const ClientForm = ({ initialData, onSubmit, isSubmitting }: ClientFormProps) =>
                 dir="ltr"
                 value={formData.email}
                 onChange={handleChange}
+                className="text-left"
               />
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2 text-right">
               <Label htmlFor="birthday">תאריך לידה</Label>
               <Input
                 id="birthday"
@@ -178,17 +181,18 @@ const ClientForm = ({ initialData, onSubmit, isSubmitting }: ClientFormProps) =>
                 dir="ltr"
                 value={formData.birthday?.split('T')[0] || ''}
                 onChange={handleChange}
+                className="text-left"
               />
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2 text-right">
               <Label htmlFor="gender">מגדר</Label>
               <Select
                 name="gender"
                 value={formData.gender || ''}
                 onValueChange={value => handleSelectChange('gender', value)}
               >
-                <SelectTrigger>
+                <SelectTrigger className="text-right">
                   <SelectValue placeholder="בחר מגדר" />
                 </SelectTrigger>
                 <SelectContent>
@@ -201,7 +205,7 @@ const ClientForm = ({ initialData, onSubmit, isSubmitting }: ClientFormProps) =>
               </Select>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2 text-right">
               <Label htmlFor="status">סטטוס *</Label>
               <Select
                 name="status"
@@ -209,7 +213,7 @@ const ClientForm = ({ initialData, onSubmit, isSubmitting }: ClientFormProps) =>
                 onValueChange={value => handleSelectChange('status', value)}
                 required
               >
-                <SelectTrigger>
+                <SelectTrigger className="text-right">
                   <SelectValue placeholder="בחר סטטוס" />
                 </SelectTrigger>
                 <SelectContent>
@@ -222,14 +226,14 @@ const ClientForm = ({ initialData, onSubmit, isSubmitting }: ClientFormProps) =>
               </Select>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2 text-right">
               <Label htmlFor="assigned_rep">נציג מטפל</Label>
               <Select
                 name="assigned_rep"
                 value={formData.assigned_rep || ''}
                 onValueChange={value => handleSelectChange('assigned_rep', value)}
               >
-                <SelectTrigger>
+                <SelectTrigger className="text-right">
                   <SelectValue placeholder="בחר נציג מטפל" />
                 </SelectTrigger>
                 <SelectContent>
@@ -244,7 +248,7 @@ const ClientForm = ({ initialData, onSubmit, isSubmitting }: ClientFormProps) =>
               </Select>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2 text-right">
               <Label htmlFor="registration_date">תאריך הצטרפות</Label>
               <Input
                 id="registration_date"
@@ -253,11 +257,12 @@ const ClientForm = ({ initialData, onSubmit, isSubmitting }: ClientFormProps) =>
                 dir="ltr"
                 value={formData.registration_date?.split('T')[0] || ''}
                 onChange={handleChange}
+                className="text-left"
               />
             </div>
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-2 text-right">
             <Label htmlFor="notes">הערות</Label>
             <Textarea
               id="notes"
@@ -266,29 +271,30 @@ const ClientForm = ({ initialData, onSubmit, isSubmitting }: ClientFormProps) =>
               value={formData.notes || ''}
               onChange={handleChange}
               rows={4}
+              className="text-right"
             />
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-3 text-right">
             <Label>תגיות</Label>
-            <div className="flex">
+            <div className="flex flex-row-reverse">
               <Input
                 placeholder="הוסף תגית ולחץ Enter"
                 value={tagInput}
                 onChange={e => setTagInput(e.target.value)}
                 onKeyDown={handleAddTag}
-                className="rounded-r-none"
+                className="rounded-l-none text-right"
               />
               <Button 
                 type="button" 
                 onClick={handleAddTagButton}
-                className="rounded-l-none"
+                className="rounded-r-none"
               >
                 <Plus className="size-4" />
               </Button>
             </div>
 
-            <div className="flex flex-wrap gap-2 mt-2">
+            <div className="flex flex-wrap gap-2 mt-2 justify-end">
               {formData.tags?.map(tag => (
                 <Badge key={tag} variant="soft" className="flex gap-1 items-center">
                   {tag}
@@ -317,3 +323,4 @@ const ClientForm = ({ initialData, onSubmit, isSubmitting }: ClientFormProps) =>
 };
 
 export default ClientForm;
+
