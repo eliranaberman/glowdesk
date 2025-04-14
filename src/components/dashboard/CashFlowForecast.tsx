@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowRight, TrendingUp, Calendar, AlertTriangle, DollarSign } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { format } from 'date-fns';
 
 interface CashFlowForecastProps {
   activeRange?: 'day' | 'week' | 'month';
@@ -24,13 +25,13 @@ const CashFlowForecast = ({ activeRange = 'week' }: CashFlowForecastProps) => {
         ];
       case 'week':
         return [
-          { date: '04/08', income: 850, expenses: 300, profit: 550, projected: false },
-          { date: '04/09', income: 920, expenses: 320, profit: 600, projected: false },
-          { date: '04/10', income: 760, expenses: 290, profit: 470, projected: true },
-          { date: '04/11', income: 650, expenses: 290, profit: 360, projected: true, note: "פסח - תנועה נמוכה" },
-          { date: '04/12', income: 450, expenses: 290, profit: 160, projected: true, note: "חג" },
-          { date: '04/13', income: 350, expenses: 200, profit: 150, projected: true, note: "שבת" },
-          { date: '04/14', income: 820, expenses: 310, profit: 510, projected: true },
+          { date: '08/04', income: 850, expenses: 300, profit: 550, projected: false },
+          { date: '09/04', income: 920, expenses: 320, profit: 600, projected: false },
+          { date: '10/04', income: 760, expenses: 290, profit: 470, projected: true },
+          { date: '11/04', income: 650, expenses: 290, profit: 360, projected: true, note: "פסח - תנועה נמוכה" },
+          { date: '12/04', income: 450, expenses: 290, profit: 160, projected: true, note: "חג" },
+          { date: '13/04', income: 350, expenses: 200, profit: 150, projected: true, note: "שבת" },
+          { date: '14/04', income: 820, expenses: 310, profit: 510, projected: true },
         ];
       case 'month':
         return [
@@ -42,13 +43,13 @@ const CashFlowForecast = ({ activeRange = 'week' }: CashFlowForecastProps) => {
         ];
       default:
         return [
-          { date: '04/08', income: 850, expenses: 300, profit: 550, projected: false },
-          { date: '04/09', income: 920, expenses: 320, profit: 600, projected: false },
-          { date: '04/10', income: 760, expenses: 290, profit: 470, projected: true },
-          { date: '04/11', income: 650, expenses: 290, profit: 360, projected: true },
-          { date: '04/12', income: 450, expenses: 290, profit: 160, projected: true },
-          { date: '04/13', income: 350, expenses: 200, profit: 150, projected: true },
-          { date: '04/14', income: 820, expenses: 310, profit: 510, projected: true },
+          { date: '08/04', income: 850, expenses: 300, profit: 550, projected: false },
+          { date: '09/04', income: 920, expenses: 320, profit: 600, projected: false },
+          { date: '10/04', income: 760, expenses: 290, profit: 470, projected: true },
+          { date: '11/04', income: 650, expenses: 290, profit: 360, projected: true },
+          { date: '12/04', income: 450, expenses: 290, profit: 160, projected: true },
+          { date: '13/04', income: 350, expenses: 200, profit: 150, projected: true },
+          { date: '14/04', income: 820, expenses: 310, profit: 510, projected: true },
         ];
     }
   };
@@ -65,7 +66,7 @@ const CashFlowForecast = ({ activeRange = 'week' }: CashFlowForecastProps) => {
       case 'week':
         return [
           { id: '1', name: 'שכר דירה', date: '10/04/2025', amount: '₪3,500' },
-          { id: '2', name: 'שכר עובדים', date: '05/04/2025', amount: '₪4,200' },
+          { id: '2', name: '��כר עובדים', date: '05/04/2025', amount: '₪4,200' },
           { id: '3', name: 'הזמנת מלאי', date: '12/04/2025', amount: '₪1,800' },
         ];
       case 'month':
