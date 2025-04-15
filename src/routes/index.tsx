@@ -40,6 +40,9 @@ import NewClientPage from "@/pages/clients/NewClientPage";
 import EditClientPage from "@/pages/clients/EditClientPage";
 import NewActivityPage from "@/pages/clients/NewActivityPage";
 
+// Marketing pages
+import MarketingPage from "@/pages/marketing/MarketingPage";
+
 // Auth routes - accessible without authentication
 export const authRoutes = [
   { path: "/login", element: <Login /> },
@@ -84,6 +87,9 @@ export const protectedRoutes = [
   { path: "/finances/cash-flow", element: wrapWithLayout(CashFlow) },
   { path: "/finances/insights", element: wrapWithLayout(BusinessInsights) },
   { path: "/finances/reports", element: wrapWithLayout(FinancialReports) },
+  
+  // Marketing routes
+  { path: "/marketing", element: wrapWithLayout(MarketingPage) },
   { path: "/marketing/templates", element: wrapWithLayout(MarketingTemplates) },
   
   // Client management routes

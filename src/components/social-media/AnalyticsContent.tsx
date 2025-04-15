@@ -1,306 +1,318 @@
-import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BarChart, LineChart, PieChart } from "lucide-react";
-import { ResponsiveContainer, BarChart as RechartsBarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, LineChart as RechartsLineChart, Line, PieChart as RechartsPieChart, Pie, Cell } from "recharts";
 
-interface AnalyticsData {
-  followers: { name: string; count: number }[];
-  engagement: { name: string; rate: number }[];
-  posts: { name: string; count: number }[];
-  colors: {
-    primary: string;
-    secondary: string;
-    tertiary: string;
-  };
-}
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { AreaChart, Area, BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import { MarketingStats } from "@/types/marketing";
+import { Loader2 } from "lucide-react";
 
 interface AnalyticsContentProps {
-  analyticsData?: AnalyticsData;
+  analyticsData: {
+    followers: { name: string; count: number }[];
+    engagement: { name: string; rate: number }[];
+    posts: { name: string; count: number }[];
+    colors: {
+      primary: string;
+      secondary: string;
+      tertiary: string;
+    };
+  };
+  marketingStats: MarketingStats | null;
+  isLoading: boolean;
 }
 
-const AnalyticsContent = ({ analyticsData }: AnalyticsContentProps) => {
-  const [selectedPlatform, setSelectedPlatform] = useState<string>("all");
-
-  const colors = {
-    primary: "#606c38",
-    secondary: "#e07a5f",
-    tertiary: "#ddbea9",
-    income: "#606c38",
-    expenses: "#e07a5f",
-    profit: "#ddbea9"
-  };
-
-  const platformData = [
-    { name: "Instagram", followers: 1250, engagement: 7.5, posts: 45, color: colors.income },
-    { name: "Facebook", followers: 950, engagement: 5.2, posts: 35, color: colors.expenses },
-    { name: "TikTok", followers: 720, engagement: 8.3, posts: 28, color: colors.profit },
-    { name: "Twitter", followers: 520, engagement: 4.1, posts: 25, color: "#90BE6D" }
-  ];
-
-  const followerGrowthData = analyticsData?.followers || [
-    { name: "ינואר", count: 320 },
-    { name: "פברואר", count: 350 },
-    { name: "מרץ", count: 410 },
-    { name: "אפריל", count: 490 },
-    { name: "מאי", count: 550 },
-    { name: "יוני", count: 590 },
-  ];
-
-  const engagementRateData = analyticsData?.engagement || [
-    { name: "ינואר", rate: 5.2 },
-    { name: "פברואר", rate: 5.8 },
-    { name: "מרץ", rate: 6.5 },
-    { name: "אפריל", rate: 7.2 },
-    { name: "מאי", rate: 8.0 },
-    { name: "יוני", rate: 8.5 },
-  ];
-
-  const postFrequencyData = analyticsData?.posts || [
-    { name: "ינואר", count: 10 },
-    { name: "פברואר", count: 12 },
-    { name: "מרץ", count: 14 },
-    { name: "אפריל", count: 15 },
-    { name: "מאי", count: 18 },
-    { name: "יוני", count: 16 },
-  ];
-
-  const topContent = [
-    {
-      id: 1,
-      title: "טיפים לשמירה על לק ג'ל",
-      platform: "Instagram",
-      engagement: 245,
-      date: "15/6/2025",
-    },
-    {
-      id: 2,
-      title: "עיצובי קיץ חדשים",
-      platform: "Facebook",
-      engagement: 198,
-      date: "02/6/2025",
-    },
-    {
-      id: 3,
-      title: "מבצע מיוחד לחג",
-      platform: "Instagram",
-      engagement: 172,
-      date: "10/5/2025",
-    },
-  ];
-
-  const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, index, name }: any) => {
-    const RADIAN = Math.PI / 180;
-    const radius = outerRadius * 1.6;
-    const x = cx + radius * Math.cos(-midAngle * RADIAN);
-    const y = cy + radius * Math.sin(-midAngle * RADIAN);
-
-    const lineX1 = cx + (outerRadius + 3) * Math.cos(-midAngle * RADIAN);
-    const lineY1 = cy + (outerRadius + 3) * Math.sin(-midAngle * RADIAN);
-    const lineX2 = cx + (radius - 15) * Math.cos(-midAngle * RADIAN);
-    const lineY2 = cy + (radius - 15) * Math.sin(-midAngle * RADIAN);
-
-    const textAdjustX = name.length > 6 ? (x > cx ? 10 : -10) : 0;
-    const textAdjustY = 0;
-
-    return (
-      <g>
-        <line
-          x1={lineX1}
-          y1={lineY1}
-          x2={lineX2}
-          y2={lineY2}
-          stroke={platformData[index].color}
-          strokeWidth={1.5}
-        />
-        <text 
-          x={x + textAdjustX} 
-          y={y + textAdjustY} 
-          fill={platformData[index].color}
-          textAnchor={x > cx ? 'start' : 'end'}
-          dominantBaseline="central"
-          className="text-sm font-bold"
-          style={{ 
-            textShadow: '0px 0px 3px rgba(255,255,255,0.9)', 
-            letterSpacing: '0.5px'
-          }}
-        >
-          {name}
-        </text>
-      </g>
-    );
-  };
-
+const AnalyticsContent = ({ analyticsData, marketingStats, isLoading }: AnalyticsContentProps) => {
   return (
-    <div className="space-y-6" dir="rtl">
-      <div className="grid gap-4 md:grid-cols-4">
-        {platformData.map((platform) => (
-          <Card key={platform.name} className={`${selectedPlatform === platform.name.toLowerCase() ? 'ring-2 ring-primary' : ''}`}>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-base">{platform.name}</CardTitle>
+    <div className="space-y-6">
+      <Tabs defaultValue="social">
+        <TabsList className="grid w-full grid-cols-2 mb-6">
+          <TabsTrigger value="marketing">נתוני שיווק</TabsTrigger>
+          <TabsTrigger value="social">מדיה חברתית</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="social" className="space-y-6">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  סה"כ עוקבים
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{analyticsData.followers[analyticsData.followers.length - 1].count}</div>
+                <p className="text-xs text-muted-foreground">
+                  +{analyticsData.followers[analyticsData.followers.length - 1].count - analyticsData.followers[analyticsData.followers.length - 2].count} מהחודש הקודם
+                </p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  אחוז מעורבות
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">
+                  {analyticsData.engagement[analyticsData.engagement.length - 1].rate}%
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  +{(analyticsData.engagement[analyticsData.engagement.length - 1].rate - analyticsData.engagement[analyticsData.engagement.length - 2].rate).toFixed(1)}% מהחודש הקודם
+                </p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  פוסטים
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{analyticsData.posts[analyticsData.posts.length - 1].count}</div>
+                <p className="text-xs text-muted-foreground">
+                  {analyticsData.posts[analyticsData.posts.length - 1].count > analyticsData.posts[analyticsData.posts.length - 2].count ? "+" : ""}
+                  {analyticsData.posts[analyticsData.posts.length - 1].count - analyticsData.posts[analyticsData.posts.length - 2].count} מהחודש הקודם
+                </p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  תגובות חודשיות
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">428</div>
+                <p className="text-xs text-muted-foreground">
+                  +24 מהחודש הקודם
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2">
+            <Card className="col-span-1">
+              <CardHeader>
+                <CardTitle>עוקבים לאורך זמן</CardTitle>
+                <CardDescription>
+                  מגמת הגידול במספר העוקבים בחצי השנה האחרונה
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="pt-2">
+                <div className="h-[300px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart
+                      data={analyticsData.followers}
+                      margin={{
+                        top: 10,
+                        right: 30,
+                        left: 0,
+                        bottom: 0,
+                      }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                      <XAxis dataKey="name" />
+                      <YAxis />
+                      <Tooltip formatter={(value) => [`${value} עוקבים`, 'סה"כ']} />
+                      <Area type="monotone" dataKey="count" stroke={analyticsData.colors.primary} fill={analyticsData.colors.primary} fillOpacity={0.2} />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="col-span-1">
+              <CardHeader>
+                <CardTitle>אחוזי מעורבות</CardTitle>
+                <CardDescription>
+                  אחוז המעורבות של העוקבים בחצי השנה האחרונה
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="pt-2">
+                <div className="h-[300px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart
+                      data={analyticsData.engagement}
+                      margin={{
+                        top: 10,
+                        right: 30,
+                        left: 0,
+                        bottom: 0,
+                      }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                      <XAxis dataKey="name" />
+                      <YAxis />
+                      <Tooltip formatter={(value) => [`${value}%`, 'אחוז מעורבות']} />
+                      <Line type="monotone" dataKey="rate" stroke={analyticsData.colors.secondary} strokeWidth={2} />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          <Card className="col-span-2">
+            <CardHeader>
+              <CardTitle>ניתוח פוסטים לפי חודש</CardTitle>
+              <CardDescription>
+                כמות הפוסטים שפורסמו בכל חודש
+              </CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">עוקבים:</span>
-                  <span className="font-medium">{platform.followers}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">אחוז מעורבות:</span>
-                  <span className="font-medium">{platform.engagement}%</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">פוסטים:</span>
-                  <span className="font-medium">{platform.posts}</span>
-                </div>
+            <CardContent className="pt-2">
+              <div className="h-[300px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={analyticsData.posts}
+                    margin={{
+                      top: 10,
+                      right: 30,
+                      left: 0,
+                      bottom: 0,
+                    }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip formatter={(value) => [`${value} פוסטים`, 'כמות']} />
+                    <Bar dataKey="count" fill={analyticsData.colors.tertiary} />
+                  </BarChart>
+                </ResponsiveContainer>
               </div>
             </CardContent>
           </Card>
-        ))}
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>גידול במספר העוקבים</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <RechartsLineChart data={followerGrowthData}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <Tooltip labelFormatter={(label) => `חודש: ${label}`} formatter={(value) => [`${value} עוקבים`, ``]} />
-                  <Line 
-                    type="monotone" 
-                    dataKey="count" 
-                    name="מספר עוקבים"
-                    stroke={colors.income}
-                    activeDot={{ r: 8 }} 
-                    strokeWidth={2}
-                  />
-                </RechartsLineChart>
-              </ResponsiveContainer>
+        </TabsContent>
+        
+        <TabsContent value="marketing" className="space-y-6">
+          {isLoading ? (
+            <div className="flex justify-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>אחוזי מעורבות</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <RechartsBarChart data={engagementRateData}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <Tooltip labelFormatter={(label) => `חודש: ${label}`} formatter={(value) => [`${value}%`, ``]} />
-                  <Bar 
-                    dataKey="rate" 
-                    name="אחוז מעורבות"
-                    fill={colors.expenses}
-                    radius={[4, 4, 0, 0]}
-                    fillOpacity={0.7}
-                  />
-                </RechartsBarChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>תדירות פרסום</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <RechartsBarChart data={postFrequencyData}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <Tooltip labelFormatter={(label) => `חודש: ${label}`} formatter={(value) => [`${value} פוסטים`, ``]} />
-                  <Bar 
-                    dataKey="count" 
-                    name="מספר פוסטים"
-                    fill={colors.profit}
-                    radius={[4, 4, 0, 0]}
-                    fillOpacity={0.7}
-                  />
-                </RechartsBarChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>התפלגות לפי פלטפורמה</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="h-[400px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <RechartsPieChart>
-                  <Pie
-                    data={platformData}
-                    dataKey="followers"
-                    nameKey="name"
-                    cx="50%"
-                    cy="50%"
-                    outerRadius={90}
-                    fill="#8884d8"
-                    labelLine={false}
-                    label={renderCustomizedLabel}
-                  >
-                    {platformData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip formatter={(value) => [`${value} עוקבים`, '']} />
-                  <Legend layout="horizontal" verticalAlign="bottom" align="center" />
-                </RechartsPieChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>תוכן מצליח במיוחד</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {topContent.map((content) => (
-              <div
-                key={content.id}
-                className="flex items-center justify-between p-3 border rounded-lg"
-              >
-                <div className="flex items-center">
-                  <div className="w-10 h-10 bg-accent rounded-full flex items-center justify-center ml-3">
-                    <span className="text-sm font-medium">{content.platform.charAt(0)}</span>
-                  </div>
-                  <div>
-                    <p className="font-medium">{content.title}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {content.platform} • {content.date}
+          ) : (
+            <>
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">
+                      סה"כ קמפיינים
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{marketingStats?.total_campaigns || 0}</div>
+                    <p className="text-xs text-muted-foreground">
+                      {marketingStats?.monthly_stats[5].campaigns || 0} בחודש האחרון
                     </p>
-                  </div>
-                </div>
-                <div className="text-left">
-                  <p className="font-semibold text-primary">{content.engagement}</p>
-                  <p className="text-xs text-muted-foreground">אינטראקציות</p>
-                </div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">
+                      הודעות שנשלחו
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{marketingStats?.total_messages || 0}</div>
+                    <p className="text-xs text-muted-foreground">
+                      {marketingStats?.monthly_stats[5].messages || 0} בחודש האחרון
+                    </p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">
+                      אחוז פתיחה
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">
+                      {marketingStats && marketingStats.monthly_stats[5].messages > 0
+                        ? Math.round((marketingStats.monthly_stats[5].opens / marketingStats.monthly_stats[5].messages) * 100)
+                        : 0}%
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      בחודש האחרון
+                    </p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">
+                      קופונים פעילים
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{marketingStats?.active_coupons || 0}</div>
+                    <p className="text-xs text-muted-foreground">
+                      {marketingStats?.redeemed_coupons || 0} מומשו
+                    </p>
+                  </CardContent>
+                </Card>
               </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+
+              <div className="grid gap-4 md:grid-cols-2">
+                <Card className="col-span-1">
+                  <CardHeader>
+                    <CardTitle>קמפיינים לפי חודש</CardTitle>
+                    <CardDescription>
+                      מספר הקמפיינים שנוצרו בכל חודש
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="pt-2">
+                    <div className="h-[300px]">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart
+                          data={marketingStats?.monthly_stats || []}
+                          margin={{
+                            top: 10,
+                            right: 30,
+                            left: 0,
+                            bottom: 0,
+                          }}
+                        >
+                          <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                          <XAxis dataKey="month" />
+                          <YAxis />
+                          <Tooltip formatter={(value) => [`${value} קמפיינים`, 'מספר']} />
+                          <Bar dataKey="campaigns" fill={analyticsData.colors.primary} />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card className="col-span-1">
+                  <CardHeader>
+                    <CardTitle>אנליטיקת הודעות</CardTitle>
+                    <CardDescription>
+                      סטטיסטיקות הודעות בחצי השנה האחרונה
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="pt-2">
+                    <div className="h-[300px]">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <LineChart
+                          data={marketingStats?.monthly_stats || []}
+                          margin={{
+                            top: 10,
+                            right: 30,
+                            left: 0,
+                            bottom: 0,
+                          }}
+                        >
+                          <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                          <XAxis dataKey="month" />
+                          <YAxis />
+                          <Tooltip />
+                          <Legend />
+                          <Line type="monotone" dataKey="messages" stroke={analyticsData.colors.primary} name="הודעות" />
+                          <Line type="monotone" dataKey="opens" stroke={analyticsData.colors.secondary} name="נפתחו" />
+                          <Line type="monotone" dataKey="clicks" stroke={analyticsData.colors.tertiary} name="לחיצות" />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </>
+          )}
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

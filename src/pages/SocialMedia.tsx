@@ -1,7 +1,8 @@
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, Loader2 } from "lucide-react";
 import DashboardContent from "@/components/social-media/DashboardContent";
 import InboxContent from "@/components/social-media/InboxContent";
 import PostCreationPanel from "@/components/social-media/PostCreationPanel";
@@ -9,6 +10,10 @@ import AnalyticsContent from "@/components/social-media/AnalyticsContent";
 import ConnectionModal from "@/components/social-media/ConnectionModal";
 import AIMarketingTools from "@/components/social-media/AIMarketingTools";
 import { ConnectedAccountsMap } from "@/components/social-media/types";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
+import { getMarketingStats } from "@/services/marketingService";
+import { MarketingStats } from "@/types/marketing";
 
 const SocialMedia = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -19,6 +24,10 @@ const SocialMedia = () => {
     twitter: false,
     tiktok: false,
   });
+  const [marketingStats, setMarketingStats] = useState<MarketingStats | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
+  const { toast } = useToast();
 
   // Mock data for demonstration purposes
   const messages = [
@@ -84,6 +93,28 @@ const SocialMedia = () => {
     }
   };
 
+  useEffect(() => {
+    const loadMarketingStats = async () => {
+      if (activeTab === "dashboard" || activeTab === "analytics") {
+        try {
+          setIsLoading(true);
+          const stats = await getMarketingStats();
+          setMarketingStats(stats);
+        } catch (error) {
+          console.error("Error loading marketing stats:", error);
+          toast({
+            title: "שגיאה בטעינת נתוני שיווק",
+            description: "אירעה שגיאה בטעינת הנתונים, אנא נסה שנית"
+          });
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    loadMarketingStats();
+  }, [activeTab, toast]);
+
   const connectPlatform = (platform: string) => {
     // Toggle the connection state for the platform
     setConnectedAccounts(prev => ({
@@ -97,6 +128,37 @@ const SocialMedia = () => {
     setActiveTab("inbox");
   };
 
+  const handleButtonAction = () => {
+    switch (activeTab) {
+      case "dashboard":
+        setIsConnectionModalOpen(true);
+        break;
+      case "inbox":
+        // Open reply modal or mark as read
+        break;
+      case "posts":
+        navigate("/social-media/create-post");
+        break;
+      case "analytics":
+        navigate("/marketing");
+        break;
+      case "ai-tools":
+        navigate("/social-media/ai-generate");
+        break;
+    }
+  };
+
+  const getButtonText = () => {
+    switch (activeTab) {
+      case "dashboard": return "חבר חשבון";
+      case "inbox": return "סמן הכל כנקרא";
+      case "posts": return "פוסט חדש";
+      case "analytics": return "דשבורד שיווק";
+      case "ai-tools": return "צור תוכן עם AI";
+      default: return "פעולה";
+    }
+  };
+
   return (
     <div className="space-y-6" dir="rtl">
       <div className="flex justify-between items-center">
@@ -104,10 +166,10 @@ const SocialMedia = () => {
           variant="soft" 
           size="sm" 
           className="flex items-center gap-1"
-          onClick={() => setIsConnectionModalOpen(true)}
+          onClick={handleButtonAction}
         >
           <Plus size={16} />
-          חבר חשבון
+          {getButtonText()}
         </Button>
         <h1 className="text-2xl font-medium text-center mx-auto">מדיה חברתית ושיווק</h1>
         <div className="w-[85px]" /> {/* Spacer for visual balance */}
@@ -128,6 +190,8 @@ const SocialMedia = () => {
             connectPlatform={connectPlatform}
             handleOpenInbox={handleOpenInbox}
             messages={messages}
+            marketingStats={marketingStats}
+            isLoading={isLoading}
           />
         </TabsContent>
 
@@ -140,7 +204,11 @@ const SocialMedia = () => {
         </TabsContent>
 
         <TabsContent value="analytics">
-          <AnalyticsContent analyticsData={analyticsData} />
+          <AnalyticsContent 
+            analyticsData={analyticsData} 
+            marketingStats={marketingStats}
+            isLoading={isLoading}
+          />
         </TabsContent>
         
         <TabsContent value="ai-tools">

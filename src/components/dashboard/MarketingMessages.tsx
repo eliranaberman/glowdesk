@@ -1,28 +1,105 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Mail, MessageSquare, Send, PlusCircle, ArrowRight } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Mail, MessageSquare, Send, PlusCircle, ArrowRight, Loader2 } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
+import { getTemplates, getCampaigns, sendCampaign } from '@/services/marketingService';
+import { MarketingTemplate, MarketingCampaign } from '@/types/marketing';
+import { format } from 'date-fns';
 
 const MarketingMessages = () => {
   const [activeTab, setActiveTab] = useState('templates');
+  const [templates, setTemplates] = useState<MarketingTemplate[]>([]);
+  const [campaigns, setCampaigns] = useState<MarketingCampaign[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSending, setIsSending] = useState<Record<string, boolean>>({});
   const { toast } = useToast();
+  const navigate = useNavigate();
 
-  const handleSendToAll = () => {
-    toast({
-      title: "פעולה הושלמה",
-      description: "ההודעה נשלחה לכל הלקוחות בהצלחה!",
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setIsLoading(true);
+        if (activeTab === 'templates') {
+          const templateData = await getTemplates();
+          setTemplates(templateData.slice(0, 4)); // Limit to 4 for dashboard
+        } else if (activeTab === 'campaigns') {
+          const campaignData = await getCampaigns();
+          setCampaigns(campaignData.slice(0, 3)); // Limit to 3 for dashboard
+        }
+      } catch (error) {
+        console.error(`Error loading ${activeTab}:`, error);
+        toast({
+          title: `שגיאה בטעינת ${activeTab === 'templates' ? 'תבניות' : 'קמפיינים'}`,
+          description: 'אירעה שגיאה בטעינת הנתונים, אנא נסה שנית',
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadData();
+  }, [activeTab, toast]);
+
+  const handleSendTemplate = (templateId: string, templateName: string) => {
+    navigate('/marketing/campaigns/new', { 
+      state: { templateId }
     });
   };
 
+  const handleSendToAll = () => {
+    navigate('/marketing/campaigns/new');
+  };
+
   const handleCreate = () => {
-    toast({
-      title: "יצירת תבנית חדשה",
-      description: "המערכת מעבירה אותך לעמוד יצירת תבנית חדשה...",
-    });
+    navigate('/marketing/templates/new');
+  };
+  
+  const handleSendCampaign = async (campaign: MarketingCampaign) => {
+    if (campaign.status === 'sent') {
+      toast({
+        title: "הקמפיין כבר נשלח",
+        description: "לא ניתן לשלוח קמפיין שכבר נשלח",
+      });
+      return;
+    }
+    
+    if (window.confirm(`האם אתה בטוח שברצונך לשלוח את הקמפיין "${campaign.name}" עכשיו?`)) {
+      try {
+        setIsSending(prev => ({ ...prev, [campaign.id]: true }));
+        await sendCampaign(campaign.id);
+        
+        // Update the campaign status in the UI
+        setCampaigns(campaigns.map(c => 
+          c.id === campaign.id ? { ...c, status: 'sent' as const } : c
+        ));
+        
+        toast({
+          title: "הקמפיין נשלח בהצלחה",
+          description: "ההודעות נשלחות ללקוחות הנבחרים",
+        });
+      } catch (error) {
+        console.error('Error sending campaign:', error);
+        toast({
+          title: "שגיאה בשליחת הקמפיין",
+          description: "אירעה שגיאה בשליחת הקמפיין, אנא נסה שנית",
+          variant: "destructive",
+        });
+      } finally {
+        setIsSending(prev => ({ ...prev, [campaign.id]: false }));
+      }
+    }
+  };
+  
+  const formatDate = (dateString: string) => {
+    try {
+      return format(new Date(dateString), 'dd/MM/yyyy');
+    } catch (error) {
+      return 'תאריך לא תקין';
+    }
   };
 
   return (
@@ -35,9 +112,9 @@ const MarketingMessages = () => {
               הודעות שיווקיות
             </CardTitle>
           </div>
-          <Link to="/marketing/templates">
+          <Link to="/marketing">
             <Button variant="ghost" size="sm" className="gap-1">
-              לכל התבניות
+              לדשבורד שיווק
               <ArrowRight className="h-4 w-4 mr-1" />
             </Button>
           </Link>
@@ -52,23 +129,42 @@ const MarketingMessages = () => {
           </TabsList>
 
           <TabsContent value="templates" className="space-y-4">
-            <div className="grid gap-3">
-              {["תזכורת לתור", "הצעה מיוחדת", "יום הולדת", "חגים"].map((template) => (
-                <div
-                  key={template}
-                  className="flex items-center justify-between p-3 border rounded-lg hover:bg-accent/10 transition-colors"
-                >
-                  <Button variant="soft" size="sm" className="flex items-center gap-1">
-                    <Send className="h-3.5 w-3.5" />
-                    שלח
-                  </Button>
-                  <div className="flex items-center">
-                    <Mail className="h-4 w-4 text-muted-foreground ml-2" />
-                    <span>{template}</span>
+            {isLoading ? (
+              <div className="flex justify-center py-8">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              </div>
+            ) : templates.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                <p>אין תבניות עדיין</p>
+                <Button onClick={handleCreate} variant="outline" className="mt-4 flex items-center gap-1">
+                  <PlusCircle className="h-4 w-4 ml-1" />
+                  יצירת תבנית חדשה
+                </Button>
+              </div>
+            ) : (
+              <div className="grid gap-3">
+                {templates.map((template) => (
+                  <div
+                    key={template.id}
+                    className="flex items-center justify-between p-3 border rounded-lg hover:bg-accent/10 transition-colors"
+                  >
+                    <Button 
+                      variant="soft" 
+                      size="sm" 
+                      className="flex items-center gap-1"
+                      onClick={() => handleSendTemplate(template.id, template.title)}
+                    >
+                      <Send className="h-3.5 w-3.5" />
+                      שלח
+                    </Button>
+                    <div className="flex items-center">
+                      <Mail className="h-4 w-4 text-muted-foreground ml-2" />
+                      <span>{template.title}</span>
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
 
             <div className="flex flex-col sm:flex-row gap-2 pt-2 justify-end">
               <Button onClick={handleCreate} variant="outline" className="flex items-center gap-1 order-first sm:order-first">
@@ -76,37 +172,73 @@ const MarketingMessages = () => {
                 יצירת תבנית חדשה
               </Button>
               <Button onClick={handleSendToAll} className="order-last sm:order-last">
-                שליחת הודעה לכל הלקוחות
+                יצירת קמפיין חדש
               </Button>
             </div>
           </TabsContent>
 
           <TabsContent value="campaigns" className="space-y-4">
-            <div className="space-y-3">
-              {[
-                { name: "הנחה לחג פסח", date: "15/03/2025", opened: "68%", clicks: "42%" },
-                { name: "תזכורת לקוחות לא פעילים", date: "02/03/2025", opened: "55%", clicks: "28%" },
-                { name: "השקת מוצרים חדשים", date: "18/02/2025", opened: "72%", clicks: "38%" }
-              ].map((campaign) => (
-                <div
-                  key={campaign.name}
-                  className="p-3 border rounded-lg hover:bg-accent/10 transition-colors"
+            {isLoading ? (
+              <div className="flex justify-center py-8">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              </div>
+            ) : campaigns.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                <p>אין קמפיינים עדיין</p>
+                <Button 
+                  variant="outline" 
+                  className="mt-4"
+                  onClick={() => navigate('/marketing/campaigns/new')}
                 >
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-muted-foreground text-xs">{campaign.date}</span>
-                    <span className="font-medium">{campaign.name}</span>
+                  יצירת קמפיין חדש
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {campaigns.map((campaign) => (
+                  <div
+                    key={campaign.id}
+                    className="p-3 border rounded-lg hover:bg-accent/10 transition-colors"
+                  >
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-muted-foreground text-xs">
+                        {campaign.status === 'sent' ? 'נשלח: ' : ''}
+                        {formatDate(campaign.created_at)}
+                      </span>
+                      <span className="font-medium">{campaign.name}</span>
+                    </div>
+                    <div className="flex justify-between text-xs text-muted-foreground">
+                      <span>סטטוס: {campaign.status === 'draft' ? 'טיוטה' : campaign.status === 'sent' ? 'נשלח' : campaign.status}</span>
+                      <span>הודעות: {campaign.messages_count || 0}</span>
+                      
+                      {campaign.status !== 'sent' && (
+                        <Button
+                          variant="soft"
+                          size="xs"
+                          disabled={isSending[campaign.id]}
+                          onClick={() => handleSendCampaign(campaign)}
+                        >
+                          {isSending[campaign.id] ? (
+                            <Loader2 className="h-3 w-3 animate-spin" />
+                          ) : (
+                            <Send className="h-3 w-3 ml-1" />
+                          )}
+                          שלח עכשיו
+                        </Button>
+                      )}
+                    </div>
                   </div>
-                  <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>אחוז לחיצות: {campaign.clicks}</span>
-                    <span>אחוז פתיחה: {campaign.opened}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
 
-            <Button variant="outline" className="w-full flex items-center gap-2">
+            <Button 
+              variant="outline" 
+              className="w-full flex items-center gap-2 mt-2"
+              onClick={() => navigate('/marketing')}
+            >
               <Mail className="h-4 w-4" />
-              צפייה בכל הקמפיינים הקודמים
+              לכל הקמפיינים
             </Button>
           </TabsContent>
         </Tabs>
