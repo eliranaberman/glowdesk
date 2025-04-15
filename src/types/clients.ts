@@ -31,7 +31,8 @@ export interface ClientActivity {
   client_id: string;
   type: ActivityType;
   description: string;
-  date: string;
+  date?: string;  // Made optional since it might not exist
+  created_at: string; // Added this field as it's likely to be present
   created_by: string;
   created_by_user?: {
     id: string;

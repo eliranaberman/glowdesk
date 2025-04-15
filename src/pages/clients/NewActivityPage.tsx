@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
@@ -95,6 +94,7 @@ const NewActivityPage = () => {
         type: formData.type as any,
         description: formData.description,
         date: fullDate,
+        created_at: new Date().toISOString(),
         created_by: user.id,
       });
       
@@ -116,65 +116,10 @@ const NewActivityPage = () => {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="flex flex-col items-center gap-2">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-r-transparent" />
-          <p className="text-muted-foreground">טוען פרטי לקוח...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="space-y-4">
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>שגיאה בטעינת פרטי הלקוח</AlertTitle>
-          <AlertDescription>
-            {error}
-          </AlertDescription>
-        </Alert>
-        <Button 
-          onClick={() => navigate('/clients')} 
-          variant="back" 
-          className="flex gap-2"
-        >
-          <ChevronRight className="h-4 w-4" />
-          חזרה לרשימת הלקוחות
-        </Button>
-      </div>
-    );
-  }
-
-  if (!client) {
-    return (
-      <div className="space-y-4">
-        <Alert>
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>לקוח לא נמצא</AlertTitle>
-          <AlertDescription>
-            לא נמצאו פרטי הלקוח המבוקש.
-          </AlertDescription>
-        </Alert>
-        <Button 
-          onClick={() => navigate('/clients')} 
-          variant="back" 
-          className="flex gap-2"
-        >
-          <ChevronRight className="h-4 w-4" />
-          חזרה לרשימת הלקוחות
-        </Button>
-      </div>
-    );
-  }
-
   return (
     <div>
       <Helmet>
-        <title>הוספת פעילות ל{client.full_name} | Chen Mizrahi</title>
+        <title>הוספת פעילות ל{client?.full_name || ''} | Chen Mizrahi</title>
       </Helmet>
 
       <Button 
@@ -189,74 +134,119 @@ const NewActivityPage = () => {
       <div className="mb-6">
         <h1 className="text-2xl font-bold mb-1">הוספת פעילות חדשה</h1>
         <p className="text-muted-foreground">
-          הוסף פעילות חדשה עבור {client.full_name}
+          הוסף פעילות חדשה עבור {client?.full_name || ''}
         </p>
       </div>
 
-      <form onSubmit={handleSubmit}>
-        <Card>
-          <CardHeader>
-            <CardTitle>פרטי הפעילות</CardTitle>
-            <CardDescription>הזן את פרטי הפעילות</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="type">סוג פעילות *</Label>
-              <Select
-                name="type"
-                value={formData.type}
-                onValueChange={value => handleSelectChange('type', value)}
-                required
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="בחר סוג פעילות" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    <SelectItem value="call">שיחת טלפון</SelectItem>
-                    <SelectItem value="message">הודעה</SelectItem>
-                    <SelectItem value="purchase">רכישה</SelectItem>
-                    <SelectItem value="visit">ביקור</SelectItem>
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-            </div>
+      {loading ? (
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="flex flex-col items-center gap-2">
+            <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-r-transparent" />
+            <p className="text-muted-foreground">טוען פרטי לקוח...</p>
+          </div>
+        </div>
+      ) : error ? (
+        <div className="space-y-4">
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>שגיאה בטעינת פרטי הלקוח</AlertTitle>
+            <AlertDescription>
+              {error}
+            </AlertDescription>
+          </Alert>
+          <Button 
+            onClick={() => navigate('/clients')} 
+            variant="back" 
+            className="flex gap-2"
+          >
+            <ChevronRight className="h-4 w-4" />
+            חזרה לרשימת הלקוחות
+          </Button>
+        </div>
+      ) : !client ? (
+        <div className="space-y-4">
+          <Alert>
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>לקוח לא נמצא</AlertTitle>
+            <AlertDescription>
+              לא נמצאו פרטי הלקוח המבוקש.
+            </AlertDescription>
+          </Alert>
+          <Button 
+            onClick={() => navigate('/clients')} 
+            variant="back" 
+            className="flex gap-2"
+          >
+            <ChevronRight className="h-4 w-4" />
+            חזרה לרשימת הלקוחות
+          </Button>
+        </div>
+      ) : (
+        <form onSubmit={handleSubmit}>
+          <Card>
+            <CardHeader>
+              <CardTitle>פרטי הפעילות</CardTitle>
+              <CardDescription>הזן את פרטי הפעילות</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="type">סוג פעילות *</Label>
+                <Select
+                  name="type"
+                  value={formData.type}
+                  onValueChange={value => handleSelectChange('type', value)}
+                  required
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="בחר סוג פעילות" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectItem value="call">שיחת טלפון</SelectItem>
+                      <SelectItem value="message">הודעה</SelectItem>
+                      <SelectItem value="purchase">רכישה</SelectItem>
+                      <SelectItem value="visit">ביקור</SelectItem>
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="date">תאריך *</Label>
-              <Input
-                id="date"
-                name="date"
-                type="date"
-                dir="ltr"
-                required
-                value={formData.date}
-                onChange={handleChange}
-              />
-            </div>
+              <div className="space-y-2">
+                <Label htmlFor="date">תאריך *</Label>
+                <Input
+                  id="date"
+                  name="date"
+                  type="date"
+                  dir="ltr"
+                  required
+                  value={formData.date}
+                  onChange={handleChange}
+                />
+              </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="description">תיאור הפעילות *</Label>
-              <Textarea
-                id="description"
-                name="description"
-                placeholder="תאר את הפעילות..."
-                required
-                value={formData.description}
-                onChange={handleChange}
-                rows={4}
-              />
-            </div>
-          </CardContent>
-          <CardFooter>
-            <div className="flex justify-end w-full">
-              <Button type="submit" disabled={submitting}>
-                {submitting ? 'שומר...' : 'הוסף פעילות'}
-              </Button>
-            </div>
-          </CardFooter>
-        </Card>
-      </form>
+              <div className="space-y-2">
+                <Label htmlFor="description">תיאור הפעילות *</Label>
+                <Textarea
+                  id="description"
+                  name="description"
+                  placeholder="תאר את הפעילות..."
+                  required
+                  value={formData.description}
+                  onChange={handleChange}
+                  rows={4}
+                />
+              </div>
+            </CardContent>
+            <CardFooter>
+              <div className="flex justify-end w-full">
+                <Button type="submit" disabled={submitting}>
+                  {submitting ? 'שומר...' : 'הוסף פעילות'}
+                </Button>
+              </div>
+            </CardFooter>
+          </Card>
+        </form>
+      )}
     </div>
   );
 };

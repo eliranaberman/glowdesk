@@ -115,7 +115,8 @@ const ActivityTimeline = ({ clientId }: ActivityTimelineProps) => {
                   {getActivityTypeLabel(activity.type)}
                 </Badge>
                 <p className="text-xs text-muted-foreground">
-                  {format(new Date(activity.date), 'dd/MM/yyyy HH:mm')}
+                  {/* Use created_at if date field is unavailable */}
+                  {format(new Date(activity.created_at || activity.date), 'dd/MM/yyyy HH:mm')}
                 </p>
               </div>
             </div>

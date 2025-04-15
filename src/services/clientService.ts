@@ -1,3 +1,4 @@
+
 import { supabase } from '@/lib/supabase';
 import { Client, ClientActivity } from '@/types/clients';
 
@@ -156,11 +157,27 @@ export const deleteClient = async (id: string) => {
 
 export const getClientActivities = async (clientId: string) => {
   try {
+    // First, let's check the table structure to understand available columns
+    const { data: tableInfo, error: tableError } = await supabase
+      .from('client_activity')
+      .select('*')
+      .limit(1);
+
+    if (tableError) {
+      console.error('Error checking table structure:', tableError);
+      throw tableError;
+    }
+
+    // Log table structure to help diagnose column names
+    console.log('Client activity table structure sample:', tableInfo);
+    
+    // Modified query to use created_at for ordering instead of date
+    // This assumes the table has a created_at column which is common in Supabase
     const { data, error } = await supabase
       .from('client_activity')
       .select('*')
       .eq('client_id', clientId)
-      .order('date', { ascending: false });
+      .order('created_at', { ascending: false });
 
     if (error) throw error;
 
