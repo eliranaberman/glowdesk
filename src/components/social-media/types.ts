@@ -52,9 +52,20 @@ export interface ConnectionModalProps {
 }
 
 export interface RecentMessagesPanelProps {
-  messages: any[];
+  messages: Message[];
 }
 
 export interface InboxStatusPanelProps {
-  // Add props as needed
+  handleOpenInbox: () => void;
+}
+
+// Add the missing Message interface
+export interface Message {
+  id: number;
+  platform: string;
+  sender: string;
+  message: string;
+  time: string;
+  read: boolean;
+  avatar: string;
 }
