@@ -4,11 +4,12 @@ import ConnectedAccountsPanel from "./ConnectedAccountsPanel";
 import RecentMessagesPanel from "./RecentMessagesPanel";
 import InboxStatusPanel from "./InboxStatusPanel";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { MessageSquare, Users, Zap, BarChart3 } from "lucide-react";
+import { MessageSquare, Users, Zap, BarChart3, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { MarketingStats } from "@/types/marketing";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface DashboardContentProps {
   connectedAccounts: ConnectedAccountsMap;
@@ -31,6 +32,13 @@ const DashboardContent = ({
 
   return (
     <div className="space-y-4">
+      <Alert variant="soft" className="bg-muted/30 mb-2">
+        <AlertCircle className="h-4 w-4" />
+        <AlertDescription>
+          חיבורי המדיה החברתית כרגע במצב הדגמה בלבד ואינם מתחברים לחשבונות אמיתיים.
+        </AlertDescription>
+      </Alert>
+      
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
         <Card className="shadow-sm hover:shadow-md transition-all duration-300">
           <CardContent className="p-6">
@@ -106,7 +114,7 @@ const DashboardContent = ({
               <Card className="overflow-hidden">
                 <CardHeader className="pb-2">
                   <div className="flex justify-between items-center">
-                    <CardTitle className="text-lg">הודעות אחרונות</CardTitle>
+                    <CardTitle className="text-lg text-center w-full">הודעות אחרונות</CardTitle>
                     <Button 
                       variant="ghost" 
                       size="sm" 

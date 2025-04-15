@@ -9,9 +9,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Instagram, Facebook, X, MessageSquare } from "lucide-react";
+import { Instagram, Facebook, X, AlertCircle } from "lucide-react";
 import { ConnectedAccountsMap } from "./types";
 import { useToast } from "@/hooks/use-toast";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 type ConnectionModalProps = {
   open: boolean;
@@ -28,6 +29,7 @@ const ConnectionModal = ({
 }: ConnectionModalProps) => {
   const { toast } = useToast();
   const [connecting, setConnecting] = useState<string | null>(null);
+  const [showDemoAlert, setShowDemoAlert] = useState(true);
 
   const handleConnect = async (platform: string) => {
     setConnecting(platform);
@@ -39,9 +41,19 @@ const ConnectionModal = ({
     setConnecting(null);
     
     toast({
-      title: "חשבון מחובר בהצלחה",
-      description: `חשבון ה${platform} שלך חובר בהצלחה`,
+      title: `חשבון ${getPlatformName(platform)} חובר בהצלחה`,
+      description: "חיבור זה הוא למטרות הדגמה בלבד ולא מחבר חשבון אמיתי",
     });
+  };
+
+  const getPlatformName = (platform: string): string => {
+    switch (platform) {
+      case "instagram": return "Instagram";
+      case "facebook": return "Facebook";
+      case "twitter": return "Twitter";
+      case "tiktok": return "TikTok";
+      default: return platform;
+    }
   };
 
   return (
@@ -54,6 +66,22 @@ const ConnectionModal = ({
           </DialogDescription>
         </DialogHeader>
         
+        {showDemoAlert && (
+          <Alert variant="soft" className="bg-muted/50 mb-4">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              זוהי גרסת הדגמה. לחיצה על כפתור "חבר חשבון" תדמה חיבור בלבד ולא תחבר חשבון אמיתי.
+              <Button 
+                variant="link" 
+                className="p-0 h-auto text-xs underline ms-1" 
+                onClick={() => setShowDemoAlert(false)}
+              >
+                הסתר
+              </Button>
+            </AlertDescription>
+          </Alert>
+        )}
+
         <div className="space-y-4 py-4">
           <div className="flex items-center justify-between border-b pb-3">
             <Button
@@ -110,8 +138,9 @@ const ConnectionModal = ({
           </div>
         </div>
         
-        <DialogFooter>
-          <Button onClick={() => onOpenChange(false)}>סגור</Button>
+        <DialogFooter className="flex flex-col sm:flex-row gap-2">
+          <Button variant="outline" onClick={() => onOpenChange(false)}>סגור</Button>
+          <Button onClick={() => onOpenChange(false)}>שמור שינויים</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

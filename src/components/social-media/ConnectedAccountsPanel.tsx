@@ -2,9 +2,10 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Facebook, Instagram, Twitter } from "lucide-react";
+import { Facebook, Instagram, Twitter, Info } from "lucide-react";
 import { ConnectedAccountsMap } from "./types";
 import ConnectionModal from "./ConnectionModal";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 type ConnectedAccountsProps = {
   connectedAccounts: ConnectedAccountsMap;
@@ -14,27 +15,27 @@ type ConnectedAccountsProps = {
 const ConnectedAccountsPanel = ({ connectedAccounts, connectPlatform }: ConnectedAccountsProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Social media account data with follower counts
+  // Social media account data with follower counts - simulate real data
   const socialAccounts = [
     {
       id: "instagram",
       name: "Instagram",
       icon: <Instagram size={16} />,
-      followers: 2540,
+      followers: connectedAccounts.instagram ? 2540 : 0,
       connected: connectedAccounts.instagram
     },
     {
       id: "facebook",
       name: "Facebook",
       icon: <Facebook size={16} />,
-      followers: 1850,
+      followers: connectedAccounts.facebook ? 1850 : 0,
       connected: connectedAccounts.facebook
     },
     {
       id: "twitter",
       name: "Twitter",
       icon: <Twitter size={16} />,
-      followers: 780,
+      followers: connectedAccounts.twitter ? 780 : 0,
       connected: connectedAccounts.twitter
     },
     {
@@ -43,7 +44,7 @@ const ConnectedAccountsPanel = ({ connectedAccounts, connectPlatform }: Connecte
       icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M9 20l3-4 3 4M10 4.5h4c3.771 0 5.657 0 6.828 1.172C22 6.843 22 8.729 22 12.5s0 5.657-1.172 6.828C19.657 20.5 17.771 20.5 14 20.5h-4c-3.771 0-5.657 0-6.828-1.172C2 18.157 2 16.271 2 12.5s0-5.657 1.172-6.828C4.343 4.5 6.229 4.5 10 4.5z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
       </svg>,
-      followers: 3200,
+      followers: connectedAccounts.tiktok ? 3200 : 0,
       connected: connectedAccounts.tiktok
     }
   ];
@@ -52,7 +53,19 @@ const ConnectedAccountsPanel = ({ connectedAccounts, connectPlatform }: Connecte
     <>
       <Card>
         <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-lg text-center w-full">פלטפורמות מחוברות</CardTitle>
+          <CardTitle className="text-lg">פלטפורמות מחוברות</CardTitle>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-6 w-6">
+                  <Info className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="left">
+                <p className="max-w-xs text-xs">חיבור זה הוא למטרות הדגמה בלבד. מספרי העוקבים מוצגים לצורך סימולציה.</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
@@ -76,7 +89,11 @@ const ConnectedAccountsPanel = ({ connectedAccounts, connectPlatform }: Connecte
                     <span className="font-medium">{account.name}</span>
                     {account.icon}
                   </div>
-                  <span className="text-xs text-muted-foreground">{account.followers.toLocaleString()} followers</span>
+                  <span className="text-xs text-muted-foreground">
+                    {account.connected 
+                      ? `${account.followers.toLocaleString()} עוקבים` 
+                      : "לא מחובר"}
+                  </span>
                 </div>
               </div>
             ))}

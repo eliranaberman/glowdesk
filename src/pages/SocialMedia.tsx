@@ -9,7 +9,7 @@ import PostCreationPanel from "@/components/social-media/PostCreationPanel";
 import AnalyticsContent from "@/components/social-media/AnalyticsContent";
 import ConnectionModal from "@/components/social-media/ConnectionModal";
 import AIMarketingTools from "@/components/social-media/AIMarketingTools";
-import { ConnectedAccountsMap } from "@/components/social-media/types";
+import { ConnectedAccountsMap, Message } from "@/components/social-media/types";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { getMarketingStats } from "@/services/marketingService";
@@ -30,7 +30,7 @@ const SocialMedia = () => {
   const { toast } = useToast();
 
   // Mock data for demonstration purposes
-  const messages = [
+  const messages: Message[] = [
     {
       id: 1,
       platform: "instagram",
@@ -135,6 +135,10 @@ const SocialMedia = () => {
         break;
       case "inbox":
         // Open reply modal or mark as read
+        toast({
+          title: "סימון הודעות כנקראו",
+          description: "כל ההודעות סומנו כנקראו בהצלחה"
+        });
         break;
       case "posts":
         navigate("/social-media/create-post");
