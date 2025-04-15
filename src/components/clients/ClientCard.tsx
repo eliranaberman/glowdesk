@@ -96,7 +96,7 @@ const ClientCard = ({ client, expanded = false }: ClientCardProps) => {
               <p>-</p>
             )}
           </div>
-          {client.tags && client.tags.length > 0 && (
+          {client.tags && Array.isArray(client.tags) && client.tags.length > 0 && (
             <div className="col-span-1 md:col-span-2">
               <p className="text-sm font-medium text-muted-foreground mb-1">תגיות</p>
               <div className="flex flex-wrap gap-1">
