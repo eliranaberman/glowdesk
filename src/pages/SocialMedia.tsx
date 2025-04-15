@@ -167,7 +167,7 @@ const SocialMedia = () => {
     <div className="space-y-6" dir="rtl">
       <div className="flex justify-between items-center">
         <Button 
-          variant="soft" 
+          variant="secondary" 
           size="sm" 
           className="flex items-center gap-1"
           onClick={handleButtonAction}

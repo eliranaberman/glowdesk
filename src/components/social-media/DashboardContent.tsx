@@ -187,7 +187,6 @@ const DashboardContent = ({
             </TabsContent>
           </Tabs>
           
-          {/* Pass the required handleOpenInbox prop */}
           <InboxStatusPanel handleOpenInbox={handleOpenInbox} />
         </div>
       </div>
