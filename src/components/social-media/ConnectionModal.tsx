@@ -87,7 +87,7 @@ const ConnectionModal = ({
             <Button
               disabled={connecting === "instagram"}
               onClick={() => handleConnect("instagram")}
-              variant={connectedAccounts.instagram ? "soft" : "outline"}
+              variant={connectedAccounts.instagram ? "secondary" : "outline"}
               className="gap-2"
             >
               <Instagram size={18} />
@@ -100,7 +100,7 @@ const ConnectionModal = ({
             <Button
               disabled={connecting === "facebook"} 
               onClick={() => handleConnect("facebook")}
-              variant={connectedAccounts.facebook ? "soft" : "outline"}
+              variant={connectedAccounts.facebook ? "secondary" : "outline"}
               className="gap-2"
             >
               <Facebook size={18} />
@@ -113,7 +113,7 @@ const ConnectionModal = ({
             <Button
               disabled={connecting === "tiktok"}
               onClick={() => handleConnect("tiktok")}
-              variant={connectedAccounts.tiktok ? "soft" : "outline"} 
+              variant={connectedAccounts.tiktok ? "secondary" : "outline"} 
               className="gap-2"
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -128,7 +128,7 @@ const ConnectionModal = ({
             <Button
               disabled={connecting === "twitter"}
               onClick={() => handleConnect("twitter")}
-              variant={connectedAccounts.twitter ? "soft" : "outline"} 
+              variant={connectedAccounts.twitter ? "secondary" : "outline"} 
               className="gap-2"
             >
               <X size={18} />

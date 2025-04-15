@@ -32,7 +32,7 @@ const DashboardContent = ({
 
   return (
     <div className="space-y-4">
-      <Alert variant="soft" className="bg-muted/30 mb-2">
+      <Alert variant="secondary" className="bg-muted/30 mb-2">
         <AlertCircle className="h-4 w-4" />
         <AlertDescription>
           חיבורי המדיה החברתית כרגע במצב הדגמה בלבד ואינם מתחברים לחשבונות אמיתיים.
