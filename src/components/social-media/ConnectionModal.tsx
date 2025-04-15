@@ -67,7 +67,7 @@ const ConnectionModal = ({
         </DialogHeader>
         
         {showDemoAlert && (
-          <Alert variant="soft" className="bg-muted/50 mb-4">
+          <Alert variant="default" className="bg-muted/50 mb-4">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
               זוהי גרסת הדגמה. לחיצה על כפתור "חבר חשבון" תדמה חיבור בלבד ולא תחבר חשבון אמיתי.
