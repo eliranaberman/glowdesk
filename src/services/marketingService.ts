@@ -6,7 +6,7 @@ import {
   MarketingMessage, MarketingMessageCreate, MarketingMessageUpdate,
   Coupon, CouponCreate, CouponUpdate,
   CouponAssignment, CouponAssignmentCreate, CouponAssignmentUpdate,
-  CampaignAnalytics, MarketingStats
+  CampaignAnalytics, MarketingStats, CampaignStatus, MessageStatus
 } from '@/types/marketing';
 import { Client } from '@/types/clients';
 
@@ -101,7 +101,11 @@ export const getCampaigns = async (): Promise<MarketingCampaign[]> => {
       .order('created_at', { ascending: false });
 
     if (error) throw error;
-    return data || [];
+    // Cast the status to CampaignStatus since we know the values match
+    return (data || []).map(campaign => ({
+      ...campaign,
+      status: campaign.status as CampaignStatus
+    }));
   } catch (error) {
     console.error('Error fetching campaigns:', error);
     throw error;
@@ -120,7 +124,13 @@ export const getCampaignById = async (id: string): Promise<MarketingCampaign | n
       .single();
 
     if (error) throw error;
-    return data;
+    if (data) {
+      return {
+        ...data,
+        status: data.status as CampaignStatus
+      };
+    }
+    return null;
   } catch (error) {
     console.error(`Error fetching campaign ${id}:`, error);
     throw error;
@@ -136,7 +146,10 @@ export const createCampaign = async (campaign: MarketingCampaignCreate): Promise
       .single();
 
     if (error) throw error;
-    return data;
+    return {
+      ...data,
+      status: data.status as CampaignStatus
+    };
   } catch (error) {
     console.error('Error creating campaign:', error);
     throw error;
@@ -153,7 +166,10 @@ export const updateCampaign = async (id: string, updates: MarketingCampaignUpdat
       .single();
 
     if (error) throw error;
-    return data;
+    return {
+      ...data,
+      status: data.status as CampaignStatus
+    };
   } catch (error) {
     console.error(`Error updating campaign ${id}:`, error);
     throw error;
@@ -187,7 +203,11 @@ export const getMessagesByCampaignId = async (campaignId: string): Promise<Marke
       .order('sent_at', { ascending: false });
 
     if (error) throw error;
-    return data || [];
+    // Cast the status to MessageStatus
+    return (data || []).map(message => ({
+      ...message,
+      status: message.status as MessageStatus
+    }));
   } catch (error) {
     console.error(`Error fetching messages for campaign ${campaignId}:`, error);
     throw error;
@@ -203,7 +223,11 @@ export const getCoupons = async (): Promise<Coupon[]> => {
       .order('created_at', { ascending: false });
 
     if (error) throw error;
-    return data || [];
+    // Add default empty code if not present
+    return (data || []).map(coupon => ({
+      ...coupon,
+      code: coupon.code || ''
+    }));
   } catch (error) {
     console.error('Error fetching coupons:', error);
     throw error;
@@ -219,7 +243,10 @@ export const createCoupon = async (coupon: CouponCreate): Promise<Coupon> => {
       .single();
 
     if (error) throw error;
-    return data;
+    return {
+      ...data,
+      code: data.code || ''
+    };
   } catch (error) {
     console.error('Error creating coupon:', error);
     throw error;

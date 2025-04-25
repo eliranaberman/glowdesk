@@ -22,6 +22,7 @@ export interface MarketingCampaign {
   scheduled_at: string | null;
   status: CampaignStatus;
   created_by: string;
+  created_at?: string; // Made optional since it's missing in some API responses
   template?: MarketingTemplate | {
     id: string;
     title: string;
@@ -33,8 +34,8 @@ export interface MarketingCampaign {
   failed_count?: number;
 }
 
-export type MarketingCampaignCreate = Omit<MarketingCampaign, 'id' | 'template' | 'messages_count' | 'delivered_count' | 'opened_count' | 'clicked_count' | 'failed_count'>;
-export type MarketingCampaignUpdate = Partial<Omit<MarketingCampaign, 'id' | 'created_by' | 'template' | 'messages_count' | 'delivered_count' | 'opened_count' | 'clicked_count' | 'failed_count'>>;
+export type MarketingCampaignCreate = Omit<MarketingCampaign, 'id' | 'template' | 'messages_count' | 'delivered_count' | 'opened_count' | 'clicked_count' | 'failed_count' | 'created_at'>;
+export type MarketingCampaignUpdate = Partial<Omit<MarketingCampaign, 'id' | 'created_by' | 'template' | 'messages_count' | 'delivered_count' | 'opened_count' | 'clicked_count' | 'failed_count' | 'created_at'>>;
 
 // Marketing message related types
 export type MessageStatus = 'pending' | 'sent' | 'delivered' | 'opened' | 'clicked' | 'failed';
@@ -57,7 +58,7 @@ export interface MarketingMessage {
   };
 }
 
-export type MarketingMessageCreate = Omit<MarketingMessage, 'id' | 'delivered_at' | 'opened_at' | 'clicked_at' | 'client'>;
+export type MarketingMessageCreate = Omit<MarketingMessage, 'id' | 'delivered_at' | 'opened_at' | 'clicked_at' | 'client' | 'error_message'>;
 export type MarketingMessageUpdate = Partial<Omit<MarketingMessage, 'id' | 'campaign_id' | 'client_id' | 'client'>>;
 
 // Coupon related types

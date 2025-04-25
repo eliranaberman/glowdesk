@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -94,8 +93,9 @@ const MarketingMessages = () => {
     }
   };
   
-  const formatDate = (dateString: string) => {
+  const formatDate = (dateString: string | undefined) => {
     try {
+      if (!dateString) return 'תאריך לא זמין';
       return format(new Date(dateString), 'dd/MM/yyyy');
     } catch (error) {
       return 'תאריך לא תקין';
@@ -136,7 +136,7 @@ const MarketingMessages = () => {
             ) : templates.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
                 <p>אין תבניות עדיין</p>
-                <Button onClick={handleCreate} variant="outline" className="mt-4 flex items-center gap-1">
+                <Button onClick={() => navigate('/marketing/templates/new')} variant="outline" className="mt-4 flex items-center gap-1">
                   <PlusCircle className="h-4 w-4 ml-1" />
                   יצירת תבנית חדשה
                 </Button>
@@ -167,11 +167,11 @@ const MarketingMessages = () => {
             )}
 
             <div className="flex flex-col sm:flex-row gap-2 pt-2 justify-end">
-              <Button onClick={handleCreate} variant="outline" className="flex items-center gap-1 order-first sm:order-first">
+              <Button onClick={() => navigate('/marketing/templates/new')} variant="outline" className="flex items-center gap-1 order-first sm:order-first">
                 <PlusCircle className="h-4 w-4 ml-1" />
                 יצירת תבנית חדשה
               </Button>
-              <Button onClick={handleSendToAll} className="order-last sm:order-last">
+              <Button onClick={() => navigate('/marketing/campaigns/new')} className="order-last sm:order-last">
                 יצירת קמפיין חדש
               </Button>
             </div>
@@ -203,7 +203,7 @@ const MarketingMessages = () => {
                     <div className="flex items-center justify-between mb-1">
                       <span className="text-muted-foreground text-xs">
                         {campaign.status === 'sent' ? 'נשלח: ' : ''}
-                        {formatDate(campaign.created_at)}
+                        {campaign.scheduled_at ? formatDate(campaign.scheduled_at) : 'לא זמין'}
                       </span>
                       <span className="font-medium">{campaign.name}</span>
                     </div>
@@ -216,7 +216,29 @@ const MarketingMessages = () => {
                           variant="soft"
                           size="xs"
                           disabled={isSending[campaign.id]}
-                          onClick={() => handleSendCampaign(campaign)}
+                          onClick={() => {
+                            if (window.confirm(`האם אתה בטוח שברצונך לשלוח את הקמפיין "${campaign.name}" עכשיו?`)) {
+                              setIsSending(prev => ({ ...prev, [campaign.id]: true }));
+                              sendCampaign(campaign.id).then(() => {
+                                setCampaigns(campaigns.map(c => 
+                                  c.id === campaign.id ? { ...c, status: 'sent' as const } : c
+                                ));
+                                toast({
+                                  title: "הקמפיין נשלח בהצלחה",
+                                  description: "ההודעות נשלחות ללקוחות הנבחרים",
+                                });
+                              }).catch(error => {
+                                console.error('Error sending campaign:', error);
+                                toast({
+                                  title: "שגיאה בשליחת הקמפיין",
+                                  description: "אירעה שגיאה בשליחת הקמפיין, אנא נסה שנית",
+                                  variant: "destructive",
+                                });
+                              }).finally(() => {
+                                setIsSending(prev => ({ ...prev, [campaign.id]: false }));
+                              });
+                            }
+                          }}
                         >
                           {isSending[campaign.id] ? (
                             <Loader2 className="h-3 w-3 animate-spin" />
