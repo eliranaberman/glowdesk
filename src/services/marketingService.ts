@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import {
   MarketingTemplate, MarketingTemplateCreate, MarketingTemplateUpdate,
@@ -223,11 +222,11 @@ export const getCoupons = async (): Promise<Coupon[]> => {
       .order('created_at', { ascending: false });
 
     if (error) throw error;
-    // Add default empty code if not present
+    // Explicitly cast to Coupon[] and ensure code is always a string
     return (data || []).map(coupon => ({
       ...coupon,
-      code: coupon.code || '' // Provide a default empty string if code is missing
-    })) as Coupon[];
+      code: coupon.code ?? '' // Use nullish coalescing to provide empty string if null/undefined
+    } as Coupon));
   } catch (error) {
     console.error('Error fetching coupons:', error);
     throw error;
@@ -243,9 +242,10 @@ export const createCoupon = async (coupon: CouponCreate): Promise<Coupon> => {
       .single();
 
     if (error) throw error;
+    // Explicitly cast to Coupon and ensure code is always a string
     return {
       ...data,
-      code: data.code || '' // Provide a default empty string if code is missing
+      code: data.code ?? '' // Use nullish coalescing to provide empty string if null/undefined
     } as Coupon;
   } catch (error) {
     console.error('Error creating coupon:', error);
