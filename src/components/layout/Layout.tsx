@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Sidebar from './Sidebar';
@@ -6,7 +5,7 @@ import Header from './Header';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
-import { ArrowRight } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface LayoutProps {
@@ -20,7 +19,6 @@ const Layout = ({ children }: LayoutProps) => {
   const isMobile = useIsMobile();
   const { user, signOut } = useAuth();
 
-  // Get page title based on current route (in Hebrew)
   const getPageTitle = (): string => {
     const path = location.pathname;
     
@@ -48,32 +46,22 @@ const Layout = ({ children }: LayoutProps) => {
 
     return 'דשבורד'; // Default
   };
-  
-  // Determine if the current route should show the back button
+
   const shouldShowBackButton = (): boolean => {
     const path = location.pathname;
     return path !== '/'; // Show back button on all pages except the dashboard
   };
 
-  // Handle back button click
   const handleBackClick = () => {
-    navigate(-1); // Navigate to the previous page in history
+    navigate(-1); // Go back to the previous page in history
   };
 
-  // Handle logout
-  const handleLogout = async () => {
-    await signOut();
-    navigate('/login');
-  };
-
-  // Effect to close sidebar when route changes
   useEffect(() => {
     if (mobileSidebarOpen) {
       setMobileSidebarOpen(false);
     }
   }, [location.pathname]);
 
-  // Effect to handle body overflow when mobile sidebar is open
   useEffect(() => {
     if (isMobile) {
       document.body.style.overflow = mobileSidebarOpen ? 'hidden' : '';
@@ -89,12 +77,10 @@ const Layout = ({ children }: LayoutProps) => {
 
   return (
     <div className="flex h-screen overflow-hidden bg-background" dir="rtl">
-      {/* Desktop Sidebar */}
       <div className="hidden lg:block">
         <Sidebar />
       </div>
 
-      {/* Mobile Sidebar */}
       <div
         className={cn(
           "fixed inset-0 z-40 lg:hidden",
@@ -113,7 +99,6 @@ const Layout = ({ children }: LayoutProps) => {
         </div>
       </div>
 
-      {/* Main Content */}
       <div className="flex flex-col flex-1 overflow-hidden w-full">
         <Header 
           pageTitle={getPageTitle()} 
@@ -122,16 +107,15 @@ const Layout = ({ children }: LayoutProps) => {
           user={user}
         />
         
-        {/* Back button */}
         {shouldShowBackButton() && (
-          <div className="px-4 pt-2 md:px-6 md:pt-3">
+          <div className="px-4 pt-2 md:px-6 md:pt-3 flex justify-end">
             <Button 
               variant="back" 
               size="sm" 
               onClick={handleBackClick}
-              className="flex items-center"
+              className="flex items-center gap-1"
             >
-              <ArrowRight className="mr-1 h-4 w-4" />
+              <ArrowLeft className="h-4 w-4" />
               חזרה
             </Button>
           </div>
