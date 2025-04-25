@@ -226,8 +226,8 @@ export const getCoupons = async (): Promise<Coupon[]> => {
     // Add default empty code if not present
     return (data || []).map(coupon => ({
       ...coupon,
-      code: coupon.code || ''
-    }));
+      code: coupon.code || '' // Provide a default empty string if code is missing
+    })) as Coupon[];
   } catch (error) {
     console.error('Error fetching coupons:', error);
     throw error;
@@ -245,8 +245,8 @@ export const createCoupon = async (coupon: CouponCreate): Promise<Coupon> => {
     if (error) throw error;
     return {
       ...data,
-      code: data.code || ''
-    };
+      code: data.code || '' // Provide a default empty string if code is missing
+    } as Coupon;
   } catch (error) {
     console.error('Error creating coupon:', error);
     throw error;
