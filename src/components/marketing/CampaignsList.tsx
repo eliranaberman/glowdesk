@@ -3,24 +3,24 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
 import { 
   Table, TableBody, TableCell, TableHead, 
   TableHeader, TableRow 
 } from '@/components/ui/table';
-import { Loader2, Search, Eye, Trash, Send, Clock } from 'lucide-react';
+import { Loader2, Search, Pencil, Trash, Send } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { getCampaigns, deleteCampaign, sendCampaign } from '@/services/marketingService';
 import { MarketingCampaign } from '@/types/marketing';
 import { format } from 'date-fns';
+import { Badge } from '@/components/ui/badge';
 
 export const CampaignsList = () => {
   const [campaigns, setCampaigns] = useState<MarketingCampaign[]>([]);
   const [filteredCampaigns, setFilteredCampaigns] = useState<MarketingCampaign[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(true);
-  const [isProcessing, setIsProcessing] = useState<Record<string, boolean>>({});
+  const [sendingMap, setSendingMap] = useState<Record<string, boolean>>({});
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -54,14 +54,14 @@ export const CampaignsList = () => {
       const filtered = campaigns.filter(
         campaign => 
           campaign.name.toLowerCase().includes(query) || 
-          campaign.template?.title.toLowerCase().includes(query)
+          (campaign.template?.title || '').toLowerCase().includes(query)
       );
       setFilteredCampaigns(filtered);
     }
   }, [searchQuery, campaigns]);
 
-  const handleView = (id: string) => {
-    navigate(`/marketing/campaigns/${id}`);
+  const handleEdit = (id: string) => {
+    navigate(`/marketing/campaigns/edit/${id}`);
   };
 
   const handleDelete = async (id: string, name: string) => {
@@ -86,34 +86,22 @@ export const CampaignsList = () => {
     }
   };
 
-  const handleSendCampaign = async (campaign: MarketingCampaign) => {
-    if (campaign.status === 'sent') {
-      toast({
-        title: 'הקמפיין כבר נשלח',
-        description: 'לא ניתן לשלוח קמפיין שכבר נשלח',
-      });
-      return;
-    }
-
-    if (window.confirm(`האם אתה בטוח שברצונך לשלוח את הקמפיין "${campaign.name}" עכשיו?`)) {
+  const handleSendCampaign = async (campaignId: string, campaignName: string) => {
+    if (window.confirm(`האם אתה בטוח שברצונך לשלוח את הקמפיין "${campaignName}" כעת?`)) {
       try {
-        setIsProcessing(prev => ({ ...prev, [campaign.id]: true }));
-        await sendCampaign(campaign.id);
+        setSendingMap(prev => ({ ...prev, [campaignId]: true }));
+        await sendCampaign(campaignId);
         
-        // Update the campaign status in the UI
-        const updatedCampaigns = campaigns.map(c => 
-          c.id === campaign.id ? { ...c, status: 'sent' as const } : c
-        );
-        setCampaigns(updatedCampaigns);
-        setFilteredCampaigns(
-          filteredCampaigns.map(c => 
-            c.id === campaign.id ? { ...c, status: 'sent' as const } : c
-          )
-        );
+        setCampaigns(campaigns.map(campaign => 
+          campaign.id === campaignId ? { ...campaign, status: 'sent' as const } : campaign
+        ));
+        setFilteredCampaigns(filteredCampaigns.map(campaign => 
+          campaign.id === campaignId ? { ...campaign, status: 'sent' as const } : campaign
+        ));
         
         toast({
-          title: 'הקמפיין נשלח בהצלחה',
-          description: 'ההודעות נשלחות ללקוחות הנבחרים',
+          title: 'הקמפיין נשלח',
+          description: 'הקמפיין נשלח בהצלחה',
         });
       } catch (error) {
         console.error('Error sending campaign:', error);
@@ -123,28 +111,34 @@ export const CampaignsList = () => {
           variant: 'destructive',
         });
       } finally {
-        setIsProcessing(prev => ({ ...prev, [campaign.id]: false }));
+        setSendingMap(prev => ({ ...prev, [campaignId]: false }));
       }
     }
   };
 
   const formatDate = (dateString: string | null) => {
     if (!dateString) return 'לא נקבע';
-    return format(new Date(dateString), 'dd/MM/yyyy HH:mm');
+    try {
+      return format(new Date(dateString), 'dd/MM/yyyy HH:mm');
+    } catch {
+      return 'תאריך שגוי';
+    }
   };
 
-  const getStatusBadge = (status: string) => {
+  const getStatusBadge = (status: string | null) => {
+    if (!status) return <Badge variant="outline">טיוטה</Badge>;
+    
     switch (status) {
       case 'draft':
         return <Badge variant="outline">טיוטה</Badge>;
       case 'scheduled':
         return <Badge variant="secondary">מתוזמן</Badge>;
       case 'sent':
-        return <Badge variant="success">נשלח</Badge>;
+        return <Badge variant="default">נשלח</Badge>;
       case 'failed':
         return <Badge variant="destructive">נכשל</Badge>;
       default:
-        return <Badge>{status}</Badge>;
+        return <Badge variant="outline">{status}</Badge>;
     }
   };
 
@@ -187,58 +181,41 @@ export const CampaignsList = () => {
                 <TableRow>
                   <TableHead className="w-[200px]">שם הקמפיין</TableHead>
                   <TableHead className="hidden md:table-cell">תבנית</TableHead>
-                  <TableHead className="hidden md:table-cell">מצב</TableHead>
-                  <TableHead className="hidden md:table-cell">לקוחות</TableHead>
-                  <TableHead className="hidden md:table-cell">זמן שליחה</TableHead>
-                  <TableHead className="w-[150px]">פעולות</TableHead>
+                  <TableHead className="hidden md:table-cell">תאריך משלוח</TableHead>
+                  <TableHead className="w-[100px]">סטטוס</TableHead>
+                  <TableHead className="w-[180px]">פעולות</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredCampaigns.map((campaign) => (
-                  <TableRow 
-                    key={campaign.id}
-                    onClick={() => handleView(campaign.id)}
-                    className="cursor-pointer"
-                  >
+                  <TableRow key={campaign.id}>
                     <TableCell className="font-medium">{campaign.name}</TableCell>
                     <TableCell className="hidden md:table-cell">
-                      {campaign.template?.title || campaign.template_id}
+                      {campaign.template?.title || 'תבנית לא נמצאה'}
                     </TableCell>
                     <TableCell className="hidden md:table-cell">
-                      {getStatusBadge(campaign.status)}
-                    </TableCell>
-                    <TableCell className="hidden md:table-cell">
-                      {campaign.messages_count || 0}
-                    </TableCell>
-                    <TableCell className="hidden md:table-cell">
-                      {campaign.status === 'scheduled' ? (
-                        <div className="flex items-center">
-                          <Clock className="h-4 w-4 ml-1 text-muted-foreground" />
-                          {formatDate(campaign.scheduled_at)}
-                        </div>
-                      ) : campaign.status === 'sent' ? (
-                        'נשלח'
-                      ) : (
-                        'לא נקבע'
-                      )}
+                      {formatDate(campaign.scheduled_at)}
                     </TableCell>
                     <TableCell>
-                      <div className="flex space-x-2 rtl:space-x-reverse" onClick={(e) => e.stopPropagation()}>
+                      {getStatusBadge(campaign.status)}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex space-x-2 rtl:space-x-reverse">
                         <Button 
                           variant="ghost" 
                           size="icon"
-                          onClick={() => handleView(campaign.id)}
+                          onClick={() => handleEdit(campaign.id)}
                         >
-                          <Eye className="h-4 w-4" />
+                          <Pencil className="h-4 w-4" />
                         </Button>
                         {campaign.status !== 'sent' && (
                           <Button 
                             variant="ghost" 
                             size="icon"
-                            disabled={isProcessing[campaign.id]}
-                            onClick={() => handleSendCampaign(campaign)}
+                            onClick={() => handleSendCampaign(campaign.id, campaign.name)}
+                            disabled={sendingMap[campaign.id]}
                           >
-                            {isProcessing[campaign.id] ? (
+                            {sendingMap[campaign.id] ? (
                               <Loader2 className="h-4 w-4 animate-spin" />
                             ) : (
                               <Send className="h-4 w-4" />
