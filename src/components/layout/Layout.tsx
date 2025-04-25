@@ -56,6 +56,11 @@ const Layout = ({ children }: LayoutProps) => {
     navigate(-1); // Go back to the previous page in history
   };
 
+  const handleLogout = async () => {
+    await signOut();
+    navigate('/login');
+  };
+
   useEffect(() => {
     if (mobileSidebarOpen) {
       setMobileSidebarOpen(false);
