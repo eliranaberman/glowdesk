@@ -21,9 +21,11 @@ export interface MarketingCampaign {
   template_id: string;
   scheduled_at: string | null;
   status: CampaignStatus;
-  created_at: string;
   created_by: string;
-  template?: MarketingTemplate;
+  template?: MarketingTemplate | {
+    id: string;
+    title: string;
+  };
   messages_count?: number;
   delivered_count?: number;
   opened_count?: number;
@@ -31,8 +33,8 @@ export interface MarketingCampaign {
   failed_count?: number;
 }
 
-export type MarketingCampaignCreate = Omit<MarketingCampaign, 'id' | 'created_at' | 'template' | 'messages_count' | 'delivered_count' | 'opened_count' | 'clicked_count' | 'failed_count'>;
-export type MarketingCampaignUpdate = Partial<Omit<MarketingCampaign, 'id' | 'created_at' | 'created_by' | 'template' | 'messages_count' | 'delivered_count' | 'opened_count' | 'clicked_count' | 'failed_count'>>;
+export type MarketingCampaignCreate = Omit<MarketingCampaign, 'id' | 'template' | 'messages_count' | 'delivered_count' | 'opened_count' | 'clicked_count' | 'failed_count'>;
+export type MarketingCampaignUpdate = Partial<Omit<MarketingCampaign, 'id' | 'created_by' | 'template' | 'messages_count' | 'delivered_count' | 'opened_count' | 'clicked_count' | 'failed_count'>>;
 
 // Marketing message related types
 export type MessageStatus = 'pending' | 'sent' | 'delivered' | 'opened' | 'clicked' | 'failed';
@@ -43,10 +45,10 @@ export interface MarketingMessage {
   client_id: string;
   status: MessageStatus;
   sent_at: string | null;
-  delivered_at: string | null;
-  opened_at: string | null;
-  clicked_at: string | null;
-  error_message: string | null;
+  delivered_at?: string | null;
+  opened_at?: string | null;
+  clicked_at?: string | null;
+  error_message?: string | null;
   client?: {
     id: string;
     full_name: string;
@@ -62,7 +64,7 @@ export type MarketingMessageUpdate = Partial<Omit<MarketingMessage, 'id' | 'camp
 export interface Coupon {
   id: string;
   title: string;
-  code: string;
+  code?: string;
   description: string | null;
   discount_percentage: number;
   valid_until: string;
@@ -82,7 +84,7 @@ export interface CouponAssignment {
   client_id: string;
   assigned_at: string;
   redeemed: boolean;
-  redeemed_at: string | null;
+  redeemed_at?: string | null;
   coupon?: Coupon;
   client?: {
     id: string;
