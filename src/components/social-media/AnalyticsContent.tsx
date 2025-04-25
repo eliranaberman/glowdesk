@@ -21,6 +21,17 @@ interface AnalyticsContentProps {
 }
 
 const AnalyticsContent = ({ analyticsData, marketingStats, isLoading }: AnalyticsContentProps) => {
+  // Get last month's stats safely
+  const getLastMonthStats = () => {
+    if (!marketingStats?.monthly_stats || marketingStats.monthly_stats.length === 0) {
+      return null;
+    }
+    return marketingStats.monthly_stats[marketingStats.monthly_stats.length - 1];
+  };
+  
+  // Get safe values for stats
+  const lastMonthStats = getLastMonthStats();
+  
   return (
     <div className="space-y-6">
       <Tabs defaultValue="social">
@@ -197,7 +208,7 @@ const AnalyticsContent = ({ analyticsData, marketingStats, isLoading }: Analytic
                   <CardContent>
                     <div className="text-2xl font-bold">{marketingStats?.total_campaigns || 0}</div>
                     <p className="text-xs text-muted-foreground">
-                      {marketingStats?.monthly_stats[5].campaigns || 0} בחודש האחרון
+                      {lastMonthStats?.campaigns || 0} בחודש האחרון
                     </p>
                   </CardContent>
                 </Card>
@@ -210,7 +221,7 @@ const AnalyticsContent = ({ analyticsData, marketingStats, isLoading }: Analytic
                   <CardContent>
                     <div className="text-2xl font-bold">{marketingStats?.total_messages || 0}</div>
                     <p className="text-xs text-muted-foreground">
-                      {marketingStats?.monthly_stats[5].messages || 0} בחודש האחרון
+                      {lastMonthStats?.messages || 0} בחודש האחרון
                     </p>
                   </CardContent>
                 </Card>
@@ -222,8 +233,8 @@ const AnalyticsContent = ({ analyticsData, marketingStats, isLoading }: Analytic
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold">
-                      {marketingStats && marketingStats.monthly_stats[5].messages > 0
-                        ? Math.round((marketingStats.monthly_stats[5].opens / marketingStats.monthly_stats[5].messages) * 100)
+                      {lastMonthStats && lastMonthStats.messages > 0
+                        ? Math.round((lastMonthStats.opens / lastMonthStats.messages) * 100)
                         : 0}%
                     </div>
                     <p className="text-xs text-muted-foreground">
