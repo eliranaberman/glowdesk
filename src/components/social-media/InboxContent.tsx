@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -139,45 +138,8 @@ const InboxContent = () => {
         </div>
       )}
       
-      {/* Messages sidebar */}
-      <Card className={`${isMobile && selectedMessage ? 'hidden' : 'block'} lg:col-span-1`}>
-        <CardHeader className="flex flex-row items-center justify-between p-4">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={() => setIsModalOpen(true)}
-            className="px-2 py-1 h-8"
-          >
-            חבר חשבון
-          </Button>
-          <CardTitle className="mx-auto text-lg">הודעות</CardTitle>
-          {messages.some(msg => !msg.read) && (
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={handleMarkAllAsRead}
-              className="px-2 py-1 h-8 text-xs whitespace-nowrap"
-            >
-              סמן הכל כנקרא
-            </Button>
-          )}
-        </CardHeader>
-        
-        <CardContent className="p-0">
-          <MessageList 
-            messages={filteredMessages} 
-            selectedMessage={selectedMessage} 
-            setSelectedMessage={setSelectedMessage} 
-            handleReply={handleReply} 
-            handleMarkAllAsRead={handleMarkAllAsRead}
-            activePlatform={activePlatform}
-            setActivePlatform={setActivePlatform}
-          />
-        </CardContent>
-      </Card>
-
-      {/* Conversation area */}
-      <Card className={`${isMobile && !selectedMessage ? 'hidden' : 'block'} lg:col-span-2 flex flex-col h-full`}>
+      {/* Conversation area - Now on the left */}
+      <Card className={`${isMobile && !selectedMessage ? 'hidden' : 'block'} lg:col-span-2 flex flex-col h-full order-last lg:order-first`}>
         {selectedMessage ? (
           <>
             <CardHeader className="flex flex-row items-center justify-between p-4 border-b">
@@ -270,6 +232,43 @@ const InboxContent = () => {
             </p>
           </div>
         )}
+      </Card>
+
+      {/* Messages sidebar - Now on the right */}
+      <Card className={`${isMobile && selectedMessage ? 'hidden' : 'block'} lg:col-span-1 order-first lg:order-last`}>
+        <CardHeader className="flex flex-row items-center justify-between p-4">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => setIsModalOpen(true)}
+            className="px-2 py-1 h-8"
+          >
+            חבר חשבון
+          </Button>
+          <CardTitle className="mx-auto text-lg">הודעות</CardTitle>
+          {messages.some(msg => !msg.read) && (
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={handleMarkAllAsRead}
+              className="px-2 py-1 h-8 text-xs whitespace-nowrap"
+            >
+              סמן הכל כנקרא
+            </Button>
+          )}
+        </CardHeader>
+        
+        <CardContent className="p-0">
+          <MessageList 
+            messages={filteredMessages} 
+            selectedMessage={selectedMessage} 
+            setSelectedMessage={setSelectedMessage} 
+            handleReply={handleReply} 
+            handleMarkAllAsRead={handleMarkAllAsRead}
+            activePlatform={activePlatform}
+            setActivePlatform={setActivePlatform}
+          />
+        </CardContent>
       </Card>
 
       {/* Modals */}
