@@ -10,7 +10,6 @@ interface CashFlowForecastProps {
 }
 
 const CashFlowForecast = ({ activeRange = 'week' }: CashFlowForecastProps) => {
-  // Generate different forecast data based on the active range
   const getForecastData = () => {
     switch (activeRange) {
       case 'day':
@@ -54,38 +53,36 @@ const CashFlowForecast = ({ activeRange = 'week' }: CashFlowForecastProps) => {
     }
   };
 
-  // Generate upcoming expenses based on active range
   const getUpcomingExpenses = () => {
     switch (activeRange) {
       case 'day':
         return [
           { id: '1', name: 'חשבון חשמל', date: '18:00 היום', amount: '₪450' },
           { id: '2', name: 'משלוח סחורה', date: '15:30 היום', amount: '₪280' },
-          { id: '3', name: 'שכר שעתי', date: '20:00 היום', amount: '₪320' },
+          { id: '3', name: 'משכורת עובדים', date: '20:00 היום', amount: '₪320' },
         ];
       case 'week':
         return [
           { id: '1', name: 'שכר דירה', date: '10/04/2025', amount: '₪3,500' },
-          { id: '2', name: '��כר עובדים', date: '05/04/2025', amount: '₪4,200' },
+          { id: '2', name: 'משכורת עובדים', date: '05/04/2025', amount: '₪4,200' },
           { id: '3', name: 'הזמנת מלאי', date: '12/04/2025', amount: '₪1,800' },
         ];
       case 'month':
         return [
           { id: '1', name: 'שכר דירה', date: '10/04/2025', amount: '₪3,500' },
-          { id: '2', name: 'שכר עובדים', date: '30/04/2025', amount: '₪16,800' },
+          { id: '2', name: 'משכורת עובדים כללית', date: '30/04/2025', amount: '₪16,800' },
           { id: '3', name: 'ביטוח עסק', date: '15/04/2025', amount: '₪2,350' },
           { id: '4', name: 'החזר הלוואה', date: '20/04/2025', amount: '₪4,500' },
         ];
       default:
         return [
           { id: '1', name: 'שכר דירה', date: '10/04/2025', amount: '₪3,500' },
-          { id: '2', name: 'שכר עובדים', date: '05/04/2025', amount: '₪4,200' },
+          { id: '2', name: 'משכורת עובדים', date: '05/04/2025', amount: '₪4,200' },
           { id: '3', name: 'הזמנת מלאי', date: '12/04/2025', amount: '₪1,800' },
         ];
     }
   };
 
-  // Generate important notes based on active range
   const getImportantNotes = () => {
     switch (activeRange) {
       case 'day':
@@ -112,7 +109,6 @@ const CashFlowForecast = ({ activeRange = 'week' }: CashFlowForecastProps) => {
     }
   };
 
-  // Get appropriate title based on the active range
   const getTitleText = () => {
     switch (activeRange) {
       case 'day':
@@ -147,7 +143,6 @@ const CashFlowForecast = ({ activeRange = 'week' }: CashFlowForecastProps) => {
       </CardHeader>
       <CardContent>
         <div className="space-y-6">
-          {/* Cash flow chart */}
           <div className="border rounded-2xl p-4 bg-white shadow-card">
             <div className="flex justify-between items-center mb-4">
               <h3 className="font-medium">{getTitleText()}</h3>
@@ -250,7 +245,6 @@ const CashFlowForecast = ({ activeRange = 'week' }: CashFlowForecastProps) => {
             </div>
           </div>
 
-          {/* Important notes */}
           <div className="border rounded-2xl p-4 bg-warmBeige/30">
             <div className="flex items-center mb-3">
               <AlertTriangle className="h-4 w-4 text-amber-500 ml-2" />
@@ -266,7 +260,6 @@ const CashFlowForecast = ({ activeRange = 'week' }: CashFlowForecastProps) => {
             </ul>
           </div>
 
-          {/* Upcoming expenses */}
           <div>
             <h3 className="font-medium mb-3">הוצאות קרובות</h3>
             <div className="space-y-2">
