@@ -42,6 +42,10 @@ import NewActivityPage from "@/pages/clients/NewActivityPage";
 
 // Marketing pages
 import MarketingPage from "@/pages/marketing/MarketingPage";
+import NewTemplateForm from "@/pages/marketing/NewTemplateForm"; 
+import EditTemplateForm from "@/pages/marketing/EditTemplateForm";
+import NewCampaignForm from "@/pages/marketing/NewCampaignForm";
+import EditCampaignForm from "@/pages/marketing/EditCampaignForm";
 
 // Auth routes - accessible without authentication
 export const authRoutes = [
@@ -91,6 +95,10 @@ export const protectedRoutes = [
   // Marketing routes
   { path: "/marketing", element: wrapWithLayout(MarketingPage) },
   { path: "/marketing/templates", element: wrapWithLayout(MarketingTemplates) },
+  { path: "/marketing/templates/new", element: wrapWithLayout(NewTemplateForm) },
+  { path: "/marketing/templates/edit/:id", element: wrapWithLayout(EditTemplateForm) },
+  { path: "/marketing/campaigns/new", element: wrapWithLayout(NewCampaignForm) },
+  { path: "/marketing/campaigns/edit/:id", element: wrapWithLayout(EditCampaignForm) },
   
   // Client management routes
   { path: "/clients", element: wrapWithLayout(ClientsPage) },

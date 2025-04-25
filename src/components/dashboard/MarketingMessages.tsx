@@ -5,7 +5,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Mail, MessageSquare, Send, PlusCircle, ArrowRight, Loader2 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
-import { getTemplates, getCampaigns, sendCampaign } from '@/services/marketingService';
+import { getTemplates } from '@/services/marketing/templateService';
+import { getCampaigns, sendCampaign } from '@/services/marketing/campaignService';
 import { MarketingTemplate, MarketingCampaign } from '@/types/marketing';
 import { format } from 'date-fns';
 
@@ -43,14 +44,10 @@ const MarketingMessages = () => {
     loadData();
   }, [activeTab, toast]);
 
-  const handleSendTemplate = (templateId: string, templateName: string) => {
+  const handleSendTemplate = (templateId: string) => {
     navigate('/marketing/campaigns/new', { 
       state: { templateId }
     });
-  };
-
-  const handleSendToAll = () => {
-    navigate('/marketing/campaigns/new');
   };
 
   const handleCreate = () => {
@@ -152,7 +149,7 @@ const MarketingMessages = () => {
                       variant="soft" 
                       size="sm" 
                       className="flex items-center gap-1"
-                      onClick={() => handleSendTemplate(template.id, template.title)}
+                      onClick={() => handleSendTemplate(template.id)}
                     >
                       <Send className="h-3.5 w-3.5" />
                       שלח
@@ -216,29 +213,7 @@ const MarketingMessages = () => {
                           variant="soft"
                           size="xs"
                           disabled={isSending[campaign.id]}
-                          onClick={() => {
-                            if (window.confirm(`האם אתה בטוח שברצונך לשלוח את הקמפיין "${campaign.name}" עכשיו?`)) {
-                              setIsSending(prev => ({ ...prev, [campaign.id]: true }));
-                              sendCampaign(campaign.id).then(() => {
-                                setCampaigns(campaigns.map(c => 
-                                  c.id === campaign.id ? { ...c, status: 'sent' as const } : c
-                                ));
-                                toast({
-                                  title: "הקמפיין נשלח בהצלחה",
-                                  description: "ההודעות נשלחות ללקוחות הנבחרים",
-                                });
-                              }).catch(error => {
-                                console.error('Error sending campaign:', error);
-                                toast({
-                                  title: "שגיאה בשליחת הקמפיין",
-                                  description: "אירעה שגיאה בשליחת הקמפיין, אנא נסה שנית",
-                                  variant: "destructive",
-                                });
-                              }).finally(() => {
-                                setIsSending(prev => ({ ...prev, [campaign.id]: false }));
-                              });
-                            }
-                          }}
+                          onClick={() => handleSendCampaign(campaign)}
                         >
                           {isSending[campaign.id] ? (
                             <Loader2 className="h-3 w-3 animate-spin" />

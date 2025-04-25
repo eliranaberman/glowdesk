@@ -1,6 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { MarketingCampaign, MarketingCampaignCreate, MarketingCampaignUpdate, CampaignStatus } from '@/types/marketing';
+import { MarketingCampaign, MarketingCampaignCreate, MarketingCampaignUpdate } from '@/types/marketing';
 
 export const getCampaigns = async (): Promise<MarketingCampaign[]> => {
   try {
@@ -8,15 +8,13 @@ export const getCampaigns = async (): Promise<MarketingCampaign[]> => {
       .from('marketing_campaigns')
       .select(`
         *,
-        template:template_id(id, title)
+        template:marketing_templates(id, title),
+        messages_count:marketing_messages(count)
       `)
-      .order('created_at', { ascending: false });
+      .order('scheduled_at', { ascending: false, nullsFirst: false });
 
     if (error) throw error;
-    return (data || []).map(campaign => ({
-      ...campaign,
-      status: campaign.status as CampaignStatus
-    }));
+    return data || [];
   } catch (error) {
     console.error('Error fetching campaigns:', error);
     throw error;
@@ -29,19 +27,13 @@ export const getCampaignById = async (id: string): Promise<MarketingCampaign | n
       .from('marketing_campaigns')
       .select(`
         *,
-        template:template_id(*)
+        template:marketing_templates(*)
       `)
       .eq('id', id)
       .single();
 
     if (error) throw error;
-    if (data) {
-      return {
-        ...data,
-        status: data.status as CampaignStatus
-      };
-    }
-    return null;
+    return data;
   } catch (error) {
     console.error(`Error fetching campaign ${id}:`, error);
     throw error;
@@ -57,10 +49,7 @@ export const createCampaign = async (campaign: MarketingCampaignCreate): Promise
       .single();
 
     if (error) throw error;
-    return {
-      ...data,
-      status: data.status as CampaignStatus
-    };
+    return data;
   } catch (error) {
     console.error('Error creating campaign:', error);
     throw error;
@@ -77,10 +66,7 @@ export const updateCampaign = async (id: string, updates: MarketingCampaignUpdat
       .single();
 
     if (error) throw error;
-    return {
-      ...data,
-      status: data.status as CampaignStatus
-    };
+    return data;
   } catch (error) {
     console.error(`Error updating campaign ${id}:`, error);
     throw error;
@@ -101,12 +87,20 @@ export const deleteCampaign = async (id: string): Promise<void> => {
   }
 };
 
-export const sendCampaign = async (campaignId: string): Promise<boolean> => {
+export const sendCampaign = async (id: string): Promise<void> => {
   try {
-    await updateCampaign(campaignId, { status: 'sent' });
-    return true;
+    // Update campaign status to sent
+    const { error: updateError } = await supabase
+      .from('marketing_campaigns')
+      .update({ status: 'sent' })
+      .eq('id', id);
+
+    if (updateError) throw updateError;
+    
+    // In a real application, here you would call a backend function to actually send the messages
+    console.log(`Campaign ${id} marked as sent. In a real application, messages would be sent here.`);
   } catch (error) {
-    console.error(`Error sending campaign ${campaignId}:`, error);
+    console.error(`Error sending campaign ${id}:`, error);
     throw error;
   }
 };
