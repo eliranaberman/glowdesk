@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import {
   MarketingTemplate, MarketingTemplateCreate, MarketingTemplateUpdate,
@@ -222,11 +223,21 @@ export const getCoupons = async (): Promise<Coupon[]> => {
       .order('created_at', { ascending: false });
 
     if (error) throw error;
-    // Explicitly cast to Coupon[] and ensure code is always a string
-    return (data || []).map(coupon => ({
-      ...coupon,
-      code: coupon.code ?? '' // Use nullish coalescing to provide empty string if null/undefined
-    } as Coupon));
+    
+    // Add the code field since it's missing from the database but required in our type
+    return (data || []).map(coupon => {
+      // Create a properly typed Coupon object with a code field
+      const typedCoupon: Coupon = {
+        ...coupon,
+        code: '', // Provide default empty string for code field
+        discount_percentage: coupon.discount_percentage || 0,
+        description: coupon.description || null,
+        valid_until: coupon.valid_until || '',
+        created_at: coupon.created_at || '',
+        created_by: coupon.created_by || ''
+      };
+      return typedCoupon;
+    });
   } catch (error) {
     console.error('Error fetching coupons:', error);
     throw error;
@@ -242,11 +253,19 @@ export const createCoupon = async (coupon: CouponCreate): Promise<Coupon> => {
       .single();
 
     if (error) throw error;
-    // Explicitly cast to Coupon and ensure code is always a string
-    return {
+    
+    // Add the code field to match our Coupon type
+    const typedCoupon: Coupon = {
       ...data,
-      code: data.code ?? '' // Use nullish coalescing to provide empty string if null/undefined
-    } as Coupon;
+      code: coupon.code || '', // Use the code from input or default to empty string
+      discount_percentage: data.discount_percentage || 0,
+      description: data.description || null,
+      valid_until: data.valid_until || '',
+      created_at: data.created_at || '',
+      created_by: data.created_by || ''
+    };
+    
+    return typedCoupon;
   } catch (error) {
     console.error('Error creating coupon:', error);
     throw error;

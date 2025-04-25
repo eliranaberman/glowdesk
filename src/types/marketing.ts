@@ -65,7 +65,7 @@ export type MarketingMessageUpdate = Partial<Omit<MarketingMessage, 'id' | 'camp
 export interface Coupon {
   id: string;
   title: string;
-  code?: string; // Made optional to match actual database schema
+  code: string; // This is now a required field in the type
   description: string | null;
   discount_percentage: number;
   valid_until: string;
