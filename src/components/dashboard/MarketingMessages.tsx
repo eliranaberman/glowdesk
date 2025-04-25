@@ -133,18 +133,21 @@ const MarketingMessages = () => {
             ) : templates.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
                 <p>אין תבניות עדיין</p>
-                <Button onClick={() => navigate('/marketing/templates/new')} variant="outline" className="mt-4 flex items-center gap-1">
-                  <PlusCircle className="h-4 w-4 ml-1" />
+                <Button onClick={() => navigate('/marketing/templates/new')} variant="outline" className="mt-4">
                   יצירת תבנית חדשה
                 </Button>
               </div>
             ) : (
               <div className="grid gap-3">
-                {templates.map((template) => (
+                {templates.slice(0, 4).map((template) => (
                   <div
                     key={template.id}
                     className="flex items-center justify-between p-3 border rounded-lg hover:bg-accent/10 transition-colors"
                   >
+                    <div className="flex items-center">
+                      <Mail className="h-4 w-4 text-muted-foreground ml-2" />
+                      <span>{template.title}</span>
+                    </div>
                     <Button 
                       variant="soft" 
                       size="sm" 
@@ -154,21 +157,13 @@ const MarketingMessages = () => {
                       <Send className="h-3.5 w-3.5" />
                       שלח
                     </Button>
-                    <div className="flex items-center">
-                      <Mail className="h-4 w-4 text-muted-foreground ml-2" />
-                      <span>{template.title}</span>
-                    </div>
                   </div>
                 ))}
               </div>
             )}
 
-            <div className="flex flex-col sm:flex-row gap-2 pt-2 justify-end">
-              <Button onClick={() => navigate('/marketing/templates/new')} variant="outline" className="flex items-center gap-1 order-first sm:order-first">
-                <PlusCircle className="h-4 w-4 ml-1" />
-                יצירת תבנית חדשה
-              </Button>
-              <Button onClick={() => navigate('/marketing/campaigns/new')} className="order-last sm:order-last">
+            <div className="flex justify-end pt-2">
+              <Button onClick={() => navigate('/marketing/campaigns/new')} className="w-full">
                 יצירת קמפיין חדש
               </Button>
             </div>
@@ -192,37 +187,20 @@ const MarketingMessages = () => {
               </div>
             ) : (
               <div className="space-y-3">
-                {campaigns.map((campaign) => (
+                {campaigns.slice(0, 3).map((campaign) => (
                   <div
                     key={campaign.id}
                     className="p-3 border rounded-lg hover:bg-accent/10 transition-colors"
                   >
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-muted-foreground text-xs">
-                        {campaign.status === 'sent' ? 'נשלח: ' : ''}
-                        {campaign.scheduled_at ? formatDate(campaign.scheduled_at) : 'לא זמין'}
+                    <div className="flex justify-between mb-1">
+                      <h3 className="font-medium">{campaign.name}</h3>
+                      <span className="text-xs text-muted-foreground">
+                        {campaign.scheduled_at ? formatDate(campaign.scheduled_at) : 'לא נקבע תאריך'}
                       </span>
-                      <span className="font-medium">{campaign.name}</span>
                     </div>
                     <div className="flex justify-between text-xs text-muted-foreground">
                       <span>סטטוס: {campaign.status === 'draft' ? 'טיוטה' : campaign.status === 'sent' ? 'נשלח' : campaign.status}</span>
                       <span>הודעות: {campaign.messages_count || 0}</span>
-                      
-                      {campaign.status !== 'sent' && (
-                        <Button
-                          variant="soft"
-                          size="xs"
-                          disabled={isSending[campaign.id]}
-                          onClick={() => handleSendCampaign(campaign)}
-                        >
-                          {isSending[campaign.id] ? (
-                            <Loader2 className="h-3 w-3 animate-spin" />
-                          ) : (
-                            <Send className="h-3 w-3 ml-1" />
-                          )}
-                          שלח עכשיו
-                        </Button>
-                      )}
                     </div>
                   </div>
                 ))}
