@@ -16,7 +16,9 @@ export const getCampaigns = async (): Promise<MarketingCampaign[]> => {
     if (error) throw error;
     return data.map(item => ({
       ...item,
-      status: item.status as CampaignStatus
+      status: item.status as CampaignStatus,
+      // Convert the messages_count from an array with count object to a number
+      messages_count: item.messages_count?.[0]?.count || 0
     })) || [];
   } catch (error) {
     console.error('Error fetching campaigns:', error);

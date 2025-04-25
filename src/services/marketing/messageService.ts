@@ -1,6 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { MarketingStats, MarketingMessage, MarketingMessageCreate, MarketingMessageUpdate } from '@/types/marketing';
+import { MarketingStats, MarketingMessage, MarketingMessageCreate, MarketingMessageUpdate, MessageStatus } from '@/types/marketing';
 
 export const getMarketingMessages = async (campaignId: string): Promise<MarketingMessage[]> => {
   try {
@@ -14,7 +14,10 @@ export const getMarketingMessages = async (campaignId: string): Promise<Marketin
       .order('sent_at', { ascending: false });
 
     if (error) throw error;
-    return data || [];
+    return (data || []).map(message => ({
+      ...message,
+      status: message.status as MessageStatus
+    }));
   } catch (error) {
     console.error('Error fetching marketing messages:', error);
     throw error;
@@ -30,7 +33,10 @@ export const createMarketingMessage = async (message: MarketingMessageCreate): P
       .single();
 
     if (error) throw error;
-    return data;
+    return {
+      ...data,
+      status: data.status as MessageStatus
+    };
   } catch (error) {
     console.error('Error creating marketing message:', error);
     throw error;
@@ -47,7 +53,10 @@ export const updateMarketingMessage = async (id: string, updates: MarketingMessa
       .single();
 
     if (error) throw error;
-    return data;
+    return {
+      ...data,
+      status: data.status as MessageStatus
+    };
   } catch (error) {
     console.error(`Error updating marketing message ${id}:`, error);
     throw error;
