@@ -8,6 +8,7 @@ import { ArrowLeft, Save } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { createTemplate } from '@/services/marketing/templateService';
+import { supabase } from '@/integrations/supabase/client';
 
 const NewTemplateForm = () => {
   const [title, setTitle] = useState('');
