@@ -157,10 +157,10 @@ export const TemplatesList = () => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="text-right w-[200px]">שם התבנית</TableHead>
+                  <TableHead className="text-right">פעולות</TableHead>
+                  <TableHead className="text-right">תאריך עדכון</TableHead>
                   <TableHead className="text-right">תוכן</TableHead>
-                  <TableHead className="text-right w-[150px]">תאריך עדכון</TableHead>
-                  <TableHead className="text-left w-[180px]">פעולות</TableHead>
+                  <TableHead className="text-right w-[200px]">שם התבנית</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -170,35 +170,17 @@ export const TemplatesList = () => {
                     onClick={() => openPreview(template)}
                     className="cursor-pointer"
                   >
-                    <TableCell className="font-medium text-right">{template.title}</TableCell>
-                    <TableCell className="text-right truncate max-w-[300px]">
-                      {template.content}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {formatDate(template.updated_at)}
-                    </TableCell>
                     <TableCell>
-                      <div className="flex justify-end space-x-2 rtl:space-x-reverse">
+                      <div className="flex space-x-2 rtl:space-x-reverse">
                         <Button 
                           variant="ghost" 
                           size="icon"
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleDelete(template.id, template.title);
-                          }}
-                          className="text-destructive hover:text-destructive/90 hover:bg-destructive/10"
-                        >
-                          <Trash className="h-4 w-4" />
-                        </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="icon"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleCreateCampaign(template);
+                            handleEdit(template.id);
                           }}
                         >
-                          <Send className="h-4 w-4" />
+                          <Pencil className="h-4 w-4" />
                         </Button>
                         <Button 
                           variant="ghost" 
@@ -215,13 +197,31 @@ export const TemplatesList = () => {
                           size="icon"
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleEdit(template.id);
+                            handleCreateCampaign(template);
                           }}
                         >
-                          <Pencil className="h-4 w-4" />
+                          <Send className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="icon"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDelete(template.id, template.title);
+                          }}
+                          className="text-destructive hover:text-destructive/90 hover:bg-destructive/10"
+                        >
+                          <Trash className="h-4 w-4" />
                         </Button>
                       </div>
                     </TableCell>
+                    <TableCell className="text-right">
+                      {formatDate(template.updated_at)}
+                    </TableCell>
+                    <TableCell className="text-right truncate max-w-[300px]">
+                      {template.content}
+                    </TableCell>
+                    <TableCell className="font-medium text-right">{template.title}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
