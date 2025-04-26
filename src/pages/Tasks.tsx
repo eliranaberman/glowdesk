@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,7 +11,11 @@ import {
   Calendar, 
   User, 
   AlertTriangle,
-  Filter
+  Filter,
+  ArrowDown,
+  ArrowUp,
+  SquareKanban,
+  Info
 } from "lucide-react";
 import { format } from "date-fns";
 import { he } from "date-fns/locale";
@@ -28,6 +33,7 @@ import {
   SelectValue
 } from "@/components/ui/select";
 import { TaskPriority, TaskStatus, Task, User as UserType } from "@/types/tasks";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const Tasks = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -37,6 +43,7 @@ const Tasks = () => {
   const [selectedUser, setSelectedUser] = useState<string | null>(null);
   const [selectedPriority, setSelectedPriority] = useState<TaskPriority | null>(null);
   const [selectedDueDate, setSelectedDueDate] = useState<string | null>(null);
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [users, setUsers] = useState<UserType[]>([]);
   const [isTaskFormOpen, setIsTaskFormOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
@@ -129,19 +136,20 @@ const Tasks = () => {
       result = result.filter(
         task => 
           task.title.toLowerCase().includes(search) || 
-          (task.description && task.description.toLowerCase().includes(search))
+          (task.description && task.description.toLowerCase().includes(search)) ||
+          (task.assigned_to_user?.full_name.toLowerCase().includes(search))
       );
     }
     
-    if (selectedUser) {
+    if (selectedUser && selectedUser !== "all") {
       result = result.filter(task => task.assigned_to === selectedUser);
     }
     
-    if (selectedPriority) {
+    if (selectedPriority && selectedPriority !== "all" as any) {
       result = result.filter(task => task.priority === selectedPriority);
     }
     
-    if (selectedDueDate) {
+    if (selectedDueDate && selectedDueDate !== "all") {
       if (selectedDueDate === 'today') {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
@@ -176,8 +184,20 @@ const Tasks = () => {
       }
     }
     
+    // Sort by due date if requested
+    result.sort((a, b) => {
+      if (!a.due_date && !b.due_date) return 0;
+      if (!a.due_date) return sortOrder === "asc" ? 1 : -1;
+      if (!b.due_date) return sortOrder === "asc" ? -1 : 1;
+      
+      const dateA = new Date(a.due_date).getTime();
+      const dateB = new Date(b.due_date).getTime();
+      
+      return sortOrder === "asc" ? dateA - dateB : dateB - dateA;
+    });
+    
     setFilteredTasks(result);
-  }, [tasks, searchTerm, selectedUser, selectedPriority, selectedDueDate]);
+  }, [tasks, searchTerm, selectedUser, selectedPriority, selectedDueDate, sortOrder]);
   
   const handleOpenTaskForm = (task: Task | null = null) => {
     setEditingTask(task);
@@ -215,16 +235,47 @@ const Tasks = () => {
   
   const handleDragStart = (e: React.DragEvent, taskId: string) => {
     e.dataTransfer.setData('taskId', taskId);
+    // Add some visual feedback
+    if (e.currentTarget instanceof HTMLElement) {
+      e.currentTarget.style.opacity = '0.4';
+    }
+  };
+  
+  const handleDragEnd = (e: React.DragEvent) => {
+    // Reset opacity when drag ends
+    if (e.currentTarget instanceof HTMLElement) {
+      e.currentTarget.style.opacity = '1';
+    }
   };
   
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
+    // Add visual feedback for drop target
+    if (e.currentTarget instanceof HTMLElement) {
+      e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.05)';
+    }
+  };
+  
+  const handleDragLeave = (e: React.DragEvent) => {
+    // Reset visual feedback
+    if (e.currentTarget instanceof HTMLElement) {
+      e.currentTarget.style.backgroundColor = '';
+    }
   };
   
   const handleDrop = (e: React.DragEvent, status: TaskStatus) => {
     e.preventDefault();
+    // Reset visual feedback
+    if (e.currentTarget instanceof HTMLElement) {
+      e.currentTarget.style.backgroundColor = '';
+    }
+    
     const taskId = e.dataTransfer.getData('taskId');
     handleStatusChange(taskId, status);
+  };
+  
+  const toggleSortOrder = () => {
+    setSortOrder(sortOrder === "asc" ? "desc" : "asc");
   };
   
   const openTasks = filteredTasks.filter(task => task.status === 'open');
@@ -233,33 +284,84 @@ const Tasks = () => {
   
   const shouldShowTaskForm = isTaskFormOpen || editingTask;
   
+  const renderSkeleton = () => (
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {[1, 2, 3].map((colIndex) => (
+        <div key={colIndex} className="space-y-4 p-4 bg-muted/30 rounded-lg">
+          <div className="flex items-center justify-between">
+            <Skeleton className="h-6 w-24" />
+            <Skeleton className="h-6 w-8 rounded-full" />
+          </div>
+          <div className="space-y-3">
+            {[1, 2, 3].map((index) => (
+              <div key={index} className="p-4 border rounded-lg bg-card">
+                <Skeleton className="h-5 w-full mb-2" />
+                <Skeleton className="h-4 w-3/4 mb-3" />
+                <div className="flex justify-between items-center mt-2">
+                  <Skeleton className="h-6 w-16 rounded-full" />
+                  <Skeleton className="h-6 w-6 rounded-full" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+  
+  const renderEmptyState = (status: TaskStatus) => {
+    const messages = {
+      open: "אין משימות פתוחות. הוסף משימה חדשה!",
+      in_progress: "אין משימות בתהליך כרגע.",
+      completed: "אין משימות שהושלמו."
+    };
+    
+    return (
+      <div className="flex flex-col items-center justify-center text-center py-10 text-muted-foreground border border-dashed rounded-lg bg-background/50 px-4">
+        <Info className="mb-2 h-10 w-10 opacity-30" />
+        <p>{messages[status]}</p>
+        {status === 'open' && (
+          <Button 
+            variant="outline" 
+            className="mt-4"
+            onClick={() => handleOpenTaskForm()}
+          >
+            <Plus className="ml-2 h-4 w-4" />
+            צור משימה חדשה
+          </Button>
+        )}
+      </div>
+    );
+  };
+  
   return (
     <div dir="rtl" className="space-y-4">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold">משימות</h1>
+          <h1 className="text-2xl font-bold">ניהול משימות</h1>
           <p className="text-muted-foreground">
-            ניהול משימות צוות ומעקב אחר ביצועים
+            נהל, עדכן וסגור משימות בצורה קלה ומהירה
           </p>
         </div>
         
         <Button 
           onClick={() => handleOpenTaskForm()}
           className="shrink-0"
+          size="lg"
         >
-          <Plus className="ml-2 h-4 w-4" />
+          <Plus className="ml-2 h-5 w-5" />
           משימה חדשה
         </Button>
       </div>
       
-      <Card>
+      <Card className="shadow-md">
         <CardHeader className="pb-3">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div className="w-full md:w-1/3">
               <div className="relative">
                 <Search className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="חיפוש משימות..."
+                  placeholder="חיפוש משימות לפי כותרת, תיאור או משתמש..."
                   className="pr-9"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
@@ -269,8 +371,8 @@ const Tasks = () => {
             
             <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
               <Select
-                value={selectedUser || ""}
-                onValueChange={(value) => setSelectedUser(value || null)}
+                value={selectedUser || "all"}
+                onValueChange={(value) => setSelectedUser(value === "all" ? null : value)}
               >
                 <SelectTrigger className="w-full md:w-40">
                   <SelectValue placeholder="סינון לפי משתמש" />
@@ -286,9 +388,9 @@ const Tasks = () => {
               </Select>
               
               <Select
-                value={selectedPriority || ""}
+                value={selectedPriority || "all"}
                 onValueChange={(value) => 
-                  setSelectedPriority(value ? value as TaskPriority : null)
+                  setSelectedPriority(value === "all" ? null : value as TaskPriority)
                 }
               >
                 <SelectTrigger className="w-full md:w-32">
@@ -303,8 +405,8 @@ const Tasks = () => {
               </Select>
               
               <Select
-                value={selectedDueDate || ""}
-                onValueChange={(value) => setSelectedDueDate(value || null)}
+                value={selectedDueDate || "all"}
+                onValueChange={(value) => setSelectedDueDate(value === "all" ? null : value)}
               >
                 <SelectTrigger className="w-full md:w-36">
                   <SelectValue placeholder="תאריך יעד" />
@@ -317,6 +419,19 @@ const Tasks = () => {
                 </SelectContent>
               </Select>
               
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={toggleSortOrder}
+                title="מיון לפי תאריך יעד"
+              >
+                {sortOrder === "asc" ? (
+                  <ArrowUp className="h-4 w-4" />
+                ) : (
+                  <ArrowDown className="h-4 w-4" />
+                )}
+              </Button>
+              
               <Button 
                 variant="outline" 
                 size="icon"
@@ -325,7 +440,9 @@ const Tasks = () => {
                   setSelectedUser(null);
                   setSelectedPriority(null);
                   setSelectedDueDate(null);
+                  setSortOrder("asc");
                 }}
+                title="נקה סינון"
               >
                 <Filter className="h-4 w-4" />
               </Button>
@@ -335,14 +452,13 @@ const Tasks = () => {
         
         <CardContent>
           {isLoading ? (
-            <div className="text-center py-10">
-              <p>טוען משימות...</p>
-            </div>
+            renderSkeleton()
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div
-                className="space-y-4 p-4 bg-muted/30 rounded-lg"
+                className="space-y-4 p-4 bg-muted/30 rounded-lg transition-colors duration-200"
                 onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
                 onDrop={(e) => handleDrop(e, 'open')}
               >
                 <div className="flex items-center justify-between">
@@ -350,15 +466,15 @@ const Tasks = () => {
                     <Badge variant="outline" className="mr-2 bg-yellow-100">
                       {openTasks.length}
                     </Badge>
-                    משימות פתוחות
+                    <span className="flex items-center">
+                      משימות פתוחות
+                    </span>
                   </h3>
                 </div>
                 
-                <div className="space-y-3">
+                <div className="space-y-3 min-h-[200px]">
                   {openTasks.length === 0 ? (
-                    <div className="text-center py-8 text-muted-foreground text-sm border border-dashed rounded-lg bg-background/50">
-                      אין משימות פתוחות
-                    </div>
+                    renderEmptyState('open')
                   ) : (
                     openTasks.map((task) => (
                       <TaskCard
@@ -366,6 +482,7 @@ const Tasks = () => {
                         task={task}
                         onEdit={() => handleOpenTaskForm(task)}
                         onDragStart={(e) => handleDragStart(e, task.id)}
+                        onDragEnd={handleDragEnd}
                         users={users}
                       />
                     ))
@@ -374,8 +491,9 @@ const Tasks = () => {
               </div>
               
               <div
-                className="space-y-4 p-4 bg-muted/30 rounded-lg"
+                className="space-y-4 p-4 bg-muted/30 rounded-lg transition-colors duration-200"
                 onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
                 onDrop={(e) => handleDrop(e, 'in_progress')}
               >
                 <div className="flex items-center justify-between">
@@ -383,15 +501,15 @@ const Tasks = () => {
                     <Badge variant="outline" className="mr-2 bg-blue-100">
                       {inProgressTasks.length}
                     </Badge>
-                    בתהליך
+                    <span className="flex items-center">
+                      בתהליך
+                    </span>
                   </h3>
                 </div>
                 
-                <div className="space-y-3">
+                <div className="space-y-3 min-h-[200px]">
                   {inProgressTasks.length === 0 ? (
-                    <div className="text-center py-8 text-muted-foreground text-sm border border-dashed rounded-lg bg-background/50">
-                      אין משימות בתהליך
-                    </div>
+                    renderEmptyState('in_progress')
                   ) : (
                     inProgressTasks.map((task) => (
                       <TaskCard
@@ -399,6 +517,7 @@ const Tasks = () => {
                         task={task}
                         onEdit={() => handleOpenTaskForm(task)}
                         onDragStart={(e) => handleDragStart(e, task.id)}
+                        onDragEnd={handleDragEnd}
                         users={users}
                       />
                     ))
@@ -407,8 +526,9 @@ const Tasks = () => {
               </div>
               
               <div
-                className="space-y-4 p-4 bg-muted/30 rounded-lg"
+                className="space-y-4 p-4 bg-muted/30 rounded-lg transition-colors duration-200"
                 onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
                 onDrop={(e) => handleDrop(e, 'completed')}
               >
                 <div className="flex items-center justify-between">
@@ -416,15 +536,15 @@ const Tasks = () => {
                     <Badge variant="outline" className="mr-2 bg-green-100">
                       {completedTasks.length}
                     </Badge>
-                    הושלמו
+                    <span className="flex items-center">
+                      הושלמו
+                    </span>
                   </h3>
                 </div>
                 
-                <div className="space-y-3">
+                <div className="space-y-3 min-h-[200px]">
                   {completedTasks.length === 0 ? (
-                    <div className="text-center py-8 text-muted-foreground text-sm border border-dashed rounded-lg bg-background/50">
-                      אין משימות שהושלמו
-                    </div>
+                    renderEmptyState('completed')
                   ) : (
                     completedTasks.map((task) => (
                       <TaskCard
@@ -432,6 +552,7 @@ const Tasks = () => {
                         task={task}
                         onEdit={() => handleOpenTaskForm(task)}
                         onDragStart={(e) => handleDragStart(e, task.id)}
+                        onDragEnd={handleDragEnd}
                         users={users}
                       />
                     ))

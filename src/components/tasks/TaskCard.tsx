@@ -8,7 +8,8 @@ import {
   Calendar, 
   Edit, 
   Trash2,
-  CheckCircle
+  CheckCircle,
+  AlertTriangle
 } from "lucide-react";
 import { format } from "date-fns";
 import { he } from "date-fns/locale";
@@ -35,10 +36,11 @@ interface TaskCardProps {
   task: Task;
   onEdit: () => void;
   onDragStart: (e: React.DragEvent) => void;
+  onDragEnd: (e: React.DragEvent) => void;
   users: User[];
 }
 
-const TaskCard = ({ task, onEdit, onDragStart, users }: TaskCardProps) => {
+const TaskCard = ({ task, onEdit, onDragStart, onDragEnd, users }: TaskCardProps) => {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
@@ -172,16 +174,24 @@ const TaskCard = ({ task, onEdit, onDragStart, users }: TaskCardProps) => {
     <>
       <Card 
         className={`p-4 hover:shadow-md transition-all duration-200 cursor-move ${
-          isDueDateOverdue(task.due_date) ? 'border-red-300 border-2' : ''
-        }`}
+          isDueDateOverdue(task.due_date) ? 'border-red-300 border-2' : 'border border-border/30'
+        } group bg-card hover:bg-card/90 hover:scale-[1.01]`}
         draggable
         onDragStart={onDragStart}
+        onDragEnd={onDragEnd}
+        onClick={(e) => {
+          // Only allow clicks on the card itself (not buttons inside) to edit
+          if (e.target === e.currentTarget || 
+              (e.target instanceof HTMLElement && !e.target.closest('button'))) {
+            onEdit();
+          }
+        }}
       >
         <div className="flex justify-between items-start">
-          <h4 className="font-medium mb-2 flex-1">{task.title}</h4>
+          <h4 className="font-medium mb-2 flex-1 text-foreground">{task.title}</h4>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
+              <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity">
                 <MoreVertical className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
@@ -221,10 +231,13 @@ const TaskCard = ({ task, onEdit, onDragStart, users }: TaskCardProps) => {
           </Badge>
           
           {assignedUser && (
-            <div className="flex items-center" title={assignedUser.full_name}>
+            <div className="flex items-center gap-1" title={assignedUser.full_name}>
+              <span className="text-xs text-muted-foreground hidden sm:inline">
+                {assignedUser.full_name.split(' ')[0]}
+              </span>
               <Avatar className="h-6 w-6">
                 <AvatarImage src={assignedUser.avatar_url} />
-                <AvatarFallback className="text-xs">
+                <AvatarFallback className="text-xs bg-muted">
                   {getInitials(assignedUser.full_name)}
                 </AvatarFallback>
               </Avatar>
@@ -232,17 +245,26 @@ const TaskCard = ({ task, onEdit, onDragStart, users }: TaskCardProps) => {
           )}
         </div>
         
-        <div className="mt-3 pt-2 border-t flex items-center text-sm text-muted-foreground">
-          <Calendar className="h-3.5 w-3.5 ml-1" />
-          <span className={`${
-            isDueDateToday(task.due_date) 
-              ? 'text-yellow-600 font-medium' 
-              : isDueDateOverdue(task.due_date) 
-                ? 'text-red-600 font-medium'
-                : ''
-          }`}>
-            {formatDueDate(task.due_date)}
-          </span>
+        <div className="mt-3 pt-2 border-t flex items-center justify-between text-xs text-muted-foreground">
+          <div className="flex items-center">
+            <Calendar className="h-3.5 w-3.5 ml-1" />
+            <span className={`${
+              isDueDateToday(task.due_date) 
+                ? 'text-yellow-600 font-medium' 
+                : isDueDateOverdue(task.due_date) 
+                  ? 'text-red-600 font-medium'
+                  : ''
+            }`}>
+              {formatDueDate(task.due_date)}
+            </span>
+          </div>
+          
+          {isDueDateOverdue(task.due_date) && (
+            <Badge variant="destructive" className="text-[0.65rem] px-1 py-0">
+              <AlertTriangle className="h-3 w-3 mr-1" />
+              באיחור
+            </Badge>
+          )}
         </div>
       </Card>
       
