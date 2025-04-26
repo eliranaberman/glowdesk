@@ -11,12 +11,12 @@ const AIMarketingTools = () => {
   const [generatedContent, setGeneratedContent] = useState<string[]>([]);
 
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Input section - Now on the right */}
-        <Card className="md:col-span-1 order-1">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {/* Input section - Now on the right */}
+      <div className="md:col-span-1 order-2 md:order-1">
+        <Card className="shadow-soft hover:shadow-soft-lg transition-all duration-300">
           <CardHeader>
-            <CardTitle>כלי שיווק חכמים</CardTitle>
+            <CardTitle className="text-lg font-display">כלי שיווק חכמים</CardTitle>
             <CardDescription>הזינו את פרטי העסק שלכם ואנו ניצור תוכן שיווקי מותאם אישית</CardDescription>
           </CardHeader>
           <ContentGenerationForm 
@@ -25,11 +25,13 @@ const AIMarketingTools = () => {
             setIsGenerating={setIsGenerating}
           />
         </Card>
+      </div>
 
-        {/* Output section - Now on the left */}
-        <Card className="md:col-span-2 order-2">
+      {/* Output section - Now on the left */}
+      <div className="md:col-span-2 order-1 md:order-2">
+        <Card className="shadow-soft hover:shadow-soft-lg transition-all duration-300">
           <CardHeader>
-            <CardTitle>הצעות לתוכן מותאם אישית</CardTitle>
+            <CardTitle className="text-lg font-display">הצעות לתוכן מותאם אישית</CardTitle>
             <CardDescription>תוכן שיווקי מותאם אישית עבור העסק שלך</CardDescription>
           </CardHeader>
           <GeneratedContent 
@@ -40,7 +42,9 @@ const AIMarketingTools = () => {
       </div>
       
       {/* Marketing benefits section */}
-      <MarketingBenefits />
+      <div className="md:col-span-3 order-3">
+        <MarketingBenefits />
+      </div>
     </div>
   );
 };
