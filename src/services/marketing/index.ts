@@ -18,9 +18,11 @@ export const initializeMarketingData = async () => {
     
     console.log(`Found ${existingTemplates.length} templates and ${existingCampaigns.length} campaigns`);
     
+    // If either templates or campaigns are empty, populate them
     if (existingTemplates.length === 0 || existingCampaigns.length === 0) {
       console.log('Populating marketing samples...');
       await populateMarketingSamples();
+      console.log('Marketing samples populated successfully');
     }
   } catch (error) {
     console.error('Error initializing marketing data:', error);

@@ -9,28 +9,28 @@ const sampleCampaigns: MarketingCampaignCreate[] = [
     name: "קמפיין קיץ 2024",
     status: "draft",
     scheduled_at: "2024-06-01T10:00:00",
-    created_by: "system",
+    created_by: "00000000-0000-0000-0000-000000000000",
     template_id: "" // Will be set dynamically
   },
   {
     name: "מבצע חזרה מחופשה",
     status: "scheduled",
     scheduled_at: "2024-08-15T09:00:00",
-    created_by: "system",
+    created_by: "00000000-0000-0000-0000-000000000000",
     template_id: "" // Will be set dynamically
   },
   {
     name: "קמפיין חגים תשפ״ה",
     status: "draft",
     scheduled_at: "2024-09-01T10:00:00",
-    created_by: "system",
+    created_by: "00000000-0000-0000-0000-000000000000",
     template_id: "" // Will be set dynamically
   },
   {
     name: "מבצע סוף שנה 2024",
     status: "draft",
     scheduled_at: "2024-12-15T09:00:00",
-    created_by: "system",
+    created_by: "00000000-0000-0000-0000-000000000000",
     template_id: "" // Will be set dynamically
   }
 ];
@@ -42,7 +42,7 @@ const sampleCoupons: CouponCreate[] = [
     discount_percentage: 25,
     description: "25% הנחה על הטיפול הראשון - תקף לחודש מיום ההנפקה",
     valid_until: "2024-12-31",
-    created_by: "system"
+    created_by: "00000000-0000-0000-0000-000000000000"
   },
   {
     title: "מבצע יום הולדת",
@@ -50,7 +50,7 @@ const sampleCoupons: CouponCreate[] = [
     discount_percentage: 40,
     description: "40% הנחה על כל הטיפולים - תקף בחודש יום ההולדת",
     valid_until: "2024-12-31",
-    created_by: "system"
+    created_by: "00000000-0000-0000-0000-000000000000"
   },
   {
     title: "חבילת VIP זוגית",
@@ -58,7 +58,7 @@ const sampleCoupons: CouponCreate[] = [
     discount_percentage: 30,
     description: "30% הנחה על טיפול זוגי - הטבה מיוחדת לחברות מועדון",
     valid_until: "2024-12-31",
-    created_by: "system"
+    created_by: "00000000-0000-0000-0000-000000000000"
   },
   {
     title: "הטבת חברה מביאה חברה",
@@ -66,7 +66,7 @@ const sampleCoupons: CouponCreate[] = [
     discount_percentage: 50,
     description: "50% הנחה ללקוחה חדשה בהמלצת לקוחה קיימת",
     valid_until: "2024-12-31",
-    created_by: "system"
+    created_by: "00000000-0000-0000-0000-000000000000"
   },
   {
     title: "מבצע השקה מיוחד",
@@ -74,19 +74,23 @@ const sampleCoupons: CouponCreate[] = [
     discount_percentage: 35,
     description: "35% הנחה על כל השירותים - מבצע השקה חד פעמי",
     valid_until: "2024-12-31",
-    created_by: "system"
+    created_by: "00000000-0000-0000-0000-000000000000"
   }
 ];
 
 export const populateMarketingSamples = async () => {
   try {
+    console.log("Starting to populate marketing samples...");
+    
     // First create all coupons
     for (const coupon of sampleCoupons) {
       await createCoupon(coupon);
     }
+    console.log("Created sample coupons");
     
     // Then create campaigns and link them to templates
     const templates = await getTemplates();
+    console.log(`Found ${templates.length} templates for campaign creation`);
     
     if (templates.length >= sampleCampaigns.length) {
       for (let i = 0; i < sampleCampaigns.length; i++) {
@@ -96,6 +100,7 @@ export const populateMarketingSamples = async () => {
         };
         await createCampaign(campaign);
       }
+      console.log("Created sample campaigns");
     }
     
     return true;

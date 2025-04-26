@@ -1,6 +1,9 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { Coupon, CouponCreate, CouponAssignment } from '@/types/marketing';
+import { Coupon, CouponCreate, CouponUpdate } from '@/types/marketing';
+
+// Use consistent system UUID for records created by the system
+const SYSTEM_USER_ID = '00000000-0000-0000-0000-000000000000';
 
 export const getCoupons = async (): Promise<Coupon[]> => {
   try {
@@ -10,46 +13,46 @@ export const getCoupons = async (): Promise<Coupon[]> => {
       .order('created_at', { ascending: false });
 
     if (error) throw error;
-    
-    return (data || []).map(coupon => {
-      const typedCoupon: Coupon = {
-        ...coupon,
-        code: '', 
-        discount_percentage: coupon.discount_percentage || 0,
-        description: coupon.description || null,
-        valid_until: coupon.valid_until || '',
-        created_at: coupon.created_at || '',
-        created_by: coupon.created_by || ''
-      };
-      return typedCoupon;
-    });
+    return data || [];
   } catch (error) {
     console.error('Error fetching coupons:', error);
     throw error;
   }
 };
 
-export const createCoupon = async (coupon: CouponCreate): Promise<Coupon> => {
+export const getCouponById = async (id: string): Promise<Coupon | null> => {
   try {
     const { data, error } = await supabase
       .from('coupons')
-      .insert(coupon)
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error(`Error fetching coupon ${id}:`, error);
+    throw error;
+  }
+};
+
+export const createCoupon = async (coupon: CouponCreate): Promise<Coupon> => {
+  try {
+    // Ensure created_by is set to system UUID if not provided
+    const couponData = {
+      ...coupon,
+      created_by: coupon.created_by || SYSTEM_USER_ID,
+      code: coupon.code.toUpperCase() // Ensure code is always uppercase
+    };
+
+    const { data, error } = await supabase
+      .from('coupons')
+      .insert(couponData)
       .select()
       .single();
 
     if (error) throw error;
-    
-    const typedCoupon: Coupon = {
-      ...data,
-      code: coupon.code || '',
-      discount_percentage: data.discount_percentage || 0,
-      description: data.description || null,
-      valid_until: data.valid_until || '',
-      created_at: data.created_at || '',
-      created_by: data.created_by || ''
-    };
-    
-    return typedCoupon;
+    return data;
   } catch (error) {
     console.error('Error creating coupon:', error);
     throw error;

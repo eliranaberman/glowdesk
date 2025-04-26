@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,7 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { getMarketingStats } from '@/services/marketingService';
 import { MarketingStats } from '@/types/marketing';
-import { initializeMarketingData } from '@/services/marketingService';
+import { initializeMarketingData } from '@/services/marketing';
 
 const MarketingPage = () => {
   const [activeTab, setActiveTab] = useState('templates');
@@ -22,25 +23,25 @@ const MarketingPage = () => {
 
   useEffect(() => {
     const initData = async () => {
-      await initializeMarketingData();
-      const loadStats = async () => {
-        try {
-          setIsLoading(true);
-          const data = await getMarketingStats();
-          setStats(data);
-        } catch (error) {
-          console.error('Error loading marketing stats:', error);
-          toast({
-            title: 'שגיאה בטעינת נתוני שיווק',
-            description: 'אירעה שגיאה בטעינת הנתונים, אנא נסה שנית',
-            variant: 'destructive',
-          });
-        } finally {
-          setIsLoading(false);
-        }
-      };
-
-      loadStats();
+      try {
+        // First initialize all marketing data
+        await initializeMarketingData();
+        console.log("Marketing data initialization completed");
+        
+        // Then load stats
+        setIsLoading(true);
+        const data = await getMarketingStats();
+        setStats(data);
+      } catch (error) {
+        console.error('Error loading marketing stats:', error);
+        toast({
+          title: 'שגיאה בטעינת נתוני שיווק',
+          description: 'אירעה שגיאה בטעינת הנתונים, אנא נסה שנית',
+          variant: 'destructive',
+        });
+      } finally {
+        setIsLoading(false);
+      }
     };
 
     initData();

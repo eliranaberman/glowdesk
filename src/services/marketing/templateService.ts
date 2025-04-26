@@ -63,12 +63,17 @@ const createInitialTemplatesIfNeeded = async () => {
       .select('id');
 
     if (!existingTemplates || existingTemplates.length === 0) {
-      // Use a system user ID for initialization, without relying on authenticated users
+      // Fixed: Use a system-generated UUID instead of a string 'system'
+      // This UUID will represent the system user for templates not created by real users
+      const systemUserId = '00000000-0000-0000-0000-000000000000';
+      
       for (const template of initialTemplates) {
-        await createTemplate({
-          ...template,
-          created_by: 'system' // Use 'system' instead of requiring a real user ID
-        });
+        await supabase
+          .from('marketing_templates')
+          .insert({
+            ...template,
+            created_by: systemUserId
+          });
       }
       console.log('Created initial marketing templates');
     }
