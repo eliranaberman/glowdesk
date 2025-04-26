@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Clock, Edit, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { format, addDays, startOfWeek, endOfWeek, addMonths, startOfMonth, endOfMonth, isWithinInterval, isSameDay, isSameMonth } from 'date-fns';
+import { format, addDays, startOfWeek, endOfWeek, addMonths, startOfMonth, endOfMonth, isWithinInterval, isSameDay, isSameMonth, parse } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 import { Calendar } from '@/components/ui/calendar';
 import {
@@ -39,8 +39,8 @@ interface GanttChartProps {
   onDateChange: (date: Date) => void;
 }
 
-const HOURS = Array.from({ length: 16 }, (_, i) => i + 8); // 8:00 to 23:00
-const CELL_HEIGHT = 60; // Height of appointment cell in pixels
+const HOURS = Array.from({ length: 12 }, (_, i) => i + 8); // 8:00 to 19:00
+const CELL_HEIGHT = 60;
 const DAYS_OF_WEEK = ['יום א׳', 'יום ב׳', 'יום ג׳', 'יום ד׳', 'יום ה׳', 'יום ו׳', 'שבת'];
 
 const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
@@ -283,6 +283,274 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
     return () => clearInterval(interval);
   }, [view, date]);
 
+  const formatAppointmentTime = (time: string) => {
+    const [hours, minutes] = time.split(':');
+    return `${hours.padStart(2, '0')}:${minutes.padStart(2, '0')}`;
+  };
+
+  const calculateOverlap = (appointments: Appointment[]): Appointment[] => {
+    const sortedApps = [...appointments].sort((a, b) => {
+      const timeA = parse(a.startTime, 'HH:mm', new Date()).getTime();
+      const timeB = parse(b.startTime, 'HH:mm', new Date()).getTime();
+      return timeA - timeB;
+    });
+
+    const processed: Appointment[] = [];
+    const overlaps: { [key: string]: number } = {};
+
+    sortedApps.forEach(app => {
+      const appStart = parse(app.startTime, 'HH:mm', new Date()).getTime();
+      const appEnd = appStart + (app.duration * 60 * 1000);
+      
+      let maxOverlap = 0;
+      let column = 0;
+      
+      processed.forEach(existing => {
+        const existingStart = parse(existing.startTime, 'HH:mm', new Date()).getTime();
+        const existingEnd = existingStart + (existing.duration * 60 * 1000);
+        
+        if (appStart < existingEnd && appEnd > existingStart) {
+          maxOverlap = Math.max(maxOverlap, (overlaps[existing.id] || 0) + 1);
+        }
+      });
+      
+      while (processed.some(existing => {
+        const existingStart = parse(existing.startTime, 'HH:mm', new Date()).getTime();
+        const existingEnd = existingStart + (existing.duration * 60 * 1000);
+        return appStart < existingEnd && 
+               appEnd > existingStart && 
+               overlaps[existing.id] === column;
+      })) {
+        column++;
+      }
+      
+      overlaps[app.id] = column;
+      processed.push(app);
+    });
+
+    return sortedApps.map(app => ({
+      ...app,
+      verticalPosition: overlaps[app.id]
+    }));
+  };
+
+  // Update the appointment rendering logic
+  const renderAppointment = (appointment: Appointment, containerWidth: number) => {
+    const left = getAppointmentPosition(appointment.startTime);
+    const width = (appointment.duration / 60) * (100 / HOURS.length);
+    const maxOverlap = Math.max(...appointments.map(a => a.verticalPosition || 0));
+    const verticalGap = 2;
+    const cardHeight = (100 - (verticalGap * (maxOverlap + 1))) / (maxOverlap + 1);
+    const top = appointment.verticalPosition ? 
+      (appointment.verticalPosition * (cardHeight + verticalGap)) : 0;
+
+    return (
+      <div
+        key={appointment.id}
+        className="absolute rounded-md border shadow-sm transition-all hover:shadow-md hover:ring-1 hover:ring-primary cursor-pointer animate-fade-in"
+        style={{
+          backgroundColor: appointment.color || '#E5DEFF',
+          left: `${left}%`,
+          width: `${width}%`,
+          top: `${top}%`,
+          height: `${cardHeight}%`,
+          minHeight: '60px',
+          minWidth: '120px',
+          zIndex: appointment.verticalPosition || 1
+        }}
+        onClick={() => handleAppointmentClick(appointment)}
+      >
+        <div className="p-2 h-full flex flex-col overflow-hidden">
+          <div className="flex-1">
+            <p className="font-medium text-sm truncate text-gray-800">{appointment.customer}</p>
+            <p className="text-xs truncate text-gray-600">{appointment.service}</p>
+          </div>
+          <div className="flex items-center justify-between mt-auto">
+            <div className="flex items-center text-xs opacity-80 gap-1 text-gray-700">
+              <Clock className="h-3 w-3" />
+              <span>{formatAppointmentTime(appointment.startTime)}</span>
+            </div>
+            {appointment.price && (
+              <Badge variant="outline" className="bg-white/70 text-xs font-medium">
+                {appointment.price}
+              </Badge>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // Update the time grid rendering
+  const renderTimeGrid = () => (
+    <div className="hours-header flex border-b bg-muted/10 sticky top-0 z-10">
+      {HOURS.map((hour) => (
+        <div 
+          key={hour} 
+          className="hour-cell text-center py-2 text-xs font-medium"
+          style={{ width: `${100 / HOURS.length}%` }}
+        >
+          {`${hour.toString().padStart(2, '0')}:00`}
+        </div>
+      ))}
+    </div>
+  );
+
+  const nextPeriod = () => {
+    const newDate = new Date(date);
+    if (view === 'day') {
+      newDate.setDate(date.getDate() + 1);
+    } else if (view === 'week') {
+      newDate.setDate(date.getDate() + 7);
+    } else if (view === 'month') {
+      newDate.setMonth(date.getMonth() + 1);
+    }
+    onDateChange(newDate);
+  };
+
+  const prevPeriod = () => {
+    const newDate = new Date(date);
+    if (view === 'day') {
+      newDate.setDate(date.getDate() - 1);
+    } else if (view === 'week') {
+      newDate.setDate(date.getDate() - 7);
+    } else if (view === 'month') {
+      newDate.setMonth(date.getMonth() - 1);
+    }
+    onDateChange(newDate);
+  };
+
+  const goToToday = () => {
+    onDateChange(new Date());
+  };
+
+  const formatHour = (hour: number) => {
+    return `${hour.toString().padStart(2, '0')}:00`;
+  };
+
+  const handleAppointmentClick = (appointment: Appointment) => {
+    setSelectedAppointment(appointment);
+    setIsAppointmentDetailsOpen(true);
+  };
+
+  const handleEditAppointment = () => {
+    if (selectedAppointment) {
+      navigate(`/scheduling/edit/${selectedAppointment.id}`);
+    }
+  };
+
+  const handleDeleteAppointment = () => {
+    if (selectedAppointment) {
+      setIsAppointmentDetailsOpen(false);
+      setSelectedAppointment(null);
+    }
+  };
+
+  const getCurrentTimePosition = () => {
+    const now = new Date();
+    const currentHour = now.getHours();
+    const currentMinute = now.getMinutes();
+    
+    if (currentHour < 8 || currentHour >= 24) {
+      return -1; // Out of bounds
+    }
+    
+    const hourPosition = currentHour - 8;
+    const minutePercentage = currentMinute / 60;
+    
+    return (hourPosition + minutePercentage) / HOURS.length * 100;
+  };
+
+  const timeToMinutes = (timeStr: string): number => {
+    const [hours, minutes] = timeStr.split(':').map(Number);
+    return hours * 60 + minutes;
+  };
+
+  const sortedAppointments = useMemo(() => {
+    return [...filteredAppointments].sort((a, b) => {
+      return timeToMinutes(a.startTime) - timeToMinutes(b.startTime);
+    });
+  }, [filteredAppointments]);
+
+  const calculateAppointmentSlots = (appointments: Appointment[]): Appointment[] => {
+    if (!appointments.length) return [];
+
+    const result = [...appointments];
+    const slots: { [key: number]: number[] } = {};
+
+    result.sort((a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime));
+    
+    for (const appointment of result) {
+      const startMinutes = timeToMinutes(appointment.startTime);
+      const endMinutes = startMinutes + appointment.duration;
+      
+      let slotIndex = 0;
+      while (true) {
+        const isSlotAvailable = !slots[slotIndex]?.some(
+          occupiedMinute => 
+            occupiedMinute >= startMinutes && 
+            occupiedMinute < endMinutes
+        );
+        
+        if (isSlotAvailable) {
+          if (!slots[slotIndex]) slots[slotIndex] = [];
+          for (let min = startMinutes; min < endMinutes; min += 5) {
+            slots[slotIndex].push(min);
+          }
+          appointment.verticalPosition = slotIndex;
+          break;
+        }
+        
+        slotIndex++;
+      }
+    }
+    
+    return result;
+  };
+
+  const slottedAppointments = useMemo(() => {
+    return calculateAppointmentSlots(sortedAppointments);
+  }, [sortedAppointments]);
+
+  const weeklyAppointmentsByDay = useMemo(() => {
+    if (view !== 'week') return [];
+    
+    return viewDates.map(dayDate => {
+      const dayAppointments = filteredAppointments
+        .filter(app => app.date ? isSameDay(app.date, dayDate) : false)
+        .sort((a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime));
+      
+      return {
+        date: dayDate,
+        appointments: dayAppointments
+      };
+    });
+  }, [filteredAppointments, viewDates, view]);
+
+  const [currentTimePos, setCurrentTimePos] = useState<number>(getCurrentTimePosition());
+  
+  useEffect(() => {
+    if (view !== 'day' || !isSameDay(date, new Date())) {
+      setIsCurrentTimeVisible(false);
+      return;
+    }
+    
+    const updateCurrentTime = () => {
+      const position = getCurrentTimePosition();
+      setCurrentTimePos(position);
+      setIsCurrentTimeVisible(position >= 0);
+    };
+    
+    updateCurrentTime();
+    const interval = setInterval(updateCurrentTime, 60000);
+    
+    return () => clearInterval(interval);
+  }, [view, date]);
+
+  const processedAppointments = useMemo(() => {
+    return calculateOverlap(filteredAppointments);
+  }, [filteredAppointments]);
+
   return (
     <Card className="shadow-md border-muted overflow-hidden">
       <CardHeader className="flex flex-row items-center justify-between pb-2 bg-white" dir="rtl">
@@ -362,105 +630,28 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
         <div className="border-t rounded-b-lg overflow-hidden">
           {view === 'day' ? (
             <div className="gantt-container relative overflow-x-auto min-h-[600px] bg-white">
-              <div className="gantt-timeline">
-                <div className="hours-header flex border-b bg-muted/10 sticky top-0 z-10">
-                  {HOURS.map((hour) => (
-                    <div 
-                      key={hour} 
-                      className="hour-cell text-center py-2 text-xs font-medium"
-                      style={{ width: `${100 / HOURS.length}%` }}
-                    >
-                      {formatHour(hour)}
-                    </div>
-                  ))}
-                </div>
-
-                <div className="relative h-[600px] p-2">
-                  {HOURS.map((hour, index) => (
-                    <div 
-                      key={`hour-${hour}`}
-                      className="absolute border-r border-muted/30 h-full"
-                      style={{ 
-                        left: `${(index / HOURS.length) * 100}%`,
-                        top: 0
-                      }}
-                    />
-                  ))}
-                  
-                  {HOURS.map((hour, index) => (
-                    <div 
-                      key={`half-hour-${hour}`}
-                      className="absolute border-r border-dashed border-muted/20 h-full"
-                      style={{ 
-                        left: `${((index + 0.5) / HOURS.length) * 100}%`,
-                        top: 0
-                      }}
-                    />
-                  ))}
-
-                  {isSameDay(date, new Date()) && isCurrentTimeVisible && (
-                    <div 
-                      className="absolute h-full border-r-2 border-red-500 z-10"
-                      style={{ 
-                        left: `${currentTimePos}%` 
-                      }}
-                    >
-                      <div className="absolute -left-2 -top-1 h-4 w-4 rounded-full bg-red-500"></div>
-                    </div>
-                  )}
-
-                  {slottedAppointments.length === 0 ? (
-                    <div className="flex justify-center items-center h-full text-muted-foreground">
-                      אין פגישות להיום
-                    </div>
-                  ) : (
-                    <div className="relative w-full h-full">
-                      {slottedAppointments.map((appointment) => {
-                        const leftPosition = getAppointmentPosition(appointment.startTime);
-                        const width = getAppointmentWidth(appointment.duration);
-                        const slotHeight = 20;
-                        const verticalGap = 3;
-                        const verticalPosition = (appointment.verticalPosition || 0) * (slotHeight + verticalGap);
-                        
-                        return (
-                          <div
-                            key={appointment.id}
-                            className="absolute rounded-md border shadow-sm transition-all hover:shadow-md hover:ring-1 hover:ring-primary cursor-pointer animate-fade-in"
-                            style={{
-                              backgroundColor: appointment.color || '#E5DEFF',
-                              left: `${leftPosition}%`,
-                              width: `${width}%`,
-                              top: `${verticalPosition}%`,
-                              height: `${slotHeight}%`,
-                              minHeight: '60px',
-                              minWidth: '120px',
-                              zIndex: 1
-                            }}
-                            onClick={() => handleAppointmentClick(appointment)}
-                          >
-                            <div className="p-2 h-full flex flex-col overflow-hidden">
-                              <div className="flex-1">
-                                <p className="font-medium text-sm truncate text-gray-800">{appointment.customer}</p>
-                                <p className="text-xs truncate text-gray-600">{appointment.service}</p>
-                              </div>
-                              <div className="flex items-center justify-between mt-auto">
-                                <div className="flex items-center text-xs opacity-80 gap-1 text-gray-700">
-                                  <Clock className="h-3 w-3" />
-                                  <span>{appointment.startTime}</span>
-                                </div>
-                                {appointment.price && (
-                                  <Badge variant="outline" className="bg-white/70 text-xs font-medium">
-                                    {appointment.price}
-                                  </Badge>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
+              {renderTimeGrid()}
+              <div className="relative h-[600px] p-2">
+                {HOURS.map((hour, index) => (
+                  <div 
+                    key={`hour-${hour}`}
+                    className="absolute border-r border-muted/30 h-full"
+                    style={{ 
+                      left: `${(index / HOURS.length) * 100}%`,
+                      top: 0
+                    }}
+                  />
+                ))}
+                
+                {processedAppointments.length === 0 ? (
+                  <div className="flex justify-center items-center h-full text-muted-foreground">
+                    אין פגישות להיום
+                  </div>
+                ) : (
+                  <div className="relative w-full h-full">
+                    {processedAppointments.map(appointment => renderAppointment(appointment, 100 / HOURS.length))}
+                  </div>
+                )}
               </div>
             </div>
           ) : view === 'week' ? (
@@ -687,20 +878,4 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
               </Button>
               
               <div className="flex gap-2">
-                <Button variant="outline" onClick={() => setIsAppointmentDetailsOpen(false)}>
-                  סגור
-                </Button>
-                <Button onClick={handleEditAppointment} className="gap-1">
-                  <Edit className="h-4 w-4" />
-                  ערוך
-                </Button>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
-      )}
-    </Card>
-  );
-};
-
-export default GanttChart;
+                <Button variant="
