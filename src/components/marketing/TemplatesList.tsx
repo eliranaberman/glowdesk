@@ -130,7 +130,7 @@ export const TemplatesList = () => {
               placeholder="חיפוש תבניות..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pr-4 pl-10 w-full"
+              className="pr-4 pl-10 w-full text-sm"
             />
           </div>
         </CardContent>
@@ -143,11 +143,11 @@ export const TemplatesList = () => {
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
           ) : filteredTemplates.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground">
+            <div className="text-center py-12 text-muted-foreground text-sm">
               <p>לא נמצאו תבניות</p>
               <Button 
                 variant="outline" 
-                className="mt-4"
+                className="mt-4 text-xs"
                 onClick={() => navigate('/marketing/templates/new')}
               >
                 יצירת תבנית חדשה
@@ -157,10 +157,10 @@ export const TemplatesList = () => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="text-right">פעולות</TableHead>
-                  <TableHead className="text-right">תאריך עדכון</TableHead>
-                  <TableHead className="text-right">תוכן</TableHead>
-                  <TableHead className="text-right w-[200px]">שם התבנית</TableHead>
+                  <TableHead className="text-right w-[100px] text-xs">פעולות</TableHead>
+                  <TableHead className="text-right w-[120px] text-xs">תאריך עדכון</TableHead>
+                  <TableHead className="text-right text-xs">תוכן</TableHead>
+                  <TableHead className="text-right w-[200px] text-xs">שם התבנית</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -170,58 +170,61 @@ export const TemplatesList = () => {
                     onClick={() => openPreview(template)}
                     className="cursor-pointer"
                   >
-                    <TableCell>
+                    <TableCell className="text-right">
                       <div className="flex space-x-2 rtl:space-x-reverse">
                         <Button 
                           variant="ghost" 
                           size="icon"
+                          className="h-7 w-7"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleEdit(template.id);
                           }}
                         >
-                          <Pencil className="h-4 w-4" />
+                          <Pencil className="h-3.5 w-3.5" />
                         </Button>
                         <Button 
                           variant="ghost" 
                           size="icon"
+                          className="h-7 w-7"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleCopy(template);
                           }}
                         >
-                          <Copy className="h-4 w-4" />
+                          <Copy className="h-3.5 w-3.5" />
                         </Button>
                         <Button 
                           variant="ghost" 
                           size="icon"
+                          className="h-7 w-7"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleCreateCampaign(template);
                           }}
                         >
-                          <Send className="h-4 w-4" />
+                          <Send className="h-3.5 w-3.5" />
                         </Button>
                         <Button 
                           variant="ghost" 
                           size="icon"
+                          className="h-7 w-7 text-destructive hover:text-destructive/90 hover:bg-destructive/10"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleDelete(template.id, template.title);
                           }}
-                          className="text-destructive hover:text-destructive/90 hover:bg-destructive/10"
                         >
-                          <Trash className="h-4 w-4" />
+                          <Trash className="h-3.5 w-3.5" />
                         </Button>
                       </div>
                     </TableCell>
-                    <TableCell className="text-right">
+                    <TableCell className="text-right text-xs">
                       {formatDate(template.updated_at)}
                     </TableCell>
-                    <TableCell className="text-right truncate max-w-[300px]">
+                    <TableCell className="text-right text-xs truncate max-w-[300px]">
                       {template.content}
                     </TableCell>
-                    <TableCell className="font-medium text-right">{template.title}</TableCell>
+                    <TableCell className="font-medium text-right text-xs">{template.title}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -231,28 +234,30 @@ export const TemplatesList = () => {
       </Card>
 
       <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
-        <DialogContent>
+        <DialogContent className="text-sm">
           <DialogHeader>
-            <DialogTitle className="text-right">{selectedTemplate?.title}</DialogTitle>
+            <DialogTitle className="text-right text-sm">{selectedTemplate?.title}</DialogTitle>
           </DialogHeader>
-          <div className="bg-accent/10 p-4 rounded-lg mt-4 text-right whitespace-pre-wrap">
+          <div className="bg-accent/10 p-4 rounded-lg mt-4 text-right whitespace-pre-wrap text-xs">
             {selectedTemplate?.content}
           </div>
           <div className="flex justify-end gap-2 mt-4">
             <Button
               variant="outline"
+              size="sm"
               onClick={() => setIsPreviewOpen(false)}
             >
               סגור
             </Button>
             <Button
+              size="sm"
               onClick={() => {
                 if (selectedTemplate) {
                   handleEdit(selectedTemplate.id);
                 }
               }}
             >
-              <Pencil className="h-4 w-4 ml-2" />
+              <Pencil className="h-3.5 w-3.5 ml-2" />
               ערוך תבנית
             </Button>
           </div>
