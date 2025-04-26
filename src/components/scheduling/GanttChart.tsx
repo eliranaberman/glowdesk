@@ -1,3 +1,4 @@
+
 import { useState, useMemo, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
@@ -20,6 +21,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Separator } from '@/components/ui/separator';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface Appointment {
   id: string;
@@ -44,6 +46,7 @@ const CELL_HEIGHT = 60;
 const DAYS_OF_WEEK = ['יום א׳', 'יום ב׳', 'יום ג׳', 'יום ד׳', 'יום ה׳', 'יום ו׳', 'שבת'];
 
 const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
+  const isMobile = useIsMobile();
   const [view, setView] = useState<'day' | 'week' | 'month'>('day');
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
   const [isAppointmentDetailsOpen, setIsAppointmentDetailsOpen] = useState(false);
@@ -338,8 +341,10 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
     const left = getAppointmentPosition(appointment.startTime);
     const width = (appointment.duration / 60) * (100 / HOURS.length);
     const maxOverlap = Math.max(...appointments.map(a => a.verticalPosition || 0));
-    const verticalGap = 1;
-    const cardHeight = (80 - (verticalGap * (maxOverlap + 1))) / (maxOverlap + 1);
+    const verticalGap = isMobile ? 0.5 : 1;
+    const cardHeight = isMobile ? 
+      (90 - (verticalGap * (maxOverlap + 1))) / (maxOverlap + 1) :
+      (80 - (verticalGap * (maxOverlap + 1))) / (maxOverlap + 1);
     const top = appointment.verticalPosition ? 
       (appointment.verticalPosition * (cardHeight + verticalGap)) : 0;
 
@@ -353,24 +358,24 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
           width: `${width}%`,
           top: `${top}%`,
           height: `${cardHeight}%`,
-          minHeight: '40px',
-          minWidth: '100px',
+          minHeight: isMobile ? '30px' : '40px',
+          minWidth: isMobile ? '70px' : '100px',
           zIndex: appointment.verticalPosition || 1
         }}
         onClick={() => handleAppointmentClick(appointment)}
       >
-        <div className="p-1.5 h-full flex flex-col overflow-hidden">
+        <div className={`${isMobile ? 'p-1' : 'p-1.5'} h-full flex flex-col overflow-hidden`}>
           <div className="flex-1">
-            <p className="font-medium text-xs truncate text-gray-800">{appointment.customer}</p>
-            <p className="text-[10px] truncate text-gray-600">{appointment.service}</p>
+            <p className={`font-medium truncate text-gray-800 ${isMobile ? 'text-[9px]' : 'text-xs'}`}>{appointment.customer}</p>
+            <p className={`truncate text-gray-600 ${isMobile ? 'text-[8px]' : 'text-[10px]'}`}>{appointment.service}</p>
           </div>
           <div className="flex items-center justify-between mt-auto">
-            <div className="flex items-center text-[10px] opacity-80 gap-1 text-gray-700">
-              <Clock className="h-2.5 w-2.5" />
+            <div className={`flex items-center opacity-80 gap-1 text-gray-700 ${isMobile ? 'text-[8px]' : 'text-[10px]'}`}>
+              <Clock className={isMobile ? 'h-2 w-2' : 'h-2.5 w-2.5'} />
               <span>{formatAppointmentTime(appointment.startTime)}</span>
             </div>
             {appointment.price && (
-              <Badge variant="outline" className="bg-white/70 text-[9px] font-medium px-1 py-0.5">
+              <Badge variant="outline" className={`bg-white/70 font-medium px-1 py-0.5 ${isMobile ? 'text-[8px]' : 'text-[9px]'}`}>
                 {appointment.price}
               </Badge>
             )}
@@ -385,10 +390,10 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
       {HOURS.map((hour) => (
         <div 
           key={hour} 
-          className="hour-cell text-center py-2 text-xs font-medium"
+          className={`hour-cell text-center py-2 font-medium ${isMobile ? 'text-[10px]' : 'text-xs'}`}
           style={{ width: `${100 / HOURS.length}%` }}
         >
-          {`${hour.toString().padStart(2, '0')}:00`}
+          {`${hour.toString().padStart(2, '0')}${isMobile ? '' : ':00'}`}
         </div>
       ))}
     </div>
@@ -400,16 +405,17 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
 
   return (
     <Card className="shadow-md border-muted overflow-hidden">
-      <CardHeader className="flex flex-row items-center justify-between pb-2 bg-white" dir="rtl">
-        <CardTitle className="text-xl font-bold">פגישות</CardTitle>
+      <CardHeader className={`flex flex-row items-center justify-between pb-2 bg-white ${isMobile ? 'px-3 py-2' : ''}`} dir="rtl">
+        <CardTitle className={`font-bold ${isMobile ? 'text-base' : 'text-xl'}`}>פגישות</CardTitle>
         <div className="flex items-center gap-2">
           <div className="flex rounded-lg overflow-hidden border">
             <Button
               variant={view === 'day' ? 'default' : 'outline'}
-              size="sm"
+              size={isMobile ? "sm" : "sm"}
               className={cn(
                 "rounded-none border-0",
-                view === 'day' && 'bg-primary text-primary-foreground hover:bg-primary/90'
+                view === 'day' && 'bg-primary text-primary-foreground hover:bg-primary/90',
+                isMobile && 'px-2 text-xs h-8'
               )}
               onClick={() => setView('day')}
             >
@@ -417,10 +423,11 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
             </Button>
             <Button
               variant={view === 'week' ? 'default' : 'outline'}
-              size="sm"
+              size={isMobile ? "sm" : "sm"}
               className={cn(
                 "rounded-none border-0 border-r border-l",
-                view === 'week' && 'bg-primary text-primary-foreground hover:bg-primary/90'
+                view === 'week' && 'bg-primary text-primary-foreground hover:bg-primary/90',
+                isMobile && 'px-2 text-xs h-8'
               )}
               onClick={() => setView('week')}
             >
@@ -428,10 +435,11 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
             </Button>
             <Button
               variant={view === 'month' ? 'default' : 'outline'}
-              size="sm"
+              size={isMobile ? "sm" : "sm"}
               className={cn(
                 "rounded-none border-0",
-                view === 'month' && 'bg-primary text-primary-foreground hover:bg-primary/90'
+                view === 'month' && 'bg-primary text-primary-foreground hover:bg-primary/90',
+                isMobile && 'px-2 text-xs h-8'
               )}
               onClick={() => setView('month')}
             >
@@ -441,17 +449,17 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
         </div>
       </CardHeader>
       <CardContent className="p-0">
-        <div className="flex items-center justify-between p-4 border-b bg-muted/20" dir="rtl">
-          <div className="flex items-center gap-3">
-            <Button variant="outline" size="icon" onClick={prevPeriod} className="h-8 w-8">
-              <ChevronRight className="h-4 w-4" />
+        <div className={`flex items-center justify-between border-b bg-muted/20 ${isMobile ? 'p-2' : 'p-4'}`} dir="rtl">
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="icon" onClick={prevPeriod} className={isMobile ? "h-7 w-7" : "h-8 w-8"}>
+              <ChevronRight className={isMobile ? "h-3 w-3" : "h-4 w-4"} />
             </Button>
             
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="outline" className="px-2 flex items-center gap-2">
-                  <CalendarIcon className="h-4 w-4" />
-                  <span className="font-medium">{getViewTitle()}</span>
+                <Button variant="outline" className={`flex items-center gap-2 ${isMobile ? 'px-1.5 py-1 h-7 text-xs' : 'px-2'}`}>
+                  <CalendarIcon className={isMobile ? "h-3 w-3" : "h-4 w-4"} />
+                  <span className={`font-medium ${isMobile ? 'text-xs' : ''}`}>{getViewTitle()}</span>
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="center">
@@ -464,12 +472,12 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
               </PopoverContent>
             </Popover>
             
-            <Button variant="outline" size="icon" onClick={nextPeriod} className="h-8 w-8">
-              <ChevronLeft className="h-4 w-4" />
+            <Button variant="outline" size="icon" onClick={nextPeriod} className={isMobile ? "h-7 w-7" : "h-8 w-8"}>
+              <ChevronLeft className={isMobile ? "h-3 w-3" : "h-4 w-4"} />
             </Button>
           </div>
           
-          <Button variant="outline" size="sm" onClick={goToToday} className="text-xs px-3">
+          <Button variant="outline" size={isMobile ? "sm" : "sm"} onClick={goToToday} className={`${isMobile ? 'text-[10px] px-2 h-7' : 'text-xs px-3'}`}>
             היום
           </Button>
         </div>
@@ -478,7 +486,7 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
           {view === 'day' ? (
             <div className="gantt-container relative overflow-x-auto min-h-[600px] bg-white">
               {renderTimeGrid()}
-              <div className="relative h-[600px] p-2">
+              <div className={`relative ${isMobile ? 'h-[450px]' : 'h-[600px]'} p-2`}>
                 {HOURS.map((hour, index) => (
                   <div 
                     key={`hour-${hour}`}
@@ -491,7 +499,7 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
                 ))}
                 
                 {processedAppointments.length === 0 ? (
-                  <div className="flex justify-center items-center h-full text-muted-foreground">
+                  <div className={`flex justify-center items-center h-full text-muted-foreground ${isMobile ? 'text-sm' : ''}`}>
                     אין פגישות להיום
                   </div>
                 ) : (
@@ -505,13 +513,13 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
             <div className="week-view bg-white">
               <div className="grid grid-cols-7 bg-muted/10 border-b">
                 {DAYS_OF_WEEK.map((day, index) => (
-                  <div key={day} className="text-center py-2 font-medium text-sm border-l last:border-l-0">
-                    {day}
+                  <div key={day} className={`text-center py-2 font-medium border-l last:border-l-0 ${isMobile ? 'text-[10px]' : 'text-sm'}`}>
+                    {isMobile ? day.substring(0, 4) : day}
                   </div>
                 ))}
               </div>
 
-              <div className="grid grid-cols-7 h-[600px] overflow-y-auto">
+              <div className={`grid grid-cols-7 ${isMobile ? 'h-[450px]' : 'h-[600px]'} overflow-y-auto`}>
                 {weeklyAppointmentsByDay.map(({ date: dayDate, appointments: dayAppointments }) => {
                   const isToday = isSameDay(dayDate, new Date());
                   
@@ -519,14 +527,16 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
                     <div 
                       key={dayDate.toISOString()} 
                       className={cn(
-                        "min-h-full border-l last:border-l-0 p-2",
-                        isToday && "bg-muted/10"
+                        "min-h-full border-l last:border-l-0",
+                        isToday && "bg-muted/10",
+                        isMobile ? "p-1" : "p-2"
                       )}
                     >
                       <div 
                         className={cn(
-                          "text-center mb-2 p-1 rounded-full w-8 h-8 flex items-center justify-center mx-auto cursor-pointer",
-                          isToday && "bg-primary text-primary-foreground"
+                          "text-center mb-2 rounded-full flex items-center justify-center mx-auto cursor-pointer",
+                          isToday && "bg-primary text-primary-foreground",
+                          isMobile ? "w-6 h-6 text-xs" : "w-8 h-8"
                         )}
                         onClick={() => {
                           onDateChange(dayDate);
@@ -536,30 +546,30 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
                         {dayDate.getDate()}
                       </div>
                       
-                      <div className="space-y-1">
+                      <div className={isMobile ? "space-y-0.5" : "space-y-1"}>
                         {dayAppointments.length === 0 ? (
-                          <div className="text-xs text-center text-muted-foreground mt-4">
+                          <div className={`text-center text-muted-foreground mt-4 ${isMobile ? 'text-[9px]' : 'text-xs'}`}>
                             אין פגישות
                           </div>
                         ) : (
                           dayAppointments.map(appointment => (
                             <div
                               key={appointment.id}
-                              className="rounded-md p-2 border border-white/20 shadow-sm hover:shadow-md hover:ring-1 hover:ring-primary cursor-pointer text-right text-xs bg-white animate-fade-in"
+                              className={`rounded-md border border-white/20 shadow-sm hover:shadow-md hover:ring-1 hover:ring-primary cursor-pointer text-right bg-white animate-fade-in ${isMobile ? 'p-1 mb-0.5' : 'p-2'}`}
                               style={{
                                 backgroundColor: appointment.color || '#E5DEFF',
                               }}
                               onClick={() => handleAppointmentClick(appointment)}
                             >
-                              <div className="font-medium truncate">{appointment.customer}</div>
-                              <div className="opacity-75 truncate">{appointment.service}</div>
-                              <div className="flex items-center justify-between mt-1">
-                                <div className="flex items-center gap-1 opacity-80">
-                                  <Clock className="h-3 w-3" />
+                              <div className={`font-medium truncate ${isMobile ? 'text-[9px]' : 'text-xs'}`}>{appointment.customer}</div>
+                              <div className={`opacity-75 truncate ${isMobile ? 'text-[8px]' : 'text-xs'}`}>{appointment.service}</div>
+                              <div className="flex items-center justify-between mt-0.5">
+                                <div className={`flex items-center gap-1 opacity-80 ${isMobile ? 'text-[8px]' : 'text-xs'}`}>
+                                  <Clock className={isMobile ? "h-2 w-2" : "h-3 w-3"} />
                                   <span>{appointment.startTime}</span>
                                 </div>
                                 {appointment.price && (
-                                  <Badge variant="outline" className="bg-white/70 text-xs">
+                                  <Badge variant="outline" className={`bg-white/70 ${isMobile ? 'text-[8px] px-1 py-0' : 'text-xs'}`}>
                                     {appointment.price}
                                   </Badge>
                                 )}
@@ -577,8 +587,8 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
             <div className="month-view bg-white">
               <div className="grid grid-cols-7 bg-muted/10 border-b">
                 {DAYS_OF_WEEK.map((day) => (
-                  <div key={day} className="text-center py-2 font-medium text-sm">
-                    {day}
+                  <div key={day} className={`text-center py-2 font-medium ${isMobile ? 'text-[10px]' : 'text-sm'}`}>
+                    {isMobile ? day.substring(0, 4) : day}
                   </div>
                 ))}
               </div>
@@ -593,9 +603,9 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
                     prevMonthDays.push(
                       <div 
                         key={`prev-${i}`} 
-                        className="border min-h-[100px] p-2 bg-muted/5 text-muted-foreground"
+                        className={`border text-muted-foreground ${isMobile ? 'min-h-[60px] p-1 bg-muted/5' : 'min-h-[100px] p-2 bg-muted/5'}`}
                       >
-                        <div className="text-right opacity-50 text-sm">{prevDate.getDate()}</div>
+                        <div className={`text-right opacity-50 ${isMobile ? 'text-xs' : 'text-sm'}`}>{prevDate.getDate()}</div>
                       </div>
                     );
                   }
@@ -616,9 +626,10 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
                     <div 
                       key={dayDate.toISOString()} 
                       className={cn(
-                        "border min-h-[100px] p-2 hover:bg-muted/10 cursor-pointer",
+                        "border min-h-[100px] hover:bg-muted/10 cursor-pointer",
                         isToday && "bg-muted/10",
-                        !isSameMonth(dayDate, date) && "bg-muted/5 text-muted-foreground"
+                        !isSameMonth(dayDate, date) && "bg-muted/5 text-muted-foreground",
+                        isMobile && "min-h-[60px] p-1"
                       )}
                       onClick={() => {
                         onDateChange(dayDate);
@@ -626,19 +637,20 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
                       }}
                     >
                       <div className={cn(
-                        "text-right font-medium text-sm w-6 h-6 flex items-center justify-center rounded-full float-right mb-1",
-                        isToday && "bg-primary text-primary-foreground"
+                        "text-right font-medium rounded-full float-right mb-1 flex items-center justify-center",
+                        isToday && "bg-primary text-primary-foreground",
+                        isMobile ? "w-5 h-5 text-xs" : "w-6 h-6 text-sm"
                       )}>
                         {dayDate.getDate()}
                       </div>
                       
                       <div className="clear-both">
                         {dayAppointments.length > 0 ? (
-                          <div className="mt-1">
-                            {dayAppointments.length > 2 ? (
+                          <div className={isMobile ? "mt-0.5" : "mt-1"}>
+                            {dayAppointments.length > (isMobile ? 1 : 2) ? (
                               <>
                                 <div 
-                                  className="text-xs p-1 mb-1 truncate text-right rounded-md border border-white/20 shadow-sm" 
+                                  className={`truncate text-right rounded-md border border-white/20 shadow-sm ${isMobile ? 'text-[8px] p-0.5 mb-0.5' : 'text-xs p-1 mb-1'}`}
                                   style={{ backgroundColor: dayAppointments[0].color || '#E5DEFF' }}
                                   onClick={(e) => {
                                     e.stopPropagation();
@@ -647,7 +659,7 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
                                 >
                                   <span className="font-medium">{dayAppointments[0].startTime}</span> {dayAppointments[0].customer}
                                 </div>
-                                <div className="text-xs text-center">
+                                <div className={`text-center ${isMobile ? 'text-[8px]' : 'text-xs'}`}>
                                   +{dayAppointments.length - 1} עוד
                                 </div>
                               </>
@@ -655,7 +667,7 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
                               dayAppointments.map(app => (
                                 <div 
                                   key={app.id}
-                                  className="text-xs p-1 rounded-md mb-1 truncate text-right border border-white/20 shadow-sm" 
+                                  className={`rounded-md mb-1 truncate text-right border border-white/20 shadow-sm ${isMobile ? 'text-[8px] p-0.5' : 'text-xs p-1'}`}
                                   style={{ backgroundColor: app.color || '#E5DEFF' }}
                                   onClick={(e) => {
                                     e.stopPropagation();
@@ -680,9 +692,9 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
 
       {selectedAppointment && (
         <Dialog open={isAppointmentDetailsOpen} onOpenChange={setIsAppointmentDetailsOpen}>
-          <DialogContent className="text-right max-w-md">
+          <DialogContent className={`text-right ${isMobile ? 'max-w-[320px]' : 'max-w-md'}`}>
             <DialogHeader>
-              <DialogTitle className="text-xl">{selectedAppointment.customer}</DialogTitle>
+              <DialogTitle className={isMobile ? "text-lg" : "text-xl"}>{selectedAppointment.customer}</DialogTitle>
               <DialogDescription>
                 פרטי פגישה
               </DialogDescription>
@@ -704,32 +716,32 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
               
               <div className="grid grid-cols-2 gap-4 text-right">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground mb-1">תאריך</p>
-                  <p>{selectedAppointment.date ? format(selectedAppointment.date, 'dd/MM/yyyy') : 'לא צוין'}</p>
+                  <p className={`font-medium text-muted-foreground mb-1 ${isMobile ? 'text-xs' : 'text-sm'}`}>תאריך</p>
+                  <p className={isMobile ? 'text-sm' : ''}>{selectedAppointment.date ? format(selectedAppointment.date, 'dd/MM/yyyy') : 'לא צוין'}</p>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground mb-1">שעה</p>
-                  <p>{selectedAppointment.startTime}</p>
+                  <p className={`font-medium text-muted-foreground mb-1 ${isMobile ? 'text-xs' : 'text-sm'}`}>שעה</p>
+                  <p className={isMobile ? 'text-sm' : ''}>{selectedAppointment.startTime}</p>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground mb-1">משך</p>
-                  <p>{selectedAppointment.duration} דקות</p>
+                  <p className={`font-medium text-muted-foreground mb-1 ${isMobile ? 'text-xs' : 'text-sm'}`}>משך</p>
+                  <p className={isMobile ? 'text-sm' : ''}>{selectedAppointment.duration} דקות</p>
                 </div>
               </div>
             </div>
             
             <div className="flex justify-between gap-2 mt-6">
-              <Button variant="destructive" size="sm" onClick={handleDeleteAppointment} className="gap-1">
-                <Trash2 className="h-4 w-4" />
-                מחק
+              <Button variant="destructive" size={isMobile ? "sm" : "sm"} onClick={handleDeleteAppointment} className="gap-1">
+                <Trash2 className={isMobile ? "h-3 w-3" : "h-4 w-4"} />
+                {isMobile ? 'מחק' : 'מחק פגישה'}
               </Button>
               
               <div className="flex gap-2">
-                <Button variant="outline" onClick={() => setIsAppointmentDetailsOpen(false)}>
+                <Button variant="outline" size={isMobile ? "sm" : "default"} onClick={() => setIsAppointmentDetailsOpen(false)}>
                   סגור
                 </Button>
-                <Button onClick={handleEditAppointment}>
-                  <Edit className="h-4 w-4 mr-2" />
+                <Button size={isMobile ? "sm" : "default"} onClick={handleEditAppointment}>
+                  <Edit className={`${isMobile ? 'h-3 w-3 mr-1' : 'h-4 w-4 mr-2'}`} />
                   ערוך
                 </Button>
               </div>

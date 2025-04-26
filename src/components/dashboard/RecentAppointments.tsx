@@ -9,6 +9,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface Appointment {
   id: string;
@@ -24,6 +25,8 @@ interface RecentAppointmentsProps {
 }
 
 const RecentAppointments = ({ appointments }: RecentAppointmentsProps) => {
+  const isMobile = useIsMobile();
+
   const getStatusClass = (status: Appointment['status']) => {
     switch (status) {
       case 'completed':
@@ -51,28 +54,31 @@ const RecentAppointments = ({ appointments }: RecentAppointmentsProps) => {
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>פגישות אחרונות</CardTitle>
-        <CardDescription>הפגישות האחרונות של הלקוחות שלך</CardDescription>
+    <Card className={isMobile ? 'shadow-sm border-muted' : ''}>
+      <CardHeader className={isMobile ? 'pb-2 px-3 pt-3' : ''}>
+        <CardTitle className={isMobile ? 'text-lg' : ''}>פגישות אחרונות</CardTitle>
+        <CardDescription className={isMobile ? 'text-xs' : ''}>הפגישות האחרונות של הלקוחות שלך</CardDescription>
       </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
+      <CardContent className={isMobile ? 'px-3' : ''}>
+        <div className="space-y-2">
           {appointments.length > 0 ? (
             appointments.map((appointment) => (
-              <div key={appointment.id} className="flex items-center justify-between py-3 border-b last:border-0">
-                <div>
-                  <h4 className="font-medium">{appointment.customer}</h4>
-                  <p className="text-sm text-muted-foreground">{appointment.service}</p>
+              <div 
+                key={appointment.id} 
+                className={`flex items-center justify-between py-2 border-b last:border-0 ${isMobile ? 'text-sm' : ''}`}
+              >
+                <div className="truncate pr-2">
+                  <h4 className={`font-medium ${isMobile ? 'text-sm' : ''}`}>{appointment.customer}</h4>
+                  <p className={`text-muted-foreground ${isMobile ? 'text-xs' : 'text-sm'}`}>{appointment.service}</p>
                 </div>
-                <div className="text-right">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm">{appointment.time}</span>
-                    <span className={`text-xs px-2 py-1 rounded-full ${getStatusClass(appointment.status)}`}>
+                <div className="text-right flex-shrink-0">
+                  <div className="flex items-center gap-2 justify-end">
+                    <span className={isMobile ? 'text-xs' : 'text-sm'}>{appointment.time}</span>
+                    <span className={`text-xs px-2 py-0.5 rounded-full ${getStatusClass(appointment.status)} ${isMobile ? 'text-[10px] px-1.5 py-0.5' : ''}`}>
                       {getStatusText(appointment.status)}
                     </span>
                   </div>
-                  <p className="text-sm font-semibold mt-1">₪{appointment.price}</p>
+                  <p className={`font-semibold mt-0.5 ${isMobile ? 'text-xs' : 'text-sm'}`}>₪{appointment.price}</p>
                 </div>
               </div>
             ))
@@ -81,8 +87,8 @@ const RecentAppointments = ({ appointments }: RecentAppointmentsProps) => {
           )}
         </div>
       </CardContent>
-      <CardFooter className="border-t bg-muted/50 px-6 py-4">
-        <Link to="/scheduling">
+      <CardFooter className={`border-t bg-muted/50 ${isMobile ? 'px-3 py-2' : 'px-6 py-4'}`}>
+        <Link to="/scheduling" className="w-full">
           <Button variant="ghost" className="w-full">
             צפה בכל הפגישות
           </Button>

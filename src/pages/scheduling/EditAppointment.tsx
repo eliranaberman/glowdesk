@@ -8,10 +8,12 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 import { ArrowRight } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const EditAppointment = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
+  const isMobile = useIsMobile();
   const [isLoading, setIsLoading] = useState(true);
   const [appointmentData, setAppointmentData] = useState({
     customer: '',
@@ -133,32 +135,32 @@ const EditAppointment = () => {
   }
 
   return (
-    <div dir="rtl" className="max-w-2xl mx-auto">
-      <div className="flex items-center mb-6">
+    <div dir="rtl" className={`${isMobile ? 'max-w-full' : 'max-w-2xl mx-auto'}`}>
+      <div className={`flex items-center ${isMobile ? 'mb-3' : 'mb-6'}`}>
         <Button 
           variant="ghost" 
           onClick={() => navigate(-1)}
-          className="mr-2"
+          className={`mr-2 ${isMobile ? 'p-1 h-8' : ''}`}
         >
-          <ArrowRight className="h-4 w-4 mr-1" />
+          <ArrowRight className={`${isMobile ? 'h-3 w-3' : 'h-4 w-4'} mr-1`} />
           חזור
         </Button>
-        <h1 className="text-2xl font-bold">עריכת פגישה</h1>
+        <h1 className={`font-bold ${isMobile ? 'text-lg' : 'text-2xl'}`}>עריכת פגישה</h1>
       </div>
       
       <Card>
         <form onSubmit={handleSubmit}>
-          <CardHeader>
-            <CardTitle>פרטי פגישה</CardTitle>
+          <CardHeader className={isMobile ? 'px-4 py-3' : ''}>
+            <CardTitle className={isMobile ? 'text-lg' : ''}>פרטי פגישה</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className={`${isMobile ? 'px-4 py-2' : ''} space-y-4`}>
             <div className="space-y-2">
-              <Label htmlFor="customer">לקוח</Label>
+              <Label htmlFor="customer" className={isMobile ? 'text-sm' : ''}>לקוח</Label>
               <Select 
                 value={appointmentData.customer} 
                 onValueChange={(value) => handleSelectChange('customer', value)}
               >
-                <SelectTrigger id="customer">
+                <SelectTrigger id="customer" className={isMobile ? 'h-8 text-sm' : ''}>
                   <SelectValue placeholder="בחר לקוח" />
                 </SelectTrigger>
                 <SelectContent>
@@ -172,7 +174,7 @@ const EditAppointment = () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="service">שירות</Label>
+              <Label htmlFor="service" className={isMobile ? 'text-sm' : ''}>שירות</Label>
               <Select 
                 value={appointmentData.service}
                 onValueChange={(value) => {
@@ -184,7 +186,7 @@ const EditAppointment = () => {
                   }
                 }}
               >
-                <SelectTrigger id="service">
+                <SelectTrigger id="service" className={isMobile ? 'h-8 text-sm' : ''}>
                   <SelectValue placeholder="בחר שירות" />
                 </SelectTrigger>
                 <SelectContent>
@@ -199,7 +201,7 @@ const EditAppointment = () => {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="date">תאריך</Label>
+                <Label htmlFor="date" className={isMobile ? 'text-sm' : ''}>תאריך</Label>
                 <Input
                   id="date"
                   name="date"
@@ -207,10 +209,11 @@ const EditAppointment = () => {
                   value={appointmentData.date}
                   onChange={handleChange}
                   required
+                  className={isMobile ? 'h-8 text-sm' : ''}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="time">שעה</Label>
+                <Label htmlFor="time" className={isMobile ? 'text-sm' : ''}>שעה</Label>
                 <Input
                   id="time"
                   name="time"
@@ -218,13 +221,14 @@ const EditAppointment = () => {
                   value={appointmentData.time}
                   onChange={handleChange}
                   required
+                  className={isMobile ? 'h-8 text-sm' : ''}
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="duration">משך (דקות)</Label>
+                <Label htmlFor="duration" className={isMobile ? 'text-sm' : ''}>משך (דקות)</Label>
                 <Input
                   id="duration"
                   name="duration"
@@ -232,10 +236,11 @@ const EditAppointment = () => {
                   value={appointmentData.duration}
                   onChange={handleChange}
                   required
+                  className={isMobile ? 'h-8 text-sm' : ''}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="price">מחיר (₪)</Label>
+                <Label htmlFor="price" className={isMobile ? 'text-sm' : ''}>מחיר (₪)</Label>
                 <Input
                   id="price"
                   name="price"
@@ -243,26 +248,38 @@ const EditAppointment = () => {
                   value={appointmentData.price}
                   onChange={handleChange}
                   required
+                  className={isMobile ? 'h-8 text-sm' : ''}
                 />
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="notes">הערות</Label>
+              <Label htmlFor="notes" className={isMobile ? 'text-sm' : ''}>הערות</Label>
               <Input
                 id="notes"
                 name="notes"
                 value={appointmentData.notes}
                 onChange={handleChange}
                 placeholder="הערות לגבי הפגישה"
+                className={isMobile ? 'h-8 text-sm' : ''}
               />
             </div>
           </CardContent>
-          <CardFooter className="flex justify-between">
-            <Button variant="outline" type="button" onClick={() => navigate('/scheduling')}>
+          <CardFooter className={`flex justify-between ${isMobile ? 'px-4 py-3' : ''}`}>
+            <Button 
+              variant="outline" 
+              type="button" 
+              onClick={() => navigate('/scheduling')}
+              className={isMobile ? 'text-sm h-8' : ''}
+            >
               ביטול
             </Button>
-            <Button type="submit">עדכן פגישה</Button>
+            <Button 
+              type="submit"
+              className={isMobile ? 'text-sm h-8' : ''}
+            >
+              עדכן פגישה
+            </Button>
           </CardFooter>
         </form>
       </Card>

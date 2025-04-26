@@ -6,8 +6,10 @@ import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { CalendarPlus } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const Scheduling = () => {
+  const isMobile = useIsMobile();
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [filteredAppointments, setFilteredAppointments] = useState<any[]>([]);
   const [activeFilter, setActiveFilter] = useState('day');
@@ -122,20 +124,20 @@ const Scheduling = () => {
 
   return (
     <div dir="rtl">
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
+      <div className={`flex flex-col ${isMobile ? 'gap-3 mb-4' : 'sm:flex-row sm:justify-between sm:items-center gap-4 mb-6'}`}>
         <div>
-          <h1 className="text-2xl font-bold">לוח פגישות</h1>
-          <p className="text-muted-foreground">
+          <h1 className={`font-bold ${isMobile ? 'text-xl' : 'text-2xl'}`}>לוח פגישות</h1>
+          <p className={`text-muted-foreground ${isMobile ? 'text-xs' : ''}`}>
             ניהול הפגישות שלך וארגון היום בצורה יעילה.
           </p>
         </div>
         
-        <div className="flex gap-4 flex-col sm:flex-row">
+        <div className={`flex ${isMobile ? 'gap-2 flex-col' : 'gap-4 flex-col sm:flex-row'}`}>
           {/* Filter buttons - in RTL direction (Day on the right, Month on the left) */}
           <div className="flex rounded-full bg-secondary/50 p-1">
             <Button
               variant={activeFilter === 'day' ? 'default' : 'ghost'}
-              size="sm"
+              size={isMobile ? "sm" : "sm"}
               onClick={() => setActiveFilter('day')}
               className="flex-1"
             >
@@ -143,7 +145,7 @@ const Scheduling = () => {
             </Button>
             <Button
               variant={activeFilter === 'week' ? 'default' : 'ghost'}
-              size="sm"
+              size={isMobile ? "sm" : "sm"}
               onClick={() => setActiveFilter('week')}
               className="flex-1"
             >
@@ -151,7 +153,7 @@ const Scheduling = () => {
             </Button>
             <Button
               variant={activeFilter === 'month' ? 'default' : 'ghost'}
-              size="sm"
+              size={isMobile ? "sm" : "sm"}
               onClick={() => setActiveFilter('month')}
               className="flex-1"
             >
@@ -159,18 +161,18 @@ const Scheduling = () => {
             </Button>
           </div>
 
-          <Link to="/scheduling/new">
-            <Button>
-              <CalendarPlus className="h-4 w-4 ml-2" />
+          <Link to="/scheduling/new" className={isMobile ? 'w-full' : ''}>
+            <Button className={isMobile ? 'w-full text-sm' : ''}>
+              <CalendarPlus className={`${isMobile ? 'h-4 w-4 ml-1.5' : 'h-4 w-4 ml-2'}`} />
               פגישה חדשה
             </Button>
           </Link>
         </div>
       </div>
       
-      <div className="space-y-6">
-        <Card className="shadow-sm">
-          <CardContent className="p-4">
+      <div className={`space-y-${isMobile ? '4' : '6'}`}>
+        <Card className={isMobile ? "shadow-sm" : "shadow-sm"}>
+          <CardContent className={isMobile ? "p-3" : "p-4"}>
             <CalendarSync />
           </CardContent>
         </Card>
