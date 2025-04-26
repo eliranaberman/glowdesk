@@ -125,16 +125,16 @@ export const CouponsList = () => {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4" dir="rtl">
       <Card>
         <CardContent className="p-4">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+            <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
             <Input
               placeholder="חיפוש קופונים..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pr-4 pl-10 w-full"
+              className="pl-4 pr-10 w-full text-sm"
             />
           </div>
         </CardContent>
@@ -147,11 +147,11 @@ export const CouponsList = () => {
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
           ) : filteredCoupons.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground">
+            <div className="text-center py-12 text-muted-foreground text-sm">
               <p>לא נמצאו קופונים</p>
               <Button 
                 variant="outline" 
-                className="mt-4"
+                className="mt-4 text-xs"
                 onClick={() => navigate('/marketing/coupons/new')}
               >
                 יצירת קופון חדש
@@ -161,11 +161,11 @@ export const CouponsList = () => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[200px]">שם הקופון</TableHead>
-                  <TableHead>קוד קופון</TableHead>
-                  <TableHead className="hidden md:table-cell">אחוז הנחה</TableHead>
-                  <TableHead className="hidden md:table-cell">תוקף עד</TableHead>
-                  <TableHead className="w-[180px]">פעולות</TableHead>
+                  <TableHead className="text-right w-[200px] text-xs">שם הקופון</TableHead>
+                  <TableHead className="text-right text-xs">קוד קופון</TableHead>
+                  <TableHead className="text-right text-xs">אחוז הנחה</TableHead>
+                  <TableHead className="text-right text-xs">תוקף עד</TableHead>
+                  <TableHead className="text-right w-[120px] text-xs">פעולות</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -174,43 +174,47 @@ export const CouponsList = () => {
                     key={coupon.id}
                     className={isExpired(coupon.valid_until) ? "text-muted-foreground" : ""}
                   >
-                    <TableCell className="font-medium">{coupon.title}</TableCell>
-                    <TableCell>
+                    <TableCell className="font-medium text-right text-xs">
+                      {coupon.title}
+                    </TableCell>
+                    <TableCell className="text-right text-xs">
                       <code className="px-2 py-1 bg-muted rounded">{coupon.code}</code>
                     </TableCell>
-                    <TableCell className="hidden md:table-cell">
+                    <TableCell className="text-right text-xs">
                       {coupon.discount_percentage}%
                     </TableCell>
-                    <TableCell className="hidden md:table-cell">
+                    <TableCell className="text-right text-xs">
                       {formatDate(coupon.valid_until)}
                       {isExpired(coupon.valid_until) && 
-                        <span className="text-destructive ml-2">(פג תוקף)</span>
+                        <span className="text-destructive mr-2">(פג תוקף)</span>
                       }
                     </TableCell>
                     <TableCell>
-                      <div className="flex space-x-2 rtl:space-x-reverse">
+                      <div className="flex space-x-2 space-x-reverse justify-end">
                         <Button 
                           variant="ghost" 
                           size="icon"
+                          className="h-6 w-6"
                           onClick={() => handleEdit(coupon.id)}
                         >
-                          <Pencil className="h-4 w-4" />
+                          <Pencil className="h-3 w-3" />
                         </Button>
                         <Button 
                           variant="ghost" 
                           size="icon"
+                          className="h-6 w-6"
                           onClick={() => handleOpenAssignDialog(coupon.id)}
                           disabled={isExpired(coupon.valid_until)}
                         >
-                          <Users className="h-4 w-4" />
+                          <Users className="h-3 w-3" />
                         </Button>
                         <Button 
                           variant="ghost" 
                           size="icon"
-                          className="text-destructive hover:text-destructive/90 hover:bg-destructive/10"
+                          className="h-6 w-6 text-destructive hover:text-destructive/90 hover:bg-destructive/10"
                           onClick={() => handleDelete(coupon.id, coupon.title)}
                         >
-                          <Trash className="h-4 w-4" />
+                          <Trash className="h-3 w-3" />
                         </Button>
                       </div>
                     </TableCell>
@@ -223,7 +227,7 @@ export const CouponsList = () => {
       </Card>
 
       <Dialog open={isAssignDialogOpen} onOpenChange={setIsAssignDialogOpen}>
-        <DialogContent>
+        <DialogContent dir="rtl">
           <DialogHeader>
             <DialogTitle className="text-right">שיוך קופון ללקוחות</DialogTitle>
             <DialogDescription className="text-right">
