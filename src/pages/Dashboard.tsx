@@ -1,5 +1,4 @@
-
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { CalendarClock, Users, DollarSign, TrendingUp } from 'lucide-react';
 import StatCard from '../components/dashboard/StatCard';
 import DailySummary from '../components/dashboard/DailySummary';
@@ -14,12 +13,20 @@ import MarketingMessages from '@/components/dashboard/MarketingMessages';
 import BusinessInsights from '@/components/dashboard/BusinessInsights';
 import CashFlowForecast from '@/components/dashboard/CashFlowForecast';
 import InactiveClientsAlert from '@/components/dashboard/InactiveClientsAlert';
+import { initializeMarketingData } from '@/services/marketing';
 
 const Dashboard = () => {
   const { toast } = useToast();
   const isMobile = useIsMobile();
   
-  // Updated data with correct numbers and currency values
+  useEffect(() => {
+    const initData = async () => {
+      await initializeMarketingData();
+    };
+    
+    initData();
+  }, []);
+  
   const stats = [
     { title: 'סך הכל לקוחות', value: '176', icon: <Users className="h-5 w-5 text-primary" />, change: { value: '12%', positive: true } },
     { title: 'פגישות חודשיות', value: '126', icon: <CalendarClock className="h-5 w-5 text-primary" />, change: { value: '5%', positive: true } },
@@ -46,7 +53,6 @@ const Dashboard = () => {
     ]
   };
 
-  // Analytics chart data - updated with correct labels
   const monthlyData = [
     { name: 'ינואר', income: 10500, expenses: 6200 },
     { name: 'פברואר', income: 11200, expenses: 6800 },
@@ -85,7 +91,6 @@ const Dashboard = () => {
 
   return (
     <div className="space-y-6 md:space-y-8" dir="rtl">
-      {/* Key metrics section with enhanced styling */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         {stats.map((stat) => (
           <StatCard
@@ -98,7 +103,6 @@ const Dashboard = () => {
         ))}
       </div>
 
-      {/* Updated: Daily Summary and Latest Appointments */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
         <div className="flex flex-col gap-6 order-first">
           <DailySummary 
@@ -116,16 +120,13 @@ const Dashboard = () => {
         </div>
       </div>
       
-      {/* Marketing and Loyalty */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
         <MarketingMessages />
         <LoyaltyProgram />
       </div>
       
-      {/* Inactive Clients Alert */}
       <InactiveClientsAlert />
       
-      {/* Analytics Charts Section */}
       <div className="mb-6 md:mb-8">
         <AnalyticsCharts 
           monthlyData={monthlyData}
@@ -135,7 +136,6 @@ const Dashboard = () => {
         />
       </div>
       
-      {/* Quick actions section */}
       <div className="border rounded-xl p-4 md:p-6 shadow-soft hover:shadow-soft-lg transition-all duration-300 bg-warmBeige/10">
         <h2 className="text-base md:text-lg font-display font-medium mb-4 md:mb-6 flex items-center">
           <span className="bg-softRose/40 w-1 h-6 rounded mr-2"></span>
@@ -161,7 +161,6 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Promotional section */}
       <div className="bg-gradient-to-r from-warmBeige to-softRose/20 border border-softRose/20 rounded-xl p-4 md:p-6 shadow-soft">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 md:gap-0">
           <div className="mb-4 md:mb-0">

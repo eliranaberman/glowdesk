@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { MarketingTemplate, MarketingTemplateCreate, MarketingTemplateUpdate } from '@/types/marketing';
 
@@ -62,21 +63,14 @@ const createInitialTemplatesIfNeeded = async () => {
       .select('id');
 
     if (!existingTemplates || existingTemplates.length === 0) {
-      // Get the current user's ID for created_by
-      const { data: { user } } = await supabase.auth.getUser();
-      const userId = user?.id;
-      
-      if (!userId) {
-        console.log('No authenticated user found, skipping template creation');
-        return;
-      }
-      
+      // Use a system user ID for initialization, without relying on authenticated users
       for (const template of initialTemplates) {
         await createTemplate({
           ...template,
-          created_by: userId
+          created_by: 'system' // Use 'system' instead of requiring a real user ID
         });
       }
+      console.log('Created initial marketing templates');
     }
   } catch (error) {
     console.error('Error checking/creating initial templates:', error);
