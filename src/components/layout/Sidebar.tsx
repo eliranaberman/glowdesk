@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -97,10 +96,7 @@ const Sidebar = ({ onLinkClick }: SidebarProps) => {
   const { user } = useAuth();
 
   const handleLinkClick = (path: string) => {
-    // If sidebar is collapsed, don't expand - just navigate
-    if (collapsed) {
-      navigate(path);
-    }
+    navigate(path);
     
     if (onLinkClick) {
       onLinkClick();
@@ -360,4 +356,3 @@ const Sidebar = ({ onLinkClick }: SidebarProps) => {
 };
 
 export default Sidebar;
-
