@@ -171,7 +171,7 @@ const MarketingMessages = () => {
                     </div>
                     <div className="flex-grow text-right">
                       <div className="flex justify-between mb-1">
-                        <h3 className="font-medium">{campaign.name}</h3>
+                        <h3 className="font-medium px-[141px]">{campaign.name}</h3>
                         <span className="text-xs text-muted-foreground">
                           {campaign.scheduled_at ? formatDate(campaign.scheduled_at) : 'לא נקבע תאריך'}
                         </span>
