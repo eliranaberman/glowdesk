@@ -162,15 +162,7 @@ export type Database = {
           title?: string
           valid_until?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "coupons_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       marketing_campaigns: {
         Row: {
@@ -198,13 +190,6 @@ export type Database = {
           template_id?: string | null
         }
         Relationships: [
-          {
-            foreignKeyName: "marketing_campaigns_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "marketing_campaigns_template_id_fkey"
             columns: ["template_id"]
@@ -278,15 +263,31 @@ export type Database = {
           title?: string
           updated_at?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "marketing_templates_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
+      }
+      user_mfa_settings: {
+        Row: {
+          created_at: string | null
+          mfa_enabled: boolean | null
+          mfa_method: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          mfa_enabled?: boolean | null
+          mfa_method?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          mfa_enabled?: boolean | null
+          mfa_method?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
       }
       users: {
         Row: {

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -146,18 +145,18 @@ const MarketingMessages = () => {
                     className="flex items-center justify-between p-3 border rounded-lg hover:bg-accent/10 transition-colors"
                   >
                     <div className="flex items-center">
+                      <Button 
+                        variant="soft" 
+                        size="sm" 
+                        className="flex items-center gap-1 mr-2"
+                        onClick={() => handleSendTemplate(template.id)}
+                      >
+                        <Send className="h-3.5 w-3.5" />
+                        שלח
+                      </Button>
                       <Mail className="h-4 w-4 text-muted-foreground ml-2" />
                       <span>{template.title}</span>
                     </div>
-                    <Button 
-                      variant="soft" 
-                      size="sm" 
-                      className="flex items-center gap-1"
-                      onClick={() => handleSendTemplate(template.id)}
-                    >
-                      <Send className="h-3.5 w-3.5" />
-                      שלח
-                    </Button>
                   </div>
                 ))}
               </div>
@@ -191,17 +190,31 @@ const MarketingMessages = () => {
                 {campaigns.slice(0, 3).map((campaign) => (
                   <div
                     key={campaign.id}
-                    className="p-3 border rounded-lg hover:bg-accent/10 transition-colors"
+                    className="p-3 border rounded-lg hover:bg-accent/10 transition-colors flex items-center justify-between"
                   >
-                    <div className="flex justify-between mb-1">
-                      <h3 className="font-medium">{campaign.name}</h3>
-                      <span className="text-xs text-muted-foreground">
-                        {campaign.scheduled_at ? formatDate(campaign.scheduled_at) : 'לא נקבע תאריך'}
-                      </span>
+                    <div>
+                      <Button
+                        variant="soft"
+                        size="sm"
+                        className="flex items-center gap-1 ml-2"
+                        onClick={() => handleSendCampaign(campaign)}
+                        disabled={isSending[campaign.id]}
+                      >
+                        <Send className="h-3.5 w-3.5" />
+                        שלח
+                      </Button>
                     </div>
-                    <div className="flex justify-between text-xs text-muted-foreground">
-                      <span>סטטוס: {campaign.status === 'draft' ? 'טיוטה' : campaign.status === 'sent' ? 'נשלח' : campaign.status}</span>
-                      <span>הודעות: {campaign.messages_count || 0}</span>
+                    <div className="flex-grow text-right">
+                      <div className="flex justify-between mb-1">
+                        <h3 className="font-medium">{campaign.name}</h3>
+                        <span className="text-xs text-muted-foreground">
+                          {campaign.scheduled_at ? formatDate(campaign.scheduled_at) : 'לא נקבע תאריך'}
+                        </span>
+                      </div>
+                      <div className="flex justify-between text-xs text-muted-foreground">
+                        <span>סטטוס: {campaign.status === 'draft' ? 'טיוטה' : campaign.status === 'sent' ? 'נשלח' : campaign.status}</span>
+                        <span>הודעות: {campaign.messages_count || 0}</span>
+                      </div>
                     </div>
                   </div>
                 ))}
