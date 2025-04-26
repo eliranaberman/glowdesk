@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -121,16 +120,16 @@ export const TemplatesList = () => {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4" dir="rtl">
       <Card>
         <CardContent className="p-4">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+            <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
             <Input
               placeholder="חיפוש תבניות..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pr-4 pl-10 w-full text-sm"
+              className="pl-4 pr-10 w-full text-sm"
             />
           </div>
         </CardContent>
@@ -157,10 +156,10 @@ export const TemplatesList = () => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="text-right w-[100px] text-xs">פעולות</TableHead>
-                  <TableHead className="text-right w-[120px] text-xs">תאריך עדכון</TableHead>
-                  <TableHead className="text-right text-xs">תוכן</TableHead>
                   <TableHead className="text-right w-[200px] text-xs">שם התבנית</TableHead>
+                  <TableHead className="text-right text-xs">תוכן</TableHead>
+                  <TableHead className="text-right w-[120px] text-xs">תאריך עדכון</TableHead>
+                  <TableHead className="text-right w-[100px] text-xs">פעולות</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -170,61 +169,61 @@ export const TemplatesList = () => {
                     onClick={() => openPreview(template)}
                     className="cursor-pointer"
                   >
+                    <TableCell className="font-medium text-right text-xs">{template.title}</TableCell>
+                    <TableCell className="text-right text-xs truncate max-w-[300px]">
+                      {template.content}
+                    </TableCell>
+                    <TableCell className="text-right text-xs">
+                      {formatDate(template.updated_at)}
+                    </TableCell>
                     <TableCell className="text-right">
-                      <div className="flex space-x-2 rtl:space-x-reverse">
+                      <div className="flex space-x-2 space-x-reverse justify-start">
                         <Button 
                           variant="ghost" 
                           size="icon"
-                          className="h-7 w-7"
+                          className="h-6 w-6"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleEdit(template.id);
                           }}
                         >
-                          <Pencil className="h-3.5 w-3.5" />
+                          <Pencil className="h-3 w-3" />
                         </Button>
                         <Button 
                           variant="ghost" 
                           size="icon"
-                          className="h-7 w-7"
+                          className="h-6 w-6"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleCopy(template);
                           }}
                         >
-                          <Copy className="h-3.5 w-3.5" />
+                          <Copy className="h-3 w-3" />
                         </Button>
                         <Button 
                           variant="ghost" 
                           size="icon"
-                          className="h-7 w-7"
+                          className="h-6 w-6"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleCreateCampaign(template);
                           }}
                         >
-                          <Send className="h-3.5 w-3.5" />
+                          <Send className="h-3 w-3" />
                         </Button>
                         <Button 
                           variant="ghost" 
                           size="icon"
-                          className="h-7 w-7 text-destructive hover:text-destructive/90 hover:bg-destructive/10"
+                          className="h-6 w-6 text-destructive hover:text-destructive/90 hover:bg-destructive/10"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleDelete(template.id, template.title);
                           }}
                         >
-                          <Trash className="h-3.5 w-3.5" />
+                          <Trash className="h-3 w-3" />
                         </Button>
                       </div>
                     </TableCell>
-                    <TableCell className="text-right text-xs">
-                      {formatDate(template.updated_at)}
-                    </TableCell>
-                    <TableCell className="text-right text-xs truncate max-w-[300px]">
-                      {template.content}
-                    </TableCell>
-                    <TableCell className="font-medium text-right text-xs">{template.title}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -234,21 +233,14 @@ export const TemplatesList = () => {
       </Card>
 
       <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
-        <DialogContent className="text-sm">
+        <DialogContent className="text-sm" dir="rtl">
           <DialogHeader>
             <DialogTitle className="text-right text-sm">{selectedTemplate?.title}</DialogTitle>
           </DialogHeader>
           <div className="bg-accent/10 p-4 rounded-lg mt-4 text-right whitespace-pre-wrap text-xs">
             {selectedTemplate?.content}
           </div>
-          <div className="flex justify-end gap-2 mt-4">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setIsPreviewOpen(false)}
-            >
-              סגור
-            </Button>
+          <div className="flex justify-start gap-2 mt-4">
             <Button
               size="sm"
               onClick={() => {
@@ -257,8 +249,15 @@ export const TemplatesList = () => {
                 }
               }}
             >
-              <Pencil className="h-3.5 w-3.5 ml-2" />
+              <Pencil className="h-3 w-3 ml-2" />
               ערוך תבנית
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsPreviewOpen(false)}
+            >
+              סגור
             </Button>
           </div>
         </DialogContent>
