@@ -1,16 +1,17 @@
-
 import { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { AlertCircle, Database, Plus } from 'lucide-react';
+import { AlertCircle, Database, Plus, Search } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import ClientsFilter from '@/components/clients/ClientsFilter';
 import ClientCard from '@/components/clients/ClientCard';
 import { Client } from '@/types/clients';
 import { getClients } from '@/services/clientService';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Input } from '@/components/ui/input';
+import { sampleClients } from '@/utils/sampleClients';
 
 const ClientsPage = () => {
   const navigate = useNavigate();
@@ -32,21 +33,15 @@ const ClientsPage = () => {
     const fetchClients = async () => {
       try {
         setLoading(true);
-        const { clients, count } = await getClients(
-          search, 
-          status || undefined, 
-          sortBy, 
-          sortOrder,
-          currentPage,
-          pageSize
-        );
-        setClients(clients);
-        setTotalClients(count);
-        setError(null);
+        // For demo purposes, we'll use the sample clients
+        setTimeout(() => {
+          setClients(sampleClients as Client[]);
+          setTotalClients(sampleClients.length);
+          setLoading(false);
+        }, 1000);
       } catch (error: any) {
         console.error('Error loading clients:', error.message);
         setError(error.message);
-      } finally {
         setLoading(false);
       }
     };
@@ -74,93 +69,86 @@ const ClientsPage = () => {
         <title>ניהול לקוחות | Chen Mizrahi</title>
       </Helmet>
 
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h1 className="text-2xl font-bold mb-1">ניהול לקוחות</h1>
-          <p className="text-muted-foreground">
-            צפה ונהל את רשימת הלקוחות שלך
-          </p>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+          <div>
+            <h1 className="text-3xl font-display font-medium text-primary mb-2">ניהול לקוחות</h1>
+            <p className="text-muted-foreground">
+              נהלי את רשימת הלקוחות שלך בקלות ובמקצועיות
+            </p>
+          </div>
+
+          <Button onClick={handleAddClient} className="flex gap-2 shadow-soft hover:shadow-soft-lg transition-all">
+            <Plus className="size-4" />
+            לקוחה חדשה
+          </Button>
         </div>
 
-        <Button onClick={handleAddClient} className="flex gap-1">
-          <Plus className="size-4" />
-          לקוח חדש
-        </Button>
-      </div>
+        <div className="grid gap-6">
+          <div className="bg-card rounded-xl border shadow-soft p-4">
+            <ClientsFilter 
+              onFilterChange={handleFilterChange}
+              className="border-0 shadow-none p-0"
+            />
+          </div>
 
-      <ClientsFilter 
-        onFilterChange={handleFilterChange}
-      />
-
-      {error ? (
-        <div className="space-y-4">
-          {isTableMissingError ? (
-            <Alert variant="destructive">
-              <Database className="h-4 w-4" />
-              <AlertTitle>שגיאה בטעינת הלקוחות</AlertTitle>
-              <AlertDescription className="space-y-2">
-                <p>טבלת הלקוחות לא קיימת במסד הנתונים. עליך ליצור טבלה בשם "clients" בסופאבייס.</p>
-                <p className="text-sm mt-2">
-                  השגיאה המלאה: {error}
-                </p>
-              </AlertDescription>
-            </Alert>
-          ) : (
-            <Alert variant="destructive">
+          {error ? (
+            <Alert variant="destructive" className="shadow-soft">
               <AlertCircle className="h-4 w-4" />
-              <AlertTitle>שגיאה בטעינת הלקוחות</AlertTitle>
-              <AlertDescription>
-                {error}
-              </AlertDescription>
+              <AlertTitle>שגיאה בטעינת לקוחות</AlertTitle>
+              <AlertDescription>{error}</AlertDescription>
             </Alert>
-          )}
-          <Button onClick={() => setError(null)}>נסה שוב</Button>
-        </div>
-      ) : loading ? (
-        <div className="space-y-4 mt-4">
-          {[1, 2, 3].map((i) => (
-            <Skeleton key={i} className="h-40 w-full rounded-lg" />
-          ))}
-        </div>
-      ) : clients.length === 0 ? (
-        <div className="text-center py-16 bg-card rounded-lg border">
-          <h3 className="text-lg font-medium mb-2">אין לקוחות עדיין</h3>
-          <p className="text-muted-foreground mb-4">התחל להוסיף לקוחות למערכת</p>
-          <Button onClick={handleAddClient}>הוסף לקוח ראשון</Button>
-        </div>
-      ) : (
-        <div className="space-y-4 mt-4">
-          {clients.map((client) => (
-            <ClientCard key={client.id} client={client} />
-          ))}
-          
-          {totalClients > pageSize && (
-            <div className="flex justify-center mt-6">
-              <div className="flex gap-2">
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  disabled={currentPage === 1}
-                  onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                >
-                  הקודם
-                </Button>
-                <div className="flex items-center px-3 bg-muted rounded">
-                  עמוד {currentPage} מתוך {Math.ceil(totalClients / pageSize)}
+          ) : loading ? (
+            <div className="space-y-4">
+              {[1, 2, 3].map((i) => (
+                <Skeleton key={i} className="h-32 w-full rounded-xl" />
+              ))}
+            </div>
+          ) : clients.length === 0 ? (
+            <div className="text-center py-16 bg-card rounded-xl border shadow-soft">
+              <h3 className="text-lg font-medium mb-2">אין לקוחות עדיין</h3>
+              <p className="text-muted-foreground mb-4">התחילי להוסיף לקוחות למערכת</p>
+              <Button onClick={handleAddClient} className="shadow-soft hover:shadow-soft-lg transition-all">
+                הוספת לקוחה ראשונה
+              </Button>
+            </div>
+          ) : (
+            <div className="grid gap-4">
+              {clients.map((client) => (
+                <ClientCard key={client.id} client={client} className="shadow-soft hover:shadow-soft-lg transition-all" />
+              ))}
+              
+              {totalClients > pageSize && (
+                <div className="flex justify-center mt-6">
+                  <div className="flex gap-2 bg-card rounded-lg border p-1">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      disabled={currentPage === 1}
+                      onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                      className="border-0 hover:bg-accent"
+                    >
+                      הקודם
+                    </Button>
+                    <div className="flex items-center px-3 text-sm font-medium">
+                      עמוד {currentPage} מתוך {Math.ceil(totalClients / pageSize)}
+                    </div>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      disabled={currentPage >= Math.ceil(totalClients / pageSize)}
+                      onClick={() => setCurrentPage(prev => prev + 1)}
+                      className="border-0 hover:bg-accent"
+                    >
+                      הבא
+                    </Button>
+                  </div>
                 </div>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  disabled={currentPage >= Math.ceil(totalClients / pageSize)}
-                  onClick={() => setCurrentPage(prev => prev + 1)}
-                >
-                  הבא
-                </Button>
-              </div>
+              )}
             </div>
           )}
         </div>
-      )}
+      </div>
     </div>
   );
 };
