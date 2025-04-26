@@ -13,12 +13,7 @@ export const getCoupons = async (): Promise<Coupon[]> => {
       .order('created_at', { ascending: false });
 
     if (error) throw error;
-    
-    // Add the code property if it doesn't exist
-    return (data || []).map(coupon => ({
-      ...coupon,
-      code: coupon.code || `COUPON-${coupon.id.substring(0, 6).toUpperCase()}` // Generate a code if it doesn't exist
-    }));
+    return data || [];
   } catch (error) {
     console.error('Error fetching coupons:', error);
     throw error;
@@ -34,14 +29,7 @@ export const getCouponById = async (id: string): Promise<Coupon | null> => {
       .single();
 
     if (error) throw error;
-    
-    if (!data) return null;
-    
-    // Add the code property if it doesn't exist
-    return {
-      ...data,
-      code: data.code || `COUPON-${data.id.substring(0, 6).toUpperCase()}` // Generate a code if it doesn't exist
-    };
+    return data;
   } catch (error) {
     console.error(`Error fetching coupon ${id}:`, error);
     throw error;
@@ -50,8 +38,6 @@ export const getCouponById = async (id: string): Promise<Coupon | null> => {
 
 export const createCoupon = async (coupon: CouponCreate): Promise<Coupon> => {
   try {
-    // Ensure created_by is set to system UUID if not provided
-    // Ensure code is uppercase
     const couponData = {
       ...coupon,
       created_by: coupon.created_by || SYSTEM_USER_ID,
