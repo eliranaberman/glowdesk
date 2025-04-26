@@ -1,5 +1,6 @@
+
 import { useState, useRef, useEffect } from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -91,10 +92,16 @@ const Sidebar = ({ onLinkClick }: SidebarProps) => {
   const [collapsed, setCollapsed] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
 
-  const handleLinkClick = () => {
+  const handleLinkClick = (path: string) => {
+    // If sidebar is collapsed, don't expand - just navigate
+    if (collapsed) {
+      navigate(path);
+    }
+    
     if (onLinkClick) {
       onLinkClick();
     }
@@ -190,7 +197,10 @@ const Sidebar = ({ onLinkClick }: SidebarProps) => {
                   )
                 }
                 data-state={({ isActive }: {isActive: boolean}) => isActive ? "active" : "inactive"}
-                onClick={handleLinkClick}
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleLinkClick(item.path);
+                }}
               >
                 <div className="flex items-center w-full justify-end">
                   {!collapsed && <span className="mr-2">{item.name}</span>}
@@ -210,7 +220,10 @@ const Sidebar = ({ onLinkClick }: SidebarProps) => {
                   )
                 }
                 data-state={({ isActive }: {isActive: boolean}) => isActive ? "active" : "inactive"}
-                onClick={handleLinkClick}
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleLinkClick("/user-management");
+                }}
               >
                 <div className="flex items-center w-full justify-end">
                   {!collapsed && <span className="mr-2">ניהול משתמשים</span>}
@@ -239,7 +252,10 @@ const Sidebar = ({ onLinkClick }: SidebarProps) => {
                     )
                   }
                   data-state={({ isActive }: {isActive: boolean}) => isActive ? "active" : "inactive"}
-                  onClick={handleLinkClick}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleLinkClick(item.path);
+                  }}
                 >
                   <div className="flex items-center w-full justify-end">
                     {!collapsed && <span className="mr-2">{item.name}</span>}
@@ -269,7 +285,10 @@ const Sidebar = ({ onLinkClick }: SidebarProps) => {
                     )
                   }
                   data-state={({ isActive }: {isActive: boolean}) => isActive ? "active" : "inactive"}
-                  onClick={handleLinkClick}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleLinkClick(item.path);
+                  }}
                 >
                   <div className="flex items-center w-full justify-end">
                     {!collapsed && <span className="mr-2">{item.name}</span>}
@@ -295,7 +314,10 @@ const Sidebar = ({ onLinkClick }: SidebarProps) => {
             )
           }
           data-state={({ isActive }: {isActive: boolean}) => isActive ? "active" : "inactive"}
-          onClick={handleLinkClick}
+          onClick={(e) => {
+            e.preventDefault();
+            handleLinkClick("/notifications");
+          }}
         >
           <Bell className="w-5 h-5" />
           {!collapsed && <span className="text-right mr-2">התראות</span>}
@@ -310,7 +332,10 @@ const Sidebar = ({ onLinkClick }: SidebarProps) => {
             )
           }
           data-state={({ isActive }: {isActive: boolean}) => isActive ? "active" : "inactive"}
-          onClick={handleLinkClick}
+          onClick={(e) => {
+            e.preventDefault();
+            handleLinkClick("/settings");
+          }}
         >
           <Settings className="w-5 h-5" />
           {!collapsed && <span className="text-right mr-2">הגדרות</span>}
@@ -335,3 +360,4 @@ const Sidebar = ({ onLinkClick }: SidebarProps) => {
 };
 
 export default Sidebar;
+
