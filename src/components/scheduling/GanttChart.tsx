@@ -1,4 +1,3 @@
-
 import { useState, useMemo, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
@@ -335,13 +334,12 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
     }));
   };
 
-  // Update the appointment rendering logic
   const renderAppointment = (appointment: Appointment, containerWidth: number) => {
     const left = getAppointmentPosition(appointment.startTime);
     const width = (appointment.duration / 60) * (100 / HOURS.length);
     const maxOverlap = Math.max(...appointments.map(a => a.verticalPosition || 0));
-    const verticalGap = 2;
-    const cardHeight = (100 - (verticalGap * (maxOverlap + 1))) / (maxOverlap + 1);
+    const verticalGap = 1;
+    const cardHeight = (80 - (verticalGap * (maxOverlap + 1))) / (maxOverlap + 1);
     const top = appointment.verticalPosition ? 
       (appointment.verticalPosition * (cardHeight + verticalGap)) : 0;
 
@@ -355,24 +353,24 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
           width: `${width}%`,
           top: `${top}%`,
           height: `${cardHeight}%`,
-          minHeight: '60px',
-          minWidth: '120px',
+          minHeight: '40px',
+          minWidth: '100px',
           zIndex: appointment.verticalPosition || 1
         }}
         onClick={() => handleAppointmentClick(appointment)}
       >
-        <div className="p-2 h-full flex flex-col overflow-hidden">
+        <div className="p-1.5 h-full flex flex-col overflow-hidden">
           <div className="flex-1">
-            <p className="font-medium text-sm truncate text-gray-800">{appointment.customer}</p>
-            <p className="text-xs truncate text-gray-600">{appointment.service}</p>
+            <p className="font-medium text-xs truncate text-gray-800">{appointment.customer}</p>
+            <p className="text-[10px] truncate text-gray-600">{appointment.service}</p>
           </div>
           <div className="flex items-center justify-between mt-auto">
-            <div className="flex items-center text-xs opacity-80 gap-1 text-gray-700">
-              <Clock className="h-3 w-3" />
+            <div className="flex items-center text-[10px] opacity-80 gap-1 text-gray-700">
+              <Clock className="h-2.5 w-2.5" />
               <span>{formatAppointmentTime(appointment.startTime)}</span>
             </div>
             {appointment.price && (
-              <Badge variant="outline" className="bg-white/70 text-xs font-medium">
+              <Badge variant="outline" className="bg-white/70 text-[9px] font-medium px-1 py-0.5">
                 {appointment.price}
               </Badge>
             )}
@@ -382,7 +380,6 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
     );
   };
 
-  // Update the time grid rendering
   const renderTimeGrid = () => (
     <div className="hours-header flex border-b bg-muted/10 sticky top-0 z-10">
       {HOURS.map((hour) => (
