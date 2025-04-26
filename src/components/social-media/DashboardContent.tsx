@@ -1,4 +1,3 @@
-
 import { ConnectedAccountsMap } from "./types";
 import ConnectedAccountsPanel from "./ConnectedAccountsPanel";
 import RecentMessagesPanel from "./RecentMessagesPanel";
@@ -10,7 +9,6 @@ import { Link } from "react-router-dom";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { MarketingStats } from "@/types/marketing";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-
 interface DashboardContentProps {
   connectedAccounts: ConnectedAccountsMap;
   connectPlatform: (platform: string) => void;
@@ -19,7 +17,6 @@ interface DashboardContentProps {
   marketingStats: MarketingStats | null;
   isLoading: boolean;
 }
-
 const DashboardContent = ({
   connectedAccounts,
   connectPlatform,
@@ -29,15 +26,8 @@ const DashboardContent = ({
   isLoading
 }: DashboardContentProps) => {
   const connectedCount = Object.values(connectedAccounts).filter(Boolean).length;
-
-  return (
-    <div className="space-y-4">
-      <Alert variant="default" className="bg-muted/30 mb-2">
-        <AlertCircle className="h-4 w-4" />
-        <AlertDescription>
-          חיבורי המדיה החברתית כרגע במצב הדגמה בלבד ואינם מתחברים לחשבונות אמיתיים.
-        </AlertDescription>
-      </Alert>
+  return <div className="space-y-4">
+      
       
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
         <Card className="shadow-sm hover:shadow-md transition-all duration-300">
@@ -98,10 +88,7 @@ const DashboardContent = ({
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <ConnectedAccountsPanel
-          connectedAccounts={connectedAccounts}
-          connectPlatform={connectPlatform}
-        />
+        <ConnectedAccountsPanel connectedAccounts={connectedAccounts} connectPlatform={connectPlatform} />
 
         <div className="space-y-4">
           <Tabs defaultValue="inbox">
@@ -115,12 +102,7 @@ const DashboardContent = ({
                 <CardHeader className="pb-2">
                   <div className="flex justify-between items-center">
                     <CardTitle className="text-lg text-center w-full">הודעות אחרונות</CardTitle>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      className="text-xs"
-                      onClick={handleOpenInbox}
-                    >
+                    <Button variant="ghost" size="sm" className="text-xs" onClick={handleOpenInbox}>
                       לכל ההודעות
                     </Button>
                   </div>
@@ -136,27 +118,19 @@ const DashboardContent = ({
                 <CardHeader className="pb-2">
                   <div className="flex justify-between items-center">
                     <CardTitle className="text-lg">סטטיסטיקות שיווק</CardTitle>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      className="text-xs"
-                      asChild
-                    >
+                    <Button variant="ghost" size="sm" className="text-xs" asChild>
                       <Link to="/marketing">לדשבורד שיווק</Link>
                     </Button>
                   </div>
                 </CardHeader>
                 <CardContent>
-                  {isLoading ? (
-                    <div className="flex justify-center py-6">
+                  {isLoading ? <div className="flex justify-center py-6">
                       <div className="animate-pulse space-y-3">
                         <div className="h-4 bg-muted rounded w-3/4"></div>
                         <div className="h-4 bg-muted rounded w-1/2"></div>
                         <div className="h-4 bg-muted rounded w-5/6"></div>
                       </div>
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-2 gap-4">
+                    </div> : <div className="grid grid-cols-2 gap-4">
                       <div className="p-3 border rounded-lg">
                         <p className="text-sm text-muted-foreground">תבניות</p>
                         <p className="text-xl font-semibold">{marketingStats?.total_templates || 0}</p>
@@ -173,8 +147,7 @@ const DashboardContent = ({
                         <p className="text-sm text-muted-foreground">קופונים פעילים</p>
                         <p className="text-xl font-semibold">{marketingStats?.active_coupons || 0}</p>
                       </div>
-                    </div>
-                  )}
+                    </div>}
                   <div className="mt-4 flex justify-center">
                     <Button asChild className="w-full">
                       <Link to="/marketing">
@@ -190,8 +163,6 @@ const DashboardContent = ({
           <InboxStatusPanel handleOpenInbox={handleOpenInbox} />
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default DashboardContent;
