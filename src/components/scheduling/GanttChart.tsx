@@ -1,3 +1,4 @@
+
 import { useState, useMemo, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
@@ -396,157 +397,6 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
     </div>
   );
 
-  const nextPeriod = () => {
-    const newDate = new Date(date);
-    if (view === 'day') {
-      newDate.setDate(date.getDate() + 1);
-    } else if (view === 'week') {
-      newDate.setDate(date.getDate() + 7);
-    } else if (view === 'month') {
-      newDate.setMonth(date.getMonth() + 1);
-    }
-    onDateChange(newDate);
-  };
-
-  const prevPeriod = () => {
-    const newDate = new Date(date);
-    if (view === 'day') {
-      newDate.setDate(date.getDate() - 1);
-    } else if (view === 'week') {
-      newDate.setDate(date.getDate() - 7);
-    } else if (view === 'month') {
-      newDate.setMonth(date.getMonth() - 1);
-    }
-    onDateChange(newDate);
-  };
-
-  const goToToday = () => {
-    onDateChange(new Date());
-  };
-
-  const formatHour = (hour: number) => {
-    return `${hour.toString().padStart(2, '0')}:00`;
-  };
-
-  const handleAppointmentClick = (appointment: Appointment) => {
-    setSelectedAppointment(appointment);
-    setIsAppointmentDetailsOpen(true);
-  };
-
-  const handleEditAppointment = () => {
-    if (selectedAppointment) {
-      navigate(`/scheduling/edit/${selectedAppointment.id}`);
-    }
-  };
-
-  const handleDeleteAppointment = () => {
-    if (selectedAppointment) {
-      setIsAppointmentDetailsOpen(false);
-      setSelectedAppointment(null);
-    }
-  };
-
-  const getCurrentTimePosition = () => {
-    const now = new Date();
-    const currentHour = now.getHours();
-    const currentMinute = now.getMinutes();
-    
-    if (currentHour < 8 || currentHour >= 24) {
-      return -1; // Out of bounds
-    }
-    
-    const hourPosition = currentHour - 8;
-    const minutePercentage = currentMinute / 60;
-    
-    return (hourPosition + minutePercentage) / HOURS.length * 100;
-  };
-
-  const timeToMinutes = (timeStr: string): number => {
-    const [hours, minutes] = timeStr.split(':').map(Number);
-    return hours * 60 + minutes;
-  };
-
-  const sortedAppointments = useMemo(() => {
-    return [...filteredAppointments].sort((a, b) => {
-      return timeToMinutes(a.startTime) - timeToMinutes(b.startTime);
-    });
-  }, [filteredAppointments]);
-
-  const calculateAppointmentSlots = (appointments: Appointment[]): Appointment[] => {
-    if (!appointments.length) return [];
-
-    const result = [...appointments];
-    const slots: { [key: number]: number[] } = {};
-
-    result.sort((a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime));
-    
-    for (const appointment of result) {
-      const startMinutes = timeToMinutes(appointment.startTime);
-      const endMinutes = startMinutes + appointment.duration;
-      
-      let slotIndex = 0;
-      while (true) {
-        const isSlotAvailable = !slots[slotIndex]?.some(
-          occupiedMinute => 
-            occupiedMinute >= startMinutes && 
-            occupiedMinute < endMinutes
-        );
-        
-        if (isSlotAvailable) {
-          if (!slots[slotIndex]) slots[slotIndex] = [];
-          for (let min = startMinutes; min < endMinutes; min += 5) {
-            slots[slotIndex].push(min);
-          }
-          appointment.verticalPosition = slotIndex;
-          break;
-        }
-        
-        slotIndex++;
-      }
-    }
-    
-    return result;
-  };
-
-  const slottedAppointments = useMemo(() => {
-    return calculateAppointmentSlots(sortedAppointments);
-  }, [sortedAppointments]);
-
-  const weeklyAppointmentsByDay = useMemo(() => {
-    if (view !== 'week') return [];
-    
-    return viewDates.map(dayDate => {
-      const dayAppointments = filteredAppointments
-        .filter(app => app.date ? isSameDay(app.date, dayDate) : false)
-        .sort((a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime));
-      
-      return {
-        date: dayDate,
-        appointments: dayAppointments
-      };
-    });
-  }, [filteredAppointments, viewDates, view]);
-
-  const [currentTimePos, setCurrentTimePos] = useState<number>(getCurrentTimePosition());
-  
-  useEffect(() => {
-    if (view !== 'day' || !isSameDay(date, new Date())) {
-      setIsCurrentTimeVisible(false);
-      return;
-    }
-    
-    const updateCurrentTime = () => {
-      const position = getCurrentTimePosition();
-      setCurrentTimePos(position);
-      setIsCurrentTimeVisible(position >= 0);
-    };
-    
-    updateCurrentTime();
-    const interval = setInterval(updateCurrentTime, 60000);
-    
-    return () => clearInterval(interval);
-  }, [view, date]);
-
   const processedAppointments = useMemo(() => {
     return calculateOverlap(filteredAppointments);
   }, [filteredAppointments]);
@@ -878,4 +728,20 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
               </Button>
               
               <div className="flex gap-2">
-                <Button variant="
+                <Button variant="outline" onClick={() => setIsAppointmentDetailsOpen(false)}>
+                  סגור
+                </Button>
+                <Button onClick={handleEditAppointment}>
+                  <Edit className="h-4 w-4 mr-2" />
+                  ערוך
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+    </Card>
+  );
+};
+
+export default GanttChart;
