@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -29,7 +28,6 @@ const SocialMedia = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // Mock data for demonstration purposes
   const messages: Message[] = [
     {
       id: 1,
@@ -60,7 +58,6 @@ const SocialMedia = () => {
     },
   ];
 
-  // Analytics data with colors matching CashFlowForecast
   const analyticsData = {
     followers: [
       { name: "ינואר", count: 320 },
@@ -87,9 +84,9 @@ const SocialMedia = () => {
       { name: "יוני", count: 16 },
     ],
     colors: {
-      primary: "#606c38", // oliveGreen
-      secondary: "#e07a5f", // softRose
-      tertiary: "#ddbea9", // roseGold
+      primary: "#606c38",
+      secondary: "#e07a5f",
+      tertiary: "#ddbea9",
     }
   };
 
@@ -116,7 +113,6 @@ const SocialMedia = () => {
   }, [activeTab, toast]);
 
   const connectPlatform = (platform: string) => {
-    // Toggle the connection state for the platform
     setConnectedAccounts(prev => ({
       ...prev,
       [platform]: !prev[platform]
@@ -124,7 +120,6 @@ const SocialMedia = () => {
   };
 
   const handleOpenInbox = () => {
-    // Change the active tab to the inbox using the state
     setActiveTab("inbox");
   };
 
@@ -134,7 +129,6 @@ const SocialMedia = () => {
         setIsConnectionModalOpen(true);
         break;
       case "inbox":
-        // Open reply modal or mark as read
         toast({
           title: "סימון הודעות כנקראו",
           description: "כל ההודעות סומנו כנקראו בהצלחה"
@@ -176,11 +170,11 @@ const SocialMedia = () => {
           {getButtonText()}
         </Button>
         <h1 className="text-2xl font-medium text-center mx-auto">מדיה חברתית ושיווק</h1>
-        <div className="w-[85px]" /> {/* Spacer for visual balance */}
+        <div className="w-[85px]" />
       </div>
 
       <Tabs defaultValue={activeTab} value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid grid-cols-5 mb-6">
+        <TabsList className="grid grid-cols-3 md:grid-cols-5 gap-2 mb-6">
           <TabsTrigger value="ai-tools" className="text-xs md:text-base">כלי שיווק AI</TabsTrigger>
           <TabsTrigger value="analytics" className="text-xs md:text-base">אנליטיקס</TabsTrigger>
           <TabsTrigger value="posts" className="text-xs md:text-base">פרסום פוסטים</TabsTrigger>
