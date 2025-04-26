@@ -10,6 +10,7 @@ import { getCampaigns, sendCampaign } from '@/services/marketing/campaignService
 import { MarketingTemplate, MarketingCampaign } from '@/types/marketing';
 import { format } from 'date-fns';
 import { useIsMobile } from '@/hooks/use-mobile';
+
 const MarketingMessages = () => {
   const [activeTab, setActiveTab] = useState('templates');
   const [templates, setTemplates] = useState<MarketingTemplate[]>([]);
@@ -21,6 +22,7 @@ const MarketingMessages = () => {
   } = useToast();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
+
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -44,6 +46,7 @@ const MarketingMessages = () => {
     };
     loadData();
   }, [activeTab, toast]);
+
   const handleSendTemplate = (templateId: string) => {
     navigate('/marketing/campaigns/new', {
       state: {
@@ -51,9 +54,11 @@ const MarketingMessages = () => {
       }
     });
   };
+
   const handleCreate = () => {
     navigate('/marketing/templates/new');
   };
+
   const handleSendCampaign = async (campaign: MarketingCampaign) => {
     if (campaign.status === 'sent') {
       toast({
@@ -94,6 +99,7 @@ const MarketingMessages = () => {
       }
     }
   };
+
   const formatDate = (dateString: string | undefined) => {
     try {
       if (!dateString) return 'תאריך לא זמין';
@@ -102,19 +108,20 @@ const MarketingMessages = () => {
       return 'תאריך לא תקין';
     }
   };
+
   return <Card className="shadow-soft hover:shadow-soft-lg transition-all duration-300">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle className="text-lg flex items-center">
-              <MessageSquare className="h-5 w-5 ml-2 text-primary" />
+            <CardTitle className="text-base md:text-lg flex items-center">
+              <MessageSquare className="h-4 w-4 md:h-5 md:w-5 ml-2 text-primary" />
               הודעות שיווקיות
             </CardTitle>
           </div>
           <Link to="/marketing">
-            <Button variant="ghost" size="sm" className="gap-1">
+            <Button variant="ghost" size="sm" className="text-xs md:text-sm gap-1">
               לדשבורד שיווק
-              <ArrowRight className="h-4 w-4 mr-1" />
+              <ArrowRight className="h-3 w-3 md:h-4 md:w-4 mr-1" />
             </Button>
           </Link>
         </div>
@@ -123,33 +130,33 @@ const MarketingMessages = () => {
       <CardContent>
         <Tabs defaultValue={activeTab} value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid grid-cols-2 mb-4">
-            <TabsTrigger value="campaigns" className="text-right">קמפיינים קודמים</TabsTrigger>
-            <TabsTrigger value="templates" className="text-right">תבניות מוכנות</TabsTrigger>
+            <TabsTrigger value="campaigns" className="text-right text-xs md:text-sm">קמפיינים קודמים</TabsTrigger>
+            <TabsTrigger value="templates" className="text-right text-xs md:text-sm">תבניות מוכנות</TabsTrigger>
           </TabsList>
 
           <TabsContent value="templates" className="space-y-4">
             {isLoading ? <div className="flex justify-center py-8">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              </div> : templates.length === 0 ? <div className="text-center py-8 text-muted-foreground">
+              </div> : templates.length === 0 ? <div className="text-center py-8 text-muted-foreground text-xs">
                 <p>אין תבניות עדיין</p>
-                <Button onClick={() => navigate('/marketing/templates/new')} variant="outline" className="mt-4">
+                <Button onClick={() => navigate('/marketing/templates/new')} variant="outline" className="mt-4 text-xs">
                   יצירת תבנית חדשה
                 </Button>
-              </div> : <div className="grid gap-3">
-                {templates.slice(0, 4).map(template => <div key={template.id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-accent/10 transition-colors px-0 mx-0 py-[5px]">
+              </div> : <div className="grid gap-2">
+                {templates.slice(0, 4).map(template => <div key={template.id} className="flex items-center justify-between p-2 border rounded-lg hover:bg-accent/10 transition-colors">
                     <div className="flex items-center flex-grow overflow-hidden">
-                      <Button variant="soft" size="sm" className="flex items-center gap-1 mr-2" onClick={() => handleSendTemplate(template.id)}>
-                        <Send className="h-3.5 w-3.5" />
+                      <Button variant="soft" size="sm" className="flex items-center gap-1 mr-1 text-xs" onClick={() => handleSendTemplate(template.id)}>
+                        <Send className="h-3 w-3" />
                         שלח
                       </Button>
-                      <Mail className="h-4 w-4 text-muted-foreground ml-2" />
-                      <span className="truncate">{template.title}</span>
+                      <Mail className="h-3 w-3 text-muted-foreground ml-1" />
+                      <span className="truncate text-xs">{template.title}</span>
                     </div>
                   </div>)}
               </div>}
 
             <div className="flex justify-end pt-2">
-              <Button onClick={() => navigate('/marketing/campaigns/new')} className="w-full">
+              <Button onClick={() => navigate('/marketing/campaigns/new')} className="w-full text-xs">
                 יצירת קמפיין חדש
               </Button>
             </div>
@@ -158,37 +165,37 @@ const MarketingMessages = () => {
           <TabsContent value="campaigns" className="space-y-4">
             {isLoading ? <div className="flex justify-center py-8">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              </div> : campaigns.length === 0 ? <div className="text-center py-8 text-muted-foreground">
+              </div> : campaigns.length === 0 ? <div className="text-center py-8 text-muted-foreground text-xs">
                 <p>אין קמפיינים עדיין</p>
-                <Button variant="outline" className="mt-4" onClick={() => navigate('/marketing/campaigns/new')}>
+                <Button variant="outline" className="mt-4 text-xs" onClick={() => navigate('/marketing/campaigns/new')}>
                   יצירת קמפיין חדש
                 </Button>
-              </div> : <div className="space-y-3">
-                {campaigns.slice(0, 3).map(campaign => <div key={campaign.id} className="p-3 border rounded-lg hover:bg-accent/10 transition-colors">
-                    <div className="flex flex-col space-y-2">
+              </div> : <div className="space-y-2">
+                {campaigns.slice(0, 3).map(campaign => <div key={campaign.id} className="p-2 border rounded-lg hover:bg-accent/10 transition-colors">
+                    <div className="flex flex-col space-y-1">
                       <div className="flex justify-between items-center">
-                        <Button variant="soft" size="sm" className="flex items-center gap-1" onClick={() => handleSendCampaign(campaign)} disabled={isSending[campaign.id] || campaign.status === 'sent'}>
-                          <Send className="h-3.5 w-3.5" />
+                        <Button variant="soft" size="sm" className="flex items-center gap-1 text-xs" onClick={() => handleSendCampaign(campaign)} disabled={isSending[campaign.id] || campaign.status === 'sent'}>
+                          <Send className="h-3 w-3" />
                           שלח
                         </Button>
-                        <h3 className="font-medium truncate">{campaign.name}</h3>
+                        <h3 className="font-medium text-xs truncate">{campaign.name}</h3>
                       </div>
                       
-                      <div className="flex justify-between text-xs text-muted-foreground">
+                      <div className="flex justify-between text-[10px] text-muted-foreground">
                         <span>סטטוס: {campaign.status === 'draft' ? 'טיוטה' : campaign.status === 'sent' ? 'נשלח' : campaign.status}</span>
                         <span>
                           {campaign.scheduled_at ? formatDate(campaign.scheduled_at) : 'לא נקבע תאריך'}
                         </span>
                       </div>
-                      <div className="text-xs text-muted-foreground text-right">
+                      <div className="text-[10px] text-muted-foreground text-right">
                         הודעות: {campaign.messages_count || 0}
                       </div>
                     </div>
                   </div>)}
               </div>}
 
-            <Button variant="outline" className="w-full flex items-center gap-2 mt-2" onClick={() => navigate('/marketing')}>
-              <Mail className="h-4 w-4" />
+            <Button variant="outline" className="w-full flex items-center gap-2 mt-2 text-xs" onClick={() => navigate('/marketing')}>
+              <Mail className="h-3 w-3" />
               לכל הקמפיינים
             </Button>
           </TabsContent>
@@ -196,4 +203,5 @@ const MarketingMessages = () => {
       </CardContent>
     </Card>;
 };
+
 export default MarketingMessages;
