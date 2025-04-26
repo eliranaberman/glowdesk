@@ -1,3 +1,4 @@
+
 import { useState, useRef, useEffect } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -96,8 +97,10 @@ const Sidebar = ({ onLinkClick }: SidebarProps) => {
   const { user } = useAuth();
 
   const handleLinkClick = (path: string) => {
+    // Just navigate to the path without toggling the sidebar
     navigate(path);
     
+    // Only call the onLinkClick prop if provided (used for mobile sidebar)
     if (onLinkClick) {
       onLinkClick();
     }
