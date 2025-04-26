@@ -1,6 +1,7 @@
 
 import { createCampaign } from '@/services/marketing/campaignService';
 import { createCoupon } from '@/services/marketing/couponService';
+import { getTemplates } from '@/services/marketing/templateService';
 import { MarketingCampaignCreate, CouponCreate } from '@/types/marketing';
 
 const sampleCampaigns: MarketingCampaignCreate[] = [

@@ -1,8 +1,11 @@
+
 export * from './templateService';
 export * from './campaignService';
 export * from './messageService';
 export * from './couponService';
 
+import { getTemplates } from './templateService';
+import { getCampaigns } from './campaignService';
 import { populateMarketingSamples } from '@/utils/marketingSamples';
 
 export const initializeMarketingData = async () => {
