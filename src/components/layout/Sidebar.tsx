@@ -184,7 +184,7 @@ const Sidebar = ({ onLinkClick }: SidebarProps) => {
                 to={item.path}
                 className={({ isActive }) => 
                   cn(
-                    "nav-link flex items-center text-sm py-1.5 px-2 rounded-md transition-colors",
+                    "nav-link flex items-center text-sm py-1.5 px-2 rounded-md transition-colors text-right",
                     isActive ? "bg-accent/50 font-medium text-primary shadow-card" : "hover:bg-accent/30",
                     collapsed ? "justify-center" : "justify-start"
                   )
@@ -192,8 +192,10 @@ const Sidebar = ({ onLinkClick }: SidebarProps) => {
                 data-state={({ isActive }: {isActive: boolean}) => isActive ? "active" : "inactive"}
                 onClick={handleLinkClick}
               >
-                {item.icon}
-                {!collapsed && <span className="text-right mr-2">{item.name}</span>}
+                <div className="flex items-center w-full justify-end">
+                  {!collapsed && <span className="mr-2">{item.name}</span>}
+                  {item.icon}
+                </div>
               </NavLink>
             ))}
             
@@ -202,7 +204,7 @@ const Sidebar = ({ onLinkClick }: SidebarProps) => {
                 to="/user-management"
                 className={({ isActive }) => 
                   cn(
-                    "nav-link flex items-center text-sm py-1.5 px-2 rounded-md transition-colors",
+                    "nav-link flex items-center text-sm py-1.5 px-2 rounded-md transition-colors text-right",
                     isActive ? "bg-accent/50 font-medium text-primary shadow-card" : "hover:bg-accent/30",
                     collapsed ? "justify-center" : "justify-start"
                   )
@@ -210,15 +212,17 @@ const Sidebar = ({ onLinkClick }: SidebarProps) => {
                 data-state={({ isActive }: {isActive: boolean}) => isActive ? "active" : "inactive"}
                 onClick={handleLinkClick}
               >
-                <UserCog className="w-5 h-5" />
-                {!collapsed && <span className="text-right mr-2">ניהול משתמשים</span>}
+                <div className="flex items-center w-full justify-end">
+                  {!collapsed && <span className="mr-2">ניהול משתמשים</span>}
+                  <UserCog className="w-5 h-5" />
+                </div>
               </NavLink>
             )}
           </div>
 
           <div>
             {!collapsed && (
-              <h3 className="text-xs font-medium text-muted-foreground px-2 mb-1">
+              <h3 className="text-xs font-medium text-muted-foreground px-2 mb-1 text-right">
                 ניהול פיננסי
               </h3>
             )}
@@ -229,7 +233,7 @@ const Sidebar = ({ onLinkClick }: SidebarProps) => {
                   to={item.path}
                   className={({ isActive }) => 
                     cn(
-                      "nav-link flex items-center text-sm py-1.5 px-2 rounded-md transition-colors",
+                      "nav-link flex items-center text-sm py-1.5 px-2 rounded-md transition-colors text-right",
                       isActive ? "bg-accent/50 font-medium text-primary shadow-card" : "hover:bg-accent/30",
                       collapsed ? "justify-center" : "justify-start"
                     )
@@ -237,8 +241,10 @@ const Sidebar = ({ onLinkClick }: SidebarProps) => {
                   data-state={({ isActive }: {isActive: boolean}) => isActive ? "active" : "inactive"}
                   onClick={handleLinkClick}
                 >
-                  {item.icon}
-                  {!collapsed && <span className="text-right mr-2">{item.name}</span>}
+                  <div className="flex items-center w-full justify-end">
+                    {!collapsed && <span className="mr-2">{item.name}</span>}
+                    {item.icon}
+                  </div>
                 </NavLink>
               ))}
             </div>
@@ -246,7 +252,7 @@ const Sidebar = ({ onLinkClick }: SidebarProps) => {
 
           <div>
             {!collapsed && (
-              <h3 className="text-xs font-medium text-muted-foreground px-2 mb-1">
+              <h3 className="text-xs font-medium text-muted-foreground px-2 mb-1 text-right">
                 תפעול
               </h3>
             )}
@@ -257,7 +263,7 @@ const Sidebar = ({ onLinkClick }: SidebarProps) => {
                   to={item.path}
                   className={({ isActive }) => 
                     cn(
-                      "nav-link flex items-center text-sm py-1.5 px-2 rounded-md transition-colors",
+                      "nav-link flex items-center text-sm py-1.5 px-2 rounded-md transition-colors text-right",
                       isActive ? "bg-accent/50 font-medium text-primary shadow-card" : "hover:bg-accent/30",
                       collapsed ? "justify-center" : "justify-start"
                     )
@@ -265,8 +271,10 @@ const Sidebar = ({ onLinkClick }: SidebarProps) => {
                   data-state={({ isActive }: {isActive: boolean}) => isActive ? "active" : "inactive"}
                   onClick={handleLinkClick}
                 >
-                  {item.icon}
-                  {!collapsed && <span className="text-right mr-2">{item.name}</span>}
+                  <div className="flex items-center w-full justify-end">
+                    {!collapsed && <span className="mr-2">{item.name}</span>}
+                    {item.icon}
+                  </div>
                 </NavLink>
               ))}
             </div>
