@@ -143,16 +143,16 @@ export const CampaignsList = () => {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4" dir="rtl">
       <Card>
         <CardContent className="p-4">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+            <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
             <Input
               placeholder="חיפוש קמפיינים..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pr-4 pl-10 w-full"
+              className="pl-4 pr-10 w-full text-sm"
             />
           </div>
         </CardContent>
@@ -165,11 +165,11 @@ export const CampaignsList = () => {
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
           ) : filteredCampaigns.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground">
+            <div className="text-center py-12 text-muted-foreground text-sm">
               <p>לא נמצאו קמפיינים</p>
               <Button 
                 variant="outline" 
-                className="mt-4"
+                className="mt-4 text-xs"
                 onClick={() => navigate('/marketing/campaigns/new')}
               >
                 יצירת קמפיין חדש
@@ -179,56 +179,60 @@ export const CampaignsList = () => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[200px]">שם הקמפיין</TableHead>
-                  <TableHead className="hidden md:table-cell">תבנית</TableHead>
-                  <TableHead className="hidden md:table-cell">תאריך משלוח</TableHead>
-                  <TableHead className="w-[100px]">סטטוס</TableHead>
-                  <TableHead className="w-[180px]">פעולות</TableHead>
+                  <TableHead className="text-right w-[200px] text-xs">שם הקמפיין</TableHead>
+                  <TableHead className="text-right text-xs">תבנית</TableHead>
+                  <TableHead className="text-right text-xs">תאריך משלוח</TableHead>
+                  <TableHead className="text-right w-[100px] text-xs">סטטוס</TableHead>
+                  <TableHead className="text-right w-[120px] text-xs">פעולות</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredCampaigns.map((campaign) => (
                   <TableRow key={campaign.id}>
-                    <TableCell className="font-medium">{campaign.name}</TableCell>
-                    <TableCell className="hidden md:table-cell">
+                    <TableCell className="font-medium text-right text-xs">
+                      {campaign.name}
+                    </TableCell>
+                    <TableCell className="text-right text-xs">
                       {campaign.template?.title || 'תבנית לא נמצאה'}
                     </TableCell>
-                    <TableCell className="hidden md:table-cell">
+                    <TableCell className="text-right text-xs">
                       {formatDate(campaign.scheduled_at)}
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="text-right text-xs">
                       {getStatusBadge(campaign.status)}
                     </TableCell>
                     <TableCell>
-                      <div className="flex space-x-2 rtl:space-x-reverse">
+                      <div className="flex space-x-2 space-x-reverse justify-end">
                         <Button 
                           variant="ghost" 
                           size="icon"
+                          className="h-6 w-6"
                           onClick={() => handleEdit(campaign.id)}
                         >
-                          <Pencil className="h-4 w-4" />
+                          <Pencil className="h-3 w-3" />
                         </Button>
                         {campaign.status !== 'sent' && (
                           <Button 
                             variant="ghost" 
                             size="icon"
+                            className="h-6 w-6"
                             onClick={() => handleSendCampaign(campaign.id, campaign.name)}
                             disabled={sendingMap[campaign.id]}
                           >
                             {sendingMap[campaign.id] ? (
-                              <Loader2 className="h-4 w-4 animate-spin" />
+                              <Loader2 className="h-3 w-3 animate-spin" />
                             ) : (
-                              <Send className="h-4 w-4" />
+                              <Send className="h-3 w-3" />
                             )}
                           </Button>
                         )}
                         <Button 
                           variant="ghost" 
                           size="icon"
-                          className="text-destructive hover:text-destructive/90 hover:bg-destructive/10"
+                          className="h-6 w-6 text-destructive hover:text-destructive/90 hover:bg-destructive/10"
                           onClick={() => handleDelete(campaign.id, campaign.name)}
                         >
-                          <Trash className="h-4 w-4" />
+                          <Trash className="h-3 w-3" />
                         </Button>
                       </div>
                     </TableCell>
