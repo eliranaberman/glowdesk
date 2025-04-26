@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -44,7 +43,6 @@ const Tasks = () => {
   const { toast } = useToast();
   const { user, isAdmin } = useAuth();
   
-  // Fetch tasks from Supabase
   useEffect(() => {
     const fetchTasks = async () => {
       setIsLoading(true);
@@ -59,7 +57,6 @@ const Tasks = () => {
           `)
           .order('created_at', { ascending: false });
           
-        // If not admin, only show tasks assigned to current user
         if (!isAdmin) {
           query = query.eq('assigned_to', user?.id);
         }
@@ -104,7 +101,6 @@ const Tasks = () => {
     fetchTasks();
     fetchUsers();
     
-    // Set up realtime subscription
     const tasksSubscription = supabase
       .channel('tasks-changes')
       .on('postgres_changes', 
@@ -115,7 +111,6 @@ const Tasks = () => {
         }, 
         (payload) => {
           console.log('Realtime update:', payload);
-          // Refetch tasks when there's a change
           fetchTasks();
         }
       )
@@ -126,11 +121,9 @@ const Tasks = () => {
     };
   }, [user?.id, isAdmin, toast]);
   
-  // Apply filters when they change
   useEffect(() => {
     let result = [...tasks];
     
-    // Apply search
     if (searchTerm) {
       const search = searchTerm.toLowerCase();
       result = result.filter(
@@ -140,17 +133,14 @@ const Tasks = () => {
       );
     }
     
-    // Apply user filter
     if (selectedUser) {
       result = result.filter(task => task.assigned_to === selectedUser);
     }
     
-    // Apply priority filter
     if (selectedPriority) {
       result = result.filter(task => task.priority === selectedPriority);
     }
     
-    // Apply due date filter
     if (selectedDueDate) {
       if (selectedDueDate === 'today') {
         const today = new Date();
@@ -237,12 +227,10 @@ const Tasks = () => {
     handleStatusChange(taskId, status);
   };
   
-  // Filter tasks by status for each column
   const openTasks = filteredTasks.filter(task => task.status === 'open');
   const inProgressTasks = filteredTasks.filter(task => task.status === 'in_progress');
   const completedTasks = filteredTasks.filter(task => task.status === 'completed');
   
-  // Determine if we're showing the task form
   const shouldShowTaskForm = isTaskFormOpen || editingTask;
   
   return (
@@ -288,7 +276,7 @@ const Tasks = () => {
                   <SelectValue placeholder="סינון לפי משתמש" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">כל המשתמשים</SelectItem>
+                  <SelectItem value="all">כל המשתמשים</SelectItem>
                   {users.map((user) => (
                     <SelectItem key={user.id} value={user.id}>
                       {user.full_name}
@@ -307,7 +295,7 @@ const Tasks = () => {
                   <SelectValue placeholder="עדיפות" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">כל העדיפויות</SelectItem>
+                  <SelectItem value="all">כל העדיפויות</SelectItem>
                   <SelectItem value="high">גבוהה</SelectItem>
                   <SelectItem value="medium">בינונית</SelectItem>
                   <SelectItem value="low">נמוכה</SelectItem>
@@ -322,7 +310,7 @@ const Tasks = () => {
                   <SelectValue placeholder="תאריך יעד" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">כל התאריכים</SelectItem>
+                  <SelectItem value="all">כל התאריכים</SelectItem>
                   <SelectItem value="today">היום</SelectItem>
                   <SelectItem value="week">השבוע</SelectItem>
                   <SelectItem value="overdue">איחור</SelectItem>
@@ -352,7 +340,6 @@ const Tasks = () => {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {/* Open Tasks Column */}
               <div
                 className="space-y-4 p-4 bg-muted/30 rounded-lg"
                 onDragOver={handleDragOver}
@@ -386,7 +373,6 @@ const Tasks = () => {
                 </div>
               </div>
               
-              {/* In Progress Tasks Column */}
               <div
                 className="space-y-4 p-4 bg-muted/30 rounded-lg"
                 onDragOver={handleDragOver}
@@ -420,7 +406,6 @@ const Tasks = () => {
                 </div>
               </div>
               
-              {/* Completed Tasks Column */}
               <div
                 className="space-y-4 p-4 bg-muted/30 rounded-lg"
                 onDragOver={handleDragOver}
