@@ -101,7 +101,7 @@ const SocialMedia = () => {
           console.error("Error loading marketing stats:", error);
           toast({
             title: "שגיאה בטעינת נתוני שיווק",
-            description: "אירעה שגיאה בטעינת הנתונים, אנא נסה שנית"
+            description: "��ירעה שגיאה בטעינת הנתונים, אנא נסה שנית"
           });
         } finally {
           setIsLoading(false);
@@ -169,18 +169,23 @@ const SocialMedia = () => {
           <Plus size={16} />
           {getButtonText()}
         </Button>
-        <h1 className="text-2xl font-medium text-center mx-auto">מדיה חברתית ושיווק</h1>
+        <h1 className="text-2xl font-semibold text-center mx-auto tracking-tight">מדיה חברתית ושיווק</h1>
         <div className="w-[85px]" />
       </div>
 
       <Tabs defaultValue={activeTab} value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid grid-cols-3 md:grid-cols-5 gap-2 mb-6">
-          <TabsTrigger value="ai-tools" className="text-xs md:text-base">כלי שיווק AI</TabsTrigger>
-          <TabsTrigger value="analytics" className="text-xs md:text-base">אנליטיקס</TabsTrigger>
-          <TabsTrigger value="posts" className="text-xs md:text-base">פרסום פוסטים</TabsTrigger>
-          <TabsTrigger value="inbox" className="text-xs md:text-base">תיבת הודעות</TabsTrigger>
-          <TabsTrigger value="dashboard" className="text-xs md:text-base">דשבורד</TabsTrigger>
-        </TabsList>
+        <div className="space-y-2">
+          <TabsList className="grid grid-cols-3 gap-2 w-full mb-2">
+            <TabsTrigger value="dashboard" className="text-sm md:text-base py-2.5 font-medium">דשבורד</TabsTrigger>
+            <TabsTrigger value="inbox" className="text-sm md:text-base py-2.5 font-medium">תיבת הודעות</TabsTrigger>
+            <TabsTrigger value="posts" className="text-sm md:text-base py-2.5 font-medium">פרסום פוסטים</TabsTrigger>
+          </TabsList>
+          
+          <TabsList className="grid grid-cols-2 gap-2 w-full mb-4">
+            <TabsTrigger value="analytics" className="text-sm md:text-base py-2.5 font-medium">אנליטיקס</TabsTrigger>
+            <TabsTrigger value="ai-tools" className="text-sm md:text-base py-2.5 font-medium">כלי שיווק AI</TabsTrigger>
+          </TabsList>
+        </div>
 
         <TabsContent value="dashboard">
           <DashboardContent 
