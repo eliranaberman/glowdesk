@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -101,7 +100,6 @@ const Sidebar = ({ onLinkClick }: SidebarProps) => {
     }
   };
 
-  // Check if the current user is an admin
   useEffect(() => {
     const checkAdminStatus = async () => {
       if (!user) {
@@ -145,17 +143,17 @@ const Sidebar = ({ onLinkClick }: SidebarProps) => {
     <div
       className={cn(
         "flex flex-col h-screen bg-sidebar border-l border-border/50 transition-all duration-300 shadow-card overflow-hidden",
-        collapsed ? "w-16" : "w-64"
+        collapsed ? "w-16" : "w-60"
       )}
       dir="rtl"
     >
-      <div className="flex items-center justify-between p-4 h-16 shrink-0">
+      <div className="flex items-center justify-between p-3 h-14 shrink-0">
         {!collapsed && (
           <div className="flex items-center">
-            <div className="w-9 h-9 rounded-full bg-gradient-to-r from-roseGold to-mutedPeach flex items-center justify-center text-primary font-medium">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-r from-roseGold to-mutedPeach flex items-center justify-center text-primary font-medium text-sm">
               CM
             </div>
-            <h1 className="mr-2 font-display font-medium text-lg">Chen Mizrahi</h1>
+            <h1 className="mr-2 font-display font-medium text-base">Chen Mizrahi</h1>
           </div>
         )}
         <Button
@@ -178,15 +176,15 @@ const Sidebar = ({ onLinkClick }: SidebarProps) => {
         className="flex-1 pr-0 pl-1 overflow-y-auto overflow-x-hidden"
         scrollHideDelay={200}
       >
-        <div className="py-3 space-y-6 px-2">
-          <div className="space-y-1">
+        <div className="py-2 space-y-4 px-2">
+          <div className="space-y-0.5">
             {navItems.map((item) => (
               <NavLink
                 key={item.name}
                 to={item.path}
                 className={({ isActive }) => 
                   cn(
-                    "nav-link flex items-center",
+                    "nav-link flex items-center text-sm py-1.5 px-2 rounded-md transition-colors",
                     isActive ? "bg-accent/50 font-medium text-primary shadow-card" : "hover:bg-accent/30",
                     collapsed ? "justify-center" : "justify-start"
                   )
@@ -194,18 +192,17 @@ const Sidebar = ({ onLinkClick }: SidebarProps) => {
                 data-state={({ isActive }: {isActive: boolean}) => isActive ? "active" : "inactive"}
                 onClick={handleLinkClick}
               >
-                {!collapsed && <span className="text-right flex-grow">{item.name}</span>}
                 {item.icon}
+                {!collapsed && <span className="text-right mr-2">{item.name}</span>}
               </NavLink>
             ))}
             
-            {/* Admin-only link */}
             {isAdmin && (
               <NavLink
                 to="/user-management"
                 className={({ isActive }) => 
                   cn(
-                    "nav-link flex items-center",
+                    "nav-link flex items-center text-sm py-1.5 px-2 rounded-md transition-colors",
                     isActive ? "bg-accent/50 font-medium text-primary shadow-card" : "hover:bg-accent/30",
                     collapsed ? "justify-center" : "justify-start"
                   )
@@ -213,26 +210,26 @@ const Sidebar = ({ onLinkClick }: SidebarProps) => {
                 data-state={({ isActive }: {isActive: boolean}) => isActive ? "active" : "inactive"}
                 onClick={handleLinkClick}
               >
-                {!collapsed && <span className="text-right flex-grow">ניהול משתמשים</span>}
                 <UserCog className="w-5 h-5" />
+                {!collapsed && <span className="text-right mr-2">ניהול משתמשים</span>}
               </NavLink>
             )}
           </div>
 
           <div>
             {!collapsed && (
-              <h3 className="text-xs font-semibold text-muted-foreground px-2 py-1 text-right">
+              <h3 className="text-xs font-medium text-muted-foreground px-2 mb-1">
                 ניהול פיננסי
               </h3>
             )}
-            <div className="mt-1 space-y-1">
+            <div className="space-y-0.5">
               {financialItems.map((item) => (
                 <NavLink
                   key={item.name}
                   to={item.path}
                   className={({ isActive }) => 
                     cn(
-                      "nav-link flex items-center",
+                      "nav-link flex items-center text-sm py-1.5 px-2 rounded-md transition-colors",
                       isActive ? "bg-accent/50 font-medium text-primary shadow-card" : "hover:bg-accent/30",
                       collapsed ? "justify-center" : "justify-start"
                     )
@@ -240,8 +237,8 @@ const Sidebar = ({ onLinkClick }: SidebarProps) => {
                   data-state={({ isActive }: {isActive: boolean}) => isActive ? "active" : "inactive"}
                   onClick={handleLinkClick}
                 >
-                  {!collapsed && <span className="text-right flex-grow">{item.name}</span>}
                   {item.icon}
+                  {!collapsed && <span className="text-right mr-2">{item.name}</span>}
                 </NavLink>
               ))}
             </div>
@@ -249,18 +246,18 @@ const Sidebar = ({ onLinkClick }: SidebarProps) => {
 
           <div>
             {!collapsed && (
-              <h3 className="text-xs font-semibold text-muted-foreground px-2 py-1 text-right">
+              <h3 className="text-xs font-medium text-muted-foreground px-2 mb-1">
                 תפעול
               </h3>
             )}
-            <div className="mt-1 space-y-1">
+            <div className="space-y-0.5">
               {operationalItems.map((item) => (
                 <NavLink
                   key={item.name}
                   to={item.path}
                   className={({ isActive }) => 
                     cn(
-                      "nav-link flex items-center",
+                      "nav-link flex items-center text-sm py-1.5 px-2 rounded-md transition-colors",
                       isActive ? "bg-accent/50 font-medium text-primary shadow-card" : "hover:bg-accent/30",
                       collapsed ? "justify-center" : "justify-start"
                     )
@@ -268,8 +265,8 @@ const Sidebar = ({ onLinkClick }: SidebarProps) => {
                   data-state={({ isActive }: {isActive: boolean}) => isActive ? "active" : "inactive"}
                   onClick={handleLinkClick}
                 >
-                  {!collapsed && <span className="text-right flex-grow">{item.name}</span>}
                   {item.icon}
+                  {!collapsed && <span className="text-right mr-2">{item.name}</span>}
                 </NavLink>
               ))}
             </div>
@@ -279,43 +276,43 @@ const Sidebar = ({ onLinkClick }: SidebarProps) => {
 
       <Separator className="bg-border/30" />
 
-      <div className="p-2 space-y-1 shrink-0">
+      <div className="p-2 space-y-0.5 shrink-0">
         <NavLink
           to="/notifications"
           className={({ isActive }) => 
             cn(
-              "nav-link flex items-center justify-end",
+              "nav-link flex items-center text-sm py-1.5 px-2 rounded-md transition-colors",
               isActive ? "bg-accent/50 font-medium text-primary shadow-card" : "hover:bg-accent/30",
-              collapsed ? "justify-center" : "justify-end"
+              collapsed ? "justify-center" : "justify-start"
             )
           }
           data-state={({ isActive }: {isActive: boolean}) => isActive ? "active" : "inactive"}
           onClick={handleLinkClick}
         >
-          <Bell className="w-5 h-5 ml-2" />
-          {!collapsed && <span>התראות</span>}
+          <Bell className="w-5 h-5" />
+          {!collapsed && <span className="text-right mr-2">התראות</span>}
         </NavLink>
         <NavLink
           to="/settings"
           className={({ isActive }) => 
             cn(
-              "nav-link flex items-center justify-end",
+              "nav-link flex items-center text-sm py-1.5 px-2 rounded-md transition-colors",
               isActive ? "bg-accent/50 font-medium text-primary shadow-card" : "hover:bg-accent/30",
-              collapsed ? "justify-center" : "justify-end"
+              collapsed ? "justify-center" : "justify-start"
             )
           }
           data-state={({ isActive }: {isActive: boolean}) => isActive ? "active" : "inactive"}
           onClick={handleLinkClick}
         >
-          <Settings className="w-5 h-5 ml-2" />
-          {!collapsed && <span>הגדרות</span>}
+          <Settings className="w-5 h-5" />
+          {!collapsed && <span className="text-right mr-2">הגדרות</span>}
         </NavLink>
       </div>
 
-      <div className="p-4 shrink-0">
+      <div className="p-3 shrink-0">
         {!collapsed && (
           <div className="flex items-center">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-r from-softRose/70 to-mutedPeach/70">
+            <div className="w-7 h-7 rounded-full bg-gradient-to-r from-softRose/70 to-mutedPeach/70">
               {/* Profile image would go here */}
             </div>
             <div className="mr-2 truncate text-right">
