@@ -1,4 +1,3 @@
-
 -- Marketing Templates Table
 CREATE TABLE IF NOT EXISTS marketing_templates (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),

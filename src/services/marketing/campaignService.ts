@@ -1,6 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { MarketingCampaign, MarketingCampaignCreate, MarketingCampaignUpdate } from '@/types/marketing';
+import { MarketingCampaign, MarketingCampaignCreate, MarketingCampaignUpdate, CampaignStatus } from '@/types/marketing';
 
 // Use consistent system UUID for records created by the system
 const SYSTEM_USER_ID = '00000000-0000-0000-0000-000000000000';
@@ -20,7 +20,12 @@ export const getCampaigns = async (): Promise<MarketingCampaign[]> => {
       .order('scheduled_at', { ascending: false });
 
     if (error) throw error;
-    return data || [];
+    
+    // Properly cast status to CampaignStatus
+    return (data || []).map(campaign => ({
+      ...campaign,
+      status: campaign.status as CampaignStatus
+    }));
   } catch (error) {
     console.error('Error fetching campaigns:', error);
     throw error;
@@ -43,7 +48,14 @@ export const getCampaignById = async (id: string): Promise<MarketingCampaign | n
       .single();
 
     if (error) throw error;
-    return data;
+    
+    if (!data) return null;
+    
+    // Properly cast status to CampaignStatus
+    return {
+      ...data,
+      status: data.status as CampaignStatus
+    };
   } catch (error) {
     console.error(`Error fetching campaign ${id}:`, error);
     throw error;
@@ -65,7 +77,12 @@ export const createCampaign = async (campaign: MarketingCampaignCreate): Promise
       .single();
 
     if (error) throw error;
-    return data;
+    
+    // Properly cast status to CampaignStatus
+    return {
+      ...data,
+      status: data.status as CampaignStatus
+    };
   } catch (error) {
     console.error('Error creating campaign:', error);
     throw error;
@@ -82,6 +99,8 @@ export const updateCampaign = async (id: string, updates: MarketingCampaignUpdat
       .single();
 
     if (error) throw error;
+    
+    // Properly cast status to CampaignStatus
     return {
       ...data,
       status: data.status as CampaignStatus
