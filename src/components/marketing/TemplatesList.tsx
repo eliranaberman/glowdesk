@@ -14,7 +14,7 @@ import { getTemplates, deleteTemplate } from '@/services/marketingService';
 import { MarketingTemplate } from '@/types/marketing';
 import { 
   Dialog, DialogContent, DialogHeader, 
-  DialogTitle, DialogTrigger 
+  DialogTitle
 } from '@/components/ui/dialog';
 import { format } from 'date-fns';
 
@@ -157,10 +157,10 @@ export const TemplatesList = () => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[250px]">שם התבנית</TableHead>
-                  <TableHead className="hidden md:table-cell">תוכן</TableHead>
-                  <TableHead className="hidden md:table-cell w-[150px]">תאריך עדכון</TableHead>
-                  <TableHead className="w-[180px]">פעולות</TableHead>
+                  <TableHead className="text-right w-[200px]">שם התבנית</TableHead>
+                  <TableHead className="text-right">תוכן</TableHead>
+                  <TableHead className="text-right w-[150px]">תאריך עדכון</TableHead>
+                  <TableHead className="text-left w-[180px]">פעולות</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -170,43 +170,55 @@ export const TemplatesList = () => {
                     onClick={() => openPreview(template)}
                     className="cursor-pointer"
                   >
-                    <TableCell className="font-medium">{template.title}</TableCell>
-                    <TableCell className="hidden md:table-cell truncate max-w-[300px]">
+                    <TableCell className="font-medium text-right">{template.title}</TableCell>
+                    <TableCell className="text-right truncate max-w-[300px]">
                       {template.content}
                     </TableCell>
-                    <TableCell className="hidden md:table-cell">
+                    <TableCell className="text-right">
                       {formatDate(template.updated_at)}
                     </TableCell>
                     <TableCell>
-                      <div className="flex space-x-2 rtl:space-x-reverse" onClick={(e) => e.stopPropagation()}>
+                      <div className="flex justify-end space-x-2 rtl:space-x-reverse">
                         <Button 
                           variant="ghost" 
                           size="icon"
-                          onClick={() => handleEdit(template.id)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDelete(template.id, template.title);
+                          }}
+                          className="text-destructive hover:text-destructive/90 hover:bg-destructive/10"
                         >
-                          <Pencil className="h-4 w-4" />
+                          <Trash className="h-4 w-4" />
                         </Button>
                         <Button 
                           variant="ghost" 
                           size="icon"
-                          onClick={() => handleCopy(template)}
-                        >
-                          <Copy className="h-4 w-4" />
-                        </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="icon"
-                          onClick={() => handleCreateCampaign(template)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleCreateCampaign(template);
+                          }}
                         >
                           <Send className="h-4 w-4" />
                         </Button>
                         <Button 
                           variant="ghost" 
                           size="icon"
-                          className="text-destructive hover:text-destructive/90 hover:bg-destructive/10"
-                          onClick={() => handleDelete(template.id, template.title)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleCopy(template);
+                          }}
                         >
-                          <Trash className="h-4 w-4" />
+                          <Copy className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="icon"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleEdit(template.id);
+                          }}
+                        >
+                          <Pencil className="h-4 w-4" />
                         </Button>
                       </div>
                     </TableCell>
