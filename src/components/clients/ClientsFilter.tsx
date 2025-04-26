@@ -17,12 +17,14 @@ import {
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 interface ClientsFilterProps {
   onFilterChange: (search: string, status: string | null, sortBy: string, sortOrder: string) => void;
+  className?: string; // Added className prop
 }
 
-const ClientsFilter = ({ onFilterChange }: ClientsFilterProps) => {
+const ClientsFilter = ({ onFilterChange, className }: ClientsFilterProps) => {
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState('registration_date');
@@ -47,7 +49,7 @@ const ClientsFilter = ({ onFilterChange }: ClientsFilterProps) => {
   };
 
   return (
-    <div className="mb-5 flex flex-col md:flex-row gap-4">
+    <div className={cn("mb-5 flex flex-col md:flex-row gap-4", className)}>
       <div className="relative flex-1">
         <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
         <Input
