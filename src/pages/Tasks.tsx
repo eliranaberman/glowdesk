@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -16,7 +15,8 @@ import {
   ArrowUp,
   SquareKanban,
   Info,
-  Loader2
+  Loader2,
+  Check
 } from "lucide-react";
 import { format } from "date-fns";
 import { he } from "date-fns/locale";
@@ -36,7 +36,6 @@ import {
 import { TaskPriority, TaskStatus, Task, User as UserType } from "@/types/tasks";
 import { Skeleton } from "@/components/ui/skeleton";
 
-// דוגמאות משימות
 const sampleTasks = [
   {
     id: "1",
@@ -106,7 +105,6 @@ const sampleTasks = [
   }
 ];
 
-// דוגמאות משתמשים
 const sampleUsers = [
   {
     id: "user1",
@@ -166,14 +164,12 @@ const Tasks = () => {
         
         if (error) {
           console.error('Error fetching tasks:', error);
-          // אם יש שגיאה בשליפת הנתונים מה-database, נשתמש בנתונים לדוגמה
           setTasks(sampleTasks as Task[]);
         } else {
           setTasks(data || []);
         }
       } catch (error) {
         console.error('Error fetching tasks:', error);
-        // במקרה של שגיאה כלשהי, נשתמש בנתונים לדוגמה
         setTasks(sampleTasks as Task[]);
         toast({
           title: "לא ניתן לטעון משימות מהשרת",
@@ -194,7 +190,6 @@ const Tasks = () => {
           
         if (error) {
           console.error('Error fetching users:', error);
-          // במקרה של שגיאה, נשתמש במשתמשים לדוגמה
           setUsers(sampleUsers);
         } else {
           setUsers(data || []);
@@ -205,7 +200,6 @@ const Tasks = () => {
       }
     };
     
-    // מדמה טעינה קצרה להצגת skeleton loaders
     setTimeout(() => {
       setLoadingDemo(false);
     }, 1500);
@@ -213,7 +207,6 @@ const Tasks = () => {
     fetchTasks();
     fetchUsers();
     
-    // ניסיון לרשום לעדכונים מה-database בזמן אמת
     try {
       const tasksSubscription = supabase
         .channel('tasks-changes')
@@ -294,7 +287,6 @@ const Tasks = () => {
       }
     }
     
-    // Sort by due date if requested
     result.sort((a, b) => {
       if (!a.due_date && !b.due_date) return 0;
       if (!a.due_date) return sortOrder === "asc" ? 1 : -1;
@@ -321,11 +313,9 @@ const Tasks = () => {
   
   const handleStatusChange = async (taskId: string, newStatus: TaskStatus) => {
     try {
-      // מחפשים את המשימה ברשימת המשימות
       const taskToUpdate = tasks.find(t => t.id === taskId);
       if (!taskToUpdate) return;
       
-      // עדכון מקומי ראשוני למצב החדש
       setTasks(prevTasks => prevTasks.map(t => 
         t.id === taskId ? { ...t, status: newStatus, updated_at: new Date().toISOString() } : t
       ));
@@ -352,14 +342,12 @@ const Tasks = () => {
         variant: "destructive",
       });
       
-      // מחזירים את המצב הקודם במקרה של שגיאה
       setTasks(prevTasks => [...prevTasks]);
     }
   };
   
   const handleDragStart = (e: React.DragEvent, taskId: string) => {
     e.dataTransfer.setData('taskId', taskId);
-    // הוספת משוב חזותי
     if (e.currentTarget instanceof HTMLElement) {
       e.currentTarget.style.opacity = '0.4';
       e.currentTarget.style.transform = 'scale(1.02)';
@@ -367,7 +355,6 @@ const Tasks = () => {
   };
   
   const handleDragEnd = (e: React.DragEvent) => {
-    // איפוס המשוב החזותי
     if (e.currentTarget instanceof HTMLElement) {
       e.currentTarget.style.opacity = '1';
       e.currentTarget.style.transform = '';
@@ -376,7 +363,6 @@ const Tasks = () => {
   
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
-    // הוספת משוב חזותי לאיזור היעד
     if (e.currentTarget instanceof HTMLElement) {
       e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.05)';
       e.currentTarget.style.boxShadow = 'inset 0 0 0 2px rgba(0, 0, 0, 0.1)';
@@ -384,7 +370,6 @@ const Tasks = () => {
   };
   
   const handleDragLeave = (e: React.DragEvent) => {
-    // איפוס המשוב החזותי
     if (e.currentTarget instanceof HTMLElement) {
       e.currentTarget.style.backgroundColor = '';
       e.currentTarget.style.boxShadow = '';
@@ -393,7 +378,6 @@ const Tasks = () => {
   
   const handleDrop = (e: React.DragEvent, status: TaskStatus) => {
     e.preventDefault();
-    // איפוס המשוב החזותי
     if (e.currentTarget instanceof HTMLElement) {
       e.currentTarget.style.backgroundColor = '';
       e.currentTarget.style.boxShadow = '';
@@ -401,7 +385,6 @@ const Tasks = () => {
     
     const taskId = e.dataTransfer.getData('taskId');
     
-    // וידוא שהמשימה הועברה לעמודה חדשה
     const task = tasks.find(t => t.id === taskId);
     if (task && task.status !== status) {
       handleStatusChange(taskId, status);
@@ -418,46 +401,36 @@ const Tasks = () => {
   
   const shouldShowTaskForm = isTaskFormOpen || editingTask;
   
-  const renderSkeleton = () => (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-      {[1, 2, 3].map((colIndex) => (
-        <div key={colIndex} className="space-y-4 p-4 rounded-lg bg-muted/30">
-          <div className="flex items-center justify-between">
-            <Skeleton className="h-6 w-24" />
-            <Skeleton className="h-6 w-8 rounded-full" />
-          </div>
-          <div className="space-y-3">
-            {[1, 2, 3].map((index) => (
-              <div key={index} className="p-4 border rounded-lg bg-card">
-                <Skeleton className="h-5 w-full mb-2" />
-                <Skeleton className="h-4 w-3/4 mb-3" />
-                <div className="flex justify-between items-center mt-2">
-                  <Skeleton className="h-6 w-16 rounded-full" />
-                  <Skeleton className="h-6 w-6 rounded-full" />
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-  
   const renderEmptyState = (status: TaskStatus) => {
     const messages = {
-      open: "אין משימות פתוחות. הוסף משימה חדשה!",
-      in_progress: "אין משימות בתהליך כרגע.",
-      completed: "אין משימות שהושלמו."
+      open: {
+        title: "רוצה להתחיל משימה חדשה?",
+        description: "אין משימות פתוחות כרגע. בוא נתחיל!",
+        icon: <Plus className="h-12 w-12 text-yellow-500/40" />
+      },
+      in_progress: {
+        title: "הכל רגוע כרגע",
+        description: "אין משימות בתהליך ביצוע.",
+        icon: <Loader2 className="h-12 w-12 text-blue-500/40" />
+      },
+      completed: {
+        title: "בקרוב יהיו פה משימות שהושלמו",
+        description: "אין עדיין משימות שהושלמו.",
+        icon: <Check className="h-12 w-12 text-green-500/40" />
+      }
     };
     
     return (
-      <div className="flex flex-col items-center justify-center text-center py-10 text-muted-foreground border border-dashed rounded-lg bg-background/50 px-4">
-        <Info className="mb-2 h-10 w-10 opacity-30" />
-        <p>{messages[status]}</p>
+      <div className="flex flex-col items-center justify-center text-center py-10 text-muted-foreground border border-dashed rounded-lg bg-background/50 px-4 animate-fade-in">
+        <div className="mb-4">
+          {messages[status].icon}
+        </div>
+        <h3 className="text-lg font-medium mb-1">{messages[status].title}</h3>
+        <p className="text-sm text-muted-foreground">{messages[status].description}</p>
         {status === 'open' && (
           <Button 
             variant="outline" 
-            className="mt-4"
+            className="mt-4 hover:bg-yellow-50"
             onClick={() => handleOpenTaskForm()}
           >
             <Plus className="ml-2 h-4 w-4" />
@@ -467,6 +440,31 @@ const Tasks = () => {
       </div>
     );
   };
+  
+  const renderSkeleton = () => (
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {[1, 2, 3].map((colIndex) => (
+        <div key={colIndex} className="space-y-4 p-4 rounded-lg bg-muted/30 animate-pulse">
+          <div className="flex items-center justify-between">
+            <div className="h-6 w-24 bg-muted rounded-full" />
+            <div className="h-6 w-8 bg-muted rounded-full" />
+          </div>
+          <div className="space-y-3">
+            {[1, 2, 3].map((index) => (
+              <div key={index} className="p-4 border rounded-lg bg-card">
+                <div className="h-5 w-full bg-muted rounded mb-2" />
+                <div className="h-4 w-3/4 bg-muted rounded mb-3" />
+                <div className="flex justify-between items-center mt-2">
+                  <div className="h-6 w-16 bg-muted rounded-full" />
+                  <div className="h-6 w-6 bg-muted rounded-full" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
   
   return (
     <div dir="rtl" className="space-y-4 max-w-6xl mx-auto px-4">
@@ -603,7 +601,7 @@ const Tasks = () => {
               >
                 <div className="flex items-center justify-between">
                   <h3 className="font-medium flex items-center">
-                    <Badge variant="outline" className="mr-2 bg-yellow-100">
+                    <Badge variant="open" className="mr-2">
                       {openTasks.length}
                     </Badge>
                     <span className="flex items-center">
@@ -638,7 +636,7 @@ const Tasks = () => {
               >
                 <div className="flex items-center justify-between">
                   <h3 className="font-medium flex items-center">
-                    <Badge variant="outline" className="mr-2 bg-blue-100">
+                    <Badge variant="inProgress" className="mr-2">
                       {inProgressTasks.length}
                     </Badge>
                     <span className="flex items-center">
@@ -673,7 +671,7 @@ const Tasks = () => {
               >
                 <div className="flex items-center justify-between">
                   <h3 className="font-medium flex items-center">
-                    <Badge variant="outline" className="mr-2 bg-green-100">
+                    <Badge variant="completed" className="mr-2">
                       {completedTasks.length}
                     </Badge>
                     <span className="flex items-center">
