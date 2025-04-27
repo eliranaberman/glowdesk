@@ -1,19 +1,30 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { CalendarClock, Users, DollarSign, TrendingUp } from 'lucide-react';
 import StatCard from '../components/dashboard/StatCard';
-import DailySummary from '../components/dashboard/DailySummary';
-import RecentAppointments from '../components/dashboard/RecentAppointments';
-import AnalyticsCharts from '../components/dashboard/AnalyticsCharts';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from '@/hooks/use-mobile';
-import LoyaltyProgram from '@/components/dashboard/LoyaltyProgram';
-import MarketingMessages from '@/components/dashboard/MarketingMessages';
-import BusinessInsights from '@/components/dashboard/BusinessInsights';
-import CashFlowForecast from '@/components/dashboard/CashFlowForecast';
-import InactiveClientsAlert from '@/components/dashboard/InactiveClientsAlert';
 import { initializeMarketingData } from '@/services/marketing';
+
+const DailySummary = React.lazy(() => import('../components/dashboard/DailySummary'));
+const RecentAppointments = React.lazy(() => import('../components/dashboard/RecentAppointments'));
+const BusinessInsights = React.lazy(() => import('../components/dashboard/BusinessInsights'));
+const CashFlowForecast = React.lazy(() => import('../components/dashboard/CashFlowForecast'));
+const LoyaltyProgram = React.lazy(() => import('@/components/dashboard/LoyaltyProgram'));
+const MarketingMessages = React.lazy(() => import('@/components/dashboard/MarketingMessages'));
+const InactiveClientsAlert = React.lazy(() => import('@/components/dashboard/InactiveClientsAlert'));
+const AnalyticsCharts = React.lazy(() => import('@/components/dashboard/AnalyticsCharts'));
+
+const LoadingFallback = () => (
+  <div className="animate-pulse p-6 bg-card rounded-xl shadow-soft">
+    <div className="h-8 w-48 bg-muted rounded mb-4"></div>
+    <div className="space-y-3">
+      <div className="h-4 bg-muted rounded w-full"></div>
+      <div className="h-4 bg-muted rounded w-5/6"></div>
+    </div>
+  </div>
+);
 
 const Dashboard = () => {
   const { toast } = useToast();
@@ -90,7 +101,7 @@ const Dashboard = () => {
   ];
 
   return (
-    <div className="space-y-6 md:space-y-8" dir="rtl">
+    <div className="space-y-6 md:space-y-8 animate-fade-in" dir="rtl">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         {stats.map((stat) => (
           <StatCard
@@ -105,35 +116,47 @@ const Dashboard = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
         <div className="flex flex-col gap-6 order-first">
-          <DailySummary 
-            customers={dailyData.customers}
-            hours={dailyData.hours}
-            revenue={dailyData.revenue}
-            deficiencies={dailyData.deficiencies}
-          />
-          <RecentAppointments appointments={appointments} />
+          <Suspense fallback={<LoadingFallback />}>
+            <DailySummary 
+              customers={dailyData.customers}
+              hours={dailyData.hours}
+              revenue={dailyData.revenue}
+              deficiencies={dailyData.deficiencies}
+            />
+          </Suspense>
+          <Suspense fallback={<LoadingFallback />}>
+            <RecentAppointments appointments={appointments} />
+          </Suspense>
         </div>
         
         <div className="flex flex-col gap-6">
-          <BusinessInsights />
-          <CashFlowForecast />
+          <Suspense fallback={<LoadingFallback />}>
+            <BusinessInsights />
+            <CashFlowForecast />
+          </Suspense>
         </div>
       </div>
       
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
-        <MarketingMessages />
-        <LoyaltyProgram />
+        <Suspense fallback={<LoadingFallback />}>
+          <MarketingMessages />
+          <LoyaltyProgram />
+        </Suspense>
       </div>
       
-      <InactiveClientsAlert />
+      <Suspense fallback={<LoadingFallback />}>
+        <InactiveClientsAlert />
+      </Suspense>
       
       <div className="mb-6 md:mb-8">
-        <AnalyticsCharts 
-          monthlyData={monthlyData}
-          retentionData={retentionData}
-          servicesData={servicesData}
-          bookingsData={bookingsData}
-        />
+        <Suspense fallback={<LoadingFallback />}>
+          <AnalyticsCharts 
+            monthlyData={monthlyData}
+            retentionData={retentionData}
+            servicesData={servicesData}
+            bookingsData={bookingsData}
+          />
+        </Suspense>
       </div>
       
       <div className="border rounded-xl p-4 md:p-6 shadow-soft hover:shadow-soft-lg transition-all duration-300 bg-warmBeige/10">
