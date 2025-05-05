@@ -8,8 +8,16 @@ import { Helmet } from 'react-helmet-async';
 import UserTable from '@/components/users/UserTable';
 import UserFilters from '@/components/users/UserFilters';
 import { Button } from '@/components/ui/button';
-import { Loader2 } from 'lucide-react';
+import { Loader2, UserPlus } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { 
+  getAllUsers, 
+  assignRole, 
+  removeRole,
+  hasRole,
+  type UserWithRoles
+} from '@/services/userRolesService';
+import { usePermissions } from '@/hooks/use-permissions';
 
 // User interface to define the structure of a user object
 export interface User {
@@ -27,8 +35,8 @@ export interface User {
 }
 
 const UserManagement = () => {
-  const [users, setUsers] = useState<User[]>([]);
-  const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
+  const [users, setUsers] = useState<UserWithRoles[]>([]);
+  const [filteredUsers, setFilteredUsers] = useState<UserWithRoles[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -36,17 +44,25 @@ const UserManagement = () => {
   const { toast } = useToast();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { isAdmin, isOwner } = usePermissions();
 
   // Check if current user is admin
   const checkAdminAccess = async () => {
     try {
-      const { data, error } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', user?.id)
-        .single();
+      if (!user?.id) {
+        toast({
+          title: "נדרשת התחברות",
+          description: "יש להתחבר תחילה למערכת",
+          variant: "destructive",
+        });
+        navigate('/login');
+        return false;
+      }
 
-      if (error || !data || data.role !== 'admin') {
+      const isUserAdmin = await hasRole(user.id, 'admin');
+      const isUserOwner = await hasRole(user.id, 'owner');
+
+      if (!isUserAdmin && !isUserOwner) {
         toast({
           title: "אין הרשאת גישה",
           description: "רק למנהלי המערכת יש גישה לדף זה",
@@ -70,15 +86,11 @@ const UserManagement = () => {
       const isAdmin = await checkAdminAccess();
       if (!isAdmin) return;
 
-      const { data, error } = await supabase.auth.admin.listUsers();
+      const usersWithRoles = await getAllUsers();
       
-      if (error) {
-        throw error;
-      }
-
-      if (data) {
-        setUsers(data.users as User[]);
-        setFilteredUsers(data.users as User[]);
+      if (usersWithRoles) {
+        setUsers(usersWithRoles);
+        setFilteredUsers(usersWithRoles);
       }
     } catch (error) {
       console.error('Error fetching users:', error);
@@ -101,103 +113,57 @@ const UserManagement = () => {
       const term = searchTerm.toLowerCase();
       result = result.filter(user => 
         user.email.toLowerCase().includes(term) || 
-        (user.user_metadata?.full_name?.toLowerCase().includes(term) || '')
+        (user.full_name?.toLowerCase().includes(term) || '')
       );
     }
     
     // Apply status filter
-    if (statusFilter !== 'all') {
-      result = result.filter(user => {
-        if (statusFilter === 'active') {
-          return !user.banned_until;
-        } else {
-          return user.banned_until;
-        }
-      });
-    }
-    
+    // Note: We'd need to add this logic if we track user status
+
     // Apply role filter
     if (roleFilter !== 'all') {
       result = result.filter(user => 
-        user.app_metadata?.role === roleFilter
+        user.roles.includes(roleFilter as any)
       );
     }
     
     setFilteredUsers(result);
   };
 
-  // Handle user actions (deactivate, promote, delete)
-  const handleUserAction = async (actionType: string, userId: string) => {
+  // Handle user role changes
+  const handleRoleChange = async (userId: string, role: string, isAdding: boolean) => {
     try {
-      switch (actionType) {
-        case 'deactivate':
-          // Set banned_until to a future date (1 year from now)
-          const banUntil = new Date();
-          banUntil.setFullYear(banUntil.getFullYear() + 1);
-          
-          await supabase.auth.admin.updateUserById(
-            userId,
-            { user_metadata: { banned_until: banUntil.toISOString() } }
-          );
-          
-          toast({
-            title: "חשבון הושבת",
-            description: "חשבון המשתמש הושבת בהצלחה",
-          });
-          break;
-          
-        case 'activate':
-          await supabase.auth.admin.updateUserById(
-            userId,
-            { user_metadata: { banned_until: null } }
-          );
-          
-          toast({
-            title: "חשבון הופעל",
-            description: "חשבון המשתמש הופעל בהצלחה",
-          });
-          break;
-          
-        case 'promote':
-          await supabase.auth.admin.updateUserById(
-            userId,
-            { app_metadata: { role: 'admin' } }
-          );
-          
-          // Also update user_roles table
-          await supabase
-            .from('user_roles')
-            .upsert({ 
-              user_id: userId, 
-              role: 'admin' 
-            });
-          
-          toast({
-            title: "קידום בוצע",
-            description: "המשתמש קודם לתפקיד מנהל בהצלחה",
-          });
-          break;
-          
-        case 'delete':
-          await supabase.auth.admin.deleteUser(userId);
-          
-          toast({
-            title: "חשבון נמחק",
-            description: "חשבון המשתמש נמחק בהצלחה",
-          });
-          break;
-          
-        default:
-          break;
+      let success;
+      
+      if (isAdding) {
+        success = await assignRole(userId, role as any);
+      } else {
+        success = await removeRole(userId, role as any);
       }
       
-      // Refresh the user list
-      fetchUsers();
+      if (success) {
+        // Update local state to show the change
+        setUsers(prevUsers => 
+          prevUsers.map(user => {
+            if (user.id === userId) {
+              const roles = isAdding 
+                ? [...user.roles, role as any]
+                : user.roles.filter(r => r !== role);
+              
+              return { ...user, roles };
+            }
+            return user;
+          })
+        );
+        
+        // Apply filters to the updated list
+        applyFilters();
+      }
     } catch (error) {
-      console.error('Error performing user action:', error);
+      console.error('Error changing user role:', error);
       toast({
-        title: "שגיאה בביצוע הפעולה",
-        description: "אירעה שגיאה בביצוע הפעולה. אנא נסה שוב.",
+        title: "שגיאה בעדכון הרשאות",
+        description: "אירעה שגיאה בעדכון הרשאות המשתמש",
         variant: "destructive",
       });
     }
@@ -230,8 +196,16 @@ const UserManagement = () => {
         
         <Card>
           <CardHeader>
-            <CardTitle>משתמשי המערכת</CardTitle>
-            <CardDescription>סה"כ {filteredUsers.length} משתמשים</CardDescription>
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center">
+              <div>
+                <CardTitle>משתמשי המערכת</CardTitle>
+                <CardDescription>סה"כ {filteredUsers.length} משתמשים</CardDescription>
+              </div>
+              <Button variant="outline" className="mt-2 sm:mt-0">
+                <UserPlus className="mr-2 h-4 w-4" />
+                הזמן משתמש חדש
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
             <UserFilters 
@@ -266,7 +240,8 @@ const UserManagement = () => {
             ) : (
               <UserTable 
                 users={filteredUsers}
-                onUserAction={handleUserAction}
+                onRoleChange={handleRoleChange}
+                currentUserId={user?.id}
               />
             )}
           </CardContent>

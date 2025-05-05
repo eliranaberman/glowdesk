@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -15,8 +15,21 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
+import { usePermissions } from "@/hooks/use-permissions";
+import { 
+  getInventoryItems,
+  addInventoryItem,
+  updateInventoryItem,
+  deleteInventoryItem,
+  getLowStockItems,
+  calculateInventoryStatus,
+  type InventoryItem
+} from "@/services/inventoryService";
 
 const Inventory = () => {
+  const { user } = useAuth();
+  const { canWrite } = usePermissions();
   const [searchQuery, setSearchQuery] = useState("");
   const [isAddItemDialogOpen, setIsAddItemDialogOpen] = useState(false);
   const [newItem, setNewItem] = useState({
@@ -25,66 +38,31 @@ const Inventory = () => {
     quantity: "",
     price: ""
   });
+  const [inventoryItems, setInventoryItems] = useState<InventoryItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [canModifyInventory, setCanModifyInventory] = useState(false);
 
-  // Mock inventory data
-  const [inventoryItems, setInventoryItems] = useState([
-    {
-      id: "1",
-      name: "לק ג'ל ורוד",
-      category: "לק",
-      quantity: 5,
-      price: 65,
-      status: "תקין",
-    },
-    {
-      id: "2",
-      name: "לק ג'ל אדום",
-      category: "לק",
-      quantity: 2,
-      price: 65,
-      status: "מלאי נמוך",
-    },
-    {
-      id: "3",
-      name: "לק ג'ל לבן",
-      category: "לק",
-      quantity: 1,
-      price: 65,
-      status: "מלאי נמוך",
-    },
-    {
-      id: "4",
-      name: "אצטון",
-      category: "חומרים",
-      quantity: 3,
-      price: 30,
-      status: "תקין",
-    },
-    {
-      id: "5",
-      name: "טיפים אקריליק",
-      category: "אביזרים",
-      quantity: 120,
-      price: 45,
-      status: "תקין",
-    },
-    {
-      id: "6",
-      name: "מברשת לציפורניים",
-      category: "כלים",
-      quantity: 8,
-      price: 25,
-      status: "תקין",
-    },
-    {
-      id: "7",
-      name: "לק ג'ל שחור",
-      category: "לק",
-      quantity: 0,
-      price: 65,
-      status: "אזל במלאי",
-    },
-  ]);
+  useEffect(() => {
+    const loadInventoryItems = async () => {
+      setLoading(true);
+      const items = await getInventoryItems();
+      setInventoryItems(items);
+      setLoading(false);
+    };
+
+    loadInventoryItems();
+  }, []);
+
+  useEffect(() => {
+    const checkPermissions = async () => {
+      if (user?.id) {
+        const hasWritePermission = await canWrite('inventory');
+        setCanModifyInventory(hasWritePermission);
+      }
+    };
+
+    checkPermissions();
+  }, [user, canWrite]);
 
   // Filter items based on search query
   const filteredItems = inventoryItems.filter(
@@ -97,7 +75,7 @@ const Inventory = () => {
     (item) => item.status === "מלאי נמוך" || item.status === "אזל במלאי"
   ).length;
 
-  const handleAddItem = () => {
+  const handleAddItem = async () => {
     // Validate form
     if (!newItem.name || !newItem.category || !newItem.quantity) {
       toast({
@@ -110,29 +88,27 @@ const Inventory = () => {
 
     // Add new item to inventory
     const quantity = parseInt(newItem.quantity);
-    const price = parseFloat(newItem.price);
-    const status = quantity === 0 ? "אזל במלאי" : quantity <= 2 ? "מלאי נמוך" : "תקין";
+    const cost = parseFloat(newItem.price);
+    const status = calculateInventoryStatus(quantity);
 
-    setInventoryItems([
-      ...inventoryItems,
-      {
-        id: String(inventoryItems.length + 1),
-        name: newItem.name,
-        category: newItem.category,
-        quantity,
-        price,
-        status,
-      },
-    ]);
+    const itemToAdd = {
+      name: newItem.name,
+      category: newItem.category,
+      quantity,
+      cost,
+      status,
+      entry_date: new Date().toISOString().split('T')[0]
+    };
 
-    // Reset form and close dialog
-    setNewItem({ name: "", category: "", quantity: "", price: "" });
-    setIsAddItemDialogOpen(false);
+    const addedItem = await addInventoryItem(itemToAdd);
     
-    toast({
-      title: "פריט נוסף בהצלחה",
-      description: `${newItem.name} נוסף למלאי בהצלחה`
-    });
+    if (addedItem) {
+      setInventoryItems([...inventoryItems, addedItem]);
+      
+      // Reset form and close dialog
+      setNewItem({ name: "", category: "", quantity: "", price: "" });
+      setIsAddItemDialogOpen(false);
+    }
   };
 
   return (
@@ -200,54 +176,63 @@ const Inventory = () => {
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            <Button onClick={() => setIsAddItemDialogOpen(true)}>
-              <Plus className="h-4 w-4 ml-2" />
-              הוסף פריט
-            </Button>
+            {canModifyInventory && (
+              <Button onClick={() => setIsAddItemDialogOpen(true)}>
+                <Plus className="h-4 w-4 ml-2" />
+                הוסף פריט
+              </Button>
+            )}
           </div>
         </CardHeader>
         <CardContent>
-          <div className="border rounded-lg overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-secondary text-secondary-foreground">
-                  <tr>
-                    <th className="text-right py-3 px-4 font-medium">שם המוצר</th>
-                    <th className="text-right py-3 px-4 font-medium">קטגוריה</th>
-                    <th className="text-right py-3 px-4 font-medium">כמות</th>
-                    <th className="text-right py-3 px-4 font-medium">מחיר</th>
-                    <th className="text-right py-3 px-4 font-medium">סטטוס</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredItems.map((item) => (
-                    <tr
-                      key={item.id}
-                      className="border-b last:border-b-0 hover:bg-accent/50"
-                    >
-                      <td className="py-3 px-4">{item.name}</td>
-                      <td className="py-3 px-4">{item.category}</td>
-                      <td className="py-3 px-4">{item.quantity}</td>
-                      <td className="py-3 px-4">₪{item.price}</td>
-                      <td className="py-3 px-4">
-                        <Badge
-                          variant={
-                            item.status === "תקין"
-                              ? "outline"
-                              : item.status === "מלאי נמוך"
-                              ? "secondary"
-                              : "destructive"
-                          }
-                        >
-                          {item.status}
-                        </Badge>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+          {loading ? (
+            <div className="flex justify-center items-center p-8">
+              <div className="animate-spin h-8 w-8 border-2 border-primary rounded-full border-t-transparent"></div>
+              <span className="mr-2">טוען נתונים...</span>
             </div>
-          </div>
+          ) : (
+            <div className="border rounded-lg overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-secondary text-secondary-foreground">
+                    <tr>
+                      <th className="text-right py-3 px-4 font-medium">שם המוצר</th>
+                      <th className="text-right py-3 px-4 font-medium">קטגוריה</th>
+                      <th className="text-right py-3 px-4 font-medium">כמות</th>
+                      <th className="text-right py-3 px-4 font-medium">מחיר</th>
+                      <th className="text-right py-3 px-4 font-medium">סטטוס</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredItems.map((item) => (
+                      <tr
+                        key={item.id}
+                        className="border-b last:border-b-0 hover:bg-accent/50"
+                      >
+                        <td className="py-3 px-4">{item.name}</td>
+                        <td className="py-3 px-4">{item.category}</td>
+                        <td className="py-3 px-4">{item.quantity}</td>
+                        <td className="py-3 px-4">₪{item.cost}</td>
+                        <td className="py-3 px-4">
+                          <Badge
+                            variant={
+                              item.status === "תקין"
+                                ? "outline"
+                                : item.status === "מלאי נמוך"
+                                ? "secondary"
+                                : "destructive"
+                            }
+                          >
+                            {item.status}
+                          </Badge>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 

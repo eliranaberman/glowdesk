@@ -164,6 +164,90 @@ export type Database = {
         }
         Relationships: []
       }
+      expenses: {
+        Row: {
+          amount: number
+          category: string
+          created_at: string | null
+          created_by: string | null
+          date: string
+          description: string | null
+          has_invoice: boolean | null
+          id: string
+          invoice_file_path: string | null
+          payment_method: string | null
+          vendor: string
+        }
+        Insert: {
+          amount: number
+          category: string
+          created_at?: string | null
+          created_by?: string | null
+          date?: string
+          description?: string | null
+          has_invoice?: boolean | null
+          id?: string
+          invoice_file_path?: string | null
+          payment_method?: string | null
+          vendor: string
+        }
+        Update: {
+          amount?: number
+          category?: string
+          created_at?: string | null
+          created_by?: string | null
+          date?: string
+          description?: string | null
+          has_invoice?: boolean | null
+          id?: string
+          invoice_file_path?: string | null
+          payment_method?: string | null
+          vendor?: string
+        }
+        Relationships: []
+      }
+      inventory_items: {
+        Row: {
+          category: string
+          cost: number
+          created_at: string | null
+          created_by: string | null
+          entry_date: string
+          expiry_date: string | null
+          id: string
+          name: string
+          quantity: number
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          category: string
+          cost: number
+          created_at?: string | null
+          created_by?: string | null
+          entry_date?: string
+          expiry_date?: string | null
+          id?: string
+          name: string
+          quantity?: number
+          status?: string
+          updated_at?: string | null
+        }
+        Update: {
+          category?: string
+          cost?: number
+          created_at?: string | null
+          created_by?: string | null
+          entry_date?: string
+          expiry_date?: string | null
+          id?: string
+          name?: string
+          quantity?: number
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       marketing_campaigns: {
         Row: {
           created_by: string | null
@@ -265,6 +349,30 @@ export type Database = {
         }
         Relationships: []
       }
+      role_permissions: {
+        Row: {
+          created_at: string | null
+          id: string
+          permission: string
+          resource: string
+          role: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          permission: string
+          resource: string
+          role: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          permission?: string
+          resource?: string
+          role?: string
+        }
+        Relationships: []
+      }
       tasks: {
         Row: {
           assigned_user_id: string | null
@@ -333,6 +441,27 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          created_at: string | null
+          id: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          role: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       users: {
         Row: {
           avatar_url: string | null
@@ -362,7 +491,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_permission: {
+        Args: { user_id: string; resource: string; required_permission: string }
+        Returns: boolean
+      }
+      has_role: {
+        Args: { user_id: string; required_role: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never

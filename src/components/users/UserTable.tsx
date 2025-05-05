@@ -1,7 +1,5 @@
 
 import { useState } from 'react';
-import { format } from 'date-fns';
-import { he } from 'date-fns/locale';
 import { 
   Table, 
   TableBody, 
@@ -10,26 +8,6 @@ import {
   TableHeader, 
   TableRow 
 } from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
-import { 
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-import { 
-  MoreHorizontal, 
-  Shield, 
-  UserX, 
-  Trash2, 
-  UserCheck,
-  ChevronDown,
-  ChevronUp,
-} from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -37,282 +15,231 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { 
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
+import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { User } from '@/pages/UserManagement';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { format } from 'date-fns';
+import { 
+  MoreHorizontal, 
+  Shield, 
+  User, 
+  AlertTriangle, 
+  CheckCircle,
+  XCircle,
+  Settings,
+  Scissors,
+  Briefcase,
+  UserPlus,
+  UserCheck,
+  UserX 
+} from 'lucide-react';
+import { UserWithRoles } from '@/services/userRolesService';
 
 interface UserTableProps {
-  users: User[];
-  onUserAction: (actionType: string, userId: string) => Promise<void>;
+  users: UserWithRoles[];
+  onRoleChange: (userId: string, role: string, isAdding: boolean) => Promise<void>;
+  currentUserId?: string;
 }
 
-const UserTable = ({ users, onUserAction }: UserTableProps) => {
-  const isMobile = useIsMobile();
-  const [sortBy, setSortBy] = useState('created_at');
-  const [sortOrder, setSortOrder] = useState('desc');
-  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const [currentAction, setCurrentAction] = useState<{
-    type: string;
+const UserTable = ({ users, onRoleChange, currentUserId }: UserTableProps) => {
+  const [confirmDialog, setConfirmDialog] = useState<{
+    isOpen: boolean;
     userId: string;
-    title: string;
-    description: string;
-    confirmText: string;
-  } | null>(null);
-
-  // Handle sorting
-  const handleSort = (column: string) => {
-    if (sortBy === column) {
-      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortBy(column);
-      setSortOrder('asc');
-    }
-  };
-
-  // Sort users
-  const sortedUsers = [...users].sort((a, b) => {
-    let valueA, valueB;
-
-    switch (sortBy) {
-      case 'name':
-        valueA = a.user_metadata?.full_name || '';
-        valueB = b.user_metadata?.full_name || '';
-        break;
-      case 'email':
-        valueA = a.email;
-        valueB = b.email;
-        break;
-      case 'role':
-        valueA = a.app_metadata?.role || 'user';
-        valueB = b.app_metadata?.role || 'user';
-        break;
-      case 'status':
-        valueA = a.banned_until ? 'inactive' : 'active';
-        valueB = b.banned_until ? 'inactive' : 'active';
-        break;
-      default: // created_at
-        valueA = new Date(a.created_at).getTime();
-        valueB = new Date(b.created_at).getTime();
-        break;
-    }
-
-    const comparison = typeof valueA === 'string'
-      ? valueA.localeCompare(valueB as string)
-      : (valueA as number) - (valueB as number);
-
-    return sortOrder === 'asc' ? comparison : -comparison;
+    username: string;
+    action: string;
+    role?: string;
+    isAdding?: boolean;
+  }>({
+    isOpen: false,
+    userId: '',
+    username: '',
+    action: '',
   });
 
-  // Prepare a confirmation dialog
-  const prepareAction = (type: string, userId: string) => {
-    let dialogContent = {
-      title: '',
-      description: '',
-      confirmText: '',
-    };
-
-    switch (type) {
-      case 'deactivate':
-        dialogContent = {
-          title: 'השבתת חשבון',
-          description: 'האם אתה בטוח שברצונך להשבית את חשבון המשתמש הזה? המשתמש לא יוכל להתחבר למערכת עד להפעלה מחדש.',
-          confirmText: 'השבת חשבון',
-        };
-        break;
-      case 'activate':
-        dialogContent = {
-          title: 'הפעלת חשבון',
-          description: 'האם אתה בטוח שברצונך להפעיל מחדש את חשבון המשתמש הזה?',
-          confirmText: 'הפעל חשבון',
-        };
-        break;
-      case 'promote':
-        dialogContent = {
-          title: 'קידום לדרגת מנהל',
-          description: 'האם אתה בטוח שברצונך לקדם את המשתמש הזה לדרגת מנהל? מנהלים יכולים לצפות ולנהל את כל המשתמשים במערכת.',
-          confirmText: 'קדם למנהל',
-        };
-        break;
-      case 'delete':
-        dialogContent = {
-          title: 'מחיקת חשבון',
-          description: 'האם אתה בטוח שברצונך למחוק את חשבון המשתמש הזה לצמיתות? פעולה זו אינה ניתנת לביטול.',
-          confirmText: 'מחק חשבון',
-        };
-        break;
-      default:
-        break;
-    }
-
-    setCurrentAction({
-      type,
+  const handleRoleAction = (userId: string, username: string, role: string, isAdding: boolean) => {
+    setConfirmDialog({
+      isOpen: true,
       userId,
-      ...dialogContent,
+      username,
+      action: isAdding ? 'add' : 'remove',
+      role,
+      isAdding,
     });
-    setShowConfirmDialog(true);
   };
 
-  // Handle confirmation
-  const handleConfirm = async () => {
-    if (currentAction) {
-      await onUserAction(currentAction.type, currentAction.userId);
+  const confirmRoleAction = async () => {
+    if (confirmDialog.role && confirmDialog.userId) {
+      await onRoleChange(
+        confirmDialog.userId, 
+        confirmDialog.role, 
+        confirmDialog.isAdding || false
+      );
+      setConfirmDialog({ ...confirmDialog, isOpen: false });
     }
-    setShowConfirmDialog(false);
-    setCurrentAction(null);
+  };
+
+  const getRoleBadgeVariant = (role: string) => {
+    switch (role) {
+      case 'admin':
+        return 'destructive';
+      case 'owner':
+        return 'default';
+      case 'employee':
+        return 'secondary';
+      case 'social_manager':
+        return 'outline';
+      default:
+        return 'outline';
+    }
+  };
+
+  const getRoleIcon = (role: string) => {
+    switch (role) {
+      case 'admin':
+        return <Shield className="h-3 w-3 ml-1" />;
+      case 'owner':
+        return <Briefcase className="h-3 w-3 ml-1" />;
+      case 'employee':
+        return <User className="h-3 w-3 ml-1" />;
+      case 'social_manager':
+        return <Scissors className="h-3 w-3 ml-1" />;
+      default:
+        return null;
+    }
+  };
+
+  const getFormattedDate = (dateString?: string) => {
+    if (!dateString) return 'לא זמין';
+    return format(new Date(dateString), 'dd/MM/yyyy HH:mm');
   };
 
   return (
-    <div className="w-full overflow-auto">
+    <div className="rounded-md border">
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead 
-              className="cursor-pointer" 
-              onClick={() => handleSort('name')}
-            >
-              <div className="flex items-center">
-                שם מלא
-                {sortBy === 'name' && (
-                  sortOrder === 'asc' ? 
-                    <ChevronUp className="h-4 w-4 mr-1" /> : 
-                    <ChevronDown className="h-4 w-4 mr-1" />
-                )}
-              </div>
-            </TableHead>
-            <TableHead 
-              className="cursor-pointer" 
-              onClick={() => handleSort('email')}
-            >
-              <div className="flex items-center">
-                אימייל
-                {sortBy === 'email' && (
-                  sortOrder === 'asc' ? 
-                    <ChevronUp className="h-4 w-4 mr-1" /> : 
-                    <ChevronDown className="h-4 w-4 mr-1" />
-                )}
-              </div>
-            </TableHead>
-            {!isMobile && (
-              <TableHead 
-                className="cursor-pointer" 
-                onClick={() => handleSort('status')}
-              >
-                <div className="flex items-center">
-                  סטטוס
-                  {sortBy === 'status' && (
-                    sortOrder === 'asc' ? 
-                      <ChevronUp className="h-4 w-4 mr-1" /> : 
-                      <ChevronDown className="h-4 w-4 mr-1" />
-                  )}
-                </div>
-              </TableHead>
-            )}
-            {!isMobile && (
-              <TableHead 
-                className="cursor-pointer" 
-                onClick={() => handleSort('created_at')}
-              >
-                <div className="flex items-center">
-                  תאריך הרשמה
-                  {sortBy === 'created_at' && (
-                    sortOrder === 'asc' ? 
-                      <ChevronUp className="h-4 w-4 mr-1" /> : 
-                      <ChevronDown className="h-4 w-4 mr-1" />
-                  )}
-                </div>
-              </TableHead>
-            )}
-            <TableHead 
-              className="cursor-pointer" 
-              onClick={() => handleSort('role')}
-            >
-              <div className="flex items-center">
-                תפקיד
-                {sortBy === 'role' && (
-                  sortOrder === 'asc' ? 
-                    <ChevronUp className="h-4 w-4 mr-1" /> : 
-                    <ChevronDown className="h-4 w-4 mr-1" />
-                )}
-              </div>
-            </TableHead>
-            <TableHead className="text-left">פעולות</TableHead>
+            <TableHead className="text-right">שם מלא</TableHead>
+            <TableHead className="text-right">אימייל</TableHead>
+            <TableHead className="text-right">תפקידים</TableHead>
+            <TableHead className="text-right">תאריך הצטרפות</TableHead>
+            <TableHead className="text-right">פעולות</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {sortedUsers.map((user) => (
+          {users.map((user) => (
             <TableRow key={user.id}>
-              <TableCell className="font-medium">
-                {user.user_metadata?.full_name || 'משתמש ללא שם'}
-              </TableCell>
+              <TableCell className="font-medium">{user.full_name || 'לא הוגדר'}</TableCell>
               <TableCell>{user.email}</TableCell>
-              {!isMobile && (
-                <TableCell>
-                  <Badge 
-                    variant={user.banned_until ? "destructive" : "success"}
-                    className="font-normal"
-                  >
-                    {user.banned_until ? 'לא פעיל' : 'פעיל'}
-                  </Badge>
-                </TableCell>
-              )}
-              {!isMobile && (
-                <TableCell>
-                  {format(new Date(user.created_at), 'dd/MM/yyyy', { locale: he })}
-                </TableCell>
-              )}
               <TableCell>
-                <Badge 
-                  variant={user.app_metadata?.role === 'admin' ? "default" : "outline"}
-                  className="font-normal"
-                >
-                  {user.app_metadata?.role === 'admin' ? 'מנהל' : 'משתמש'}
-                </Badge>
+                <div className="flex flex-wrap gap-1">
+                  {user.roles.length === 0 ? (
+                    <span className="text-muted-foreground text-sm">ללא תפקיד</span>
+                  ) : (
+                    user.roles.map((role) => (
+                      <TooltipProvider key={role}>
+                        <Tooltip>
+                          <TooltipTrigger>
+                            <Badge variant={getRoleBadgeVariant(role)} className="text-xs">
+                              {getRoleIcon(role)}
+                              {role}
+                            </Badge>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p dir="rtl">
+                              {role === 'admin' && 'מנהל מערכת - גישה מלאה'}
+                              {role === 'owner' && 'בעל עסק - גישה מלאה'}
+                              {role === 'employee' && 'עובד - גישה חלקית'}
+                              {role === 'social_manager' && 'מנהל סושיאל - גישה לניהול סושיאל'}
+                            </p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    ))
+                  )}
+                </div>
+              </TableCell>
+              <TableCell className="text-muted-foreground text-sm">
+                {format(new Date(user.created_at || Date.now()), 'dd/MM/yyyy')}
               </TableCell>
               <TableCell>
                 <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
+                  <DropdownMenuTrigger asChild disabled={user.id === currentUserId}>
                     <Button variant="ghost" className="h-8 w-8 p-0">
                       <span className="sr-only">פתח תפריט</span>
                       <MoreHorizontal className="h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    {user.banned_until ? (
-                      <DropdownMenuItem 
-                        onClick={() => prepareAction('activate', user.id)}
-                        className="gap-2"
-                      >
-                        <UserCheck className="h-4 w-4" />
-                        <span>הפעל משתמש</span>
-                      </DropdownMenuItem>
-                    ) : (
-                      <DropdownMenuItem 
-                        onClick={() => prepareAction('deactivate', user.id)}
-                        className="gap-2"
-                      >
-                        <UserX className="h-4 w-4" />
-                        <span>השבת משתמש</span>
-                      </DropdownMenuItem>
-                    )}
-                    
-                    {user.app_metadata?.role !== 'admin' && (
-                      <DropdownMenuItem 
-                        onClick={() => prepareAction('promote', user.id)}
-                        className="gap-2"
-                      >
-                        <Shield className="h-4 w-4" />
-                        <span>קדם למנהל</span>
-                      </DropdownMenuItem>
-                    )}
+                    <DropdownMenuItem disabled>
+                      <Settings className="mr-2 h-4 w-4" />
+                      <span>ערוך משתמש</span>
+                    </DropdownMenuItem>
                     
                     <DropdownMenuSeparator />
                     
+                    {/* Role Management */}
                     <DropdownMenuItem 
-                      onClick={() => prepareAction('delete', user.id)}
-                      className="text-destructive gap-2"
+                      onClick={() => handleRoleAction(user.id, user.full_name || user.email, 'admin', !user.roles.includes('admin'))}
+                      className={user.roles.includes('admin') ? 'text-destructive' : ''}
                     >
-                      <Trash2 className="h-4 w-4" />
-                      <span>מחק משתמש</span>
+                      {user.roles.includes('admin') ? (
+                        <>
+                          <UserX className="mr-2 h-4 w-4" />
+                          <span>הסר הרשאות מנהל</span>
+                        </>
+                      ) : (
+                        <>
+                          <UserPlus className="mr-2 h-4 w-4" />
+                          <span>הפוך למנהל מערכת</span>
+                        </>
+                      )}
+                    </DropdownMenuItem>
+                    
+                    <DropdownMenuItem 
+                      onClick={() => handleRoleAction(user.id, user.full_name || user.email, 'employee', !user.roles.includes('employee'))}
+                      className={user.roles.includes('employee') ? 'text-destructive' : ''}
+                    >
+                      {user.roles.includes('employee') ? (
+                        <>
+                          <UserX className="mr-2 h-4 w-4" />
+                          <span>הסר הרשאות עובד</span>
+                        </>
+                      ) : (
+                        <>
+                          <UserCheck className="mr-2 h-4 w-4" />
+                          <span>הפוך לעובד</span>
+                        </>
+                      )}
+                    </DropdownMenuItem>
+                    
+                    <DropdownMenuItem 
+                      onClick={() => handleRoleAction(user.id, user.full_name || user.email, 'social_manager', !user.roles.includes('social_manager'))}
+                      className={user.roles.includes('social_manager') ? 'text-destructive' : ''}
+                    >
+                      {user.roles.includes('social_manager') ? (
+                        <>
+                          <UserX className="mr-2 h-4 w-4" />
+                          <span>הסר הרשאות מנהל סושיאל</span>
+                        </>
+                      ) : (
+                        <>
+                          <Scissors className="mr-2 h-4 w-4" />
+                          <span>הפוך למנהל סושיאל</span>
+                        </>
+                      )}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -322,28 +249,32 @@ const UserTable = ({ users, onUserAction }: UserTableProps) => {
         </TableBody>
       </Table>
 
-      {/* Confirmation Dialog */}
-      <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{currentAction?.title}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {currentAction?.description}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>ביטול</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleConfirm}
-              className={
-                currentAction?.type === 'delete' ? 'bg-destructive hover:bg-destructive/90' : ''
+      <Dialog open={confirmDialog.isOpen} onOpenChange={(open) => setConfirmDialog({ ...confirmDialog, isOpen: open })}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {confirmDialog.action === 'add' ? 'הוספת תפקיד' : 'הסרת תפקיד'}
+            </DialogTitle>
+            <DialogDescription>
+              {confirmDialog.action === 'add' 
+                ? `האם להוסיף את התפקיד ${confirmDialog.role} למשתמש ${confirmDialog.username}?` 
+                : `האם להסיר את התפקיד ${confirmDialog.role} מהמשתמש ${confirmDialog.username}?`
               }
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setConfirmDialog({ ...confirmDialog, isOpen: false })}>
+              ביטול
+            </Button>
+            <Button 
+              variant={confirmDialog.action === 'add' ? 'default' : 'destructive'}
+              onClick={confirmRoleAction}
             >
-              {currentAction?.confirmText}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+              {confirmDialog.action === 'add' ? 'הוסף' : 'הסר'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
