@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -7,7 +8,7 @@ import {
   LayoutDashboard,
   User2,
   Calendar,
-  FileBarGraph,
+  FileText,
   ShoppingCart,
   Coins,
   ListChecks,
@@ -55,7 +56,7 @@ const Sidebar = ({ onLinkClick }: SidebarProps) => {
       { href: '/dashboard', label: 'דשבורד', icon: LayoutDashboard },
       { href: '/clients', label: 'לקוחות', icon: Contact2 },
       { href: '/scheduling', label: 'יומן', icon: Calendar },
-      { href: '/reports', label: 'דוחות', icon: FileBarGraph },
+      { href: '/reports', label: 'דוחות', icon: FileText },
       { href: '/inventory', label: 'מלאי', icon: ShoppingCart },
       { href: '/expenses', label: 'הוצאות', icon: Coins },
       { href: '/tasks', label: 'משימות', icon: ListChecks },
