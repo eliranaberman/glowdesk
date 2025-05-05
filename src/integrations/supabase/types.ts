@@ -400,6 +400,87 @@ export type Database = {
         }
         Relationships: []
       }
+      social_media_accounts: {
+        Row: {
+          access_token: string
+          account_id: string
+          account_name: string
+          created_at: string
+          id: string
+          platform: string
+          token_expires_at: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          access_token: string
+          account_id: string
+          account_name: string
+          created_at?: string
+          id?: string
+          platform: string
+          token_expires_at?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          access_token?: string
+          account_id?: string
+          account_name?: string
+          created_at?: string
+          id?: string
+          platform?: string
+          token_expires_at?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      social_media_posts: {
+        Row: {
+          account_id: string
+          caption: string | null
+          created_at: string
+          external_post_id: string | null
+          id: string
+          image_url: string | null
+          platform: string
+          published_at: string | null
+          scheduled_for: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          account_id: string
+          caption?: string | null
+          created_at?: string
+          external_post_id?: string | null
+          id?: string
+          image_url?: string | null
+          platform: string
+          published_at?: string | null
+          scheduled_for?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          account_id?: string
+          caption?: string | null
+          created_at?: string
+          external_post_id?: string | null
+          id?: string
+          image_url?: string | null
+          platform?: string
+          published_at?: string | null
+          scheduled_for?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       tasks: {
         Row: {
           assigned_user_id: string | null

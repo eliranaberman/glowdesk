@@ -1,4 +1,3 @@
-
 import { ReactElement } from 'react';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import ProtectedRouteWrapper from '@/components/auth/ProtectedRouteWrapper';
@@ -23,6 +22,7 @@ import NewInventoryItem from '@/pages/inventory/NewInventoryItem';
 import Expenses from '@/pages/Expenses';
 import Tasks from '@/pages/Tasks';
 import SocialMedia from '@/pages/SocialMedia';
+import SocialMediaMeta from '@/pages/SocialMediaMeta';
 import Notifications from '@/pages/Notifications';
 import Settings from '@/pages/Settings';
 import OnlineBooking from '@/pages/OnlineBooking';
@@ -198,6 +198,17 @@ export const protectedRoutes: RouteConfig[] = [
       </ProtectedRoute>
     ),
   },
+  
+  // Add the new Meta API route
+  {
+    path: '/social-media-meta',
+    element: (
+      <ProtectedRoute>
+        <SocialMediaMeta />
+      </ProtectedRoute>
+    ),
+  },
+  
   {
     path: '/notifications',
     element: (

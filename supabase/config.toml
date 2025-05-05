@@ -1,1 +1,11 @@
+
 project_id = "njjxqxluxtyechxgtwsq"
+
+[functions.meta-auth]
+verify_jwt = true
+
+[functions.meta-posts]
+verify_jwt = true
+
+[functions.meta-publish]
+verify_jwt = true

@@ -22,6 +22,7 @@ import {
   Users,
   Contact2,
   BrainCircuit,
+  Facebook,
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -61,6 +62,7 @@ const Sidebar = ({ onLinkClick }: SidebarProps) => {
       { href: '/expenses', label: 'הוצאות', icon: Coins },
       { href: '/tasks', label: 'משימות', icon: ListChecks },
       { href: '/social-media', label: 'מדיה חברתית ושיווק', icon: MessageSquare },
+      { href: '/social-media-meta', label: 'חיבור Meta API', icon: Facebook },
       { href: '/portfolio', label: 'גלריה', icon: ImageIcon },
       { href: '/marketing/templates', label: 'תבניות הודעות', icon: LayoutTemplate },
       { href: '/loyalty', label: 'תוכנית נאמנות', icon: HomeIcon },
