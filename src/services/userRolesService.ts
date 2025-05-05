@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 
@@ -15,6 +14,7 @@ export interface UserWithRoles {
   email: string;
   full_name?: string;
   roles: UserRole[];
+  created_at?: string; // Added this property
 }
 
 export interface Permission {
@@ -148,7 +148,8 @@ export const getAllUsers = async (): Promise<UserWithRoles[]> => {
       id: user.id,
       email: user.email || '',
       full_name: user.user_metadata?.full_name,
-      roles: [] as UserRole[]
+      roles: [] as UserRole[],
+      created_at: user.created_at // Include created_at from users data
     }));
     
     // Get all role assignments
