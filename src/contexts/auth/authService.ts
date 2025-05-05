@@ -1,3 +1,4 @@
+
 import { supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
 
@@ -139,7 +140,7 @@ export const updateUserPassword = async (password: string, toast: Toast) => {
     console.error('Update password error:', error);
     return { 
       success: false, 
-      error: 'התרחשה שגיאה בעדכ��ן הסיסמה. אנא נסו שוב מאוחר יותר.' 
+      error: 'התרחשה שגיאה בעדכון הסיסמה. אנא נסו שוב מאוחר יותר.' 
     };
   }
 };
