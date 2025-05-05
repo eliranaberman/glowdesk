@@ -1,358 +1,124 @@
-
-import { useState, useRef, useEffect } from 'react';
-import { NavLink, useLocation, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
+import { useLocation, Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { useIsMobile } from '@/hooks/use-mobile';
 import {
+  HomeIcon,
   LayoutDashboard,
-  Users,
+  User2,
   Calendar,
-  BarChart,
-  Package,
-  ClipboardList,
+  FileBarGraph,
+  ShoppingCart,
+  Coins,
+  ListChecks,
+  MessageSquare,
   Bell,
   Settings,
-  ChevronLeft,
-  ChevronRight,
-  Receipt,
-  Share2,
-  DollarSign,
-  TrendingUp,
-  UserCog,
+  LogOut,
+  LucideIcon,
+  ImageIcon,
+  LayoutTemplate,
+  Users,
+  Contact2,
+  BrainCircuit,
 } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
-import { useAuth } from '@/contexts/AuthContext';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { ScrollArea } from "@/components/ui/scroll-area"
 
-const navItems = [
-  { 
-    name: 'דשבורד', 
-    path: '/', 
-    icon: <LayoutDashboard className="w-5 h-5" /> 
-  },
-  { 
-    name: 'יומן', 
-    path: '/scheduling', 
-    icon: <Calendar className="w-5 h-5" /> 
-  },
-  { 
-    name: 'לקוחות', 
-    path: '/clients', 
-    icon: <Users className="w-5 h-5" /> 
-  },
-  { 
-    name: 'מדיה חברתית', 
-    path: '/social-media', 
-    icon: <Share2 className="w-5 h-5" /> 
-  },
-];
-
-const financialItems = [
-  {
-    name: 'תזרים מזומנים',
-    path: '/finances/cash-flow',
-    icon: <DollarSign className="w-5 h-5" />
-  },
-  {
-    name: 'תובנות עסקיות',
-    path: '/finances/insights',
-    icon: <TrendingUp className="w-5 h-5" />
-  }
-];
-
-const operationalItems = [
-  { 
-    name: 'הוצאות',
-    path: '/expenses', 
-    icon: <Receipt className="w-5 h-5" />
-  },
-  { 
-    name: 'משימות', 
-    path: '/tasks', 
-    icon: <ClipboardList className="w-5 h-5" /> 
-  },
-  { 
-    name: 'מלאי', 
-    path: '/inventory', 
-    icon: <Package className="w-5 h-5" /> 
-  },
-  { 
-    name: 'דוחות', 
-    path: '/reports', 
-    icon: <BarChart className="w-5 h-5" /> 
-  },
-];
+interface NavLinkProps {
+  href: string;
+  label: string;
+  icon: LucideIcon;
+}
 
 interface SidebarProps {
   onLinkClick?: () => void;
 }
 
 const Sidebar = ({ onLinkClick }: SidebarProps) => {
-  const [collapsed, setCollapsed] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
   const location = useLocation();
-  const navigate = useNavigate();
-  const scrollAreaRef = useRef<HTMLDivElement>(null);
-  const { user } = useAuth();
+  const isMobile = useIsMobile();
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
-  const handleLinkClick = (path: string) => {
-    // Just navigate to the path without toggling the sidebar
-    navigate(path);
-    
-    // Only call the onLinkClick prop if provided (used for mobile sidebar)
+  const toggleSidebar = () => {
+    setIsCollapsed(!isCollapsed);
+  };
+
+  const handleLinkClick = () => {
     if (onLinkClick) {
       onLinkClick();
     }
   };
 
-  useEffect(() => {
-    const checkAdminStatus = async () => {
-      if (!user) {
-        setIsAdmin(false);
-        return;
-      }
+  const Navigation = () => {
+    const links: NavLinkProps[] = [
+      { href: '/dashboard', label: 'דשבורד', icon: LayoutDashboard },
+      { href: '/clients', label: 'לקוחות', icon: Contact2 },
+      { href: '/scheduling', label: 'יומן', icon: Calendar },
+      { href: '/reports', label: 'דוחות', icon: FileBarGraph },
+      { href: '/inventory', label: 'מלאי', icon: ShoppingCart },
+      { href: '/expenses', label: 'הוצאות', icon: Coins },
+      { href: '/tasks', label: 'משימות', icon: ListChecks },
+      { href: '/social-media', label: 'מדיה חברתית ושיווק', icon: MessageSquare },
+      { href: '/portfolio', label: 'גלריה', icon: ImageIcon },
+      { href: '/marketing/templates', label: 'תבניות הודעות', icon: LayoutTemplate },
+      { href: '/loyalty', label: 'תוכנית נאמנות', icon: HomeIcon },
+      { href: '/users', label: 'משתמשים', icon: Users },
+      { href: '/ai-assistant', label: 'עוזר AI', icon: BrainCircuit },
+      { href: '/notifications', label: 'התראות', icon: Bell },
+      { href: '/settings', label: 'הגדרות', icon: Settings },
+    ];
 
-      try {
-        const { data, error } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', user.id)
-          .single();
-
-        if (!error && data && data.role === 'admin') {
-          setIsAdmin(true);
-        } else {
-          setIsAdmin(false);
-        }
-      } catch (error) {
-        console.error('Error checking admin status:', error);
-        setIsAdmin(false);
-      }
-    };
-
-    checkAdminStatus();
-  }, [user]);
-
-  useEffect(() => {
-    if (!collapsed && scrollAreaRef.current) {
-      const activeElement = scrollAreaRef.current.querySelector('[data-state="active"]');
-      if (activeElement) {
-        setTimeout(() => {
-          activeElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }, 100);
-      }
-    }
-  }, [collapsed, location.pathname]);
+    return (
+      <nav className="flex flex-col space-y-1">
+        {links.map((link) => (
+          <Link
+            key={link.href}
+            to={link.href}
+            onClick={handleLinkClick}
+            className={cn(
+              "group flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-all hover:bg-secondary hover:text-secondary-foreground",
+              location.pathname === link.href
+                ? "bg-secondary text-secondary-foreground"
+                : "text-muted-foreground"
+            )}
+          >
+            <link.icon className="h-4 w-4" />
+            <span>{link.label}</span>
+          </Link>
+        ))}
+      </nav>
+    );
+  };
 
   return (
     <div
       className={cn(
-        "flex flex-col h-screen bg-sidebar border-l border-border/50 transition-all duration-300 shadow-card overflow-hidden",
-        collapsed ? "w-16" : "w-60"
+        "flex h-screen flex-col border-r border-r-border/50 bg-sidebar text-sidebar-foreground shadow-md transition-all",
+        isCollapsed ? "w-16" : "w-64",
+        isMobile ? "fixed inset-y-0 z-50" : "hidden lg:flex"
       )}
-      dir="rtl"
     >
-      <div className="flex items-center justify-between p-3 h-14 shrink-0">
-        {!collapsed && (
-          <div className="flex items-center">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-r from-roseGold to-mutedPeach flex items-center justify-center text-primary font-medium text-sm">
-              CM
-            </div>
-            <h1 className="mr-2 font-display font-medium text-base">Chen Mizrahi</h1>
-          </div>
-        )}
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setCollapsed(!collapsed)}
-          className={cn("hover:bg-accent/30", collapsed ? "mx-auto" : "mr-auto")}
-        >
-          {collapsed ? (
-            <ChevronLeft className="h-4 w-4" />
-          ) : (
-            <ChevronRight className="h-4 w-4" />
-          )}
-        </Button>
+      <div className="flex-1 overflow-hidden px-3 py-4">
+        <Link to="/dashboard" className="flex items-center pl-1.5 font-semibold">
+          <Avatar className="mr-2 h-8 w-8">
+            <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
+            <AvatarFallback>SC</AvatarFallback>
+          </Avatar>
+          <span className={cn("whitespace-nowrap", isCollapsed && "hidden")}>
+            GlowDesk
+          </span>
+        </Link>
+        <ScrollArea className="flex-1 space-y-2 pt-6">
+          <Navigation />
+        </ScrollArea>
       </div>
-
-      <Separator className="bg-border/30" />
-
-      <ScrollArea 
-        className="flex-1 pr-0 pl-1 overflow-y-auto overflow-x-hidden"
-        scrollHideDelay={200}
-      >
-        <div className="py-2 space-y-4 px-2">
-          <div className="space-y-0.5">
-            {navItems.map((item) => (
-              <NavLink
-                key={item.name}
-                to={item.path}
-                className={({ isActive }) => 
-                  cn(
-                    "nav-link flex items-center text-sm py-1.5 px-2 rounded-md transition-colors text-right",
-                    isActive ? "bg-accent/50 font-medium text-primary shadow-card" : "hover:bg-accent/30",
-                    collapsed ? "justify-center" : "justify-start"
-                  )
-                }
-                data-state={({ isActive }: {isActive: boolean}) => isActive ? "active" : "inactive"}
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleLinkClick(item.path);
-                }}
-              >
-                <div className="flex items-center w-full justify-end">
-                  {!collapsed && <span className="mr-2">{item.name}</span>}
-                  {item.icon}
-                </div>
-              </NavLink>
-            ))}
-            
-            {isAdmin && (
-              <NavLink
-                to="/user-management"
-                className={({ isActive }) => 
-                  cn(
-                    "nav-link flex items-center text-sm py-1.5 px-2 rounded-md transition-colors text-right",
-                    isActive ? "bg-accent/50 font-medium text-primary shadow-card" : "hover:bg-accent/30",
-                    collapsed ? "justify-center" : "justify-start"
-                  )
-                }
-                data-state={({ isActive }: {isActive: boolean}) => isActive ? "active" : "inactive"}
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleLinkClick("/user-management");
-                }}
-              >
-                <div className="flex items-center w-full justify-end">
-                  {!collapsed && <span className="mr-2">ניהול משתמשים</span>}
-                  <UserCog className="w-5 h-5" />
-                </div>
-              </NavLink>
-            )}
-          </div>
-
-          <div>
-            {!collapsed && (
-              <h3 className="text-xs font-medium text-muted-foreground px-2 mb-1 text-right">
-                ניהול פיננסי
-              </h3>
-            )}
-            <div className="space-y-0.5">
-              {financialItems.map((item) => (
-                <NavLink
-                  key={item.name}
-                  to={item.path}
-                  className={({ isActive }) => 
-                    cn(
-                      "nav-link flex items-center text-sm py-1.5 px-2 rounded-md transition-colors text-right",
-                      isActive ? "bg-accent/50 font-medium text-primary shadow-card" : "hover:bg-accent/30",
-                      collapsed ? "justify-center" : "justify-start"
-                    )
-                  }
-                  data-state={({ isActive }: {isActive: boolean}) => isActive ? "active" : "inactive"}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handleLinkClick(item.path);
-                  }}
-                >
-                  <div className="flex items-center w-full justify-end">
-                    {!collapsed && <span className="mr-2">{item.name}</span>}
-                    {item.icon}
-                  </div>
-                </NavLink>
-              ))}
-            </div>
-          </div>
-
-          <div>
-            {!collapsed && (
-              <h3 className="text-xs font-medium text-muted-foreground px-2 mb-1 text-right">
-                תפעול
-              </h3>
-            )}
-            <div className="space-y-0.5">
-              {operationalItems.map((item) => (
-                <NavLink
-                  key={item.name}
-                  to={item.path}
-                  className={({ isActive }) => 
-                    cn(
-                      "nav-link flex items-center text-sm py-1.5 px-2 rounded-md transition-colors text-right",
-                      isActive ? "bg-accent/50 font-medium text-primary shadow-card" : "hover:bg-accent/30",
-                      collapsed ? "justify-center" : "justify-start"
-                    )
-                  }
-                  data-state={({ isActive }: {isActive: boolean}) => isActive ? "active" : "inactive"}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handleLinkClick(item.path);
-                  }}
-                >
-                  <div className="flex items-center w-full justify-end">
-                    {!collapsed && <span className="mr-2">{item.name}</span>}
-                    {item.icon}
-                  </div>
-                </NavLink>
-              ))}
-            </div>
-          </div>
-        </div>
-      </ScrollArea>
-
-      <Separator className="bg-border/30" />
-
-      <div className="p-2 space-y-0.5 shrink-0">
-        <NavLink
-          to="/notifications"
-          className={({ isActive }) => 
-            cn(
-              "nav-link flex items-center text-sm py-1.5 px-2 rounded-md transition-colors",
-              isActive ? "bg-accent/50 font-medium text-primary shadow-card" : "hover:bg-accent/30",
-              collapsed ? "justify-center" : "justify-start"
-            )
-          }
-          data-state={({ isActive }: {isActive: boolean}) => isActive ? "active" : "inactive"}
-          onClick={(e) => {
-            e.preventDefault();
-            handleLinkClick("/notifications");
-          }}
-        >
-          <Bell className="w-5 h-5" />
-          {!collapsed && <span className="text-right mr-2">התראות</span>}
-        </NavLink>
-        <NavLink
-          to="/settings"
-          className={({ isActive }) => 
-            cn(
-              "nav-link flex items-center text-sm py-1.5 px-2 rounded-md transition-colors",
-              isActive ? "bg-accent/50 font-medium text-primary shadow-card" : "hover:bg-accent/30",
-              collapsed ? "justify-center" : "justify-start"
-            )
-          }
-          data-state={({ isActive }: {isActive: boolean}) => isActive ? "active" : "inactive"}
-          onClick={(e) => {
-            e.preventDefault();
-            handleLinkClick("/settings");
-          }}
-        >
-          <Settings className="w-5 h-5" />
-          {!collapsed && <span className="text-right mr-2">הגדרות</span>}
-        </NavLink>
-      </div>
-
-      <div className="p-3 shrink-0">
-        {!collapsed && (
-          <div className="flex items-center">
-            <div className="w-7 h-7 rounded-full bg-gradient-to-r from-softRose/70 to-mutedPeach/70">
-              {/* Profile image would go here */}
-            </div>
-            <div className="mr-2 truncate text-right">
-              <p className="text-sm font-medium">חן מזרחי</p>
-              <p className="text-xs text-muted-foreground">בעלים</p>
-            </div>
-          </div>
-        )}
+      {/* Footer */}
+      <div className="border-t border-border/50 p-3">
+        <Link to="/logout" className="group flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-all hover:bg-secondary hover:text-secondary-foreground text-muted-foreground">
+          <LogOut className="h-4 w-4" />
+          <span>התנתקות</span>
+        </Link>
       </div>
     </div>
   );
