@@ -99,7 +99,7 @@ const Sidebar = ({ onLinkClick }: SidebarProps) => {
       className={cn(
         "flex h-screen flex-col border-r border-r-border/50 bg-sidebar text-sidebar-foreground shadow-md transition-all",
         isCollapsed ? "w-16" : "w-64",
-        "relative" // Always make it relative, not hidden
+        "h-full" // Ensure full height
       )}
     >
       <div className="flex-1 overflow-hidden px-3 py-4">
@@ -112,7 +112,7 @@ const Sidebar = ({ onLinkClick }: SidebarProps) => {
             GlowDesk
           </span>
         </Link>
-        <ScrollArea className="flex-1 space-y-2 pt-6">
+        <ScrollArea className="flex-1 space-y-2 pt-6 h-[calc(100vh-120px)]">
           <Navigation />
         </ScrollArea>
       </div>

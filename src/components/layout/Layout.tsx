@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Sidebar from './Sidebar';
@@ -82,8 +83,10 @@ const Layout = ({ children }: LayoutProps) => {
 
   return (
     <div className="flex h-screen overflow-hidden bg-background" dir="rtl">
-      {/* Always show sidebar on desktop */}
-      <Sidebar />
+      {/* Desktop Sidebar - always visible on larger screens */}
+      <div className="hidden lg:block lg:h-full lg:flex-shrink-0">
+        <Sidebar />
+      </div>
 
       {/* Mobile Sidebar - only shown when toggled */}
       <div
