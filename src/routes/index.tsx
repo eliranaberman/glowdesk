@@ -27,6 +27,7 @@ import BusinessInsights from "@/pages/finances/BusinessInsights";
 import MarketingTemplates from "@/pages/marketing/MarketingTemplates";
 import FinancialReports from "@/pages/finances/FinancialReports";
 import UserManagement from "@/pages/UserManagement";
+import AIAssistant from "@/pages/AIAssistant";
 import Login from "@/pages/auth/Login";
 import Register from "@/pages/auth/Register";
 import ForgotPassword from "@/pages/auth/ForgotPassword";
@@ -91,6 +92,7 @@ export const protectedRoutes = [
   { path: "/finances/cash-flow", element: wrapWithLayout(CashFlow) },
   { path: "/finances/insights", element: wrapWithLayout(BusinessInsights) },
   { path: "/finances/reports", element: wrapWithLayout(FinancialReports) },
+  { path: "/ai-assistant", element: wrapWithLayout(AIAssistant) },
   
   // Marketing routes
   { path: "/marketing", element: wrapWithLayout(MarketingPage) },
