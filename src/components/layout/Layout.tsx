@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Sidebar from './Sidebar';
@@ -82,10 +83,12 @@ const Layout = ({ children }: LayoutProps) => {
 
   return (
     <div className="flex h-screen overflow-hidden bg-background" dir="rtl">
+      {/* Desktop Sidebar */}
       <div className="hidden lg:block">
         <Sidebar />
       </div>
 
+      {/* Mobile Sidebar */}
       <div
         className={cn(
           "fixed inset-0 z-40 lg:hidden",

@@ -99,7 +99,7 @@ const Sidebar = ({ onLinkClick }: SidebarProps) => {
       className={cn(
         "flex h-screen flex-col border-r border-r-border/50 bg-sidebar text-sidebar-foreground shadow-md transition-all",
         isCollapsed ? "w-16" : "w-64",
-        isMobile ? "fixed inset-y-0 z-50" : "hidden lg:flex"
+        isMobile ? "fixed inset-y-0 z-50" : "relative"
       )}
     >
       <div className="flex-1 overflow-hidden px-3 py-4">
