@@ -1,6 +1,8 @@
-
 import { supabase } from '@/lib/supabase';
-import { Toast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks/use-toast';
+
+// Define the Toast type to match what's returned by useToast hook
+type Toast = ReturnType<typeof useToast>['toast'];
 
 export const signUpUser = async (
   email: string, 
@@ -137,7 +139,7 @@ export const updateUserPassword = async (password: string, toast: Toast) => {
     console.error('Update password error:', error);
     return { 
       success: false, 
-      error: 'התרחשה שגיאה בעדכון הסיסמה. אנא נסו שוב מאוחר יותר.' 
+      error: 'התרחשה שגיאה בעדכ��ן הסיסמה. אנא נסו שוב מאוחר יותר.' 
     };
   }
 };
