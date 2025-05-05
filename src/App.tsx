@@ -18,8 +18,8 @@ function App() {
   }, []);
 
   return (
-    <AuthProvider>
-      <BrowserRouter>
+    <BrowserRouter>
+      <AuthProvider>
         <Routes>
           {/* Auth routes */}
           {authRoutes.map((route) => (
@@ -42,9 +42,9 @@ function App() {
           {/* Fallback route */}
           <Route path={fallbackRoute.path} element={fallbackRoute.element} />
         </Routes>
-      </BrowserRouter>
-      <Toaster />
-    </AuthProvider>
+        <Toaster />
+      </AuthProvider>
+    </BrowserRouter>
   );
 }
 
