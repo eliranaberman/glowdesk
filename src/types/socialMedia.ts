@@ -8,6 +8,7 @@ export interface SocialMediaAccount {
   token_expires_at: string | null;
   created_at: string;
   updated_at: string;
+  user_id?: string;
 }
 
 export interface SocialMediaPost {
@@ -22,6 +23,7 @@ export interface SocialMediaPost {
   published_at: string | null;
   created_at: string;
   updated_at: string;
+  user_id?: string;
 }
 
 export interface PostFormData {

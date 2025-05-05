@@ -92,7 +92,8 @@ export const fetchConnectedAccounts = async (): Promise<SocialMediaAccount[]> =>
       return [];
     }
     
-    return data || [];
+    // Cast the data to the correct type
+    return (data || []) as SocialMediaAccount[];
   } catch (error) {
     console.error('Failed to fetch connected accounts:', error);
     return [];
@@ -145,12 +146,12 @@ export const fetchPosts = async (
       if (error) {
         console.error('Error fetching posts from API:', error);
         // Still return local posts if API fetch fails
-        return { success: true, posts: localPosts };
+        return { success: true, posts: localPosts as SocialMediaPost[] };
       }
       
       if (data.error) {
         console.error('API returned error:', data.error);
-        return { success: true, posts: localPosts };
+        return { success: true, posts: localPosts as SocialMediaPost[] };
       }
       
       // Merge remote posts with local posts
@@ -178,11 +179,11 @@ export const fetchPosts = async (
         .eq('account_id', accountId)
         .order('created_at', { ascending: false });
       
-      return { success: true, posts: updatedPosts || [] };
+      return { success: true, posts: updatedPosts as SocialMediaPost[] || [] };
     } catch (apiError) {
       console.error('API fetch failed:', apiError);
       // Still return local posts if API fetch fails
-      return { success: true, posts: localPosts };
+      return { success: true, posts: localPosts as SocialMediaPost[] };
     }
   } catch (error) {
     console.error('Failed to fetch posts:', error);
@@ -233,7 +234,7 @@ export const createPost = async (formData: PostFormData): Promise<CreatePostResp
       return { success: false, error: data.error };
     }
     
-    return { success: true, post: data.post };
+    return { success: true, post: data.post as SocialMediaPost };
   } catch (error) {
     console.error('Failed to create post:', error);
     return { success: false, error: error.message };
