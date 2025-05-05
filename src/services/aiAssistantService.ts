@@ -284,21 +284,21 @@ export const loadChatHistory = async (userId: string): Promise<AIResponse> => {
         throw error;
       }
 
-      const messages = data?.messages ? JSON.parse(data.messages) : [];
+      const messagesData = data?.messages ? JSON.parse(data.messages) : [];
       return {
         status: 'success',
         message: 'היסטוריית הצ\'אט נטענה בהצלחה',
-        data: { messages }
+        data: { message: 'היסטוריית שיחות נטענה בהצלחה', suggestions: ['המשך שיחה', 'התחל שיחה חדשה'] }
       };
     } else {
       // Fallback to localStorage
       const storedHistory = localStorage.getItem(`ai_chat_history_${userId}`);
-      const messages = storedHistory ? JSON.parse(storedHistory) : [];
+      const messagesData = storedHistory ? JSON.parse(storedHistory) : [];
       
       return {
         status: 'success',
         message: 'היסטוריית הצ\'אט נטענה מלוקל סטורג׳',
-        data: { messages }
+        data: { message: 'היסטוריית שיחות נטענה מאחסון מקומי', suggestions: ['המשך שיחה', 'התחל שיחה חדשה'] }
       };
     }
   } catch (error) {
@@ -308,11 +308,11 @@ export const loadChatHistory = async (userId: string): Promise<AIResponse> => {
     try {
       const storedHistory = localStorage.getItem(`ai_chat_history_${userId}`);
       if (storedHistory) {
-        const messages = JSON.parse(storedHistory);
+        const messagesData = JSON.parse(storedHistory);
         return {
           status: 'success',
           message: 'היסטוריית הצ\'אט נטענה מלוקל סטורג׳',
-          data: { messages }
+          data: { message: 'היסטוריית שיחות נטענה מאחסון מקומי' }
         };
       }
       
