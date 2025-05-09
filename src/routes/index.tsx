@@ -1,59 +1,55 @@
-import { ReactElement } from 'react';
-import ProtectedRoute from '@/components/auth/ProtectedRoute';
-import ProtectedRouteWrapper from '@/components/auth/ProtectedRouteWrapper';
 
-// Pages
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { AuthProvider } from '@/contexts/AuthContext';
+import ProtectedRoute from '@/components/auth/ProtectedRoute';
+import Dashboard from '@/pages/Dashboard';
 import Login from '@/pages/auth/Login';
 import Register from '@/pages/auth/Register';
 import ForgotPassword from '@/pages/auth/ForgotPassword';
 import ResetPassword from '@/pages/auth/ResetPassword';
-import Dashboard from '@/pages/Dashboard';
-import Customers from '@/pages/Customers';
-import NewCustomer from '@/pages/customers/NewCustomer';
-import EditCustomer from '@/pages/customers/EditCustomer';
-import ViewCustomer from '@/pages/customers/ViewCustomer';
-import AppointmentCalendar from '@/pages/AppointmentCalendar';
+import NotFound from '@/pages/NotFound';
+import Index from '@/pages/Index';
+import Expenses from '@/pages/Expenses';
+import Inventory from '@/pages/Inventory';
+import NewInventoryItem from '@/pages/inventory/NewInventoryItem';
+import Tasks from '@/pages/Tasks';
 import Scheduling from '@/pages/Scheduling';
 import NewAppointment from '@/pages/scheduling/NewAppointment';
 import EditAppointment from '@/pages/scheduling/EditAppointment';
 import Reports from '@/pages/Reports';
-import Inventory from '@/pages/Inventory';
-import NewInventoryItem from '@/pages/inventory/NewInventoryItem';
-import Expenses from '@/pages/Expenses';
-import Tasks from '@/pages/Tasks';
+import Settings from '@/pages/Settings';
+import LoyaltyPage from '@/pages/LoyaltyPage';
 import SocialMedia from '@/pages/SocialMedia';
 import SocialMediaMeta from '@/pages/SocialMediaMeta';
+import AIAssistant from '@/pages/AIAssistant';
 import Notifications from '@/pages/Notifications';
-import Settings from '@/pages/Settings';
-import OnlineBooking from '@/pages/OnlineBooking';
-import NewPayment from '@/pages/payments/NewPayment';
-import CashFlow from '@/pages/finances/CashFlow';
-import BusinessInsights from '@/pages/finances/BusinessInsights';
 import PortfolioPage from '@/pages/PortfolioPage';
-import NotFound from '@/pages/NotFound';
-import Index from '@/pages/Index';
-import MarketingPage from '@/pages/marketing/MarketingPage';
 import MarketingTemplates from '@/pages/marketing/MarketingTemplates';
 import NewTemplateForm from '@/pages/marketing/NewTemplateForm';
 import EditTemplateForm from '@/pages/marketing/EditTemplateForm';
+import MarketingPage from '@/pages/marketing/MarketingPage';
 import NewCampaignForm from '@/pages/marketing/NewCampaignForm';
 import EditCampaignForm from '@/pages/marketing/EditCampaignForm';
-import LoyaltyPage from '@/pages/LoyaltyPage';
-import UserManagement from '@/pages/UserManagement';
 import ClientsPage from '@/pages/clients/ClientsPage';
 import NewClientPage from '@/pages/clients/NewClientPage';
 import EditClientPage from '@/pages/clients/EditClientPage';
 import ClientDetailPage from '@/pages/clients/ClientDetailPage';
 import NewActivityPage from '@/pages/clients/NewActivityPage';
-import AIAssistant from '@/pages/AIAssistant';
+import CashFlow from '@/pages/finances/CashFlow';
+import BusinessInsights from '@/pages/finances/BusinessInsights';
+import FinancialReports from '@/pages/finances/FinancialReports';
+import NewPayment from '@/pages/payments/NewPayment';
+import OnlineBooking from '@/pages/OnlineBooking';
+import UserManagement from '@/pages/UserManagement';
+import UserRolesPage from '@/pages/UserRolesPage';
+import UserProfilePage from '@/pages/UserProfilePage';
+import InitialSetupPage from '@/pages/InitialSetupPage';
 
-interface RouteConfig {
-  path: string;
-  element: ReactElement;
-}
-
-// Public routes (no auth required)
-export const authRoutes: RouteConfig[] = [
+const router = createBrowserRouter([
+  {
+    path: '/',
+    element: <Index />,
+  },
   {
     path: '/login',
     element: <Login />,
@@ -71,58 +67,50 @@ export const authRoutes: RouteConfig[] = [
     element: <ResetPassword />,
   },
   {
-    path: '/',
-    element: <Index />,
-  },
-];
-
-// Routes that require authentication
-export const protectedRoutes: RouteConfig[] = [
-  {
     path: '/dashboard',
     element: (
-      <ProtectedRouteWrapper>
+      <ProtectedRoute>
         <Dashboard />
-      </ProtectedRouteWrapper>
-    ),
-  },
-  {
-    path: '/customers',
-    element: (
-      <ProtectedRoute>
-        <Customers />
       </ProtectedRoute>
     ),
   },
   {
-    path: '/customers/new',
+    path: '/clients',
     element: (
       <ProtectedRoute>
-        <NewCustomer />
+        <ClientsPage />
       </ProtectedRoute>
     ),
   },
   {
-    path: '/customers/edit/:id',
+    path: '/clients/new',
     element: (
       <ProtectedRoute>
-        <EditCustomer />
+        <NewClientPage />
       </ProtectedRoute>
     ),
   },
   {
-    path: '/customers/:id',
+    path: '/clients/:id',
     element: (
       <ProtectedRoute>
-        <ViewCustomer />
+        <ClientDetailPage />
       </ProtectedRoute>
     ),
   },
   {
-    path: '/appointment-calendar',
+    path: '/clients/:id/edit',
     element: (
       <ProtectedRoute>
-        <AppointmentCalendar />
+        <EditClientPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/clients/:id/activity/new',
+    element: (
+      <ProtectedRoute>
+        <NewActivityPage />
       </ProtectedRoute>
     ),
   },
@@ -151,10 +139,10 @@ export const protectedRoutes: RouteConfig[] = [
     ),
   },
   {
-    path: '/reports',
+    path: '/tasks',
     element: (
       <ProtectedRoute>
-        <Reports />
+        <Tasks />
       </ProtectedRoute>
     ),
   },
@@ -183,37 +171,10 @@ export const protectedRoutes: RouteConfig[] = [
     ),
   },
   {
-    path: '/tasks',
+    path: '/reports',
     element: (
       <ProtectedRoute>
-        <Tasks />
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: '/social-media',
-    element: (
-      <ProtectedRoute>
-        <SocialMedia />
-      </ProtectedRoute>
-    ),
-  },
-  
-  // Add the new Meta API route
-  {
-    path: '/social-media-meta',
-    element: (
-      <ProtectedRoute>
-        <SocialMediaMeta />
-      </ProtectedRoute>
-    ),
-  },
-  
-  {
-    path: '/notifications',
-    element: (
-      <ProtectedRoute>
-        <Notifications />
+        <Reports />
       </ProtectedRoute>
     ),
   },
@@ -226,6 +187,14 @@ export const protectedRoutes: RouteConfig[] = [
     ),
   },
   {
+    path: '/loyalty',
+    element: (
+      <ProtectedRoute>
+        <LoyaltyPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
     path: '/online-booking',
     element: (
       <ProtectedRoute>
@@ -234,26 +203,18 @@ export const protectedRoutes: RouteConfig[] = [
     ),
   },
   {
-    path: '/payments/new',
+    path: '/social-media',
     element: (
       <ProtectedRoute>
-        <NewPayment />
+        <SocialMedia />
       </ProtectedRoute>
     ),
   },
   {
-    path: '/finances/cash-flow',
+    path: '/social-media-meta',
     element: (
       <ProtectedRoute>
-        <CashFlow />
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: '/finances/insights',
-    element: (
-      <ProtectedRoute>
-        <BusinessInsights />
+        <SocialMediaMeta />
       </ProtectedRoute>
     ),
   },
@@ -262,14 +223,6 @@ export const protectedRoutes: RouteConfig[] = [
     element: (
       <ProtectedRoute>
         <PortfolioPage />
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: '/marketing',
-    element: (
-      <ProtectedRoute>
-        <MarketingPage />
       </ProtectedRoute>
     ),
   },
@@ -298,6 +251,14 @@ export const protectedRoutes: RouteConfig[] = [
     ),
   },
   {
+    path: '/marketing/campaigns',
+    element: (
+      <ProtectedRoute>
+        <MarketingPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
     path: '/marketing/campaigns/new',
     element: (
       <ProtectedRoute>
@@ -314,10 +275,50 @@ export const protectedRoutes: RouteConfig[] = [
     ),
   },
   {
-    path: '/loyalty',
+    path: '/finances/cash-flow',
     element: (
       <ProtectedRoute>
-        <LoyaltyPage />
+        <CashFlow />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/finances/insights',
+    element: (
+      <ProtectedRoute>
+        <BusinessInsights />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/finances/reports',
+    element: (
+      <ProtectedRoute>
+        <FinancialReports />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/payments/new',
+    element: (
+      <ProtectedRoute>
+        <NewPayment />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/ai-assistant',
+    element: (
+      <ProtectedRoute>
+        <AIAssistant />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/notifications',
+    element: (
+      <ProtectedRoute>
+        <Notifications />
       </ProtectedRoute>
     ),
   },
@@ -330,57 +331,39 @@ export const protectedRoutes: RouteConfig[] = [
     ),
   },
   {
-    path: '/clients',
+    path: '/user-roles',
     element: (
       <ProtectedRoute>
-        <ClientsPage />
+        <UserRolesPage />
       </ProtectedRoute>
     ),
   },
   {
-    path: '/clients/new',
+    path: '/user-profile',
     element: (
       <ProtectedRoute>
-        <NewClientPage />
+        <UserProfilePage />
       </ProtectedRoute>
     ),
   },
   {
-    path: '/clients/edit/:id',
+    path: '/setup',
     element: (
       <ProtectedRoute>
-        <EditClientPage />
+        <InitialSetupPage />
       </ProtectedRoute>
     ),
   },
   {
-    path: '/clients/:id',
-    element: (
-      <ProtectedRoute>
-        <ClientDetailPage />
-      </ProtectedRoute>
-    ),
+    path: '*',
+    element: <NotFound />,
   },
-  {
-    path: '/clients/:id/new-activity',
-    element: (
-      <ProtectedRoute>
-        <NewActivityPage />
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: '/ai-assistant',
-    element: (
-      <ProtectedRoute>
-        <AIAssistant />
-      </ProtectedRoute>
-    ),
-  },
-];
+]);
 
-// Fallback route (404)
-export const fallbackRoute: RouteConfig = {
-  path: '*',
-  element: <NotFound />,
-};
+export default function Router() {
+  return (
+    <AuthProvider>
+      <RouterProvider router={router} />
+    </AuthProvider>
+  );
+}

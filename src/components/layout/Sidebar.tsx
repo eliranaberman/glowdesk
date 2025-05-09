@@ -23,9 +23,11 @@ import {
   Contact2,
   BrainCircuit,
   Facebook,
+  ShieldCheck,
+  UserCog,
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { ScrollArea } from "@/components/ui/scroll-area"
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface NavLinkProps {
   href: string;
@@ -66,7 +68,9 @@ const Sidebar = ({ onLinkClick }: SidebarProps) => {
       { href: '/portfolio', label: 'גלריה', icon: ImageIcon },
       { href: '/marketing/templates', label: 'תבניות הודעות', icon: LayoutTemplate },
       { href: '/loyalty', label: 'תוכנית נאמנות', icon: HomeIcon },
-      { href: '/users', label: 'משתמשים', icon: Users },
+      { href: '/users', label: 'ניהול משתמשים', icon: Users },
+      { href: '/user-roles', label: 'תפקידים והרשאות', icon: ShieldCheck },
+      { href: '/user-profile', label: 'פרופיל משתמש', icon: UserCog },
       { href: '/ai-assistant', label: 'עוזר AI', icon: BrainCircuit },
       { href: '/notifications', label: 'התראות', icon: Bell },
       { href: '/settings', label: 'הגדרות', icon: Settings },
