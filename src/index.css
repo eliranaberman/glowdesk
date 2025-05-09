@@ -1,10 +1,9 @@
+/* Import Hebrew fonts: Heebo and Rubik */
+@import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700&family=Rubik:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-/* Import Hebrew fonts: Heebo and Rubik */
-@import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700&family=Rubik:wght@400;500;600;700&display=swap');
 
 @layer base {
   :root {

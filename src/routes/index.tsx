@@ -1,4 +1,3 @@
-
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { AuthProvider } from '@/contexts/AuthContext';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
@@ -45,11 +44,13 @@ import UserRolesPage from '@/pages/UserRolesPage';
 import UserProfilePage from '@/pages/UserProfilePage';
 import InitialSetupPage from '@/pages/InitialSetupPage';
 
-const router = createBrowserRouter([
-  {
-    path: '/',
-    element: <Index />,
-  },
+interface RouteConfig {
+  path: string;
+  element: ReactNode;
+}
+
+// Auth routes (accessible to unauthenticated users)
+export const authRoutes: RouteConfig[] = [
   {
     path: '/login',
     element: <Login />,
@@ -66,6 +67,14 @@ const router = createBrowserRouter([
     path: '/reset-password',
     element: <ResetPassword />,
   },
+  {
+    path: '/',
+    element: <Index />,
+  },
+];
+
+// Protected routes (require authentication)
+export const protectedRoutes: RouteConfig[] = [
   {
     path: '/dashboard',
     element: (
@@ -354,12 +363,16 @@ const router = createBrowserRouter([
       </ProtectedRoute>
     ),
   },
-  {
-    path: '*',
-    element: <NotFound />,
-  },
-]);
+];
 
+// Fallback route (404)
+export const fallbackRoute: RouteConfig = {
+  path: '*',
+  element: <NotFound />,
+};
+
+// We keep the original Router export for backward compatibility 
+// and to avoid breaking existing imports
 export default function Router() {
   return (
     <AuthProvider>
