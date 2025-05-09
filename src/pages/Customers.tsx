@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import CustomerListView from '@/components/customers/CustomerListView';
 import { Helmet } from 'react-helmet-async';
@@ -61,6 +60,12 @@ const Customers = () => {
   };
   
   const handleDeleteCustomer = (id: string) => {
+    if (id === "refresh") {
+      // This is a signal to refresh the list
+      fetchCustomers();
+      return;
+    }
+    
     // Remove the deleted customer from the state
     setCustomers(prevCustomers => 
       prevCustomers.filter(customer => customer.id !== id)
@@ -124,7 +129,7 @@ const Customers = () => {
         <div className="text-center py-12 bg-muted/30 rounded-lg border">
           <h3 className="text-lg font-medium">אין לקוחות עדיין</h3>
           <p className="text-muted-foreground mt-1 mb-4">התחל/י להוסיף לקוחות חדשים למערכת</p>
-          <Button onClick={() => window.location.href = '/customers/new'}>הוסף לקוח/ה חדש/ה</Button>
+          <Button onClick={() => setIsAddModalOpen(true)}>הוסף לקוח/ה חדש/ה</Button>
         </div>
       ) : (
         <CustomerListView 

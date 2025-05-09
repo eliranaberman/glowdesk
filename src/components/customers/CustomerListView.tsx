@@ -4,6 +4,7 @@ import CustomerTable from './CustomerTable';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import CustomerAddModal from './CustomerAddModal';
 
 interface CustomerListViewProps {
   customers?: any[];
@@ -17,14 +18,22 @@ const CustomerListView = ({
   onDeleteCustomer 
 }: CustomerListViewProps) => {
   const navigate = useNavigate();
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   
   const handleAddCustomer = () => {
-    navigate('/customers/new');
+    setIsAddModalOpen(true);
   };
 
   const handleDeleteCustomer = (id: string) => {
     if (onDeleteCustomer) {
       onDeleteCustomer(id);
+    }
+  };
+
+  const handleAddSuccess = () => {
+    // Reload customers list via parent component
+    if (onDeleteCustomer) {
+      onDeleteCustomer("refresh"); // Using this as a signal to refresh the list
     }
   };
 
@@ -41,6 +50,12 @@ const CustomerListView = ({
       <CustomerTable 
         customers={customers} 
         onDelete={handleDeleteCustomer}
+      />
+      
+      <CustomerAddModal 
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        onSuccess={handleAddSuccess}
       />
     </div>
   );
