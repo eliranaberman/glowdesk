@@ -102,50 +102,58 @@ const CustomerTable = ({ customers, onDelete }: CustomerTableProps) => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {customers.map((customer) => (
-              <TableRow key={customer.id}>
-                <TableCell className="font-medium text-right">{customer.full_name}</TableCell>
-                <TableCell className="text-right">{customer.phone_number || customer.phone || "—"}</TableCell>
-                <TableCell className="text-right">{customer.email || "—"}</TableCell>
-                <TableCell className="text-right">
-                  {customer.status ? (
-                    <Badge variant={customer.status === "active" ? "outline" : "secondary"}>
-                      {customer.status === "active" ? "פעיל" : customer.status}
-                    </Badge>
-                  ) : "—"}
-                </TableCell>
-                <TableCell className="text-right">
-                  {customer.registration_date ? 
-                    format(new Date(customer.registration_date), 'dd/MM/yyyy') : 
-                    "—"}
-                </TableCell>
-                <TableCell>
-                  <div className="flex gap-1 justify-end">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => openDeleteDialog(customer.id)}
-                    >
-                      <Trash2 className="h-4 w-4 text-red-500" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleEditCustomer(customer.id)}
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleViewCustomer(customer.id)}
-                    >
-                      <Eye className="h-4 w-4" />
-                    </Button>
-                  </div>
+            {customers.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={6} className="text-center py-8">
+                  <p className="text-muted-foreground">לא נמצאו לקוחות</p>
                 </TableCell>
               </TableRow>
-            ))}
+            ) : (
+              customers.map((customer) => (
+                <TableRow key={customer.id}>
+                  <TableCell className="font-medium text-right">{customer.full_name}</TableCell>
+                  <TableCell className="text-right">{customer.phone_number || customer.phone || "—"}</TableCell>
+                  <TableCell className="text-right">{customer.email || "—"}</TableCell>
+                  <TableCell className="text-right">
+                    {customer.status ? (
+                      <Badge variant={customer.status === "active" ? "outline" : "secondary"}>
+                        {customer.status === "active" ? "פעיל" : customer.status}
+                      </Badge>
+                    ) : "—"}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    {customer.registration_date ? 
+                      format(new Date(customer.registration_date), 'dd/MM/yyyy') : 
+                      "—"}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex gap-1 justify-end">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => openDeleteDialog(customer.id)}
+                      >
+                        <Trash2 className="h-4 w-4 text-red-500" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleEditCustomer(customer.id)}
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleViewCustomer(customer.id)}
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
       </div>
