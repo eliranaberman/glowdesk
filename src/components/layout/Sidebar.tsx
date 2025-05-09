@@ -103,7 +103,7 @@ const Sidebar = ({ onLinkClick }: SidebarProps) => {
               isActive 
                 ? "bg-secondary text-secondary-foreground"
                 : "text-muted-foreground",
-              "text-right justify-end" // Added right alignment and justify-end
+              "text-right justify-end" // Right alignment and justify-end
             )}
           >
             <span>{link.label}</span>
@@ -123,13 +123,13 @@ const Sidebar = ({ onLinkClick }: SidebarProps) => {
       )}
     >
       <div className="flex-1 overflow-hidden px-3 py-4">
-        <Link to="/dashboard" className="flex items-center justify-end pl-1.5 font-semibold">
-          <span className={cn("whitespace-nowrap", isCollapsed && "hidden")}>
-            GlowDesk
+        <Link to="/dashboard" className="flex items-center justify-center pl-1.5 font-semibold">
+          <span className={cn("whitespace-nowrap text-center", isCollapsed && "hidden")}>
+            by.chen.mizrahi
           </span>
           <Avatar className="ml-2 h-8 w-8">
-            <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
-            <AvatarFallback>SC</AvatarFallback>
+            <AvatarImage src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158" alt="Brand Logo" />
+            <AvatarFallback>CM</AvatarFallback>
           </Avatar>
         </Link>
         <ScrollArea className="flex-1 space-y-2 pt-6 h-[calc(100vh-120px)] text-right">
