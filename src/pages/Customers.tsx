@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import CustomerListView from '@/components/customers/CustomerListView';
 import { Helmet } from 'react-helmet-async';
@@ -12,6 +13,7 @@ const Customers = () => {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [customers, setCustomers] = useState<any[]>([]);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const { user } = useAuth();
 
   const fetchCustomers = async () => {
