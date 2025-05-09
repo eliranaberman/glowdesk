@@ -14,9 +14,11 @@ const Customers = () => {
   const [loading, setLoading] = useState(true);
   const [customers, setCustomers] = useState<any[]>([]);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [customerCount, setCustomerCount] = useState(0);
+  const [searchQuery, setSearchQuery] = useState('');
   const { user } = useAuth();
 
-  const fetchCustomers = async () => {
+  const fetchCustomers = async (search?: string) => {
     try {
       setLoading(true);
       
@@ -28,10 +30,33 @@ const Customers = () => {
       
       console.log("Fetching customers for user:", user.id);
       
-      const { data, error: supabaseError } = await supabase
+      // First, get the total count of customers
+      const { count, error: countError } = await supabase
+        .from('clients')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id);
+      
+      if (countError) {
+        throw countError;
+      }
+      
+      setCustomerCount(count || 0);
+      
+      // Determine if we need server-side filtering
+      const useServerFiltering = (count || 0) > 100 && search;
+      
+      let query = supabase
         .from('clients')
         .select('*')
         .eq('user_id', user.id);
+      
+      // Apply server-side filtering if needed
+      if (useServerFiltering && search) {
+        const searchTerm = search.toLowerCase();
+        query = query.or(`full_name.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%,phone_number.ilike.%${searchTerm}%`);
+      }
+      
+      const { data, error: supabaseError } = await query;
           
       if (supabaseError) {
         throw supabaseError;
@@ -49,8 +74,18 @@ const Customers = () => {
   };
 
   useEffect(() => {
-    fetchCustomers();
-  }, [user]);
+    if (customerCount > 100) {
+      // If we have more than 100 customers, use server-side filtering
+      const timer = setTimeout(() => {
+        fetchCustomers(searchQuery);
+      }, 300);
+      
+      return () => clearTimeout(timer);
+    } else {
+      // For smaller datasets, just fetch once
+      fetchCustomers();
+    }
+  }, [user, searchQuery, customerCount]);
 
   const handleError = (errorMessage: string) => {
     setError(errorMessage);
@@ -127,7 +162,7 @@ const Customers = () => {
           )}
           <Button onClick={retryLoading}>נסה שוב</Button>
         </div>
-      ) : customers.length === 0 ? (
+      ) : customers.length === 0 && !searchQuery ? (
         <div className="text-center py-12 bg-muted/30 rounded-lg border">
           <h3 className="text-lg font-medium">אין לקוחות עדיין</h3>
           <p className="text-muted-foreground mt-1 mb-4">התחל/י להוסיף לקוחות חדשים למערכת</p>

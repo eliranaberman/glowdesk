@@ -1,4 +1,3 @@
-
 import {
   Table,
   TableBody,
@@ -9,7 +8,7 @@ import {
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Eye, Edit, Trash2 } from 'lucide-react';
+import { Eye, Edit, Trash2, Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { useState } from 'react';
@@ -29,9 +28,10 @@ import {
 interface CustomerTableProps {
   customers: any[];
   onDelete?: (id: string) => void;
+  searchQuery?: string;
 }
 
-const CustomerTable = ({ customers, onDelete }: CustomerTableProps) => {
+const CustomerTable = ({ customers, onDelete, searchQuery = '' }: CustomerTableProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -87,6 +87,8 @@ const CustomerTable = ({ customers, onDelete }: CustomerTableProps) => {
     }
   };
 
+  const isFiltering = searchQuery.trim().length > 0;
+
   return (
     <>
       <div className="border rounded-lg overflow-hidden">
@@ -105,7 +107,15 @@ const CustomerTable = ({ customers, onDelete }: CustomerTableProps) => {
             {customers.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={6} className="text-center py-8">
-                  <p className="text-muted-foreground">לא נמצאו לקוחות</p>
+                  {isFiltering ? (
+                    <div className="flex flex-col items-center justify-center py-6 text-muted-foreground">
+                      <Search className="h-12 w-12 text-muted-foreground/50 mb-2" />
+                      <p className="text-lg font-medium">לא נמצאו לקוחות תואמים</p>
+                      <p className="text-sm">נסה לשנות את מונחי החיפוש</p>
+                    </div>
+                  ) : (
+                    <p className="text-muted-foreground">לא נמצאו לקוחות</p>
+                  )}
                 </TableCell>
               </TableRow>
             ) : (
