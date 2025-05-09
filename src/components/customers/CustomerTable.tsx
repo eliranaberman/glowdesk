@@ -12,13 +12,19 @@ import { Badge } from '@/components/ui/badge';
 import { Eye, Edit, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
+import { useState } from 'react';
+import { supabase } from '@/lib/supabase';
+import { useToast } from '@/components/ui/use-toast';
 
 interface CustomerTableProps {
   customers: any[];
+  onDelete?: (id: string) => void;
 }
 
-const CustomerTable = ({ customers }: CustomerTableProps) => {
+const CustomerTable = ({ customers, onDelete }: CustomerTableProps) => {
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const handleViewCustomer = (id: string) => {
     navigate(`/customers/${id}`);
@@ -28,45 +34,78 @@ const CustomerTable = ({ customers }: CustomerTableProps) => {
     navigate(`/customers/${id}/edit`);
   };
 
+  const handleDeleteCustomer = async (id: string) => {
+    try {
+      setDeletingId(id);
+      
+      const { error } = await supabase
+        .from('clients')
+        .delete()
+        .eq('id', id);
+        
+      if (error) throw error;
+      
+      toast({
+        title: "הלקוח נמחק בהצלחה",
+        description: "פרטי הלקוח הוסרו מהמערכת",
+      });
+      
+      // Call the onDelete callback if provided
+      if (onDelete) {
+        onDelete(id);
+      }
+    } catch (error: any) {
+      console.error('Error deleting customer:', error);
+      toast({
+        variant: "destructive",
+        title: "שגיאה במחיקת הלקוח",
+        description: error.message || "לא ניתן למחוק את הלקוח כרגע",
+      });
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
   return (
     <div className="border rounded-lg overflow-hidden">
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>שם מלא</TableHead>
-            <TableHead>טלפון</TableHead>
-            <TableHead>אימייל</TableHead>
-            <TableHead>סטטוס</TableHead>
-            <TableHead>תאריך רישום</TableHead>
-            <TableHead className="w-[100px]">פעולות</TableHead>
+            <TableHead className="text-right">שם מלא</TableHead>
+            <TableHead className="text-right">טלפון</TableHead>
+            <TableHead className="text-right">אימייל</TableHead>
+            <TableHead className="text-right">סטטוס</TableHead>
+            <TableHead className="text-right">תאריך רישום</TableHead>
+            <TableHead className="w-[120px] text-right">פעולות</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {customers.map((customer) => (
             <TableRow key={customer.id}>
-              <TableCell className="font-medium">{customer.full_name}</TableCell>
-              <TableCell>{customer.phone_number || customer.phone || "—"}</TableCell>
-              <TableCell>{customer.email || "—"}</TableCell>
-              <TableCell>
+              <TableCell className="font-medium text-right">{customer.full_name}</TableCell>
+              <TableCell className="text-right">{customer.phone_number || customer.phone || "—"}</TableCell>
+              <TableCell className="text-right">{customer.email || "—"}</TableCell>
+              <TableCell className="text-right">
                 {customer.status ? (
                   <Badge variant={customer.status === "active" ? "outline" : "secondary"}>
                     {customer.status === "active" ? "פעיל" : customer.status}
                   </Badge>
                 ) : "—"}
               </TableCell>
-              <TableCell>
+              <TableCell className="text-right">
                 {customer.registration_date ? 
                   format(new Date(customer.registration_date), 'dd/MM/yyyy') : 
                   "—"}
               </TableCell>
               <TableCell>
-                <div className="flex space-x-2">
+                <div className="flex gap-1 justify-end">
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => handleViewCustomer(customer.id)}
+                    onClick={() => handleDeleteCustomer(customer.id)}
+                    disabled={deletingId === customer.id}
                   >
-                    <Eye className="h-4 w-4" />
+                    <Trash2 className="h-4 w-4 text-red-500" />
                   </Button>
                   <Button
                     variant="ghost"
@@ -74,6 +113,13 @@ const CustomerTable = ({ customers }: CustomerTableProps) => {
                     onClick={() => handleEditCustomer(customer.id)}
                   >
                     <Edit className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => handleViewCustomer(customer.id)}
+                  >
+                    <Eye className="h-4 w-4" />
                   </Button>
                 </div>
               </TableCell>

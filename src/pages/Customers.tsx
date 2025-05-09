@@ -15,39 +15,39 @@ const Customers = () => {
   const [customers, setCustomers] = useState<any[]>([]);
   const { user } = useAuth();
 
-  useEffect(() => {
-    const fetchCustomers = async () => {
-      try {
-        setLoading(true);
-        
-        if (!user) {
-          setError("יש להתחבר למערכת כדי לצפות ברשימת הלקוחות");
-          setLoading(false);
-          return;
-        }
-        
-        console.log("Fetching customers for user:", user.id);
-        
-        const { data, error: supabaseError } = await supabase
-          .from('clients')
-          .select('*')
-          .eq('user_id', user.id);
-          
-        if (supabaseError) {
-          throw supabaseError;
-        }
-        
-        console.log("Fetched customers:", data);
-        setCustomers(data || []);
-        setError(null);
-      } catch (err: any) {
-        console.error('Error loading customers:', err);
-        setError(err.message);
-      } finally {
+  const fetchCustomers = async () => {
+    try {
+      setLoading(true);
+      
+      if (!user) {
+        setError("יש להתחבר למערכת כדי לצפות ברשימת הלקוחות");
         setLoading(false);
+        return;
       }
-    };
+      
+      console.log("Fetching customers for user:", user.id);
+      
+      const { data, error: supabaseError } = await supabase
+        .from('clients')
+        .select('*')
+        .eq('user_id', user.id);
+          
+      if (supabaseError) {
+        throw supabaseError;
+      }
+      
+      console.log("Fetched customers:", data);
+      setCustomers(data || []);
+      setError(null);
+    } catch (err: any) {
+      console.error('Error loading customers:', err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchCustomers();
   }, [user]);
 
@@ -57,6 +57,14 @@ const Customers = () => {
 
   const retryLoading = () => {
     setError(null);
+    fetchCustomers();
+  };
+  
+  const handleDeleteCustomer = (id: string) => {
+    // Remove the deleted customer from the state
+    setCustomers(prevCustomers => 
+      prevCustomers.filter(customer => customer.id !== id)
+    );
   };
 
   const isTableMissingError = error?.includes('relation "public.clients" does not exist');
@@ -76,12 +84,12 @@ const Customers = () => {
   }
 
   return (
-    <div>
+    <div className="text-right">
       <Helmet>
         <title>ניהול לקוחות | Chen Mizrahi</title>
       </Helmet>
 
-      <div className="mb-6">
+      <div className="mb-6 text-right">
         <h1 className="text-2xl font-bold mb-1">ניהול לקוחות</h1>
         <p className="text-muted-foreground">
           צפה ונהל את רשימת הלקוחות שלך
@@ -119,7 +127,11 @@ const Customers = () => {
           <Button onClick={() => window.location.href = '/customers/new'}>הוסף לקוח/ה חדש/ה</Button>
         </div>
       ) : (
-        <CustomerListView customers={customers} onError={handleError} />
+        <CustomerListView 
+          customers={customers} 
+          onError={handleError} 
+          onDeleteCustomer={handleDeleteCustomer}
+        />
       )}
     </div>
   );
