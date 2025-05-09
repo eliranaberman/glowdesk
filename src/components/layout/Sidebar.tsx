@@ -209,19 +209,17 @@ const Sidebar = ({
                   className={cn(
                     "group flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-all hover:bg-secondary hover:text-secondary-foreground",
                     (isLinkActive(link.href) || isParentActive(link.subLinks)) ? "bg-secondary text-secondary-foreground" : "text-muted-foreground",
-                    "text-right justify-between cursor-pointer" // added justify-between for icon placement
+                    "text-right justify-end cursor-pointer" // Updated to justify-end for right alignment
                   )}
                   onClick={() => toggleMenu(link.label)}
                 >
-                  <div className="flex items-center gap-3 justify-end flex-row-reverse">
-                    {isMenuExpanded(link.label) ? (
-                      <ChevronDown className="h-4 w-4" />
-                    ) : (
-                      <ChevronRight className="h-4 w-4" />
-                    )}
-                    <span>{link.label}</span>
-                    <link.icon className="h-4 w-4" />
-                  </div>
+                  <span>{link.label}</span>
+                  <link.icon className="h-4 w-4" />
+                  {isMenuExpanded(link.label) ? (
+                    <ChevronDown className="h-4 w-4 mr-auto" />
+                  ) : (
+                    <ChevronRight className="h-4 w-4 mr-auto" />
+                  )}
                 </div>
                 
                 {isMenuExpanded(link.label) && (
@@ -234,7 +232,7 @@ const Sidebar = ({
                         className={({isActive}) => cn(
                           "group flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-all hover:bg-secondary hover:text-secondary-foreground",
                           isActive ? "bg-secondary text-secondary-foreground" : "text-muted-foreground",
-                          "text-right justify-end" // Right alignment and justify-end
+                          "text-right justify-end" // Right alignment
                         )}
                       >
                         <span>{subLink.label}</span>
@@ -251,7 +249,7 @@ const Sidebar = ({
                 className={({isActive}) => cn(
                   "group flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-all hover:bg-secondary hover:text-secondary-foreground",
                   isActive ? "bg-secondary text-secondary-foreground" : "text-muted-foreground",
-                  "text-right justify-end" // Right alignment and justify-end
+                  "text-right justify-end" // Right alignment for standard links
                 )}
               >
                 <span>{link.label}</span>
@@ -264,17 +262,21 @@ const Sidebar = ({
     );
   };
 
-  return <div className={cn("flex h-screen flex-col border-r border-r-border/50 bg-sidebar text-sidebar-foreground shadow-md transition-all", isCollapsed ? "w-16" : "w-64", "h-full" // Ensure full height
-  )}>
+  return (
+    <div className={cn(
+      "flex h-screen flex-col border-r border-r-border/50 bg-sidebar text-sidebar-foreground shadow-md transition-all", 
+      isCollapsed ? "w-16" : "w-64", 
+      "h-full" // Ensure full height
+    )}>
       <div className="flex-1 overflow-hidden px-3 py-4">
-        <Link to="/dashboard" className="flex items-center justify-center pl-1.5 font-semibold">
+        <Link to="/dashboard" className="flex items-center justify-end pl-1.5 font-semibold mb-4">
           <span className={cn("whitespace-nowrap text-center", isCollapsed && "hidden")}>by.chen.mizrahi</span>
           <Avatar className="ml-2 h-8 w-8">
             <AvatarImage alt="Brand Logo" src="/lovable-uploads/9359e539-3bc2-4c89-abd8-c495b1f4754c.png" />
             <AvatarFallback>CM</AvatarFallback>
           </Avatar>
         </Link>
-        <ScrollArea className="flex-1 space-y-2 pt-6 h-[calc(100vh-120px)] text-right">
+        <ScrollArea className="flex-1 space-y-2 pt-2 h-[calc(100vh-120px)] text-right">
           <Navigation />
         </ScrollArea>
       </div>
@@ -285,6 +287,7 @@ const Sidebar = ({
           <LogOut className="h-4 w-4" />
         </button>
       </div>
-    </div>;
+    </div>
+  );
 };
 export default Sidebar;
