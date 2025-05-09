@@ -71,21 +71,38 @@ export default function AppRoutes() {
       {/* Protected routes with layout */}
       <Route element={<ProtectedLayout />}>
         <Route path="/dashboard" element={<Dashboard />} />
+        
+        {/* Client routes */}
         <Route path="/clients" element={<ClientsPage />} />
         <Route path="/clients/new" element={<NewClientPage />} />
         <Route path="/clients/:id" element={<ClientDetailPage />} />
         <Route path="/clients/:id/edit" element={<EditClientPage />} />
         <Route path="/clients/:id/activity/new" element={<NewActivityPage />} />
         <Route path="/customers" element={<Customers />} />
+        
+        {/* Scheduling routes */}
         <Route path="/scheduling" element={<Scheduling />} />
         <Route path="/scheduling/new" element={<NewAppointment />} />
         <Route path="/scheduling/edit/:id" element={<EditAppointment />} />
+        
+        {/* Tasks */}
         <Route path="/tasks" element={<Tasks />} />
+        
+        {/* Inventory and expenses */}
         <Route path="/inventory" element={<Inventory />} />
         <Route path="/inventory/new" element={<NewInventoryItem />} />
         <Route path="/expenses" element={<Expenses />} />
+        
+        {/* Reports */}
         <Route path="/reports" element={<Reports />} />
+        
+        {/* Settings */}
         <Route path="/settings" element={<Settings />} />
+        <Route path="/users" element={<UserManagement />} />
+        <Route path="/user-roles" element={<UserRolesPage />} />
+        <Route path="/user-profile" element={<UserProfilePage />} />
+        
+        {/* Social media and marketing */}
         <Route path="/loyalty" element={<LoyaltyPage />} />
         <Route path="/online-booking" element={<OnlineBooking />} />
         <Route path="/social-media" element={<SocialMedia />} />
@@ -97,15 +114,18 @@ export default function AppRoutes() {
         <Route path="/marketing/campaigns" element={<MarketingPage />} />
         <Route path="/marketing/campaigns/new" element={<NewCampaignForm />} />
         <Route path="/marketing/campaigns/edit/:id" element={<EditCampaignForm />} />
+        
+        {/* Financial routes */}
         <Route path="/finances/cash-flow" element={<CashFlow />} />
         <Route path="/finances/insights" element={<BusinessInsights />} />
         <Route path="/finances/reports" element={<FinancialReports />} />
         <Route path="/payments/new" element={<NewPayment />} />
+        
+        {/* AI and notifications */}
         <Route path="/ai-assistant" element={<AIAssistant />} />
         <Route path="/notifications" element={<Notifications />} />
-        <Route path="/users" element={<UserManagement />} />
-        <Route path="/user-roles" element={<UserRolesPage />} />
-        <Route path="/user-profile" element={<UserProfilePage />} />
+        
+        {/* Setup */}
         <Route path="/setup" element={<InitialSetupPage />} />
       </Route>
       
