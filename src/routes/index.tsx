@@ -1,6 +1,8 @@
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+
+import { createBrowserRouter, RouterProvider, Outlet } from 'react-router-dom';
 import { AuthProvider } from '@/contexts/AuthContext';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
+import Layout from '@/components/layout/Layout';
 import Dashboard from '@/pages/Dashboard';
 import Login from '@/pages/auth/Login';
 import Register from '@/pages/auth/Register';
@@ -50,8 +52,8 @@ interface RouteConfig {
   element: ReactNode;
 }
 
-// Auth routes (accessible to unauthenticated users)
-export const authRoutes: RouteConfig[] = [
+// Public routes (accessible to unauthenticated users)
+export const publicRoutes: RouteConfig[] = [
   {
     path: '/login',
     element: <Login />,
@@ -75,294 +77,151 @@ export const authRoutes: RouteConfig[] = [
 ];
 
 // Protected routes (require authentication)
-export const protectedRoutes: RouteConfig[] = [
+// These will be nested inside the Layout component
+export const protectedRoutes = [
   {
     path: '/dashboard',
-    element: (
-      <ProtectedRoute>
-        <Dashboard />
-      </ProtectedRoute>
-    ),
+    element: <Dashboard />,
   },
   {
     path: '/clients',
-    element: (
-      <ProtectedRoute>
-        <ClientsPage />
-      </ProtectedRoute>
-    ),
+    element: <ClientsPage />,
   },
   {
     path: '/clients/new',
-    element: (
-      <ProtectedRoute>
-        <NewClientPage />
-      </ProtectedRoute>
-    ),
+    element: <NewClientPage />,
   },
   {
     path: '/clients/:id',
-    element: (
-      <ProtectedRoute>
-        <ClientDetailPage />
-      </ProtectedRoute>
-    ),
+    element: <ClientDetailPage />,
   },
   {
     path: '/clients/:id/edit',
-    element: (
-      <ProtectedRoute>
-        <EditClientPage />
-      </ProtectedRoute>
-    ),
+    element: <EditClientPage />,
   },
   {
     path: '/clients/:id/activity/new',
-    element: (
-      <ProtectedRoute>
-        <NewActivityPage />
-      </ProtectedRoute>
-    ),
+    element: <NewActivityPage />,
   },
   {
     path: '/scheduling',
-    element: (
-      <ProtectedRoute>
-        <Scheduling />
-      </ProtectedRoute>
-    ),
+    element: <Scheduling />,
   },
   {
     path: '/scheduling/new',
-    element: (
-      <ProtectedRoute>
-        <NewAppointment />
-      </ProtectedRoute>
-    ),
+    element: <NewAppointment />,
   },
   {
     path: '/scheduling/edit/:id',
-    element: (
-      <ProtectedRoute>
-        <EditAppointment />
-      </ProtectedRoute>
-    ),
+    element: <EditAppointment />,
   },
   {
     path: '/tasks',
-    element: (
-      <ProtectedRoute>
-        <Tasks />
-      </ProtectedRoute>
-    ),
+    element: <Tasks />,
   },
   {
     path: '/inventory',
-    element: (
-      <ProtectedRoute>
-        <Inventory />
-      </ProtectedRoute>
-    ),
+    element: <Inventory />,
   },
   {
     path: '/inventory/new',
-    element: (
-      <ProtectedRoute>
-        <NewInventoryItem />
-      </ProtectedRoute>
-    ),
+    element: <NewInventoryItem />,
   },
   {
     path: '/expenses',
-    element: (
-      <ProtectedRoute>
-        <Expenses />
-      </ProtectedRoute>
-    ),
+    element: <Expenses />,
   },
   {
     path: '/reports',
-    element: (
-      <ProtectedRoute>
-        <Reports />
-      </ProtectedRoute>
-    ),
+    element: <Reports />,
   },
   {
     path: '/settings',
-    element: (
-      <ProtectedRoute>
-        <Settings />
-      </ProtectedRoute>
-    ),
+    element: <Settings />,
   },
   {
     path: '/loyalty',
-    element: (
-      <ProtectedRoute>
-        <LoyaltyPage />
-      </ProtectedRoute>
-    ),
+    element: <LoyaltyPage />,
   },
   {
     path: '/online-booking',
-    element: (
-      <ProtectedRoute>
-        <OnlineBooking />
-      </ProtectedRoute>
-    ),
+    element: <OnlineBooking />,
   },
   {
     path: '/social-media',
-    element: (
-      <ProtectedRoute>
-        <SocialMedia />
-      </ProtectedRoute>
-    ),
+    element: <SocialMedia />,
   },
   {
     path: '/social-media-meta',
-    element: (
-      <ProtectedRoute>
-        <SocialMediaMeta />
-      </ProtectedRoute>
-    ),
+    element: <SocialMediaMeta />,
   },
   {
     path: '/portfolio',
-    element: (
-      <ProtectedRoute>
-        <PortfolioPage />
-      </ProtectedRoute>
-    ),
+    element: <PortfolioPage />,
   },
   {
     path: '/marketing/templates',
-    element: (
-      <ProtectedRoute>
-        <MarketingTemplates />
-      </ProtectedRoute>
-    ),
+    element: <MarketingTemplates />,
   },
   {
     path: '/marketing/templates/new',
-    element: (
-      <ProtectedRoute>
-        <NewTemplateForm />
-      </ProtectedRoute>
-    ),
+    element: <NewTemplateForm />,
   },
   {
     path: '/marketing/templates/edit/:id',
-    element: (
-      <ProtectedRoute>
-        <EditTemplateForm />
-      </ProtectedRoute>
-    ),
+    element: <EditTemplateForm />,
   },
   {
     path: '/marketing/campaigns',
-    element: (
-      <ProtectedRoute>
-        <MarketingPage />
-      </ProtectedRoute>
-    ),
+    element: <MarketingPage />,
   },
   {
     path: '/marketing/campaigns/new',
-    element: (
-      <ProtectedRoute>
-        <NewCampaignForm />
-      </ProtectedRoute>
-    ),
+    element: <NewCampaignForm />,
   },
   {
     path: '/marketing/campaigns/edit/:id',
-    element: (
-      <ProtectedRoute>
-        <EditCampaignForm />
-      </ProtectedRoute>
-    ),
+    element: <EditCampaignForm />,
   },
   {
     path: '/finances/cash-flow',
-    element: (
-      <ProtectedRoute>
-        <CashFlow />
-      </ProtectedRoute>
-    ),
+    element: <CashFlow />,
   },
   {
     path: '/finances/insights',
-    element: (
-      <ProtectedRoute>
-        <BusinessInsights />
-      </ProtectedRoute>
-    ),
+    element: <BusinessInsights />,
   },
   {
     path: '/finances/reports',
-    element: (
-      <ProtectedRoute>
-        <FinancialReports />
-      </ProtectedRoute>
-    ),
+    element: <FinancialReports />,
   },
   {
     path: '/payments/new',
-    element: (
-      <ProtectedRoute>
-        <NewPayment />
-      </ProtectedRoute>
-    ),
+    element: <NewPayment />,
   },
   {
     path: '/ai-assistant',
-    element: (
-      <ProtectedRoute>
-        <AIAssistant />
-      </ProtectedRoute>
-    ),
+    element: <AIAssistant />,
   },
   {
     path: '/notifications',
-    element: (
-      <ProtectedRoute>
-        <Notifications />
-      </ProtectedRoute>
-    ),
+    element: <Notifications />,
   },
   {
     path: '/users',
-    element: (
-      <ProtectedRoute>
-        <UserManagement />
-      </ProtectedRoute>
-    ),
+    element: <UserManagement />,
   },
   {
     path: '/user-roles',
-    element: (
-      <ProtectedRoute>
-        <UserRolesPage />
-      </ProtectedRoute>
-    ),
+    element: <UserRolesPage />,
   },
   {
     path: '/user-profile',
-    element: (
-      <ProtectedRoute>
-        <UserProfilePage />
-      </ProtectedRoute>
-    ),
+    element: <UserProfilePage />,
   },
   {
     path: '/setup',
-    element: (
-      <ProtectedRoute>
-        <InitialSetupPage />
-      </ProtectedRoute>
-    ),
+    element: <InitialSetupPage />,
   },
 ];
 
@@ -372,15 +231,33 @@ export const fallbackRoute: RouteConfig = {
   element: <NotFound />,
 };
 
-// Create the router with all routes
+// Create a layout wrapper for protected routes
+const ProtectedLayout = () => {
+  return (
+    <ProtectedRoute>
+      <Layout>
+        <Outlet />
+      </Layout>
+    </ProtectedRoute>
+  );
+};
+
+// Create the router with proper nesting for protected routes
 const router = createBrowserRouter([
-  ...authRoutes,
-  ...protectedRoutes,
+  // Public routes (no layout)
+  ...publicRoutes,
+  
+  // Protected routes with layout
+  {
+    element: <ProtectedLayout />,
+    children: protectedRoutes
+  },
+  
+  // Fallback route
   fallbackRoute
 ]);
 
-// We keep the original Router export for backward compatibility 
-// and to avoid breaking existing imports
+// Main Router component
 export default function Router() {
   return (
     <AuthProvider>

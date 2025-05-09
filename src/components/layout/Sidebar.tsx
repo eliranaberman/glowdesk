@@ -1,8 +1,9 @@
 
-import { useState } from 'react';
-import { useLocation, Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useLocation, Link, NavLink } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useAuth } from '@/contexts/AuthContext';
 import {
   HomeIcon,
   LayoutDashboard,
@@ -43,6 +44,12 @@ const Sidebar = ({ onLinkClick }: SidebarProps) => {
   const location = useLocation();
   const isMobile = useIsMobile();
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const { user, signOut } = useAuth();
+  
+  // For debugging
+  useEffect(() => {
+    console.log("Sidebar rendering with user:", user?.id);
+  }, [user]);
 
   const toggleSidebar = () => {
     setIsCollapsed(!isCollapsed);
@@ -51,6 +58,14 @@ const Sidebar = ({ onLinkClick }: SidebarProps) => {
   const handleLinkClick = () => {
     if (onLinkClick) {
       onLinkClick();
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await signOut();
+    } catch (error) {
+      console.error("Error logging out:", error);
     }
   };
 
@@ -79,20 +94,20 @@ const Sidebar = ({ onLinkClick }: SidebarProps) => {
     return (
       <nav className="flex flex-col space-y-1">
         {links.map((link) => (
-          <Link
+          <NavLink
             key={link.href}
             to={link.href}
             onClick={handleLinkClick}
-            className={cn(
+            className={({ isActive }) => cn(
               "group flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-all hover:bg-secondary hover:text-secondary-foreground",
-              location.pathname === link.href
+              isActive 
                 ? "bg-secondary text-secondary-foreground"
                 : "text-muted-foreground"
             )}
           >
             <link.icon className="h-4 w-4" />
             <span>{link.label}</span>
-          </Link>
+          </NavLink>
         ))}
       </nav>
     );
@@ -122,10 +137,13 @@ const Sidebar = ({ onLinkClick }: SidebarProps) => {
       </div>
       {/* Footer */}
       <div className="border-t border-border/50 p-3">
-        <Link to="/logout" className="group flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-all hover:bg-secondary hover:text-secondary-foreground text-muted-foreground">
+        <button 
+          onClick={handleLogout}
+          className="group flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-all hover:bg-secondary hover:text-secondary-foreground text-muted-foreground"
+        >
           <LogOut className="h-4 w-4" />
           <span>התנתקות</span>
-        </Link>
+        </button>
       </div>
     </div>
   );

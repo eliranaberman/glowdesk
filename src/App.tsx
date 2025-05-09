@@ -1,7 +1,6 @@
 
 import { useEffect, useState } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { authRoutes, protectedRoutes, fallbackRoute } from './routes';
+import Router from './routes';
 import { AuthProvider } from '@/contexts/auth';
 import { Toaster } from '@/components/ui/toaster';
 import { initializeStorage } from '@/services/storageService';
@@ -29,33 +28,10 @@ function App() {
 
   return (
     <HelmetProvider>
-      <BrowserRouter>
-        <AuthProvider>
-          <Routes>
-            {/* Auth routes */}
-            {authRoutes.map((route) => (
-              <Route 
-                key={route.path} 
-                path={route.path} 
-                element={route.element} 
-              />
-            ))}
-            
-            {/* Protected routes */}
-            {protectedRoutes.map((route) => (
-              <Route 
-                key={route.path} 
-                path={route.path} 
-                element={route.element} 
-              />
-            ))}
-            
-            {/* Fallback route */}
-            <Route path={fallbackRoute.path} element={fallbackRoute.element} />
-          </Routes>
-          <Toaster />
-        </AuthProvider>
-      </BrowserRouter>
+      <AuthProvider>
+        <Router />
+        <Toaster />
+      </AuthProvider>
     </HelmetProvider>
   );
 }

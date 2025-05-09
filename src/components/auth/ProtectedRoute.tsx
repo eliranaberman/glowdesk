@@ -15,7 +15,12 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const { toast } = useToast();
 
   useEffect(() => {
-    console.log("🔒 ProtectedRoute - Auth state:", { user: !!user, isLoading });
+    console.log("🔒 ProtectedRoute - Auth state:", { 
+      userId: user?.id, 
+      isAuthenticated: !!user, 
+      isLoading,
+      currentPath: location.pathname
+    });
     
     // Show toast message if redirected due to unauthorized access
     if (!isLoading && !user && location.state?.from) {
@@ -25,7 +30,7 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
         variant: "destructive",
       });
     }
-  }, [isLoading, user, location.state, toast]);
+  }, [isLoading, user, location.state, toast, location.pathname]);
 
   // Show loading state while checking auth
   if (isLoading) {

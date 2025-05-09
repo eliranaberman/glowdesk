@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Sidebar from './Sidebar';
@@ -19,6 +18,9 @@ const Layout = ({ children }: LayoutProps) => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const { user, signOut } = useAuth();
+
+  // For debugging
+  console.log("Layout rendering with user:", user?.id);
 
   const getPageTitle = (): string => {
     const path = location.pathname;
@@ -50,7 +52,7 @@ const Layout = ({ children }: LayoutProps) => {
 
   const shouldShowBackButton = (): boolean => {
     const path = location.pathname;
-    return path !== '/'; // Show back button on all pages except the dashboard
+    return path !== '/dashboard'; // Show back button on all pages except the dashboard
   };
 
   const handleBackClick = () => {
