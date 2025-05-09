@@ -1,9 +1,18 @@
-
 export type ClientGender = 'male' | 'female' | 'other';
 
 export type ClientStatus = 'active' | 'inactive' | 'lead';
 
 export type ActivityType = 'call' | 'message' | 'purchase' | 'visit';
+
+export interface ClientService {
+  id: string;
+  client_id: string;
+  service_date: string;
+  description: string;
+  price: number;
+  created_at: string;
+  created_by?: string;
+}
 
 export interface Client {
   id: string;

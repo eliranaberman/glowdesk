@@ -1,4 +1,3 @@
-
 import { supabase } from '@/lib/supabase';
 import { Client, ClientActivity } from '@/types/clients';
 
@@ -228,6 +227,47 @@ export const createClientActivity = async (activity: Omit<ClientActivity, 'id'>)
     return data[0] as ClientActivity;
   } catch (error) {
     console.error('Error creating client activity:', error);
+    throw error;
+  }
+};
+
+export const getClientServices = async (clientId: string) => {
+  try {
+    const { data, error } = await supabase
+      .from('client_services')
+      .select('*')
+      .eq('client_id', clientId)
+      .order('service_date', { ascending: false });
+
+    if (error) throw error;
+
+    return data || [];
+  } catch (error) {
+    console.error('Error fetching client services:', error);
+    throw error;
+  }
+};
+
+export const createClientService = async (service: {
+  client_id: string;
+  service_date: string;
+  description: string;
+  price: number;
+}) => {
+  try {
+    const { data, error } = await supabase
+      .from('client_services')
+      .insert([{
+        ...service,
+        created_by: supabase.auth.getUser().then(res => res.data?.user?.id)
+      }])
+      .select();
+
+    if (error) throw error;
+
+    return data[0];
+  } catch (error) {
+    console.error('Error creating client service:', error);
     throw error;
   }
 };

@@ -6,7 +6,7 @@ import { getClient, getClientActivities } from '@/services/clientService';
 import { Client, ClientActivity } from '@/types/clients';
 import { 
   AlertCircle, ChevronRight, ArrowLeft, 
-  Phone, MessageSquare, Edit, Tag, Plus 
+  Phone, MessageSquare, Edit, Tag, Plus, Receipt
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { 
@@ -24,6 +24,8 @@ import {
 } from '@/components/ui/alert';
 import ClientActivityList from '@/components/clients/ClientActivityList';
 import ClientDetailsPanel from '@/components/clients/ClientDetailsPanel';
+import ClientServicesList from '@/components/clients/ClientServicesList';
+import ClientServiceForm from '@/components/clients/ClientServiceForm';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
@@ -38,6 +40,8 @@ const ClientDetailPage = () => {
   const [activities, setActivities] = useState<ClientActivity[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isServiceFormOpen, setIsServiceFormOpen] = useState(false);
+  const [serviceRefreshTrigger, setServiceRefreshTrigger] = useState(0);
 
   useEffect(() => {
     const fetchClientData = async () => {
@@ -78,6 +82,14 @@ const ClientDetailPage = () => {
 
   const handleAddActivity = () => {
     navigate(`/clients/${id}/activity/new`);
+  };
+
+  const handleServiceAdded = () => {
+    setServiceRefreshTrigger(prev => prev + 1);
+    toast({
+      title: "השירות נוסף בהצלחה",
+      description: "פרטי השירות נשמרו במערכת",
+    });
   };
 
   if (loading) {
@@ -241,6 +253,31 @@ const ClientDetailPage = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="md:col-span-2 space-y-6">
+          {/* Service Form Dialog */}
+          <ClientServiceForm 
+            clientId={client.id}
+            isOpen={isServiceFormOpen}
+            onClose={() => setIsServiceFormOpen(false)}
+            onSuccess={handleServiceAdded}
+          />
+
+          {/* Service List Card */}
+          <div className="flex justify-between items-center">
+            <h2 className="text-lg font-medium">שירותים ותשלומים</h2>
+            <Button 
+              onClick={() => setIsServiceFormOpen(true)}
+              className="flex gap-2"
+            >
+              <Plus className="size-4" />
+              הוסף שירות חדש
+            </Button>
+          </div>
+          <ClientServicesList 
+            clientId={client.id} 
+            refreshTrigger={serviceRefreshTrigger} 
+          />
+
+          {/* Activity Card */}
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <div>

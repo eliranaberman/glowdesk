@@ -44,6 +44,44 @@ export type Database = {
           },
         ]
       }
+      client_services: {
+        Row: {
+          client_id: string
+          created_at: string
+          created_by: string | null
+          description: string
+          id: string
+          price: number
+          service_date: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          created_by?: string | null
+          description: string
+          id?: string
+          price: number
+          service_date?: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          id?: string
+          price?: number
+          service_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_services_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       clients: {
         Row: {
           assigned_rep: string | null
