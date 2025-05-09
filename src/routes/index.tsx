@@ -44,7 +44,7 @@ import UserManagement from '@/pages/UserManagement';
 import UserRolesPage from '@/pages/UserRolesPage';
 import UserProfilePage from '@/pages/UserProfilePage';
 import InitialSetupPage from '@/pages/InitialSetupPage';
-import { ReactNode } from 'react';
+import Customers from '@/pages/Customers';
 
 // Create a layout wrapper for protected routes
 const ProtectedLayout = () => {
@@ -76,6 +76,7 @@ export default function AppRoutes() {
         <Route path="/clients/:id" element={<ClientDetailPage />} />
         <Route path="/clients/:id/edit" element={<EditClientPage />} />
         <Route path="/clients/:id/activity/new" element={<NewActivityPage />} />
+        <Route path="/customers" element={<Customers />} />
         <Route path="/scheduling" element={<Scheduling />} />
         <Route path="/scheduling/new" element={<NewAppointment />} />
         <Route path="/scheduling/edit/:id" element={<EditAppointment />} />
