@@ -36,6 +36,7 @@ const CustomerTable = ({ customers, onDelete, searchQuery = '' }: CustomerTableP
   const navigate = useNavigate();
   const { toast } = useToast();
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deletingName, setDeletingName] = useState<string | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState<boolean>(false);
 
   const handleViewCustomer = (id: string) => {
@@ -46,14 +47,16 @@ const CustomerTable = ({ customers, onDelete, searchQuery = '' }: CustomerTableP
     navigate(`/customers/${id}/edit`);
   };
 
-  const openDeleteDialog = (id: string) => {
+  const openDeleteDialog = (id: string, name: string) => {
     setDeletingId(id);
+    setDeletingName(name);
     setIsDeleteDialogOpen(true);
   };
 
   const closeDeleteDialog = () => {
     setIsDeleteDialogOpen(false);
     setDeletingId(null);
+    setDeletingName(null);
   };
 
   const handleDeleteCustomer = async () => {
@@ -142,7 +145,7 @@ const CustomerTable = ({ customers, onDelete, searchQuery = '' }: CustomerTableP
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => openDeleteDialog(customer.id)}
+                        onClick={() => openDeleteDialog(customer.id, customer.full_name)}
                       >
                         <Trash2 className="h-4 w-4 text-red-500" />
                       </Button>
@@ -173,7 +176,7 @@ const CustomerTable = ({ customers, onDelete, searchQuery = '' }: CustomerTableP
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent dir="rtl" className="text-right">
           <AlertDialogHeader>
-            <AlertDialogTitle>האם אתה בטוח שברצונך למחוק?</AlertDialogTitle>
+            <AlertDialogTitle>האם אתה בטוח שברצונך למחוק את {deletingName}?</AlertDialogTitle>
             <AlertDialogDescription>
               פעולה זו אינה הפיכה. מחיקת הלקוח תסיר את כל הנתונים שלו מהמערכת.
             </AlertDialogDescription>
