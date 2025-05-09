@@ -1,6 +1,5 @@
 
-import { createBrowserRouter, RouterProvider, Outlet } from 'react-router-dom';
-import { AuthProvider } from '@/contexts/AuthContext';
+import { Navigate, Outlet, Route, Routes } from 'react-router-dom';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import Layout from '@/components/layout/Layout';
 import Dashboard from '@/pages/Dashboard';
@@ -47,190 +46,6 @@ import UserProfilePage from '@/pages/UserProfilePage';
 import InitialSetupPage from '@/pages/InitialSetupPage';
 import { ReactNode } from 'react';
 
-interface RouteConfig {
-  path: string;
-  element: ReactNode;
-}
-
-// Public routes (accessible to unauthenticated users)
-export const publicRoutes: RouteConfig[] = [
-  {
-    path: '/login',
-    element: <Login />,
-  },
-  {
-    path: '/register',
-    element: <Register />,
-  },
-  {
-    path: '/forgot-password',
-    element: <ForgotPassword />,
-  },
-  {
-    path: '/reset-password',
-    element: <ResetPassword />,
-  },
-  {
-    path: '/',
-    element: <Index />,
-  },
-];
-
-// Protected routes (require authentication)
-// These will be nested inside the Layout component
-export const protectedRoutes = [
-  {
-    path: '/dashboard',
-    element: <Dashboard />,
-  },
-  {
-    path: '/clients',
-    element: <ClientsPage />,
-  },
-  {
-    path: '/clients/new',
-    element: <NewClientPage />,
-  },
-  {
-    path: '/clients/:id',
-    element: <ClientDetailPage />,
-  },
-  {
-    path: '/clients/:id/edit',
-    element: <EditClientPage />,
-  },
-  {
-    path: '/clients/:id/activity/new',
-    element: <NewActivityPage />,
-  },
-  {
-    path: '/scheduling',
-    element: <Scheduling />,
-  },
-  {
-    path: '/scheduling/new',
-    element: <NewAppointment />,
-  },
-  {
-    path: '/scheduling/edit/:id',
-    element: <EditAppointment />,
-  },
-  {
-    path: '/tasks',
-    element: <Tasks />,
-  },
-  {
-    path: '/inventory',
-    element: <Inventory />,
-  },
-  {
-    path: '/inventory/new',
-    element: <NewInventoryItem />,
-  },
-  {
-    path: '/expenses',
-    element: <Expenses />,
-  },
-  {
-    path: '/reports',
-    element: <Reports />,
-  },
-  {
-    path: '/settings',
-    element: <Settings />,
-  },
-  {
-    path: '/loyalty',
-    element: <LoyaltyPage />,
-  },
-  {
-    path: '/online-booking',
-    element: <OnlineBooking />,
-  },
-  {
-    path: '/social-media',
-    element: <SocialMedia />,
-  },
-  {
-    path: '/social-media-meta',
-    element: <SocialMediaMeta />,
-  },
-  {
-    path: '/portfolio',
-    element: <PortfolioPage />,
-  },
-  {
-    path: '/marketing/templates',
-    element: <MarketingTemplates />,
-  },
-  {
-    path: '/marketing/templates/new',
-    element: <NewTemplateForm />,
-  },
-  {
-    path: '/marketing/templates/edit/:id',
-    element: <EditTemplateForm />,
-  },
-  {
-    path: '/marketing/campaigns',
-    element: <MarketingPage />,
-  },
-  {
-    path: '/marketing/campaigns/new',
-    element: <NewCampaignForm />,
-  },
-  {
-    path: '/marketing/campaigns/edit/:id',
-    element: <EditCampaignForm />,
-  },
-  {
-    path: '/finances/cash-flow',
-    element: <CashFlow />,
-  },
-  {
-    path: '/finances/insights',
-    element: <BusinessInsights />,
-  },
-  {
-    path: '/finances/reports',
-    element: <FinancialReports />,
-  },
-  {
-    path: '/payments/new',
-    element: <NewPayment />,
-  },
-  {
-    path: '/ai-assistant',
-    element: <AIAssistant />,
-  },
-  {
-    path: '/notifications',
-    element: <Notifications />,
-  },
-  {
-    path: '/users',
-    element: <UserManagement />,
-  },
-  {
-    path: '/user-roles',
-    element: <UserRolesPage />,
-  },
-  {
-    path: '/user-profile',
-    element: <UserProfilePage />,
-  },
-  {
-    path: '/setup',
-    element: <InitialSetupPage />,
-  },
-];
-
-// Fallback route (404)
-export const fallbackRoute: RouteConfig = {
-  path: '*',
-  element: <NotFound />,
-};
-
 // Create a layout wrapper for protected routes
 const ProtectedLayout = () => {
   return (
@@ -242,26 +57,59 @@ const ProtectedLayout = () => {
   );
 };
 
-// Create the router with proper nesting for protected routes
-const router = createBrowserRouter([
-  // Public routes (no layout)
-  ...publicRoutes,
-  
-  // Protected routes with layout
-  {
-    element: <ProtectedLayout />,
-    children: protectedRoutes
-  },
-  
-  // Fallback route
-  fallbackRoute
-]);
-
-// Main Router component
-export default function Router() {
+// Main Router component - no longer wraps with AuthProvider
+export default function AppRoutes() {
   return (
-    <AuthProvider>
-      <RouterProvider router={router} />
-    </AuthProvider>
+    <Routes>
+      {/* Public routes (no layout) */}
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/" element={<Index />} />
+
+      {/* Protected routes with layout */}
+      <Route element={<ProtectedLayout />}>
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/clients" element={<ClientsPage />} />
+        <Route path="/clients/new" element={<NewClientPage />} />
+        <Route path="/clients/:id" element={<ClientDetailPage />} />
+        <Route path="/clients/:id/edit" element={<EditClientPage />} />
+        <Route path="/clients/:id/activity/new" element={<NewActivityPage />} />
+        <Route path="/scheduling" element={<Scheduling />} />
+        <Route path="/scheduling/new" element={<NewAppointment />} />
+        <Route path="/scheduling/edit/:id" element={<EditAppointment />} />
+        <Route path="/tasks" element={<Tasks />} />
+        <Route path="/inventory" element={<Inventory />} />
+        <Route path="/inventory/new" element={<NewInventoryItem />} />
+        <Route path="/expenses" element={<Expenses />} />
+        <Route path="/reports" element={<Reports />} />
+        <Route path="/settings" element={<Settings />} />
+        <Route path="/loyalty" element={<LoyaltyPage />} />
+        <Route path="/online-booking" element={<OnlineBooking />} />
+        <Route path="/social-media" element={<SocialMedia />} />
+        <Route path="/social-media-meta" element={<SocialMediaMeta />} />
+        <Route path="/portfolio" element={<PortfolioPage />} />
+        <Route path="/marketing/templates" element={<MarketingTemplates />} />
+        <Route path="/marketing/templates/new" element={<NewTemplateForm />} />
+        <Route path="/marketing/templates/edit/:id" element={<EditTemplateForm />} />
+        <Route path="/marketing/campaigns" element={<MarketingPage />} />
+        <Route path="/marketing/campaigns/new" element={<NewCampaignForm />} />
+        <Route path="/marketing/campaigns/edit/:id" element={<EditCampaignForm />} />
+        <Route path="/finances/cash-flow" element={<CashFlow />} />
+        <Route path="/finances/insights" element={<BusinessInsights />} />
+        <Route path="/finances/reports" element={<FinancialReports />} />
+        <Route path="/payments/new" element={<NewPayment />} />
+        <Route path="/ai-assistant" element={<AIAssistant />} />
+        <Route path="/notifications" element={<Notifications />} />
+        <Route path="/users" element={<UserManagement />} />
+        <Route path="/user-roles" element={<UserRolesPage />} />
+        <Route path="/user-profile" element={<UserProfilePage />} />
+        <Route path="/setup" element={<InitialSetupPage />} />
+      </Route>
+      
+      {/* Fallback route (404) */}
+      <Route path="*" element={<NotFound />} />
+    </Routes>
   );
 }
