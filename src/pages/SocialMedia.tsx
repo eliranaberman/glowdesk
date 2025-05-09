@@ -1,7 +1,17 @@
+
 import { useState, useEffect } from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Plus, Loader2 } from "lucide-react";
+import { 
+  Plus, 
+  Loader2, 
+  LayoutDashboard, 
+  MessageSquare, 
+  Send, 
+  BarChart3, 
+  BrainCircuit, 
+  ArrowRight 
+} from "lucide-react";
 import DashboardContent from "@/components/social-media/DashboardContent";
 import InboxContent from "@/components/social-media/InboxContent";
 import PostCreationPanel from "@/components/social-media/PostCreationPanel";
@@ -160,32 +170,54 @@ const SocialMedia = () => {
   return (
     <div className="space-y-6" dir="rtl">
       <div className="flex justify-between items-center">
-        <Button 
-          variant="secondary" 
-          size="sm" 
-          className="flex items-center gap-1"
-          onClick={handleButtonAction}
-        >
-          <Plus size={16} />
-          {getButtonText()}
-        </Button>
-        <h1 className="text-2xl font-semibold text-center mx-auto tracking-tight">מדיה חברתית ושיווק</h1>
-        <div className="w-[85px]" />
+        <div className="flex gap-2">
+          <Button 
+            variant="secondary" 
+            size="sm" 
+            className="flex items-center gap-1"
+            onClick={handleButtonAction}
+          >
+            <Plus size={16} />
+            {getButtonText()}
+          </Button>
+          
+          <Button
+            variant="outline"
+            size="sm"
+            className="flex items-center gap-1"
+            onClick={() => navigate('/marketing')}
+          >
+            <ArrowRight size={16} />
+            לדשבורד קמפיינים
+          </Button>
+        </div>
+        <h1 className="text-2xl font-semibold text-center tracking-tight">מדיה חברתית ושיווק</h1>
+        <div className="w-[150px]" />
       </div>
 
       <Tabs defaultValue={activeTab} value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <div className="space-y-2">
-          <TabsList className="grid grid-cols-3 gap-2 w-full mb-2">
-            <TabsTrigger value="posts" className="text-sm md:text-base py-2.5 font-medium">פרסום פוסטים</TabsTrigger>
-            <TabsTrigger value="inbox" className="text-sm md:text-base py-2.5 font-medium">תיבת הודעות</TabsTrigger>
-            <TabsTrigger value="dashboard" className="text-sm md:text-base py-2.5 font-medium">דשבורד</TabsTrigger>
-          </TabsList>
-          
-          <TabsList className="grid grid-cols-2 gap-2 w-full mb-4">
-            <TabsTrigger value="ai-tools" className="text-sm md:text-base py-2.5 font-medium">כלי שיווק AI</TabsTrigger>
-            <TabsTrigger value="analytics" className="text-sm md:text-base py-2.5 font-medium">אנליטיקס</TabsTrigger>
-          </TabsList>
-        </div>
+        <TabsList className="grid grid-cols-5 gap-2 w-full mb-4">
+          <TabsTrigger value="dashboard" className="text-sm py-2.5 font-medium flex gap-2 justify-center">
+            <LayoutDashboard className="h-4 w-4" />
+            <span>דשבורד</span>
+          </TabsTrigger>
+          <TabsTrigger value="inbox" className="text-sm py-2.5 font-medium flex gap-2 justify-center">
+            <MessageSquare className="h-4 w-4" />
+            <span>תיבת הודעות</span>
+          </TabsTrigger>
+          <TabsTrigger value="posts" className="text-sm py-2.5 font-medium flex gap-2 justify-center">
+            <Send className="h-4 w-4" />
+            <span>פרסום פוסטים</span>
+          </TabsTrigger>
+          <TabsTrigger value="analytics" className="text-sm py-2.5 font-medium flex gap-2 justify-center">
+            <BarChart3 className="h-4 w-4" />
+            <span>אנליטיקס</span>
+          </TabsTrigger>
+          <TabsTrigger value="ai-tools" className="text-sm py-2.5 font-medium flex gap-2 justify-center">
+            <BrainCircuit className="h-4 w-4" />
+            <span>כלי שיווק AI</span>
+          </TabsTrigger>
+        </TabsList>
 
         <TabsContent value="dashboard">
           <DashboardContent 

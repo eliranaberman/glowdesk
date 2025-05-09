@@ -108,6 +108,9 @@ export default function AppRoutes() {
         <Route path="/social-media" element={<SocialMedia />} />
         <Route path="/social-media-meta" element={<SocialMediaMeta />} />
         <Route path="/portfolio" element={<PortfolioPage />} />
+        
+        {/* Marketing routes */}
+        <Route path="/marketing" element={<MarketingPage />} /> 
         <Route path="/marketing/templates" element={<MarketingTemplates />} />
         <Route path="/marketing/templates/new" element={<NewTemplateForm />} />
         <Route path="/marketing/templates/edit/:id" element={<EditTemplateForm />} />
