@@ -15,6 +15,16 @@ import { format } from 'date-fns';
 import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useToast } from '@/components/ui/use-toast';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 interface CustomerTableProps {
   customers: any[];
@@ -25,6 +35,7 @@ const CustomerTable = ({ customers, onDelete }: CustomerTableProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState<boolean>(false);
 
   const handleViewCustomer = (id: string) => {
     navigate(`/customers/${id}`);
@@ -34,14 +45,24 @@ const CustomerTable = ({ customers, onDelete }: CustomerTableProps) => {
     navigate(`/customers/${id}/edit`);
   };
 
-  const handleDeleteCustomer = async (id: string) => {
+  const openDeleteDialog = (id: string) => {
+    setDeletingId(id);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const closeDeleteDialog = () => {
+    setIsDeleteDialogOpen(false);
+    setDeletingId(null);
+  };
+
+  const handleDeleteCustomer = async () => {
+    if (!deletingId) return;
+    
     try {
-      setDeletingId(id);
-      
       const { error } = await supabase
         .from('clients')
         .delete()
-        .eq('id', id);
+        .eq('id', deletingId);
         
       if (error) throw error;
       
@@ -52,7 +73,7 @@ const CustomerTable = ({ customers, onDelete }: CustomerTableProps) => {
       
       // Call the onDelete callback if provided
       if (onDelete) {
-        onDelete(id);
+        onDelete(deletingId);
       }
     } catch (error: any) {
       console.error('Error deleting customer:', error);
@@ -62,72 +83,90 @@ const CustomerTable = ({ customers, onDelete }: CustomerTableProps) => {
         description: error.message || "לא ניתן למחוק את הלקוח כרגע",
       });
     } finally {
-      setDeletingId(null);
+      closeDeleteDialog();
     }
   };
 
   return (
-    <div className="border rounded-lg overflow-hidden">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="text-right">שם מלא</TableHead>
-            <TableHead className="text-right">טלפון</TableHead>
-            <TableHead className="text-right">אימייל</TableHead>
-            <TableHead className="text-right">סטטוס</TableHead>
-            <TableHead className="text-right">תאריך רישום</TableHead>
-            <TableHead className="w-[120px] text-right">פעולות</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {customers.map((customer) => (
-            <TableRow key={customer.id}>
-              <TableCell className="font-medium text-right">{customer.full_name}</TableCell>
-              <TableCell className="text-right">{customer.phone_number || customer.phone || "—"}</TableCell>
-              <TableCell className="text-right">{customer.email || "—"}</TableCell>
-              <TableCell className="text-right">
-                {customer.status ? (
-                  <Badge variant={customer.status === "active" ? "outline" : "secondary"}>
-                    {customer.status === "active" ? "פעיל" : customer.status}
-                  </Badge>
-                ) : "—"}
-              </TableCell>
-              <TableCell className="text-right">
-                {customer.registration_date ? 
-                  format(new Date(customer.registration_date), 'dd/MM/yyyy') : 
-                  "—"}
-              </TableCell>
-              <TableCell>
-                <div className="flex gap-1 justify-end">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleDeleteCustomer(customer.id)}
-                    disabled={deletingId === customer.id}
-                  >
-                    <Trash2 className="h-4 w-4 text-red-500" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleEditCustomer(customer.id)}
-                  >
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleViewCustomer(customer.id)}
-                  >
-                    <Eye className="h-4 w-4" />
-                  </Button>
-                </div>
-              </TableCell>
+    <>
+      <div className="border rounded-lg overflow-hidden">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="text-right">שם מלא</TableHead>
+              <TableHead className="text-right">טלפון</TableHead>
+              <TableHead className="text-right">אימייל</TableHead>
+              <TableHead className="text-right">סטטוס</TableHead>
+              <TableHead className="text-right">תאריך רישום</TableHead>
+              <TableHead className="w-[120px] text-right">פעולות</TableHead>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </div>
+          </TableHeader>
+          <TableBody>
+            {customers.map((customer) => (
+              <TableRow key={customer.id}>
+                <TableCell className="font-medium text-right">{customer.full_name}</TableCell>
+                <TableCell className="text-right">{customer.phone_number || customer.phone || "—"}</TableCell>
+                <TableCell className="text-right">{customer.email || "—"}</TableCell>
+                <TableCell className="text-right">
+                  {customer.status ? (
+                    <Badge variant={customer.status === "active" ? "outline" : "secondary"}>
+                      {customer.status === "active" ? "פעיל" : customer.status}
+                    </Badge>
+                  ) : "—"}
+                </TableCell>
+                <TableCell className="text-right">
+                  {customer.registration_date ? 
+                    format(new Date(customer.registration_date), 'dd/MM/yyyy') : 
+                    "—"}
+                </TableCell>
+                <TableCell>
+                  <div className="flex gap-1 justify-end">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => openDeleteDialog(customer.id)}
+                    >
+                      <Trash2 className="h-4 w-4 text-red-500" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleEditCustomer(customer.id)}
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleViewCustomer(customer.id)}
+                    >
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent dir="rtl" className="text-right">
+          <AlertDialogHeader>
+            <AlertDialogTitle>האם אתה בטוח שברצונך למחוק?</AlertDialogTitle>
+            <AlertDialogDescription>
+              פעולה זו אינה הפיכה. מחיקת הלקוח תסיר את כל הנתונים שלו מהמערכת.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex">
+            <AlertDialogCancel className="mr-auto">ביטול</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteCustomer} className="bg-red-500 hover:bg-red-700">
+              מחק
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 };
 
