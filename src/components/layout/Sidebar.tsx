@@ -102,11 +102,12 @@ const Sidebar = ({ onLinkClick }: SidebarProps) => {
               "group flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-all hover:bg-secondary hover:text-secondary-foreground",
               isActive 
                 ? "bg-secondary text-secondary-foreground"
-                : "text-muted-foreground"
+                : "text-muted-foreground",
+              "text-right justify-end" // Added right alignment and justify-end
             )}
           >
-            <link.icon className="h-4 w-4" />
             <span>{link.label}</span>
+            <link.icon className="h-4 w-4" />
           </NavLink>
         ))}
       </nav>
@@ -122,16 +123,16 @@ const Sidebar = ({ onLinkClick }: SidebarProps) => {
       )}
     >
       <div className="flex-1 overflow-hidden px-3 py-4">
-        <Link to="/dashboard" className="flex items-center pl-1.5 font-semibold">
-          <Avatar className="mr-2 h-8 w-8">
-            <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
-            <AvatarFallback>SC</AvatarFallback>
-          </Avatar>
+        <Link to="/dashboard" className="flex items-center justify-end pl-1.5 font-semibold">
           <span className={cn("whitespace-nowrap", isCollapsed && "hidden")}>
             GlowDesk
           </span>
+          <Avatar className="ml-2 h-8 w-8">
+            <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
+            <AvatarFallback>SC</AvatarFallback>
+          </Avatar>
         </Link>
-        <ScrollArea className="flex-1 space-y-2 pt-6 h-[calc(100vh-120px)]">
+        <ScrollArea className="flex-1 space-y-2 pt-6 h-[calc(100vh-120px)] text-right">
           <Navigation />
         </ScrollArea>
       </div>
@@ -139,10 +140,10 @@ const Sidebar = ({ onLinkClick }: SidebarProps) => {
       <div className="border-t border-border/50 p-3">
         <button 
           onClick={handleLogout}
-          className="group flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-all hover:bg-secondary hover:text-secondary-foreground text-muted-foreground"
+          className="group flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-all hover:bg-secondary hover:text-secondary-foreground text-muted-foreground text-right justify-end"
         >
-          <LogOut className="h-4 w-4" />
           <span>התנתקות</span>
+          <LogOut className="h-4 w-4" />
         </button>
       </div>
     </div>
