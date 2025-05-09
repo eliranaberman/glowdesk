@@ -43,6 +43,7 @@ import UserManagement from '@/pages/UserManagement';
 import UserRolesPage from '@/pages/UserRolesPage';
 import UserProfilePage from '@/pages/UserProfilePage';
 import InitialSetupPage from '@/pages/InitialSetupPage';
+import { ReactNode } from 'react';
 
 interface RouteConfig {
   path: string;
@@ -370,6 +371,13 @@ export const fallbackRoute: RouteConfig = {
   path: '*',
   element: <NotFound />,
 };
+
+// Create the router with all routes
+const router = createBrowserRouter([
+  ...authRoutes,
+  ...protectedRoutes,
+  fallbackRoute
+]);
 
 // We keep the original Router export for backward compatibility 
 // and to avoid breaking existing imports
