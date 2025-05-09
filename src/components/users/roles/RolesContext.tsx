@@ -1,6 +1,6 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface RoleContextType {
@@ -104,10 +104,3 @@ export const useRoles = () => {
   }
   return context;
 };
-
-// Export the roles index file
-<lov-write file_path="src/components/users/roles/index.ts">
-export { default as AssignRoleTable } from './AssignRoleTable';
-export { default as RolePermissionsTable } from './RolePermissionsTable';
-export { default as RoleDescriptions } from './RoleDescriptions';
-export { RolesProvider, useRoles } from './RolesContext';
