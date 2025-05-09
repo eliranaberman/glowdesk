@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase';
 import { useToast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { 
   Form,
   FormControl,
@@ -19,18 +20,27 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { format, parse } from 'date-fns';
 
 // Form validation schema
 const customerSchema = z.object({
   full_name: z.string().min(2, { message: "שם חייב להכיל לפחות 2 תווים" }),
-  phone_number: z.string().optional(),
+  phone_number: z.string().min(9, { message: "מספר טלפון לא תקין" }),
   email: z.string().email({ message: "אימייל לא תקין" }).optional().or(z.literal('')),
+  birthday: z.string().optional().or(z.literal('')),
+  notes: z.string().optional().or(z.literal('')),
 });
 
 type FormValues = z.infer<typeof customerSchema>;
 
-const CustomerEditForm = () => {
-  const { id } = useParams<{ id: string }>();
+interface CustomerEditFormProps {
+  customerId?: string;
+  onSuccess?: () => void;
+}
+
+const CustomerEditForm = ({ customerId, onSuccess }: CustomerEditFormProps) => {
+  const { id: paramsId } = useParams<{ id: string }>();
+  const id = customerId || paramsId;
   const navigate = useNavigate();
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
@@ -44,6 +54,8 @@ const CustomerEditForm = () => {
       full_name: "",
       phone_number: "",
       email: "",
+      birthday: "",
+      notes: "",
     },
   });
 
@@ -54,6 +66,8 @@ const CustomerEditForm = () => {
       
       try {
         setLoading(true);
+        setError(null);
+        
         const { data, error } = await supabase
           .from('clients')
           .select('*')
@@ -63,11 +77,23 @@ const CustomerEditForm = () => {
         if (error) throw error;
         
         if (data) {
+          // Format birthday if exists
+          let formattedBirthday = '';
+          if (data.birthday) {
+            try {
+              formattedBirthday = data.birthday;
+            } catch (e) {
+              console.error('Error parsing birthday:', e);
+            }
+          }
+          
           // Set form values from fetched data
           form.reset({
             full_name: data.full_name || '',
             phone_number: data.phone_number || data.phone || '',
             email: data.email || '',
+            birthday: formattedBirthday,
+            notes: data.notes || '',
           });
         }
       } catch (err: any) {
@@ -100,6 +126,8 @@ const CustomerEditForm = () => {
           full_name: values.full_name,
           phone_number: values.phone_number,
           email: values.email,
+          birthday: values.birthday,
+          notes: values.notes,
         })
         .eq('id', id);
       
@@ -110,7 +138,11 @@ const CustomerEditForm = () => {
         description: "פרטי הלקוח עודכנו בהצלחה",
       });
       
-      navigate('/customers');
+      if (onSuccess) {
+        onSuccess();
+      } else {
+        navigate('/customers');
+      }
     } catch (err: any) {
       console.error('Error updating customer:', err);
       setError(err.message);
@@ -133,7 +165,7 @@ const CustomerEditForm = () => {
   }
 
   return (
-    <div className="max-w-2xl mx-auto" dir="rtl">
+    <div dir="rtl">
       <Card>
         <CardHeader>
           <CardTitle className="text-right">עריכת פרטי לקוח</CardTitle>
@@ -185,6 +217,39 @@ const CustomerEditForm = () => {
                     <FormLabel>אימייל</FormLabel>
                     <FormControl>
                       <Input placeholder="אימייל" type="email" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="birthday"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>תאריך לידה</FormLabel>
+                    <FormControl>
+                      <Input type="date" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="notes"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>הערות</FormLabel>
+                    <FormControl>
+                      <Textarea 
+                        placeholder="הערות פנימיות" 
+                        className="resize-none" 
+                        rows={4}
+                        {...field} 
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

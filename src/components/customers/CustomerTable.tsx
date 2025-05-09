@@ -1,3 +1,4 @@
+
 import {
   Table,
   TableBody,
@@ -149,6 +150,7 @@ const CustomerTable = ({ customers, onDelete, searchQuery = '' }: CustomerTableP
                         variant="ghost"
                         size="icon"
                         onClick={() => handleEditCustomer(customer.id)}
+                        aria-label="ערוך לקוח"
                       >
                         <Edit className="h-4 w-4" />
                       </Button>
