@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from '@/hooks/use-toast';
 import { format, isSameDay, addDays } from 'date-fns';
-import { createAppointment } from '@/services/appointmentService';
+import { createAppointment, AppointmentFormData } from '@/services/appointmentService';
 import { sendAppointmentNotification } from '@/services/notificationService';
 import { getUserCalendarConnections } from '@/services/calendarService';
 import { Loader2, Calendar as CalendarIcon } from 'lucide-react';
@@ -149,14 +149,14 @@ const OnlineBooking = () => {
       const endTime = `${endHours.toString().padStart(2, '0')}:${endMinutes.toString().padStart(2, '0')}`;
       
       // Create appointment record - in a real implementation this would include creating/updating customer record first
-      const appointmentData = {
+      const appointmentData: AppointmentFormData = {
         customer_id: "temp_customer_id", // In a real implementation, this would be the actual customer ID
         employee_id: null, // Add this required field with null value for online booking
         service_type: selectedService,
         date: selectedDate,
         start_time: selectedTime,
         end_time: endTime,
-        status: 'scheduled',
+        status: "scheduled", // Use the specific string literal as required by the type
         notes: `הזמנה חדשה מהאתר. פרטי קשר: ${customerPhone}, ${customerEmail || 'ללא מייל'}`
       };
       
