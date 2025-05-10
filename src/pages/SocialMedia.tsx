@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -111,7 +110,7 @@ const SocialMedia = () => {
           console.error("Error loading marketing stats:", error);
           toast({
             title: "שגיאה בטעינת נתוני שיווק",
-            description: "��ירעה שגיאה בטעינת הנתונים, אנא נסה שנית"
+            description: "אירעה שגיאה בטעינת הנתונים, אנא נסה שנית"
           });
         } finally {
           setIsLoading(false);
