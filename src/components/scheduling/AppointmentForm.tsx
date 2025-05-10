@@ -4,12 +4,14 @@ import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { format } from 'date-fns';
-import { Calendar as CalendarIcon, Clock } from 'lucide-react';
+import { Calendar as CalendarIcon, Clock, Share2, Download, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Calendar } from '@/components/ui/calendar';
 import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Separator } from '@/components/ui/separator';
 import {
   Form,
   FormControl,
@@ -30,6 +32,11 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { toast } from 'sonner';
 import { 
   AppointmentFormData, 
@@ -37,11 +44,15 @@ import {
   updateAppointment, 
   getAppointmentById,
   getEmployees,
-  getUniqueServiceTypes
+  getUniqueServiceTypes,
+  syncAppointmentWithCalendar,
+  downloadIcsFile
 } from '@/services/appointmentService';
+import { sendAppointmentNotification } from '@/services/notificationService';
 import { Customer, getCustomers } from '@/services/customerService';
+import { getUserCalendarConnections } from '@/services/calendarService';
 
-// Form validation schema
+// Extended form schema with notification and calendar options
 const appointmentSchema = z.object({
   customer_id: z.string().min(1, { message: 'נא לבחור לקוח' }),
   employee_id: z.string().nullable(),
@@ -53,6 +64,9 @@ const appointmentSchema = z.object({
     required_error: 'נא לבחור סטטוס',
   }),
   notes: z.string().nullable(),
+  send_confirmation: z.boolean().optional(),
+  sync_with_calendar: z.boolean().optional(),
+  calendar_id: z.string().optional(),
 });
 
 type AppointmentFormSchema = z.infer<typeof appointmentSchema>;
@@ -76,6 +90,8 @@ const AppointmentForm = ({
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [employees, setEmployees] = useState<{ id: string; name: string }[]>([]);
   const [serviceTypes, setServiceTypes] = useState<string[]>([]);
+  const [calendarConnections, setCalendarConnections] = useState<any[]>([]);
+  const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
   
   // Default form values
   const defaultValues: AppointmentFormSchema = {
@@ -87,6 +103,9 @@ const AppointmentForm = ({
     end_time: initialTime ? calculateEndTime(initialTime, 60) : '10:00',
     status: 'scheduled',
     notes: null,
+    send_confirmation: true,
+    sync_with_calendar: true,
+    calendar_id: '',
   };
   
   const form = useForm<AppointmentFormSchema>({
@@ -103,7 +122,7 @@ const AppointmentForm = ({
     return `${newHours.toString().padStart(2, '0')}:${newMinutes.toString().padStart(2, '0')}`;
   }
 
-  // Load customers, employees, and service types data
+  // Load customers, employees, service types, and calendar connections data
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -126,6 +145,15 @@ const AppointmentForm = ({
         const serviceTypesData = await getUniqueServiceTypes();
         setServiceTypes(serviceTypesData);
         
+        // Fetch calendar connections
+        try {
+          const connectionsData = await getUserCalendarConnections();
+          setCalendarConnections(connectionsData.filter(conn => conn.is_active));
+        } catch (err) {
+          console.error('Error loading calendar connections:', err);
+          // Not critical, can continue without
+        }
+        
         // If editing an existing appointment, load its data
         if (appointmentId) {
           const appointmentData = await getAppointmentById(appointmentId);
@@ -144,6 +172,9 @@ const AppointmentForm = ({
             end_time: appointmentData.end_time,
             status: appointmentData.status,
             notes: appointmentData.notes,
+            send_confirmation: true,
+            sync_with_calendar: true,
+            calendar_id: ''
           });
         } else if (initialDate) {
           form.setValue('date', initialDate);
@@ -190,14 +221,40 @@ const AppointmentForm = ({
         notes: data.notes,
       };
       
+      let savedAppointmentId: string;
+      
       if (appointmentId) {
         // Update existing appointment
-        await updateAppointment(appointmentId, appointmentData);
+        const updated = await updateAppointment(appointmentId, appointmentData);
+        savedAppointmentId = updated.id;
         toast.success('הפגישה עודכנה בהצלחה');
       } else {
         // Create new appointment
-        await createAppointment(appointmentData);
+        const created = await createAppointment(appointmentData);
+        savedAppointmentId = created.id;
         toast.success('הפגישה נוצרה בהצלחה');
+      }
+      
+      // Handle calendar sync if enabled
+      if (data.sync_with_calendar && data.calendar_id) {
+        try {
+          await syncAppointmentWithCalendar(savedAppointmentId, data.calendar_id);
+          toast.success('הפגישה סונכרנה עם לוח השנה');
+        } catch (error) {
+          console.error('Error syncing with calendar:', error);
+          toast.error('שגיאה בסנכרון עם לוח השנה');
+        }
+      }
+      
+      // Send confirmation notification if enabled
+      if (data.send_confirmation) {
+        try {
+          await sendAppointmentNotification(savedAppointmentId, 'confirmation');
+          toast.success('הודעת אישור נשלחה ללקוח');
+        } catch (error) {
+          console.error('Error sending confirmation:', error);
+          toast.error('שגיאה בשליחת הודעת אישור');
+        }
       }
       
       // Notify parent component of success
@@ -443,6 +500,143 @@ const AppointmentForm = ({
             </FormItem>
           )}
         />
+        
+        <Collapsible
+          open={showAdvancedOptions}
+          onOpenChange={setShowAdvancedOptions}
+          className="w-full space-y-4"
+        >
+          <CollapsibleTrigger className="flex w-full items-center justify-between py-2">
+            <span className="text-sm font-medium">אפשרויות מתקדמות</span>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="p-0 h-auto"
+            >
+              <span className="sr-only">Toggle</span>
+              {showAdvancedOptions ? "הסתר אפשרויות" : "הצג אפשרויות"}
+            </Button>
+          </CollapsibleTrigger>
+          <CollapsibleContent className="space-y-4">
+            <Separator />
+            
+            <FormField
+              control={form.control}
+              name="send_confirmation"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-center justify-between space-x-3 space-x-reverse space-y-0 p-2 border rounded-lg">
+                  <div className="space-y-0 leading-none">
+                    <FormLabel className="text-right flex items-center">
+                      <MessageSquare className="h-4 w-4 mr-1" />
+                      שלח הודעת אישור
+                    </FormLabel>
+                    <p className="text-sm text-muted-foreground">
+                      שלח הודעת WhatsApp או SMS ללקוח
+                    </p>
+                  </div>
+                  <FormControl>
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                      disabled={loading}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+            
+            {calendarConnections.length > 0 ? (
+              <>
+                <FormField
+                  control={form.control}
+                  name="sync_with_calendar"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center justify-between space-x-3 space-x-reverse space-y-0 p-2 border rounded-lg">
+                      <div className="space-y-0 leading-none">
+                        <FormLabel className="text-right flex items-center">
+                          <Share2 className="h-4 w-4 mr-1" />
+                          סנכרן עם לוח שנה
+                        </FormLabel>
+                        <p className="text-sm text-muted-foreground">
+                          סנכרן פגישה עם לוח שנה מחובר
+                        </p>
+                      </div>
+                      <FormControl>
+                        <Checkbox
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                          disabled={loading}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+
+                {form.watch('sync_with_calendar') && (
+                  <FormField
+                    control={form.control}
+                    name="calendar_id"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-right">בחר לוח שנה לסנכרון</FormLabel>
+                        <Select 
+                          value={field.value}
+                          onValueChange={field.onChange}
+                          disabled={loading}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="בחר לוח שנה מחובר" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {calendarConnections.map((connection) => (
+                              <SelectItem key={connection.id} value={connection.id}>
+                                {connection.calendar_email} ({connection.calendar_type === 'google' ? 'Google' : 
+                                connection.calendar_type === 'apple' ? 'Apple' : 'Outlook'})
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
+              </>
+            ) : (
+              <div className="p-2 border rounded-lg">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium text-sm">ייצוא פגישה</p>
+                    <p className="text-xs text-muted-foreground">
+                      הורד את הפגישה כקובץ .ics להוספה ללוח השנה שלך
+                    </p>
+                  </div>
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => {
+                      const formValues = form.getValues();
+                      downloadIcsFile({
+                        date: formValues.date.toISOString().split('T')[0],
+                        start_time: formValues.start_time,
+                        end_time: formValues.end_time,
+                        service_type: formValues.service_type,
+                        customer: customers.find(c => c.id === formValues.customer_id)
+                      });
+                    }}
+                    disabled={loading || !form.formState.isValid}
+                  >
+                    <Download className="h-4 w-4 mr-1" />
+                    הורד .ics
+                  </Button>
+                </div>
+              </div>
+            )}
+          </CollapsibleContent>
+        </Collapsible>
         
         <div className="flex justify-between pt-4">
           <Button 

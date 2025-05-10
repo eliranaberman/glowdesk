@@ -1,11 +1,8 @@
 
 project_id = "njjxqxluxtyechxgtwsq"
 
-[functions.meta-auth]
+[functions.whatsapp-notification]
 verify_jwt = true
 
-[functions.meta-posts]
-verify_jwt = true
-
-[functions.meta-publish]
+[functions.calendar-sync]
 verify_jwt = true
