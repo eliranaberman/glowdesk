@@ -151,6 +151,7 @@ const OnlineBooking = () => {
       // Create appointment record - in a real implementation this would include creating/updating customer record first
       const appointmentData = {
         customer_id: "temp_customer_id", // In a real implementation, this would be the actual customer ID
+        employee_id: null, // Add this required field with null value for online booking
         service_type: selectedService,
         date: selectedDate,
         start_time: selectedTime,

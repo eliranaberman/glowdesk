@@ -1,4 +1,3 @@
-
 import { supabase } from '@/lib/supabase';
 import { format, parseISO } from 'date-fns';
 import { Customer, getCustomerById } from './customerService';
@@ -251,6 +250,12 @@ export const calculateDuration = (startTime: string, endTime: string): number =>
   return endTotalMinutes - startTotalMinutes;
 };
 
+// Import functions from calendarService to re-export them
+import { syncAppointmentWithCalendar, downloadIcsFile } from './calendarService';
+
+// Re-export the calendar service functions to make them available through appointmentService
+export { syncAppointmentWithCalendar, downloadIcsFile };
+
 // Generate mock appointments for testing
 export const generateMockAppointments = async (): Promise<void> => {
   // Get all customers to use for mock data
@@ -272,7 +277,7 @@ export const generateMockAppointments = async (): Promise<void> => {
     'בניית ציפורניים',
     'פדיקור',
     'לק ג׳ל',
-    'טיפול פנים'
+    'טיפול ��נים'
   ];
   
   const statuses: Array<Appointment['status']> = ['scheduled', 'cancelled', 'completed'];

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -106,6 +105,7 @@ const CalendarSync = () => {
         refresh_token: "simulated_refresh_token",
         token_expiry: new Date(Date.now() + 3600000).toISOString(),
         is_active: true,
+        last_sync_at: null
       });
       
       toast({
@@ -156,6 +156,7 @@ const CalendarSync = () => {
         refresh_token: null,
         token_expiry: null,
         is_active: true,
+        last_sync_at: null
       });
       
       toast({
@@ -206,6 +207,7 @@ const CalendarSync = () => {
         refresh_token: "simulated_refresh_token",
         token_expiry: new Date(Date.now() + 3600000).toISOString(),
         is_active: true,
+        last_sync_at: null
       });
       
       toast({
@@ -242,7 +244,7 @@ const CalendarSync = () => {
       
       toast({
         title: "לוח שנה נותק",
-        description: "לוח השנה נותק בהצלחה",
+        description: "לוח שנה נותק בהצלחה",
       });
       
       await loadData();
