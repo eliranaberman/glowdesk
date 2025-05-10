@@ -37,19 +37,12 @@ if (mainRoutes.children) {
 
   // Add all protected routes to the container
   if (protectedRoutesContainer && protectedRoutesContainer.children) {
-    // Ensure all routes added here have a path property
-    const routesWithPath = createProtectedRoutes().filter(
-      (route): route is RouteObject & { path: string } => route.path !== undefined
-    );
-    protectedRoutesContainer.children.push(...routesWithPath);
+    protectedRoutesContainer.children.push(...createProtectedRoutes());
   }
 
   // Add public routes directly to the main layout
   // Include both the regular public routes and the public scheduling routes
-  const validPublicRoutes = [...publicRoutes, ...schedulingPublicRoutes].filter(
-    (route): route is RouteObject & { path: string } => route.path !== undefined
-  );
-  mainRoutes.children.push(...validPublicRoutes);
+  mainRoutes.children.push(...publicRoutes, ...schedulingPublicRoutes);
 }
 
 // Create the final routes array

@@ -57,7 +57,7 @@ export const managementRoutes: RouteObject[] = [
     element: <UserManagement />,
   },
   {
-    path: '/users/roles',
+    path: '/user-roles',
     element: <UserRolesPage />,
   },
   {
