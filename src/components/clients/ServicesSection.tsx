@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import ClientServicesList from './ClientServicesList';
 import ClientServiceForm from './ClientServiceForm';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 
 interface ServicesSectionProps {
   clientId: string;

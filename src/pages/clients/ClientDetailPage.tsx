@@ -4,9 +4,9 @@ import { useParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { getClient, getClientActivities } from '@/services/clientService';
 import { Client, ClientActivity } from '@/types/clients';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 
-// Import our new components
+// Import our components
 import ClientHeader from '@/components/clients/ClientHeader';
 import ClientDetailsPanel from '@/components/clients/ClientDetailsPanel';
 import ServicesSection from '@/components/clients/ServicesSection';
