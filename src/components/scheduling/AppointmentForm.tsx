@@ -1,4 +1,5 @@
 
+// First section of the file up to the appointmentSchema
 import { useState, useEffect } from 'react';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';

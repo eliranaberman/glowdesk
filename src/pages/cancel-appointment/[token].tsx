@@ -9,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertTriangle, CheckCircle, Clock, XCircle } from 'lucide-react';
 import { toast } from 'sonner';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/integrations/supabase/client';
 import { useIsMobile } from '@/hooks/use-mobile';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import { CancellationToken } from '@/types/cancellation';
@@ -25,7 +25,7 @@ interface AppointmentDetails {
   };
 }
 
-const CancelAppointmentPage = () => {
+const CancelAppointment = () => {
   const { token } = useParams<{ token: string }>();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
@@ -58,7 +58,6 @@ const CancelAppointmentPage = () => {
     const fetchAppointmentDetails = async () => {
       try {
         // Use the edge function to validate the token and get appointment details
-        // This avoids the need to directly query tables that might not be in the type system yet
         const { data, error } = await supabase.functions.invoke('appointment-cancellation', {
           body: { 
             token,
@@ -285,7 +284,12 @@ const CancelAppointmentPage = () => {
           )}
         </CardContent>
         <CardFooter className="flex justify-between">
-          <Button variant="outline" onClick={() => navigate('/')} disabled={cancelling}>
+          <Button 
+            type="button" 
+            variant="outline" 
+            onClick={() => navigate('/')} 
+            disabled={cancelling}
+          >
             ביטול
           </Button>
           <Button 
@@ -305,4 +309,4 @@ const CancelAppointmentPage = () => {
   );
 };
 
-export default CancelAppointmentPage;
+export default CancelAppointment;
