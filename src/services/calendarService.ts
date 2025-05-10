@@ -143,3 +143,37 @@ export const downloadIcsFile = (appointment: any): void => {
   document.body.removeChild(link);
   URL.revokeObjectURL(url);
 };
+
+// Connect to Google Calendar
+export const connectToGoogle = async (): Promise<void> => {
+  try {
+    // In a real implementation, this would redirect to Google OAuth
+    // For now, we'll mock a successful connection
+    const mockConnection = {
+      user_id: 'current-user-id',
+      calendar_type: 'google' as const,
+      calendar_email: 'user@example.com',
+      calendar_id: 'primary',
+      access_token: 'mock-access-token',
+      refresh_token: 'mock-refresh-token',
+      token_expiry: new Date(Date.now() + 3600 * 1000).toISOString()
+    };
+    
+    await createCalendarConnection(mockConnection);
+    console.log('Successfully connected to Google Calendar');
+  } catch (error) {
+    console.error('Error connecting to Google Calendar:', error);
+    throw new Error('Failed to connect to Google Calendar');
+  }
+};
+
+// Disconnect calendar
+export const disconnectCalendar = async (connectionId: string): Promise<void> => {
+  try {
+    await deleteCalendarConnection(connectionId);
+    console.log('Successfully disconnected calendar');
+  } catch (error) {
+    console.error('Error disconnecting calendar:', error);
+    throw new Error('Failed to disconnect calendar');
+  }
+};
