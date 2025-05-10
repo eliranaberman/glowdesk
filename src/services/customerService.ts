@@ -198,7 +198,7 @@ export const createCustomer = async (data: CustomerFormData): Promise<Customer> 
   return newCustomer;
 };
 
-// Update customer
+// Export updateCustomer function
 export const updateCustomer = async (id: string, data: Partial<CustomerFormData>): Promise<Customer> => {
   await new Promise(resolve => setTimeout(resolve, 400)); // Simulate API delay
 

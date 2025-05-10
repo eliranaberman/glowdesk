@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -178,6 +177,16 @@ const CustomerDetailView = () => {
     }
   };
   
+  // Get status text
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case 'active': return 'פעיל';
+      case 'inactive': return 'לא פעיל';
+      case 'lead': return 'לקוח פוטנציאלי';
+      default: return status;
+    }
+  };
+  
   // Loading state
   if (loading) {
     return (
@@ -311,8 +320,14 @@ const CustomerDetailView = () => {
             
             <div className="flex items-center justify-between">
               <span>סטטוס:</span>
-              <Badge variant={customer.status === 'active' ? 'default' : 'secondary'}>
-                {customer.status === 'active' ? 'פעיל' : 'לא פעיל'}
+              <Badge variant={
+                customer.status === 'active' 
+                  ? 'default' 
+                  : customer.status === 'lead'
+                    ? 'warm'
+                    : 'secondary'
+              }>
+                {getStatusText(customer.status)}
               </Badge>
             </div>
           </CardContent>

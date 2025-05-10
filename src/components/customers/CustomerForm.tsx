@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
@@ -42,7 +41,7 @@ import { X, Plus } from 'lucide-react';
 // Form schema validation - update to match Customer type
 const customerSchema = z.object({
   full_name: z.string().min(2, { message: "שם חייב להיות לפחות 2 תווים" }),
-  email: z.string().email({ message: "יש להזין כתובת אימייל תקינה" }),
+  email: z.string().email({ message: "יש להזין כתובת ��ימייל תקינה" }),
   phone_number: z.string().min(9, { message: "מספר טלפון חייב להיות לפחות 9 ספרות" }),
   status: z.enum(["active", "inactive", "lead"]),
   loyalty_level: z.enum(["bronze", "silver", "gold", "none"]),
@@ -262,6 +261,7 @@ const CustomerForm = ({ isEdit = false }: CustomerFormProps) => {
                         <SelectContent>
                           <SelectItem value="active">פעיל</SelectItem>
                           <SelectItem value="inactive">לא פעיל</SelectItem>
+                          <SelectItem value="lead">לקוח פוטנציאלי</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />

@@ -1,7 +1,8 @@
 
+
 // Mock calendar service
 
-interface CalendarConnection {
+export interface CalendarConnection {
   id: string;
   user_id: string;
   calendar_type: 'google' | 'apple' | 'outlook';
