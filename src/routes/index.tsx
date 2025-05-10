@@ -37,11 +37,16 @@ if (mainRoutes.children) {
 
   // Add all protected routes to the container
   if (protectedRoutesContainer && protectedRoutesContainer.children) {
-    protectedRoutesContainer.children.push(...createProtectedRoutes());
+    // Ensure all routes added here are properly typed with required path
+    protectedRoutesContainer.children.push(
+      ...createProtectedRoutes().filter(route => route.path !== undefined)
+    );
   }
 
   // Add public routes directly to the main layout
-  mainRoutes.children.push(...publicRoutes);
+  // Filter out any routes without a path
+  const validPublicRoutes = publicRoutes.filter(route => route.path !== undefined);
+  mainRoutes.children.push(...validPublicRoutes);
 }
 
 // Create the final routes array
