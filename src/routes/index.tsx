@@ -6,7 +6,7 @@ import { AuthLayout, createMainRoutes, notFoundRoute } from './routeUtils';
 import { authRoutes } from './authRoutes';
 import { customerRoutes } from './customerRoutes';
 import { clientRoutes } from './clientRoutes';
-import { schedulingRoutes } from './schedulingRoutes';
+import { schedulingRoutes, schedulingPublicRoutes } from './schedulingRoutes';
 import { managementRoutes } from './managementRoutes';
 import { marketingRoutes } from './marketingRoutes';
 import { financeRoutes } from './financeRoutes';
@@ -45,8 +45,8 @@ if (mainRoutes.children) {
   }
 
   // Add public routes directly to the main layout
-  // Filter out any routes without a path
-  const validPublicRoutes = publicRoutes.filter(
+  // Include both the regular public routes and the public scheduling routes
+  const validPublicRoutes = [...publicRoutes, ...schedulingPublicRoutes].filter(
     (route): route is RouteObject & { path: string } => route.path !== undefined
   );
   mainRoutes.children.push(...validPublicRoutes);

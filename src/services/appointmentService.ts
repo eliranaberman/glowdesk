@@ -1,3 +1,4 @@
+
 import { supabase } from '@/lib/supabase';
 import { format, parseISO } from 'date-fns';
 import { Customer, getCustomerById } from './customerService';
@@ -10,8 +11,23 @@ export interface Appointment {
   date: string; // YYYY-MM-DD
   start_time: string; // HH:MM
   end_time: string; // HH:MM
-  status: 'scheduled' | 'cancelled' | 'completed';
+  status: 'scheduled' | 'cancelled' | 'completed' | 'no_show';
   notes: string | null;
+  whatsapp_notification_sent: boolean;
+  sms_notification_sent: boolean;
+  notification_sent_at: string | null;
+  reminder_24h_sent: boolean;
+  reminder_3h_sent: boolean;
+  cancel_reason: string | null;
+  cancelled_at: string | null;
+  late_cancellation: boolean;
+  payment_required: boolean;
+  external_calendar_id: string | null;
+  calendar_sync_status: string | null;
+  last_sync_at: string | null;
+  attendance_status: 'pending' | 'arrived' | 'no_show' | 'cancelled';
+  attendance_confirmed_at: string | null;
+  attendance_confirmed_by: string | null;
   customer?: Customer; // Optional customer data for frontend display
 }
 
@@ -22,17 +38,19 @@ export interface AppointmentFormData {
   date: Date;
   start_time: string; // HH:MM
   end_time: string; // HH:MM
-  status: 'scheduled' | 'cancelled' | 'completed';
+  status: 'scheduled' | 'cancelled' | 'completed' | 'no_show';
   notes: string | null;
 }
 
 export interface AppointmentFilter {
   employee_id?: string | null;
   service_type?: string | null;
-  status?: 'scheduled' | 'cancelled' | 'completed' | 'all';
+  status?: 'scheduled' | 'cancelled' | 'completed' | 'no_show' | 'all';
   search?: string;
   date_from?: Date;
   date_to?: Date;
+  attendance_status?: 'pending' | 'arrived' | 'no_show' | 'cancelled' | 'all';
+  payment_required?: boolean;
 }
 
 // Helper function to format dates for Supabase
@@ -64,6 +82,14 @@ export const getAppointments = async (filter: AppointmentFilter = {}): Promise<A
   
   if (filter.status && filter.status !== 'all') {
     query = query.eq('status', filter.status);
+  }
+  
+  if (filter.attendance_status && filter.attendance_status !== 'all') {
+    query = query.eq('attendance_status', filter.attendance_status);
+  }
+  
+  if (filter.payment_required !== undefined) {
+    query = query.eq('payment_required', filter.payment_required);
   }
   
   if (filter.date_from) {
@@ -201,6 +227,58 @@ export const updateAppointmentStatus = async (id: string, status: Appointment['s
   return data;
 };
 
+// Update appointment attendance status
+export const updateAttendanceStatus = async (
+  id: string, 
+  attendanceStatus: Appointment['attendance_status'], 
+  userId?: string
+): Promise<Appointment> => {
+  const updates: any = { 
+    attendance_status: attendanceStatus, 
+    attendance_confirmed_at: new Date().toISOString() 
+  };
+  
+  if (userId) {
+    updates.attendance_confirmed_by = userId;
+  }
+  
+  // If marked as no_show, also update the main status
+  if (attendanceStatus === 'no_show') {
+    updates.status = 'no_show';
+  }
+  
+  const { data, error } = await supabase
+    .from('appointments')
+    .update(updates)
+    .eq('id', id)
+    .select()
+    .single();
+  
+  if (error) {
+    console.error('Error updating attendance status:', error);
+    throw new Error(error.message);
+  }
+  
+  return data;
+};
+
+// Mark payment required for late cancellation
+export const markPaymentRequired = async (id: string, required: boolean): Promise<Appointment> => {
+  const { data, error } = await supabase
+    .from('appointments')
+    .update({ payment_required: required })
+    .eq('id', id)
+    .select()
+    .single();
+  
+  if (error) {
+    console.error('Error updating payment required status:', error);
+    throw new Error(error.message);
+  }
+  
+  return data;
+};
+
 // Delete an appointment
 export const deleteAppointment = async (id: string): Promise<void> => {
   const { error } = await supabase
@@ -250,6 +328,98 @@ export const calculateDuration = (startTime: string, endTime: string): number =>
   return endTotalMinutes - startTotalMinutes;
 };
 
+// Waiting list operations
+export interface WaitingListEntry {
+  id: string;
+  customer_id: string;
+  service_type: string;
+  preferred_date: string | null;
+  preferred_time_range: string | null;
+  notes: string | null;
+  status: 'waiting' | 'notified' | 'booked' | 'expired';
+  created_at: string;
+  updated_at: string;
+  customer?: Customer;
+}
+
+// Add customer to waiting list
+export const addToWaitingList = async (entry: Omit<WaitingListEntry, 'id' | 'created_at' | 'updated_at'>): Promise<WaitingListEntry> => {
+  const { data, error } = await supabase
+    .from('appointment_waiting_list')
+    .insert(entry)
+    .select()
+    .single();
+  
+  if (error) {
+    console.error('Error adding to waiting list:', error);
+    throw new Error(error.message);
+  }
+  
+  return data;
+};
+
+// Get waiting list entries with optional filters
+export const getWaitingList = async (serviceType?: string): Promise<WaitingListEntry[]> => {
+  let query = supabase
+    .from('appointment_waiting_list')
+    .select(`
+      *,
+      customers:customer_id (id, full_name, email, phone_number)
+    `)
+    .order('created_at', { ascending: true });
+  
+  if (serviceType) {
+    query = query.eq('service_type', serviceType);
+  }
+  
+  const { data, error } = await query;
+  
+  if (error) {
+    console.error('Error fetching waiting list:', error);
+    throw new Error(error.message);
+  }
+  
+  const waitingList = data?.map(entry => ({
+    ...entry,
+    customer: entry.customers
+  })) || [];
+  
+  return waitingList;
+};
+
+// Update waiting list entry status
+export const updateWaitingListEntryStatus = async (id: string, status: WaitingListEntry['status']): Promise<WaitingListEntry> => {
+  const { data, error } = await supabase
+    .from('appointment_waiting_list')
+    .update({ 
+      status,
+      updated_at: new Date().toISOString()
+    })
+    .eq('id', id)
+    .select()
+    .single();
+  
+  if (error) {
+    console.error('Error updating waiting list entry:', error);
+    throw new Error(error.message);
+  }
+  
+  return data;
+};
+
+// Remove from waiting list
+export const removeFromWaitingList = async (id: string): Promise<void> => {
+  const { error } = await supabase
+    .from('appointment_waiting_list')
+    .delete()
+    .eq('id', id);
+  
+  if (error) {
+    console.error('Error removing from waiting list:', error);
+    throw new Error(error.message);
+  }
+};
+
 // Import functions from calendarService to re-export them
 import { syncAppointmentWithCalendar, downloadIcsFile } from './calendarService';
 
@@ -277,10 +447,10 @@ export const generateMockAppointments = async (): Promise<void> => {
     'בניית ציפורניים',
     'פדיקור',
     'לק ג׳ל',
-    'טיפול ��נים'
+    'טיפול פנים'
   ];
   
-  const statuses: Array<Appointment['status']> = ['scheduled', 'cancelled', 'completed'];
+  const statuses: Array<Appointment['status']> = ['scheduled', 'cancelled', 'completed', 'no_show'];
   const employees = await getEmployees();
   
   // Generate 30 random appointments
@@ -307,6 +477,10 @@ export const generateMockAppointments = async (): Promise<void> => {
     const endMinute = (startMinute + duration) % 60;
     const endTime = `${endHour.toString().padStart(2, '0')}:${endMinute.toString().padStart(2, '0')}`;
     
+    const status = statuses[Math.floor(Math.random() * statuses.length)];
+    const isCancelled = status === 'cancelled';
+    const isNoShow = status === 'no_show';
+    
     mockAppointments.push({
       customer_id: customers[Math.floor(Math.random() * customers.length)].id,
       employee_id: Math.random() < 0.8 ? employees[Math.floor(Math.random() * employees.length)].id : null,
@@ -314,8 +488,16 @@ export const generateMockAppointments = async (): Promise<void> => {
       date: format(appointmentDate, 'yyyy-MM-dd'),
       start_time: startTime,
       end_time: endTime,
-      status: statuses[Math.floor(Math.random() * statuses.length)],
-      notes: Math.random() < 0.3 ? 'הערות לגבי הפגישה' : null
+      status,
+      notes: Math.random() < 0.3 ? 'הערות לגבי הפגישה' : null,
+      reminder_24h_sent: Math.random() < 0.5,
+      reminder_3h_sent: Math.random() < 0.3,
+      cancel_reason: isCancelled ? (Math.random() < 0.5 ? 'התנגשות בלוח הזמנים' : 'לא מרגישה טוב') : null,
+      cancelled_at: isCancelled ? new Date().toISOString() : null,
+      late_cancellation: isCancelled && Math.random() < 0.3,
+      payment_required: isCancelled && Math.random() < 0.2,
+      attendance_status: isCancelled ? 'cancelled' : (isNoShow ? 'no_show' : (status === 'completed' ? 'arrived' : 'pending')),
+      attendance_confirmed_at: (status === 'completed' || isNoShow) ? new Date().toISOString() : null,
     });
   }
   

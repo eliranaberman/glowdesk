@@ -1,8 +1,30 @@
 
 project_id = "njjxqxluxtyechxgtwsq"
 
-[functions.whatsapp-notification]
-verify_jwt = true
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "storage", "graphql_public"]
 
+[db]
+port = 54322
+
+[studio]
+port = 54323
+
+[inbucket]
+port = 54324
+
+[storage]
+port = 54325
+
+[functions]
+port = 54326
+[functions.appointment-reminders]
+verify_jwt = false
+[functions.appointment-cancellation]
+verify_jwt = false
+[functions.whatsapp-notification]
+verify_jwt = false
 [functions.calendar-sync]
-verify_jwt = true
+verify_jwt = false
