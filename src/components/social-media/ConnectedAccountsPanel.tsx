@@ -53,6 +53,7 @@ const ConnectedAccountsPanel = ({ connectedAccounts, connectPlatform }: Connecte
     <>
       <Card>
         <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <CardTitle className="text-lg">פלטפורמות מחוברות</CardTitle>
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -60,12 +61,11 @@ const ConnectedAccountsPanel = ({ connectedAccounts, connectPlatform }: Connecte
                   <Info className="h-4 w-4" />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent side="left">
+              <TooltipContent side="right">
                 <p className="max-w-xs text-xs">חיבור זה הוא למטרות הדגמה בלבד. מספרי העוקבים מוצגים לצורך סימולציה.</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
-          <CardTitle className="text-lg">פלטפורמות מחוברות</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
@@ -76,6 +76,14 @@ const ConnectedAccountsPanel = ({ connectedAccounts, connectPlatform }: Connecte
                   index < socialAccounts.length - 1 ? 'border-b pb-2' : ''
                 }`}
               >
+                <Button 
+                  variant={account.connected ? "soft" : "outline"} 
+                  className="gap-2"
+                  onClick={() => setIsModalOpen(true)}
+                >
+                  {account.connected ? "מחובר" : "חבר חשבון"}
+                  {account.icon}
+                </Button>
                 <div className="flex flex-col text-right">
                   <div className="flex items-center gap-1.5">
                     {account.icon}
@@ -87,14 +95,6 @@ const ConnectedAccountsPanel = ({ connectedAccounts, connectPlatform }: Connecte
                       : "לא מחובר"}
                   </span>
                 </div>
-                <Button 
-                  variant={account.connected ? "soft" : "outline"} 
-                  className="gap-2"
-                  onClick={() => setIsModalOpen(true)}
-                >
-                  {account.connected ? "מחובר" : "חבר חשבון"}
-                  {account.icon}
-                </Button>
               </div>
             ))}
           </div>

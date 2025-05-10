@@ -31,18 +31,18 @@ const DashboardContent = ({
   
   return (
     <div className="space-y-4">
-      {/* Stats Grid - Reversed order for RTL */}
+      {/* Stats Grid - For RTL reading flow (right to left) */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <Card className="shadow-sm hover:shadow-md transition-all duration-300">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
-              <div className="p-2 sm:p-3 bg-primary/10 rounded-full">
-                <Zap className="w-4 h-4 sm:w-6 sm:h-6 text-primary" />
-              </div>
               <div className="flex flex-col items-end">
                 <span className="text-[11px] sm:text-sm text-muted-foreground">פלטפורמות מחוברות</span>
                 <span className="text-lg sm:text-2xl font-bold">{connectedCount}/4</span>
               </div>
+              <div className="p-2 sm:p-3 bg-primary/10 rounded-full">
+                <Zap className="w-4 h-4 sm:w-6 sm:h-6 text-primary" />
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -50,13 +50,13 @@ const DashboardContent = ({
         <Card className="shadow-sm hover:shadow-md transition-all duration-300">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
-              <div className="p-2 sm:p-3 bg-secondary/10 rounded-full">
-                <MessageSquare className="w-4 h-4 sm:w-6 sm:h-6 text-secondary" />
-              </div>
               <div className="flex flex-col items-end">
                 <span className="text-[11px] sm:text-sm text-muted-foreground">הודעות לא נקראו</span>
                 <span className="text-lg sm:text-2xl font-bold">{messages.filter(m => !m.read).length}</span>
               </div>
+              <div className="p-2 sm:p-3 bg-secondary/10 rounded-full">
+                <MessageSquare className="w-4 h-4 sm:w-6 sm:h-6 text-secondary" />
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -64,13 +64,13 @@ const DashboardContent = ({
         <Card className="shadow-sm hover:shadow-md transition-all duration-300">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
-              <div className="p-2 sm:p-3 bg-roseGold/20 rounded-full">
-                <Users className="w-4 h-4 sm:w-6 sm:h-6 text-roseGold" />
-              </div>
               <div className="flex flex-col items-end">
                 <span className="text-[11px] sm:text-sm text-muted-foreground">קמפיינים</span>
                 <span className="text-lg sm:text-2xl font-bold">{marketingStats?.total_campaigns || 0}</span>
               </div>
+              <div className="p-2 sm:p-3 bg-roseGold/20 rounded-full">
+                <Users className="w-4 h-4 sm:w-6 sm:h-6 text-roseGold" />
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -78,12 +78,12 @@ const DashboardContent = ({
         <Card className="shadow-sm hover:shadow-md transition-all duration-300">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
-              <div className="p-2 sm:p-3 bg-oliveGreen/10 rounded-full">
-                <BarChart3 className="w-4 h-4 sm:w-6 sm:h-6 text-oliveGreen" />
-              </div>
               <div className="flex flex-col items-end">
                 <span className="text-[11px] sm:text-sm text-muted-foreground">הודעות שנשלחו</span>
                 <span className="text-lg sm:text-2xl font-bold">{marketingStats?.total_messages || 0}</span>
+              </div>
+              <div className="p-2 sm:p-3 bg-oliveGreen/10 rounded-full">
+                <BarChart3 className="w-4 h-4 sm:w-6 sm:h-6 text-oliveGreen" />
               </div>
             </div>
           </CardContent>
@@ -104,10 +104,10 @@ const DashboardContent = ({
               <Card className="overflow-hidden">
                 <CardHeader className="pb-2">
                   <div className="flex justify-between items-center">
+                    <CardTitle className="text-sm sm:text-lg text-right w-full">הודעות אחרונות</CardTitle>
                     <Button variant="ghost" size="sm" className="text-xs" onClick={handleOpenInbox}>
                       לכל ההודעות
                     </Button>
-                    <CardTitle className="text-sm sm:text-lg text-center w-full">הודעות אחרונות</CardTitle>
                   </div>
                 </CardHeader>
                 <CardContent className="p-0">
@@ -120,10 +120,10 @@ const DashboardContent = ({
               <Card className="overflow-hidden">
                 <CardHeader className="pb-2">
                   <div className="flex justify-between items-center">
+                    <CardTitle className="text-sm sm:text-lg">סטטיסטיקות שיווק</CardTitle>
                     <Button variant="ghost" size="sm" className="text-xs" asChild>
                       <Link to="/marketing">לדשבורד שיווק</Link>
                     </Button>
-                    <CardTitle className="text-sm sm:text-lg">סטטיסטיקות שיווק</CardTitle>
                   </div>
                 </CardHeader>
                 <CardContent>
