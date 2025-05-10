@@ -60,7 +60,7 @@ const appointmentSchema = z.object({
   date: z.date({ required_error: 'נא לבחור תאריך' }),
   start_time: z.string().min(1, { message: 'נא להזין שעת התחלה' }),
   end_time: z.string().min(1, { message: 'נא להזין שעת סיום' }),
-  status: z.enum(['scheduled', 'cancelled', 'completed'], {
+  status: z.enum(['scheduled', 'cancelled', 'completed', 'no_show'], {
     required_error: 'נא לבחור סטטוס',
   }),
   notes: z.string().nullable(),

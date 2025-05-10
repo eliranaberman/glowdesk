@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -10,9 +9,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertTriangle, CheckCircle, Clock, XCircle } from 'lucide-react';
 import { toast } from 'sonner';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/lib/supabase';
 import { useIsMobile } from '@/hooks/use-mobile';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
+import { CancellationToken } from '@/types/cancellation';
 
 interface AppointmentDetails {
   id: string;
@@ -57,64 +57,52 @@ const CancelAppointmentPage = () => {
     
     const fetchAppointmentDetails = async () => {
       try {
-        // Validate token and get appointment ID
-        const { data: tokenData, error: tokenError } = await supabase
-          .from('cancellation_tokens')
-          .select('appointment_id, expires_at, used')
-          .eq('token', token)
-          .single();
+        // Use the edge function to validate the token and get appointment details
+        // This avoids the need to directly query tables that might not be in the type system yet
+        const { data, error } = await supabase.functions.invoke('appointment-cancellation', {
+          body: { 
+            token,
+            action: 'validate'
+          }
+        });
         
-        if (tokenError || !tokenData) {
-          setError('קישור ביטול לא תקין או פג תוקף');
+        if (error || !data || data.error) {
+          setError(data?.message || 'קישור ביטול לא תקין או פג תוקף');
           setLoading(false);
           return;
         }
         
-        // Check if token is expired
-        if (new Date(tokenData.expires_at) < new Date()) {
+        if (data.isExpired) {
           setError('קישור הביטול פג תוקף');
           setLoading(false);
           return;
         }
         
-        // Check if token has already been used
-        if (tokenData.used) {
+        if (data.isUsed) {
           setError('קישור הביטול כבר נוצל');
           setLoading(false);
           return;
         }
         
-        // Get appointment details
-        const appointmentId = tokenData.appointment_id;
-        const { data: appointmentData, error: appointmentError } = await supabase
-          .from('appointments')
-          .select(`
-            id, service_type, date, start_time, status,
-            customers:customer_id (full_name)
-          `)
-          .eq('id', appointmentId)
-          .single();
-        
-        if (appointmentError || !appointmentData) {
-          setError('לא ניתן למצוא את פרטי הפגישה');
-          setLoading(false);
-          return;
-        }
-        
-        // Check if appointment is already cancelled
-        if (appointmentData.status === 'cancelled') {
+        if (data.isCancelled) {
           setError('הפגישה כבר בוטלה');
           setLoading(false);
           return;
         }
         
-        // Check if this is a late cancellation
-        const appointmentDateTime = new Date(`${appointmentData.date}T${appointmentData.start_time}`);
-        const now = new Date();
-        const hoursDifference = (appointmentDateTime.getTime() - now.getTime()) / (1000 * 60 * 60);
-        setIsLateCancellation(hoursDifference < 6);
+        // Set appointment data from the response
+        setAppointment({
+          id: data.appointment.id,
+          service_type: data.appointment.service_type,
+          date: data.appointment.date,
+          start_time: data.appointment.start_time,
+          status: data.appointment.status,
+          customer: {
+            full_name: data.appointment.customer_name
+          }
+        });
         
-        setAppointment(appointmentData as AppointmentDetails);
+        setIsLateCancellation(data.isLateCancellation);
         setLoading(false);
       } catch (err) {
         console.error('Error fetching appointment details:', err);
@@ -140,12 +128,16 @@ const CancelAppointmentPage = () => {
       
       // Call the cancellation function
       const { data, error } = await supabase.functions.invoke('appointment-cancellation', {
-        body: { token, reason: finalReason }
+        body: { 
+          token, 
+          reason: finalReason,
+          action: 'cancel'
+        }
       });
       
-      if (error) {
+      if (error || !data || data.error) {
         toast.error('התרחשה שגיאה בעת ביטול הפגישה');
-        console.error('Error cancelling appointment:', error);
+        console.error('Error cancelling appointment:', error || data?.error);
         setCancelling(false);
         return;
       }
@@ -215,7 +207,7 @@ const CancelAppointmentPage = () => {
                 <AlertTriangle className="h-4 w-4 text-yellow-600" />
                 <AlertTitle className="text-yellow-800">ביטול מאוחר</AlertTitle>
                 <AlertDescription className="text-yellow-700">
-                  שים/י לב, הפגישה בוטלה פחות מ-6 שעות לפני מועדה. במקרים מסוימים, עשוי להיות חיוב על ביטול מאוחר.
+                  שים/י לב, הפגישה בוטלה פחות מ-6 שעות לפני מועד הפגישה. במקרים מסוימים, עשוי להיות חיוב על ביטול מאוחר.
                 </AlertDescription>
               </Alert>
             )}
@@ -242,7 +234,7 @@ const CancelAppointmentPage = () => {
           <div className="space-y-1">
             <Label>תאריך ושעה</Label>
             <div className="p-2 bg-muted rounded-md">
-              {new Date(appointment?.date || '').toLocaleDateString('he-IL')} בשעה {appointment?.start_time}
+              {appointment && new Date(appointment.date).toLocaleDateString('he-IL')} בשעה {appointment?.start_time}
             </div>
           </div>
           

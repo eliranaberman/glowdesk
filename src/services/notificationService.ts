@@ -10,6 +10,15 @@ export interface NotificationResult {
   smsStatus: 'sent' | 'failed' | 'not_attempted';
 }
 
+export interface NotificationPreference {
+  id: string;
+  user_id: string;
+  whatsapp_enabled: boolean;
+  sms_fallback_enabled: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 /**
  * Send a notification for an appointment
  * @param appointmentId The ID of the appointment
@@ -73,6 +82,118 @@ export async function sendDirectMessage(
     return data;
   } catch (error) {
     console.error('Error in sendDirectMessage:', error);
+    throw error;
+  }
+}
+
+/**
+ * Get notification preferences for the current user
+ * @returns Notification preference settings
+ */
+export async function getUserNotificationPreferences(): Promise<NotificationPreference> {
+  try {
+    const { data: user } = await supabase.auth.getUser();
+    
+    if (!user.user) {
+      throw new Error('User not authenticated');
+    }
+    
+    const { data, error } = await supabase
+      .from('notification_preferences')
+      .select('*')
+      .eq('user_id', user.user.id)
+      .maybeSingle();
+    
+    if (error) {
+      console.error('Error fetching notification preferences:', error);
+      throw error;
+    }
+    
+    // Return default preferences if none exist
+    if (!data) {
+      return {
+        id: '',
+        user_id: user.user.id,
+        whatsapp_enabled: true,
+        sms_fallback_enabled: true,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('Error in getUserNotificationPreferences:', error);
+    throw error;
+  }
+}
+
+/**
+ * Update notification preferences for the current user
+ * @param preferences The preference settings to update
+ * @returns The updated notification preferences
+ */
+export async function upsertNotificationPreferences(
+  preferences: Partial<Pick<NotificationPreference, 'whatsapp_enabled' | 'sms_fallback_enabled'>>
+): Promise<NotificationPreference> {
+  try {
+    const { data: user } = await supabase.auth.getUser();
+    
+    if (!user.user) {
+      throw new Error('User not authenticated');
+    }
+    
+    // Check if preferences exist for this user
+    const { data: existingData } = await supabase
+      .from('notification_preferences')
+      .select('id')
+      .eq('user_id', user.user.id)
+      .maybeSingle();
+    
+    let result;
+    
+    if (existingData) {
+      // Update existing preferences
+      const { data, error } = await supabase
+        .from('notification_preferences')
+        .update({
+          ...preferences,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', existingData.id)
+        .select()
+        .single();
+      
+      if (error) {
+        console.error('Error updating notification preferences:', error);
+        throw error;
+      }
+      
+      result = data;
+    } else {
+      // Insert new preferences
+      const { data, error } = await supabase
+        .from('notification_preferences')
+        .insert({
+          user_id: user.user.id,
+          ...preferences,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+        .select()
+        .single();
+      
+      if (error) {
+        console.error('Error inserting notification preferences:', error);
+        throw error;
+      }
+      
+      result = data;
+    }
+    
+    return result;
+  } catch (error) {
+    console.error('Error in upsertNotificationPreferences:', error);
     throw error;
   }
 }
