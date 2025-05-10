@@ -1,20 +1,18 @@
+
 import { useState, useEffect } from 'react';
-import { DollarSign, Upload, FileText, FileImage, Trash2, Filter, Calendar } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { DollarSign, Upload, FileText, Filter, Calendar, Trash2 } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Separator } from '@/components/ui/separator';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Badge } from '@/components/ui/badge'; // Added Badge import
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Badge } from '@/components/ui/badge';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { format } from 'date-fns';
-import { he } from 'date-fns/locale';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -33,17 +31,15 @@ import { usePermissions } from '@/hooks/use-permissions';
 import { useAuth } from '@/contexts/AuthContext';
 import PermissionGuard from '@/components/auth/PermissionGuard';
 import {
-  getExpenses,
-  getExpensesByDateRange,
-  getExpensesByCategory,
-  addExpense,
-  updateExpense,
-  deleteExpense,
-  uploadInvoice,
-  getExpenseCategories,
-  getExpenseSummaryByMonth,
-  type Expense
-} from '@/services/expensesService';
+  getRevenues,
+  getRevenuesByDateRange,
+  getRevenuesBySource,
+  addRevenue,
+  updateRevenue,
+  deleteRevenue,
+  type Revenue,
+  type RevenueCreate
+} from '@/services/revenueService';
 
 // Define form schema
 const formSchema = z.object({
@@ -51,27 +47,26 @@ const formSchema = z.object({
     required_error: "יש לבחור תאריך",
   }),
   amount: z.string().min(1, { message: "יש להזין סכום" }),
-  category: z.string().min(1, { message: "יש לבחור קטגוריה" }),
+  source: z.string().min(1, { message: "יש לבחור מקור הכנסה" }),
   description: z.string().optional(),
-  vendor: z.string().min(1, { message: "יש להזין שם ספק" }),
   payment_method: z.string().optional(),
+  customer_id: z.string().optional(),
+  service_id: z.string().optional(),
 });
 
-const Expenses = () => {
+const Revenues = () => {
   const { toast } = useToast();
   const { user } = useAuth();
   const { canWrite, canDelete } = usePermissions();
-  const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [revenues, setRevenues] = useState<Revenue[]>([]);
   const [openAddDialog, setOpenAddDialog] = useState(false);
-  const [openUploadDialog, setOpenUploadDialog] = useState(false);
   const [openFilterDialog, setOpenFilterDialog] = useState(false);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(true);
-  const [canModifyExpenses, setCanModifyExpenses] = useState(false);
-  const [expenseCategories, setExpenseCategories] = useState<string[]>([
-    "חומרים", "ציוד", "שכירות", "שיווק", "משכורות", "הכשרה", "אחר"
+  const [canModifyRevenues, setCanModifyRevenues] = useState(false);
+  const [revenueSources, setRevenueSources] = useState<string[]>([
+    "שירותים", "מוצרים", "מנויים", "שוברי מתנה", "אחר"
   ]);
-  const [filterCategory, setFilterCategory] = useState<string>('');
+  const [filterSource, setFilterSource] = useState<string>('');
   const [filterDateRange, setFilterDateRange] = useState<{
     from: Date | undefined;
     to: Date | undefined;
@@ -84,6 +79,7 @@ const Expenses = () => {
     resolver: zodResolver(formSchema),
     defaultValues: {
       description: "",
+      payment_method: "",
     },
   });
 
@@ -91,16 +87,11 @@ const Expenses = () => {
     const loadData = async () => {
       setLoading(true);
       
-      // Load expenses
-      const fetchedExpenses = await getExpenses();
-      setExpenses(fetchedExpenses);
+      // Load revenues
+      const fetchedRevenues = await getRevenues();
+      setRevenues(fetchedRevenues);
       
-      // Load expense categories
-      const categories = await getExpenseCategories();
-      if (categories.length > 0) {
-        setExpenseCategories(categories);
-      }
-      
+      // In a complete implementation, we would also load revenue sources from backend
       setLoading(false);
     };
     
@@ -110,8 +101,8 @@ const Expenses = () => {
   useEffect(() => {
     const checkPermissions = async () => {
       if (user?.id) {
-        const hasWritePermission = await canWrite('expenses');
-        setCanModifyExpenses(hasWritePermission);
+        const hasWritePermission = await canWrite('finances');
+        setCanModifyRevenues(hasWritePermission);
       }
     };
 
@@ -123,121 +114,113 @@ const Expenses = () => {
     const applyFilters = async () => {
       setLoading(true);
       
-      let filteredExpenses: Expense[] = [];
+      let filteredRevenues: Revenue[] = [];
       
       // Apply date range filter
       if (filterDateRange.from && filterDateRange.to) {
         const fromStr = format(filterDateRange.from, 'yyyy-MM-dd');
         const toStr = format(filterDateRange.to, 'yyyy-MM-dd');
-        filteredExpenses = await getExpensesByDateRange(fromStr, toStr);
+        filteredRevenues = await getRevenuesByDateRange(fromStr, toStr);
       }
       
-      // Apply category filter (if both filters active, category filter applies on date-filtered results)
-      if (filterCategory) {
-        if (filteredExpenses.length > 0) {
-          filteredExpenses = filteredExpenses.filter(e => e.category === filterCategory);
+      // Apply source filter
+      if (filterSource) {
+        if (filteredRevenues.length > 0) {
+          filteredRevenues = filteredRevenues.filter(r => r.source === filterSource);
         } else {
-          filteredExpenses = await getExpensesByCategory(filterCategory);
+          filteredRevenues = await getRevenuesBySource(filterSource);
         }
       }
       
-      // If no filters active, get all expenses
-      if (!filterCategory && !filterDateRange.from && !filterDateRange.to) {
-        filteredExpenses = await getExpenses();
+      // If no filters active, get all revenues
+      if (!filterSource && !filterDateRange.from && !filterDateRange.to) {
+        filteredRevenues = await getRevenues();
       }
       
-      setExpenses(filteredExpenses);
+      setRevenues(filteredRevenues);
       setLoading(false);
     };
     
     applyFilters();
-  }, [filterCategory, filterDateRange]);
+  }, [filterSource, filterDateRange]);
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    const newExpense = {
-      amount: parseFloat(values.amount),
-      category: values.category,
-      vendor: values.vendor,
-      description: values.description || "",
-      date: format(values.date, 'yyyy-MM-dd'),
-      payment_method: values.payment_method
-    };
-    
-    const addedExpense = await addExpense(newExpense);
-    
-    if (addedExpense) {
-      setExpenses([addedExpense, ...expenses]);
-      
-      // Upload invoice if selected
-      if (selectedFile && addedExpense.id) {
-        await uploadInvoice(selectedFile, addedExpense.id);
-      }
-      
-      form.reset();
-      setSelectedFile(null);
-      setOpenAddDialog(false);
-    }
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0] || null;
-    setSelectedFile(file);
-    
-    if (file) {
+    if (!user?.id) {
       toast({
-        title: "קובץ נבחר",
-        description: `${file.name} נבחר בהצלחה`,
-      });
-    }
-  };
-
-  const handleDeleteExpense = async (id: string) => {
-    const canUserDelete = await canDelete('expenses');
-    if (!canUserDelete) {
-      toast({
-        title: "אין הרשאות",
-        description: "אין לך הרשאה למחוק הוצאות",
+        title: "שגיאה",
+        description: "המשתמש אינו מחובר",
         variant: "destructive",
       });
       return;
     }
     
-    const success = await deleteExpense(id);
+    const newRevenue: RevenueCreate = {
+      amount: parseFloat(values.amount),
+      source: values.source,
+      description: values.description || "",
+      date: format(values.date, 'yyyy-MM-dd'),
+      payment_method: values.payment_method,
+      created_by: user.id,
+      customer_id: values.customer_id,
+      service_id: values.service_id,
+    };
+    
+    const addedRevenue = await addRevenue(newRevenue);
+    
+    if (addedRevenue) {
+      setRevenues([addedRevenue, ...revenues]);
+      form.reset();
+      setOpenAddDialog(false);
+    }
+  };
+
+  const handleDeleteRevenue = async (id: string) => {
+    const canUserDelete = await canDelete('finances');
+    if (!canUserDelete) {
+      toast({
+        title: "אין הרשאות",
+        description: "אין לך הרשאה למחוק הכנסות",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    const success = await deleteRevenue(id);
     if (success) {
-      setExpenses(expenses.filter(expense => expense.id !== id));
+      setRevenues(revenues.filter(revenue => revenue.id !== id));
     }
   };
 
   const clearFilters = () => {
-    setFilterCategory('');
+    setFilterSource('');
     setFilterDateRange({
       from: undefined,
       to: undefined,
     });
   };
 
-  // Calculate total expenses
-  const totalExpenses = expenses.reduce((total, expense) => total + expense.amount, 0);
+  // Calculate total revenues
+  const totalRevenues = revenues.reduce((total, revenue) => total + revenue.amount, 0);
 
   return (
     <PermissionGuard requiredResource="finances" requiredPermission="read" redirectTo="/dashboard">
       <div className="space-y-6">
         <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-bold">ניהול הוצאות</h1>
+          <h1 className="text-2xl font-bold">ניהול הכנסות</h1>
           <div className="flex gap-2">
-            {canModifyExpenses && (
+            {canModifyRevenues && (
               <Dialog open={openAddDialog} onOpenChange={setOpenAddDialog}>
                 <DialogTrigger asChild>
                   <Button className="gap-2">
                     <DollarSign className="h-4 w-4" />
-                    הוסף הוצאה
+                    הוסף הכנסה
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-[500px]">
                   <DialogHeader>
-                    <DialogTitle className="text-right">הוספת הוצאה חדשה</DialogTitle>
+                    <DialogTitle className="text-right">הוספת הכנסה חדשה</DialogTitle>
                     <DialogDescription className="text-right">
-                      הזן את פרטי ההוצאה החדשה להוספה למערכת
+                      הזן את פרטי ההכנסה החדשה להוספה למערכת
                     </DialogDescription>
                   </DialogHeader>
                   <Form {...form}>
@@ -256,7 +239,7 @@ const Expenses = () => {
                                       variant="outline"
                                       className={`w-full text-right justify-between ${!field.value && "text-muted-foreground"}`}
                                     >
-                                      {field.value ? format(field.value, "P", { locale: he }) : "בחר תאריך"}
+                                      {field.value ? format(field.value, "P") : "בחר תאריך"}
                                       <Calendar className="ml-auto h-4 w-4" />
                                     </Button>
                                   </FormControl>
@@ -291,33 +274,20 @@ const Expenses = () => {
                       </div>
                       <FormField
                         control={form.control}
-                        name="vendor"
+                        name="source"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="text-right">שם ספק</FormLabel>
-                            <FormControl>
-                              <Input placeholder="הזן שם ספק" {...field} className="text-right" />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="category"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="text-right">קטגוריה</FormLabel>
+                            <FormLabel className="text-right">מקור הכנסה</FormLabel>
                             <Select onValueChange={field.onChange} defaultValue={field.value}>
                               <FormControl>
                                 <SelectTrigger>
-                                  <SelectValue placeholder="בחר קטגוריה" />
+                                  <SelectValue placeholder="בחר מקור הכנסה" />
                                 </SelectTrigger>
                               </FormControl>
                               <SelectContent>
-                                {expenseCategories.map(category => (
-                                  <SelectItem key={category} value={category}>
-                                    {category}
+                                {revenueSources.map(source => (
+                                  <SelectItem key={source} value={source}>
+                                    {source}
                                   </SelectItem>
                                 ))}
                               </SelectContent>
@@ -357,31 +327,14 @@ const Expenses = () => {
                           <FormItem>
                             <FormLabel className="text-right">תיאור (אופציונלי)</FormLabel>
                             <FormControl>
-                              <Textarea placeholder="הזן תיאור להוצאה" {...field} className="text-right" />
+                              <Textarea placeholder="הזן תיאור להכנסה" {...field} className="text-right" />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
                         )}
                       />
-                      <div>
-                        <Label htmlFor="invoice-upload" className="text-right block mb-2">חשבונית (אופציונלי)</Label>
-                        <div className="flex items-center gap-2">
-                          <Input
-                            id="invoice-upload"
-                            type="file"
-                            accept=".pdf,.jpg,.jpeg,.png"
-                            onChange={handleFileChange}
-                            className="text-right"
-                          />
-                        </div>
-                        {selectedFile && (
-                          <p className="text-sm text-muted-foreground mt-1 text-right">
-                            נבחר: {selectedFile.name}
-                          </p>
-                        )}
-                      </div>
                       <DialogFooter>
-                        <Button type="submit" className="w-full">שמור הוצאה</Button>
+                        <Button type="submit" className="w-full">שמור הכנסה</Button>
                       </DialogFooter>
                     </form>
                   </Form>
@@ -393,30 +346,30 @@ const Expenses = () => {
               <DialogTrigger asChild>
                 <Button variant="outline" className="gap-2">
                   <Filter className="h-4 w-4" />
-                  סנן הוצאות
+                  סנן הכנסות
                 </Button>
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle className="text-right">סינון הוצאות</DialogTitle>
+                  <DialogTitle className="text-right">סינון הכנסות</DialogTitle>
                   <DialogDescription className="text-right">
-                    סנן את רשימת ההוצאות לפי תאריך או קטגוריה
+                    סנן את רשימת ההכנסות לפי תאריך או מקור
                   </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4 py-4">
                   <div className="space-y-2">
-                    <Label className="text-right block">קטגוריה</Label>
+                    <Label className="text-right block">מקור הכנסה</Label>
                     <Select
-                      value={filterCategory}
-                      onValueChange={setFilterCategory}
+                      value={filterSource}
+                      onValueChange={setFilterSource}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="בחר קטגוריה" />
+                        <SelectValue placeholder="בחר מקור הכנסה" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">כל הקטגוריות</SelectItem>
-                        {expenseCategories.map(category => (
-                          <SelectItem key={category} value={category}>{category}</SelectItem>
+                        <SelectItem value="">כל המקורות</SelectItem>
+                        {revenueSources.map(source => (
+                          <SelectItem key={source} value={source}>{source}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
@@ -495,29 +448,29 @@ const Expenses = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-lg text-right">סה"כ הוצאות</CardTitle>
-              <CardDescription className="text-right">סה"כ ההוצאות המוצגות</CardDescription>
+              <CardTitle className="text-lg text-right">סה"כ הכנסות</CardTitle>
+              <CardDescription className="text-right">סה"כ ההכנסות המוצגות</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-right">₪{totalExpenses.toFixed(2)}</div>
+              <div className="text-2xl font-bold text-right">₪{totalRevenues.toFixed(2)}</div>
             </CardContent>
           </Card>
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-lg text-right">קטגוריה מובילה</CardTitle>
-              <CardDescription className="text-right">קטגוריית ההוצאה הגבוהה ביותר</CardDescription>
+              <CardTitle className="text-lg text-right">מקור מוביל</CardTitle>
+              <CardDescription className="text-right">מקור ההכנסה הגבוה ביותר</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-right">
-                {expenses.length > 0 
-                  ? [...new Set(expenses.map(e => e.category))]
-                    .map(cat => ({
-                      category: cat,
-                      total: expenses
-                        .filter(e => e.category === cat)
+                {revenues.length > 0 
+                  ? [...new Set(revenues.map(e => e.source))]
+                    .map(src => ({
+                      source: src,
+                      total: revenues
+                        .filter(e => e.source === src)
                         .reduce((sum, e) => sum + e.amount, 0)
                     }))
-                    .sort((a, b) => b.total - a.total)[0]?.category || "—"
+                    .sort((a, b) => b.total - a.total)[0]?.source || "—"
                   : "—"
                 }
               </div>
@@ -525,12 +478,27 @@ const Expenses = () => {
           </Card>
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-lg text-right">חשבוניות</CardTitle>
-              <CardDescription className="text-right">מספר ההוצאות עם חשבוניות</CardDescription>
+              <CardTitle className="text-lg text-right">ממוצע חודשי</CardTitle>
+              <CardDescription className="text-right">הכנסה ממוצעת לחודש</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-right">
-                {expenses.filter(e => e.has_invoice).length}
+                {revenues.length > 0 
+                  ? (() => {
+                      // Group by month and calculate average
+                      const byMonth = revenues.reduce((acc, rev) => {
+                        const month = rev.date.substring(0, 7); // Get YYYY-MM
+                        if (!acc[month]) acc[month] = 0;
+                        acc[month] += rev.amount;
+                        return acc;
+                      }, {} as Record<string, number>);
+                      
+                      const monthsCount = Object.keys(byMonth).length;
+                      const total = Object.values(byMonth).reduce((sum, val) => sum + val, 0);
+                      return monthsCount ? `₪${(total / monthsCount).toFixed(2)}` : "₪0.00";
+                    })()
+                  : "₪0.00"
+                }
               </div>
             </CardContent>
           </Card>
@@ -538,13 +506,13 @@ const Expenses = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-right">רשימת הוצאות</CardTitle>
-            {(filterCategory || (filterDateRange.from && filterDateRange.to)) && (
+            <CardTitle className="text-right">רשימת הכנסות</CardTitle>
+            {(filterSource || (filterDateRange.from && filterDateRange.to)) && (
               <div className="flex items-center gap-2 justify-end">
                 <span className="text-sm text-muted-foreground">מסונן לפי:</span>
-                {filterCategory && (
+                {filterSource && (
                   <Badge variant="secondary" className="text-xs">
-                    {filterCategory}
+                    {filterSource}
                   </Badge>
                 )}
                 {filterDateRange.from && filterDateRange.to && (
@@ -569,52 +537,33 @@ const Expenses = () => {
                 <TableHeader>
                   <TableRow>
                     <TableHead className="text-right">תאריך</TableHead>
-                    <TableHead className="text-right">ספק</TableHead>
-                    <TableHead className="text-right">קטגוריה</TableHead>
+                    <TableHead className="text-right">מקור</TableHead>
                     <TableHead className="text-right">תיאור</TableHead>
+                    <TableHead className="text-right">אמצעי תשלום</TableHead>
                     <TableHead className="text-right">סכום</TableHead>
-                    <TableHead className="text-right">חשבונית</TableHead>
-                    {canModifyExpenses && (
+                    {canModifyRevenues && (
                       <TableHead className="text-right">פעולות</TableHead>
                     )}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {expenses.length === 0 ? (
+                  {revenues.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={canModifyExpenses ? 7 : 6} className="text-center py-8">
-                        לא נמצאו הוצאות התואמות את החיפוש
+                      <TableCell colSpan={canModifyRevenues ? 6 : 5} className="text-center py-8">
+                        לא נמצאו הכנסות התואמות את החיפוש
                       </TableCell>
                     </TableRow>
                   ) : (
-                    expenses.map((expense) => (
-                      <TableRow key={expense.id}>
+                    revenues.map((revenue) => (
+                      <TableRow key={revenue.id}>
                         <TableCell className="text-right">
-                          {format(new Date(expense.date), "dd/MM/yyyy")}
+                          {format(new Date(revenue.date), "dd/MM/yyyy")}
                         </TableCell>
-                        <TableCell className="text-right">{expense.vendor}</TableCell>
-                        <TableCell className="text-right">{expense.category}</TableCell>
-                        <TableCell className="text-right">{expense.description || "—"}</TableCell>
-                        <TableCell className="text-right font-medium">₪{expense.amount.toFixed(2)}</TableCell>
-                        <TableCell className="text-right">
-                          {expense.has_invoice ? (
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
-                              className="h-8 w-8 p-0"
-                              onClick={() => {
-                                if (expense.invoice_file_path) {
-                                  window.open(expense.invoice_file_path, '_blank');
-                                }
-                              }}
-                            >
-                              <FileText className="h-4 w-4" />
-                            </Button>
-                          ) : (
-                            <span className="text-muted-foreground">אין</span>
-                          )}
-                        </TableCell>
-                        {canModifyExpenses && (
+                        <TableCell className="text-right">{revenue.source}</TableCell>
+                        <TableCell className="text-right">{revenue.description || "—"}</TableCell>
+                        <TableCell className="text-right">{revenue.payment_method || "—"}</TableCell>
+                        <TableCell className="text-right font-medium">₪{revenue.amount.toFixed(2)}</TableCell>
+                        {canModifyRevenues && (
                           <TableCell className="text-right">
                             <AlertDialog>
                               <AlertDialogTrigger asChild>
@@ -626,12 +575,12 @@ const Expenses = () => {
                                 <AlertDialogHeader>
                                   <AlertDialogTitle>האם אתה בטוח?</AlertDialogTitle>
                                   <AlertDialogDescription>
-                                    פעולה זו לא ניתנת לביטול. ההוצאה תימחק לצמיתות מרשימת ההוצאות שלך.
+                                    פעולה זו לא ניתנת לביטול. ההכנסה תימחק לצמיתות מרשימת ההכנסות שלך.
                                   </AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
                                   <AlertDialogCancel>ביטול</AlertDialogCancel>
-                                  <AlertDialogAction onClick={() => handleDeleteExpense(expense.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                                  <AlertDialogAction onClick={() => handleDeleteRevenue(revenue.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
                                     מחק
                                   </AlertDialogAction>
                                 </AlertDialogFooter>
@@ -652,4 +601,4 @@ const Expenses = () => {
   );
 };
 
-export default Expenses;
+export default Revenues;

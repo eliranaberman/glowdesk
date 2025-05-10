@@ -9,8 +9,9 @@ interface PermissionGuardProps {
   children: ReactNode;
   requiredResource?: string;
   requiredPermission?: 'read' | 'write' | 'delete';
-  requiredRole?: 'admin' | 'owner' | 'employee' | 'social_manager';
+  requiredRole?: 'admin' | 'owner' | 'employee' | 'social_manager' | 'finance_manager';
   redirectTo?: string;
+  showLoadingState?: boolean;
 }
 
 const PermissionGuard = ({
@@ -19,6 +20,7 @@ const PermissionGuard = ({
   requiredPermission = 'read',
   requiredRole,
   redirectTo = '/',
+  showLoadingState = true,
 }: PermissionGuardProps) => {
   const { user } = useAuth();
   const { checkRole, checkPermission, isAdmin, isOwner } = usePermissions();
@@ -59,7 +61,7 @@ const PermissionGuard = ({
   }, [user, requiredResource, requiredPermission, requiredRole, checkPermission, checkRole, isAdmin, isOwner]);
 
   // Show loading state while checking permissions
-  if (hasAccess === null) {
+  if (hasAccess === null && showLoadingState) {
     return (
       <div className="flex justify-center items-center min-h-screen">
         <div className="animate-spin h-8 w-8 border-2 border-primary rounded-full border-t-transparent"></div>

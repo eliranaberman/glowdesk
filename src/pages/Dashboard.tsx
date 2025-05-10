@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, Suspense } from 'react';
 import { CalendarClock, Users, DollarSign, TrendingUp, Bot } from 'lucide-react';
 import StatCard from '../components/dashboard/StatCard';
@@ -7,6 +6,9 @@ import { Button } from '@/components/ui/button';
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from '@/hooks/use-mobile';
 import { initializeMarketingData } from '@/services/marketing';
+import { usePermissions } from '@/hooks/use-permissions';
+import PermissionGuard from '@/components/auth/PermissionGuard';
+import BusinessAnalytics from '@/components/dashboard/BusinessAnalytics';
 
 const DailySummary = React.lazy(() => import('../components/dashboard/DailySummary'));
 const RecentAppointments = React.lazy(() => import('../components/dashboard/RecentAppointments'));
@@ -30,6 +32,8 @@ const LoadingFallback = () => (
 const Dashboard = () => {
   const { toast } = useToast();
   const isMobile = useIsMobile();
+  const { isAdmin, isOwner } = usePermissions();
+  const hasFinanceAccess = isAdmin || isOwner;
   
   useEffect(() => {
     const initData = async () => {
@@ -114,6 +118,15 @@ const Dashboard = () => {
           />
         ))}
       </div>
+
+      {/* Business Analytics Section - Only visible to users with finance permissions */}
+      {hasFinanceAccess && (
+        <PermissionGuard requiredResource="finances" requiredPermission="read" showLoadingState={false}>
+          <div className="mb-8">
+            <BusinessAnalytics timeFrame="month" />
+          </div>
+        </PermissionGuard>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
         <div className="flex flex-col gap-6 order-first">
