@@ -3,10 +3,9 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { format } from 'date-fns';
 import { Award, Calendar, Clock, Mail, Phone, Plus, Tag, X } from 'lucide-react';
 import { Customer } from '@/services/customers';
-import { CustomerStatus, LoyaltyLevel, getLoyaltyText, getStatusText } from '@/services/customers/constants';
+import { CustomerStatus, LoyaltyLevel } from '@/services/customers/constants';
 
 interface CustomerContactInfoProps {
   customer: Customer;
@@ -14,6 +13,8 @@ interface CustomerContactInfoProps {
   openTagDialog: () => void;
   removeTag: (tag: string) => void;
   formatDate: (dateString: string | null) => string;
+  getLoyaltyText: (level: string) => string;
+  getStatusText: (status: string) => string;
 }
 
 const CustomerContactInfo = ({ 
@@ -21,7 +22,9 @@ const CustomerContactInfo = ({
   isAdmin, 
   openTagDialog, 
   removeTag, 
-  formatDate
+  formatDate,
+  getLoyaltyText,
+  getStatusText
 }: CustomerContactInfoProps) => {
   return (
     <Card>

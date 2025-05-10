@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
@@ -12,6 +11,7 @@ import {
   updateCustomer 
 } from '@/services/customers';
 import { customerSchema, CustomerFormValues } from '../schema/customerFormSchema';
+import { CustomerStatus, LoyaltyLevel } from '@/services/customers/constants';
 
 export const useCustomerForm = (customerId?: string) => {
   const navigate = useNavigate();
@@ -29,8 +29,8 @@ export const useCustomerForm = (customerId?: string) => {
       full_name: '',
       email: '',
       phone_number: '',
-      status: 'active',
-      loyalty_level: 'bronze',
+      status: CustomerStatus.ACTIVE,
+      loyalty_level: LoyaltyLevel.BRONZE,
       notes: '',
       registration_date: new Date(),
       last_appointment: null,
