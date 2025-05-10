@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Navigate, Outlet } from 'react-router-dom';
+import { Navigate, Outlet, RouteObject } from 'react-router-dom';
 import { AuthProvider } from '@/contexts/auth';
 import Layout from '@/components/layout/Layout';
 import ProtectedRouteWrapper from '@/components/auth/ProtectedRouteWrapper';
@@ -24,8 +24,11 @@ export const defaultProtectedRouteProps = {
   setRedirectPath: () => {},
 };
 
+// Define a type for the children prop to be more specific
+type ChildrenProp = React.ReactNode;
+
 // Create main application layout with protected routes
-export const createMainRoutes = (children: React.ReactNode) => ({
+export const createMainRoutes = (children: ChildrenProp): RouteObject => ({
   path: '/',
   element: <Layout>{children}</Layout>,
   children: [
@@ -50,7 +53,7 @@ export const createMainRoutes = (children: React.ReactNode) => ({
 });
 
 // Create catch-all route for 404s
-export const notFoundRoute = {
+export const notFoundRoute: RouteObject = {
   path: '*',
   element: <NotFound />,
 };

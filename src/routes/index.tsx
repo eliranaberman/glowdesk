@@ -13,7 +13,7 @@ import { financeRoutes } from './financeRoutes';
 import { publicRoutes } from './publicRoutes';
 
 // Combine all protected routes
-const createProtectedRoutes = () => {
+const createProtectedRoutes = (): RouteObject[] => {
   // Combine all the routes that need authentication
   return [
     ...customerRoutes,
@@ -33,19 +33,22 @@ if (mainRoutes.children) {
   // Find the protected routes container (the one with ProtectedRouteWrapper)
   const protectedRoutesContainer = mainRoutes.children.find(
     route => route.path === '/' && route.element
-  );
+  ) as RouteObject;
 
   // Add all protected routes to the container
   if (protectedRoutesContainer && protectedRoutesContainer.children) {
-    // Ensure all routes added here are properly typed with required path
-    protectedRoutesContainer.children.push(
-      ...createProtectedRoutes().filter(route => route.path !== undefined)
+    // Ensure all routes added here have a path property
+    const routesWithPath = createProtectedRoutes().filter(
+      (route): route is RouteObject & { path: string } => route.path !== undefined
     );
+    protectedRoutesContainer.children.push(...routesWithPath);
   }
 
   // Add public routes directly to the main layout
   // Filter out any routes without a path
-  const validPublicRoutes = publicRoutes.filter(route => route.path !== undefined);
+  const validPublicRoutes = publicRoutes.filter(
+    (route): route is RouteObject & { path: string } => route.path !== undefined
+  );
   mainRoutes.children.push(...validPublicRoutes);
 }
 
