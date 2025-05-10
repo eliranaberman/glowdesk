@@ -123,19 +123,14 @@ const Sidebar = ({
         icon: Calendar
       },
       {
-        href: '/social-media',
+        href: '#',
         label: 'מדיה חברתית ושיווק',
         icon: MessageSquare,
         subLinks: [
           {
-            href: '/social-media-meta',
-            label: 'חיבור Meta API',
-            icon: Facebook
-          },
-          {
-            href: '/portfolio',
-            label: 'גלריה',
-            icon: ImageIcon
+            href: '/social-media',
+            label: 'מדיה חברתית ושיווק',
+            icon: MessageSquare
           },
           {
             href: '/marketing/templates',
@@ -146,6 +141,16 @@ const Sidebar = ({
             href: '/loyalty',
             label: 'תוכנית נאמנות',
             icon: Award
+          },
+          {
+            href: '/portfolio',
+            label: 'גלריה',
+            icon: ImageIcon
+          },
+          {
+            href: '/social-media-meta',
+            label: 'חיבור Meta API',
+            icon: Facebook
           }
         ]
       },
