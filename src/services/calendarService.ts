@@ -1,4 +1,3 @@
-
 import { supabase } from '@/lib/supabase';
 
 export interface CalendarConnection {
@@ -156,7 +155,9 @@ export const connectToGoogle = async (): Promise<void> => {
       calendar_id: 'primary',
       access_token: 'mock-access-token',
       refresh_token: 'mock-refresh-token',
-      token_expiry: new Date(Date.now() + 3600 * 1000).toISOString()
+      token_expiry: new Date(Date.now() + 3600 * 1000).toISOString(),
+      last_sync_at: null,
+      is_active: true
     };
     
     await createCalendarConnection(mockConnection);
