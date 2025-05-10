@@ -1,4 +1,6 @@
 
+import { CustomerStatus, LoyaltyLevel } from './constants';
+
 // Customer-related type definitions
 
 export interface Customer {
@@ -7,8 +9,8 @@ export interface Customer {
   email: string;
   phone: string;
   phone_number?: string;
-  status: 'active' | 'inactive' | 'lead';
-  loyalty_level?: 'gold' | 'silver' | 'bronze' | 'none';
+  status: CustomerStatus;
+  loyalty_level?: LoyaltyLevel;
   tags?: string[];
   created_at: string;
   updated_at: string;
@@ -21,8 +23,8 @@ export interface CustomerFormData {
   full_name: string;
   email: string;
   phone_number: string;
-  status: 'active' | 'inactive' | 'lead';
-  loyalty_level: 'gold' | 'silver' | 'bronze' | 'none';
+  status: CustomerStatus;
+  loyalty_level: LoyaltyLevel;
   notes?: string;
   registration_date: Date;
   last_appointment?: Date | null;
@@ -37,8 +39,8 @@ export const mockCustomers: Customer[] = [
     email: 'sarah@example.com',
     phone: '050-1234567',
     phone_number: '050-1234567',
-    status: 'active',
-    loyalty_level: 'gold',
+    status: CustomerStatus.ACTIVE,
+    loyalty_level: LoyaltyLevel.GOLD,
     tags: ['vip', 'regular'],
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
@@ -52,8 +54,8 @@ export const mockCustomers: Customer[] = [
     email: 'emily@example.com',
     phone: '050-2345678',
     phone_number: '050-2345678',
-    status: 'active',
-    loyalty_level: 'silver',
+    status: CustomerStatus.ACTIVE,
+    loyalty_level: LoyaltyLevel.SILVER,
     tags: ['new'],
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
@@ -67,8 +69,8 @@ export const mockCustomers: Customer[] = [
     email: 'liat@example.com',
     phone: '050-3456789',
     phone_number: '050-3456789',
-    status: 'inactive',
-    loyalty_level: 'bronze',
+    status: CustomerStatus.INACTIVE,
+    loyalty_level: LoyaltyLevel.BRONZE,
     tags: [],
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
@@ -82,8 +84,8 @@ export const mockCustomers: Customer[] = [
     email: 'michal@example.com',
     phone: '050-4567890',
     phone_number: '050-4567890',
-    status: 'lead',
-    loyalty_level: 'none',
+    status: CustomerStatus.LEAD,
+    loyalty_level: LoyaltyLevel.NONE,
     tags: ['interested'],
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
@@ -96,8 +98,8 @@ export const mockCustomers: Customer[] = [
     email: 'rachel@example.com',
     phone: '050-5678901',
     phone_number: '050-5678901',
-    status: 'active',
-    loyalty_level: 'gold',
+    status: CustomerStatus.ACTIVE,
+    loyalty_level: LoyaltyLevel.GOLD,
     tags: ['vip'],
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),

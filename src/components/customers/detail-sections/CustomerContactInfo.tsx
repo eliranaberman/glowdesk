@@ -6,6 +6,7 @@ import { Separator } from '@/components/ui/separator';
 import { format } from 'date-fns';
 import { Award, Calendar, Clock, Mail, Phone, Plus, Tag, X } from 'lucide-react';
 import { Customer } from '@/services/customers';
+import { CustomerStatus, LoyaltyLevel, getLoyaltyText, getStatusText } from '@/services/customers/constants';
 
 interface CustomerContactInfoProps {
   customer: Customer;
@@ -13,8 +14,6 @@ interface CustomerContactInfoProps {
   openTagDialog: () => void;
   removeTag: (tag: string) => void;
   formatDate: (dateString: string | null) => string;
-  getLoyaltyText: (level: string) => string;
-  getStatusText: (status: string) => string;
 }
 
 const CustomerContactInfo = ({ 
@@ -22,9 +21,7 @@ const CustomerContactInfo = ({
   isAdmin, 
   openTagDialog, 
   removeTag, 
-  formatDate, 
-  getLoyaltyText, 
-  getStatusText 
+  formatDate
 }: CustomerContactInfoProps) => {
   return (
     <Card>
@@ -89,34 +86,34 @@ const CustomerContactInfo = ({
         <div className="flex items-center justify-between">
           <div className="flex items-center">
             <Award className="h-4 w-4 ml-2 text-muted-foreground" />
-            <span>רמת נאמנות: {getLoyaltyText(customer.loyalty_level)}</span>
+            <span>רמת נאמנות: {getLoyaltyText(customer.loyalty_level || '')}</span>
           </div>
           <Badge 
             variant={
-              customer.loyalty_level === 'gold' 
+              customer.loyalty_level === LoyaltyLevel.GOLD 
                 ? 'default' 
-                : customer.loyalty_level === 'silver' 
+                : customer.loyalty_level === LoyaltyLevel.SILVER 
                   ? 'secondary' 
                   : 'outline'
             }
             className={
-              customer.loyalty_level === 'gold' 
+              customer.loyalty_level === LoyaltyLevel.GOLD 
                 ? 'bg-amber-500' 
-                : customer.loyalty_level === 'silver' 
+                : customer.loyalty_level === LoyaltyLevel.SILVER 
                   ? 'bg-gray-300 text-primary' 
                   : 'border-amber-900/20 text-amber-900/70'
             }
           >
-            {getLoyaltyText(customer.loyalty_level)}
+            {getLoyaltyText(customer.loyalty_level || '')}
           </Badge>
         </div>
         
         <div className="flex items-center justify-between">
           <span>סטטוס:</span>
           <Badge variant={
-            customer.status === 'active' 
+            customer.status === CustomerStatus.ACTIVE 
               ? 'default' 
-              : customer.status === 'lead'
+              : customer.status === CustomerStatus.LEAD
                 ? 'warm'
                 : 'secondary'
           }>

@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/select';
 import { UseFormReturn } from 'react-hook-form';
 import { CustomerFormValues } from '../schema/customerFormSchema';
+import { CustomerStatus, LoyaltyLevel, getStatusText, getLoyaltyText } from '@/services/customers/constants';
 
 interface CustomerBasicInfoSectionProps {
   form: UseFormReturn<CustomerFormValues>;
@@ -80,9 +81,9 @@ const CustomerBasicInfoSection = ({ form }: CustomerBasicInfoSectionProps) => {
                 </SelectTrigger>
               </FormControl>
               <SelectContent>
-                <SelectItem value="active">פעיל</SelectItem>
-                <SelectItem value="inactive">לא פעיל</SelectItem>
-                <SelectItem value="lead">לקוח פוטנציאלי</SelectItem>
+                <SelectItem value={CustomerStatus.ACTIVE}>{getStatusText(CustomerStatus.ACTIVE)}</SelectItem>
+                <SelectItem value={CustomerStatus.INACTIVE}>{getStatusText(CustomerStatus.INACTIVE)}</SelectItem>
+                <SelectItem value={CustomerStatus.LEAD}>{getStatusText(CustomerStatus.LEAD)}</SelectItem>
               </SelectContent>
             </Select>
             <FormMessage />
@@ -107,10 +108,10 @@ const CustomerBasicInfoSection = ({ form }: CustomerBasicInfoSectionProps) => {
                 </SelectTrigger>
               </FormControl>
               <SelectContent>
-                <SelectItem value="bronze">ברונזה</SelectItem>
-                <SelectItem value="silver">כסף</SelectItem>
-                <SelectItem value="gold">זהב</SelectItem>
-                <SelectItem value="none">ללא</SelectItem>
+                <SelectItem value={LoyaltyLevel.BRONZE}>{getLoyaltyText(LoyaltyLevel.BRONZE)}</SelectItem>
+                <SelectItem value={LoyaltyLevel.SILVER}>{getLoyaltyText(LoyaltyLevel.SILVER)}</SelectItem>
+                <SelectItem value={LoyaltyLevel.GOLD}>{getLoyaltyText(LoyaltyLevel.GOLD)}</SelectItem>
+                <SelectItem value={LoyaltyLevel.NONE}>{getLoyaltyText(LoyaltyLevel.NONE)}</SelectItem>
               </SelectContent>
             </Select>
             <FormMessage />
