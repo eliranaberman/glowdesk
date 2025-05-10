@@ -8,19 +8,19 @@ import CancelAppointment from '../pages/cancel-appointment/[token]';
 
 export const schedulingRoutes: RouteObject[] = [
   {
-    path: '/scheduling',
+    path: 'scheduling',
     element: <Scheduling />,
   },
   {
-    path: '/calendar',
+    path: 'calendar',
     element: <AppointmentCalendar />,
   },
   {
-    path: '/scheduling/new',
+    path: 'scheduling/new',
     element: <NewAppointment />,
   },
   {
-    path: '/scheduling/:id',
+    path: 'scheduling/:id',
     element: <EditAppointment />,
   },
 ];

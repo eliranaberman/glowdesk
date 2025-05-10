@@ -47,6 +47,7 @@ export const createMainRoutes = (children: ChildrenProp): RouteObject => ({
           path: '/dashboard',
           element: <Dashboard />,
         },
+        // The children parameter will be inserted here by index.tsx
       ]
     }
   ]

@@ -32,17 +32,24 @@ const mainRoutes = createMainRoutes(<Outlet />);
 if (mainRoutes.children) {
   // Find the protected routes container (the one with ProtectedRouteWrapper)
   const protectedRoutesContainer = mainRoutes.children.find(
-    route => route.path === '/' && route.element
+    route => route.path === '/' && route.element && React.isValidElement(route.element)
   ) as RouteObject;
 
   // Add all protected routes to the container
   if (protectedRoutesContainer && protectedRoutesContainer.children) {
-    protectedRoutesContainer.children.push(...createProtectedRoutes());
+    protectedRoutesContainer.children = [
+      ...protectedRoutesContainer.children,
+      ...createProtectedRoutes()
+    ];
   }
 
   // Add public routes directly to the main layout
   // Include both the regular public routes and the public scheduling routes
-  mainRoutes.children.push(...publicRoutes, ...schedulingPublicRoutes);
+  mainRoutes.children = [
+    ...mainRoutes.children,
+    ...publicRoutes,
+    ...schedulingPublicRoutes
+  ];
 }
 
 // Create the final routes array
