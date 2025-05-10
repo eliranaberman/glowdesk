@@ -10,7 +10,7 @@ import {
   getCustomerById, 
   createCustomer, 
   updateCustomer 
-} from '@/services/customerService';
+} from '@/services/customers';
 import { customerSchema, CustomerFormValues } from '../schema/customerFormSchema';
 
 export const useCustomerForm = (customerId?: string) => {

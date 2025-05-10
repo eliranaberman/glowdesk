@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
-import { Customer, getCustomerById, updateCustomer } from '@/services/customerService';
+import { Customer, getCustomerById, updateCustomer } from '@/services/customers';
 import { format } from 'date-fns';
 
 export const useCustomerDetail = (customerId: string | undefined) => {
