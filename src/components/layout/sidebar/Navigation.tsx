@@ -47,6 +47,7 @@ const Navigation = ({ onLinkClick }: NavigationProps) => {
     return subLinks.some(link => isLinkActive(link.href));
   };
 
+  // Update links to match the actual routes defined in the route files
   const mainLinks = [
     {
       href: '/dashboard',
@@ -121,7 +122,7 @@ const Navigation = ({ onLinkClick }: NavigationProps) => {
       icon: Bell
     },
     {
-      href: '/settings',
+      href: '#',
       label: 'הגדרות',
       icon: Settings,
       subLinks: [
@@ -143,6 +144,27 @@ const Navigation = ({ onLinkClick }: NavigationProps) => {
       ]
     }
   ];
+
+  // Auto-expand the menu that contains the active route
+  useEffect(() => {
+    const currentPath = location.pathname;
+    
+    // Find any menu that should be expanded based on current path
+    mainLinks.forEach(link => {
+      if (link.subLinks) {
+        const shouldExpand = link.subLinks.some(subLink => 
+          currentPath === subLink.href || currentPath.startsWith(subLink.href + '/')
+        );
+        
+        if (shouldExpand) {
+          setExpandedMenus(prev => ({
+            ...prev,
+            [link.label]: true
+          }));
+        }
+      }
+    });
+  }, [location.pathname]);
 
   return (
     <nav className="flex flex-col space-y-1">

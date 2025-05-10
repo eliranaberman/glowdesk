@@ -4,7 +4,6 @@ import Settings from '../pages/Settings';
 import Expenses from '../pages/Expenses';
 import Inventory from '../pages/Inventory';
 import NewInventoryItem from '../pages/inventory/NewInventoryItem';
-import PortfolioPage from '../pages/PortfolioPage';
 import Tasks from '../pages/Tasks';
 import Notifications from '../pages/Notifications';
 import LoyaltyPage from '../pages/LoyaltyPage';
@@ -31,10 +30,6 @@ export const managementRoutes: RouteObject[] = [
   {
     path: '/inventory/new',
     element: <NewInventoryItem />,
-  },
-  {
-    path: '/portfolio',
-    element: <PortfolioPage />,
   },
   {
     path: '/tasks',

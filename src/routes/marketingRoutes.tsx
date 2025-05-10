@@ -8,6 +8,7 @@ import NewCampaignForm from '../pages/marketing/NewCampaignForm';
 import EditCampaignForm from '../pages/marketing/EditCampaignForm';
 import SocialMedia from '../pages/SocialMedia';
 import SocialMediaMeta from '../pages/SocialMediaMeta';
+import PortfolioPage from '../pages/PortfolioPage';
 
 export const marketingRoutes: RouteObject[] = [
   {
@@ -15,7 +16,7 @@ export const marketingRoutes: RouteObject[] = [
     element: <SocialMedia />,
   },
   {
-    path: '/social-media/meta',
+    path: '/social-media-meta',
     element: <SocialMediaMeta />,
   },
   {
@@ -41,5 +42,9 @@ export const marketingRoutes: RouteObject[] = [
   {
     path: '/marketing/campaigns/:id',
     element: <EditCampaignForm />,
+  },
+  {
+    path: '/portfolio',
+    element: <PortfolioPage />,
   },
 ];
