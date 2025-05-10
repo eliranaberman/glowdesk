@@ -8,23 +8,23 @@ import NewActivityPage from '../pages/clients/NewActivityPage';
 
 export const clientRoutes: RouteObject[] = [
   {
-    path: '/clients',
+    path: 'clients',
     element: <ClientsPage />,
   },
   {
-    path: '/clients/new',
+    path: 'clients/new',
     element: <NewClientPage />,
   },
   {
-    path: '/clients/:id',
+    path: 'clients/:id',
     element: <ClientDetailPage />,
   },
   {
-    path: '/clients/:id/edit',
+    path: 'clients/:id/edit',
     element: <EditClientPage />,
   },
   {
-    path: '/clients/:id/activity/new',
+    path: 'clients/:id/activity/new',
     element: <NewActivityPage />,
   },
 ];
