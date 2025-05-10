@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, Suspense } from 'react';
 import { CalendarClock, Users, DollarSign, TrendingUp, Bot } from 'lucide-react';
 import StatCard from '../components/dashboard/StatCard';

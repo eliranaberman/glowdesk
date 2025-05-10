@@ -8,14 +8,18 @@ import {
   type UserRole 
 } from '@/services/userRolesService';
 
+// Update UserRole to include finance_manager
+export type ExtendedUserRole = UserRole | 'finance_manager';
+
 interface PermissionHook {
   // Role checking
-  userRoles: UserRole[];
+  userRoles: ExtendedUserRole[];
   isAdmin: boolean;
   isOwner: boolean;
   isEmployee: boolean;
   isSocialManager: boolean;
-  checkRole: (role: UserRole) => boolean;
+  isFinanceManager: boolean;
+  checkRole: (role: ExtendedUserRole) => boolean;
   
   // Permission checking
   loading: boolean;
@@ -28,7 +32,7 @@ interface PermissionHook {
 export const usePermissions = (): PermissionHook => {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
-  const [userRoles, setUserRoles] = useState<UserRole[]>([]);
+  const [userRoles, setUserRoles] = useState<ExtendedUserRole[]>([]);
 
   useEffect(() => {
     const fetchUserRoles = async () => {
@@ -39,7 +43,7 @@ export const usePermissions = (): PermissionHook => {
       }
 
       try {
-        const roles = await getUserRoles(user.id);
+        const roles = await getUserRoles(user.id) as ExtendedUserRole[];
         setUserRoles(roles);
       } catch (error) {
         console.error('Error fetching user roles:', error);
@@ -56,8 +60,9 @@ export const usePermissions = (): PermissionHook => {
   const isOwner = userRoles.includes('owner');
   const isEmployee = userRoles.includes('employee');
   const isSocialManager = userRoles.includes('social_manager');
+  const isFinanceManager = userRoles.includes('finance_manager');
 
-  const checkRole = (role: UserRole): boolean => {
+  const checkRole = (role: ExtendedUserRole): boolean => {
     return userRoles.includes(role);
   };
 
@@ -89,6 +94,7 @@ export const usePermissions = (): PermissionHook => {
     isOwner,
     isEmployee,
     isSocialManager,
+    isFinanceManager,
     checkRole,
     loading,
     canRead,

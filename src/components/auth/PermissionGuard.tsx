@@ -41,7 +41,7 @@ const PermissionGuard = ({
       }
 
       // Check for required role
-      if (requiredRole && checkRole(requiredRole)) {
+      if (requiredRole && checkRole(requiredRole as any)) {
         setHasAccess(true);
         return;
       }

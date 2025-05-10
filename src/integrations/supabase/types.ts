@@ -489,6 +489,84 @@ export type Database = {
         }
         Relationships: []
       }
+      reports: {
+        Row: {
+          created_at: string
+          data: Json
+          description: string | null
+          format: string
+          generated_at: string
+          id: string
+          time_frame: string
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          data: Json
+          description?: string | null
+          format: string
+          generated_at?: string
+          id?: string
+          time_frame: string
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          data?: Json
+          description?: string | null
+          format?: string
+          generated_at?: string
+          id?: string
+          time_frame?: string
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      revenues: {
+        Row: {
+          amount: number
+          created_at: string | null
+          created_by: string | null
+          customer_id: string | null
+          date: string
+          description: string | null
+          id: string
+          payment_method: string | null
+          service_id: string | null
+          source: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string | null
+          created_by?: string | null
+          customer_id?: string | null
+          date?: string
+          description?: string | null
+          id?: string
+          payment_method?: string | null
+          service_id?: string | null
+          source: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string | null
+          created_by?: string | null
+          customer_id?: string | null
+          date?: string
+          description?: string | null
+          id?: string
+          payment_method?: string | null
+          service_id?: string | null
+          source?: string
+        }
+        Relationships: []
+      }
       role_permissions: {
         Row: {
           created_at: string | null

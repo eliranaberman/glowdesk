@@ -175,18 +175,24 @@ export const generateCashFlowReport = async (timeFrame: TimeFrame, filter?: Repo
 // Save a report to the database for future reference
 export const saveReport = async (report: ReportDataCreate): Promise<string | null> => {
   try {
+    const { data: userData } = await supabase.auth.getUser();
+    
+    if (!userData.user) {
+      throw new Error('User not authenticated');
+    }
+    
     const { data, error } = await supabase
       .from('reports')
       .insert([{
         ...report,
         generatedAt: new Date().toISOString(),
+        user_id: userData.user.id
       }])
-      .select()
-      .single();
+      .select();
       
     if (error) throw error;
     
-    return data.id;
+    return data[0]?.id || null;
   } catch (error) {
     console.error('Error saving report:', error);
     return null;
@@ -204,7 +210,7 @@ export const getReport = async (reportId: string): Promise<ReportData | null> =>
       
     if (error) throw error;
     
-    return data;
+    return data as unknown as ReportData;
   } catch (error) {
     console.error('Error retrieving report:', error);
     return null;
@@ -214,21 +220,21 @@ export const getReport = async (reportId: string): Promise<ReportData | null> =>
 // Get all reports for the current user
 export const getUserReports = async (): Promise<ReportData[]> => {
   try {
-    const { data: user } = await supabase.auth.getUser();
+    const { data: userData } = await supabase.auth.getUser();
     
-    if (!user.user) {
+    if (!userData.user) {
       throw new Error('User not authenticated');
     }
     
     const { data, error } = await supabase
       .from('reports')
       .select('*')
-      .eq('user_id', user.user.id)
-      .order('generatedAt', { ascending: false });
+      .eq('user_id', userData.user.id)
+      .order('generated_at', { ascending: false });
       
     if (error) throw error;
     
-    return data || [];
+    return (data as unknown as ReportData[]) || [];
   } catch (error) {
     console.error('Error retrieving user reports:', error);
     return [];
