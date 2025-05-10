@@ -1,6 +1,11 @@
 
 // Mock notification service
 
+export interface NotificationPreference {
+  whatsapp_enabled: boolean;
+  sms_fallback_enabled: boolean;
+}
+
 /**
  * Send a notification related to an appointment
  * @param appointmentId The ID of the appointment
@@ -26,10 +31,7 @@ export const sendAppointmentNotification = async (
  */
 export const setNotificationPreferences = async (
   userId: string,
-  preferences: {
-    whatsapp_enabled: boolean;
-    sms_fallback_enabled: boolean;
-  }
+  preferences: Partial<NotificationPreference>
 ): Promise<void> => {
   await new Promise(resolve => setTimeout(resolve, 300)); // Simulate API delay
   
@@ -43,10 +45,7 @@ export const setNotificationPreferences = async (
  */
 export const getNotificationPreferences = async (
   userId: string
-): Promise<{
-  whatsapp_enabled: boolean;
-  sms_fallback_enabled: boolean;
-}> => {
+): Promise<NotificationPreference> => {
   await new Promise(resolve => setTimeout(resolve, 200)); // Simulate API delay
   
   // Default preferences
@@ -54,4 +53,26 @@ export const getNotificationPreferences = async (
     whatsapp_enabled: true,
     sms_fallback_enabled: true
   };
+};
+
+/**
+ * Get user notification preferences (alias for getNotificationPreferences)
+ * @param userId User ID (optional)
+ */
+export const getUserNotificationPreferences = async (
+  userId: string = 'current-user'
+): Promise<NotificationPreference> => {
+  return getNotificationPreferences(userId);
+};
+
+/**
+ * Update or insert notification preferences
+ * @param preferences Partial preferences to update
+ * @param userId User ID (optional)
+ */
+export const upsertNotificationPreferences = async (
+  preferences: Partial<NotificationPreference>,
+  userId: string = 'current-user'
+): Promise<void> => {
+  return setNotificationPreferences(userId, preferences);
 };

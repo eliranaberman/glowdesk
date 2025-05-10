@@ -1,52 +1,72 @@
 
 // Mock calendar service
 
+interface CalendarConnection {
+  id: string;
+  user_id: string;
+  calendar_type: 'google' | 'apple' | 'outlook';
+  calendar_email: string;
+  calendar_id: string | null;
+  access_token: string | null;
+  refresh_token: string | null;
+  is_active: boolean;
+  connected_at: string;
+  last_sync_at: string | null;
+}
+
 // Mock data
-let mockCalendarConnections = [
+let mockCalendarConnections: CalendarConnection[] = [
   {
     id: 'conn1',
     user_id: 'user1',
     calendar_type: 'google',
-    calendar_email: 'user@gmail.com',
+    calendar_email: 'test@example.com',
+    calendar_id: 'primary',
+    access_token: 'mock_token',
+    refresh_token: 'mock_refresh_token',
     is_active: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
+    connected_at: new Date().toISOString(),
+    last_sync_at: new Date().toISOString()
   }
 ];
 
-// Get calendar connections for the current user
-export const getUserCalendarConnections = async () => {
-  await new Promise(resolve => setTimeout(resolve, 300)); // Simulate API delay
-  return [...mockCalendarConnections];
-};
-
-// Connect to Google Calendar
-export const connectToGoogle = async () => {
-  await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API delay
+/**
+ * Connect to Google Calendar
+ */
+export const connectToGoogle = async (): Promise<{ id: string }> => {
+  await new Promise(resolve => setTimeout(resolve, 800)); // Simulate API delay
   
-  // In a real app, this would redirect to Google OAuth
-  // For the mock, we'll just add a new connection
-  const newConnection = {
-    id: 'conn' + Date.now(),
-    user_id: 'user1',
+  const newConnection: CalendarConnection = {
+    id: `conn${Date.now()}`,
+    user_id: 'current_user',
     calendar_type: 'google',
-    calendar_email: 'user@gmail.com',
+    calendar_email: 'user@example.com',
+    calendar_id: 'primary',
+    access_token: 'new_mock_token',
+    refresh_token: 'new_mock_refresh_token',
     is_active: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
+    connected_at: new Date().toISOString(),
+    last_sync_at: null
   };
   
   mockCalendarConnections.push(newConnection);
   
-  return newConnection;
+  return { id: newConnection.id };
 };
 
-// Disconnect a calendar
-export const disconnectCalendar = async (connectionId: string) => {
+/**
+ * Get user calendar connections
+ */
+export const getUserCalendarConnections = async (): Promise<CalendarConnection[]> => {
+  await new Promise(resolve => setTimeout(resolve, 300)); // Simulate API delay
+  return [...mockCalendarConnections];
+};
+
+/**
+ * Disconnect calendar
+ */
+export const disconnectCalendar = async (connectionId: string): Promise<void> => {
   await new Promise(resolve => setTimeout(resolve, 500)); // Simulate API delay
   
-  // Remove the connection
   mockCalendarConnections = mockCalendarConnections.filter(conn => conn.id !== connectionId);
-  
-  return { success: true };
 };

@@ -21,8 +21,8 @@ export interface CustomerFormData {
   full_name: string;
   email: string;
   phone_number: string;
-  status: 'active' | 'inactive';
-  loyalty_level: 'gold' | 'silver' | 'bronze';
+  status: 'active' | 'inactive' | 'lead';
+  loyalty_level: 'gold' | 'silver' | 'bronze' | 'none';
   notes?: string;
   registration_date: Date;
   last_appointment?: Date | null;

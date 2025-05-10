@@ -39,13 +39,13 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { format, parse } from 'date-fns';
 import { X, Plus } from 'lucide-react';
 
-// Form schema validation
+// Form schema validation - update to match Customer type
 const customerSchema = z.object({
   full_name: z.string().min(2, { message: "שם חייב להיות לפחות 2 תווים" }),
   email: z.string().email({ message: "יש להזין כתובת אימייל תקינה" }),
   phone_number: z.string().min(9, { message: "מספר טלפון חייב להיות לפחות 9 ספרות" }),
-  status: z.enum(["active", "inactive"]),
-  loyalty_level: z.enum(["bronze", "silver", "gold"]),
+  status: z.enum(["active", "inactive", "lead"]),
+  loyalty_level: z.enum(["bronze", "silver", "gold", "none"]),
   notes: z.string().optional(),
   registration_date: z.date(),
   last_appointment: z.date().optional().nullable(),
