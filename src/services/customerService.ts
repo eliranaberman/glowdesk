@@ -1,4 +1,3 @@
-
 // Mock customer service
 
 export interface Customer {
