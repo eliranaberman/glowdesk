@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { BrowserRouter as Router } from 'react-router-dom';
 import AppRoutes from './routes';
-import { AuthProvider } from '@/contexts/auth';
+import { AuthProvider } from '@/contexts/AuthContext';
 import { Toaster } from '@/components/ui/toaster';
 import { initializeStorage } from '@/services/storageService';
 import { HelmetProvider } from 'react-helmet-async';

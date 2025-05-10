@@ -1,6 +1,5 @@
-
 import React from 'react';
-import { createBrowserRouter, Navigate } from 'react-router-dom';
+import { createBrowserRouter, Navigate, Router } from 'react-router-dom';
 
 import Layout from '../components/layout/Layout';
 import Dashboard from '../pages/Dashboard';
@@ -56,7 +55,14 @@ import BusinessInsights from '../pages/finances/BusinessInsights';
 
 // Import auth wrapper
 import ProtectedRouteWrapper from '../components/auth/ProtectedRouteWrapper';
-import { ProtectedRouteProps } from '../components/auth/ProtectedRoute';
+
+// Define ProtectedRouteProps type since we can't import it
+interface ProtectedRouteProps {
+  isAuthenticated: boolean;
+  authenticationPath: string;
+  redirectPath: string;
+  setRedirectPath: () => void;
+}
 
 // Default auth settings for most routes
 const defaultProtectedRouteProps: ProtectedRouteProps = {
@@ -68,6 +74,7 @@ const defaultProtectedRouteProps: ProtectedRouteProps = {
 
 const router = createBrowserRouter([
   {
+    path: '/',
     element: <Layout />,
     children: [
       {

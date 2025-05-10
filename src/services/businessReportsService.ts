@@ -181,13 +181,21 @@ export const saveReport = async (report: ReportDataCreate): Promise<string | nul
       throw new Error('User not authenticated');
     }
     
+    // Correctly format the report data to match the database schema
+    const reportToSave = {
+      title: report.title,
+      description: report.description || '',
+      type: report.type,
+      time_frame: report.timeFrame,
+      format: report.format,
+      data: report.data,
+      generated_at: new Date().toISOString(),
+      user_id: userData.user.id
+    };
+    
     const { data, error } = await supabase
       .from('reports')
-      .insert([{
-        ...report,
-        generatedAt: new Date().toISOString(),
-        user_id: userData.user.id
-      }])
+      .insert([reportToSave])
       .select();
       
     if (error) throw error;

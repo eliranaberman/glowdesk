@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -35,6 +34,7 @@ const ReportsGenerator = ({
   const [isGenerating, setIsGenerating] = useState(false);
   const [reportData, setReportData] = useState<any>(null);
   const [exportFormat, setExportFormat] = useState<'csv' | 'pdf'>('csv');
+  const { toast } = useToast();
 
   const handleGenerateReport = async () => {
     setIsGenerating(true);
