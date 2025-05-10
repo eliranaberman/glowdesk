@@ -1,5 +1,6 @@
+
 import React from 'react';
-import { createBrowserRouter, Navigate, Router } from 'react-router-dom';
+import { createBrowserRouter, Navigate, RouteObject } from 'react-router-dom';
 
 import Layout from '../components/layout/Layout';
 import Dashboard from '../pages/Dashboard';
@@ -72,7 +73,7 @@ const defaultProtectedRouteProps: ProtectedRouteProps = {
   setRedirectPath: () => {},
 };
 
-const router = createBrowserRouter([
+const routes: RouteObject[] = [
   {
     path: '/',
     element: <Layout />,
@@ -83,7 +84,10 @@ const router = createBrowserRouter([
       },
       {
         // Protected routes that require authentication
-        element: <ProtectedRouteWrapper {...defaultProtectedRouteProps} outlet={undefined} />,
+        path: '/',
+        element: <ProtectedRouteWrapper {...defaultProtectedRouteProps}>
+          <></>
+        </ProtectedRouteWrapper>,
         children: [
           {
             path: '/dashboard',
@@ -295,6 +299,8 @@ const router = createBrowserRouter([
     path: '*',
     element: <NotFound />,
   },
-]);
+];
+
+const router = createBrowserRouter(routes);
 
 export default router;
