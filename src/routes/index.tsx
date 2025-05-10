@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { createBrowserRouter, Navigate, RouteObject } from 'react-router-dom';
+import { createBrowserRouter, Navigate, RouteObject, Outlet } from 'react-router-dom';
 
 import Layout from '../components/layout/Layout';
 import Dashboard from '../pages/Dashboard';
@@ -76,7 +76,7 @@ const defaultProtectedRouteProps: ProtectedRouteProps = {
 const routes: RouteObject[] = [
   {
     path: '/',
-    element: <Layout />,
+    element: <Layout>{<Outlet />}</Layout>,
     children: [
       {
         path: '/',
@@ -86,7 +86,7 @@ const routes: RouteObject[] = [
         // Protected routes that require authentication
         path: '/',
         element: <ProtectedRouteWrapper {...defaultProtectedRouteProps}>
-          <></>
+          <Outlet />
         </ProtectedRouteWrapper>,
         children: [
           {
