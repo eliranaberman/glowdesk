@@ -1,56 +1,57 @@
 
 // Mock notification service
 
-export interface NotificationPreference {
-  id?: string;
-  user_id?: string;
-  whatsapp_enabled: boolean;
-  sms_fallback_enabled: boolean;
-  email_enabled?: boolean;
-  created_at?: string;
-  updated_at?: string;
-}
-
-// Mock data
-let mockNotificationPreferences: NotificationPreference = {
-  id: 'pref1',
-  user_id: 'user1',
-  whatsapp_enabled: true,
-  sms_fallback_enabled: true,
-  email_enabled: false,
-  created_at: new Date().toISOString(),
-  updated_at: new Date().toISOString()
-};
-
-// Get notification preferences for the current user
-export const getUserNotificationPreferences = async (): Promise<NotificationPreference> => {
-  await new Promise(resolve => setTimeout(resolve, 300)); // Simulate API delay
-  return { ...mockNotificationPreferences };
-};
-
-// Update notification preferences
-export const upsertNotificationPreferences = async (
-  preferences: Partial<NotificationPreference>
-): Promise<NotificationPreference> => {
+/**
+ * Send a notification related to an appointment
+ * @param appointmentId The ID of the appointment
+ * @param type The type of notification to send
+ * @returns Promise that resolves when notification is sent
+ */
+export const sendAppointmentNotification = async (
+  appointmentId: string, 
+  type: 'confirmation' | 'reminder' | 'cancellation'
+): Promise<boolean> => {
   await new Promise(resolve => setTimeout(resolve, 500)); // Simulate API delay
   
-  mockNotificationPreferences = {
-    ...mockNotificationPreferences,
-    ...preferences,
-    updated_at: new Date().toISOString()
-  };
-  
-  return { ...mockNotificationPreferences };
-};
-
-// Send notification for an appointment
-export const sendAppointmentNotification = async (
-  appointmentId: string,
-  type: 'confirmation' | 'reminder' | 'cancellation'
-): Promise<{ success: boolean }> => {
-  await new Promise(resolve => setTimeout(resolve, 800)); // Simulate API delay
-  
+  // In a real app, this would send a notification through the appropriate channel
   console.log(`Sending ${type} notification for appointment ${appointmentId}`);
   
-  return { success: true };
+  return true;
+};
+
+/**
+ * Set notification preferences for a user
+ * @param userId User ID
+ * @param preferences Preferences object
+ */
+export const setNotificationPreferences = async (
+  userId: string,
+  preferences: {
+    whatsapp_enabled: boolean;
+    sms_fallback_enabled: boolean;
+  }
+): Promise<void> => {
+  await new Promise(resolve => setTimeout(resolve, 300)); // Simulate API delay
+  
+  // In a real app, this would update the user's notification preferences
+  console.log(`Updated notification preferences for user ${userId}:`, preferences);
+};
+
+/**
+ * Get notification preferences for a user
+ * @param userId User ID
+ */
+export const getNotificationPreferences = async (
+  userId: string
+): Promise<{
+  whatsapp_enabled: boolean;
+  sms_fallback_enabled: boolean;
+}> => {
+  await new Promise(resolve => setTimeout(resolve, 200)); // Simulate API delay
+  
+  // Default preferences
+  return {
+    whatsapp_enabled: true,
+    sms_fallback_enabled: true
+  };
 };

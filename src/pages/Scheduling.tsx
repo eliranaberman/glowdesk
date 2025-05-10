@@ -1,188 +1,296 @@
 
 import { useState, useEffect } from 'react';
-import GanttChart from '../components/scheduling/GanttChart';
-import CalendarSync from '../components/scheduling/CalendarSync';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { 
+  Card, 
+  CardContent, 
+  CardHeader, 
+  CardTitle, 
+  CardDescription 
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Link } from 'react-router-dom';
-import { CalendarPlus } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { 
+  Calendar as CalendarIcon, 
+  Clock, 
+  Plus, 
+  Search,
+  Filter,
+  Check,
+  X,
+  CalendarDays,
+  User,
+  Scissors
+} from 'lucide-react';
+import { format, parseISO, isToday, addDays, isTomorrow } from 'date-fns';
+import { he } from 'date-fns/locale';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
+
+interface Appointment {
+  id: string;
+  customer_name: string;
+  service: string;
+  date: string;
+  time: string;
+  duration: string;
+  status: string;
+}
 
 const Scheduling = () => {
-  const isMobile = useIsMobile();
-  const [selectedDate, setSelectedDate] = useState(new Date());
-  const [filteredAppointments, setFilteredAppointments] = useState<any[]>([]);
-  const [activeFilter, setActiveFilter] = useState('day');
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [activeTab, setActiveTab] = useState('upcoming');
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Generate random appointments for the next 30 days
-  const generateRandomAppointments = () => {
-    const currentDate = new Date();
-    const appointments = [];
-    
-    // Extended list of client names
-    const clientNames = [
-      'שרה כהן', 'אמילי לוי', 'ליאת ונג', 'מיכל אברהם', 'רחל גולן',
-      'דנה ישראלי', 'יעל מור', 'נופר דהן', 'טלי ברק', 'מירי אלון',
-      'רוני שטרן', 'נועה אדלר', 'קרן לוי', 'דפנה גבאי', 'הילה שגיא',
-      'מאיה ברגר', 'שירה אוחנה', 'איילת בן דוד', 'רותם זהבי', 'עדי מזרחי',
-      'שני גרינברג', 'ליטל כץ', 'אורטל נחום', 'גלי אשכנזי', 'יפעת אוזן',
-      'לירון פישר', 'ענבר חן', 'חני לויד', 'הודיה פרץ', 'עדן שפירא',
-      'אביגיל מנחם', 'ספיר דנינו', 'אופיר יעקב', 'חן אסולין', 'ליאור גולדשטיין',
-      'רבקה כהן', 'סיגל לוי', 'אורית שלום', 'נטע ברזילי', 'גלית גוטמן',
-      'שלומית מלכה', 'מיטל יצחקי', 'תמי ממן', 'ורד אזולאי', 'טובה שמעוני'
-    ];
-    
-    const services = [
-      { name: 'מניקור ג\'ל', duration: 60, color: '#F2FCE2', price: 120 },
-      { name: 'אקריליק מלא', duration: 90, color: '#FEF7CD', price: 180 },
-      { name: 'פדיקור', duration: 75, color: '#FEC6A1', price: 140 },
-      { name: 'לק ג\'ל', duration: 45, color: '#E5DEFF', price: 100 },
-      { name: 'בניית ציפורניים', duration: 120, color: '#FFDEE2', price: 220 },
-      { name: 'טיפול יופי', duration: 90, color: '#FDE1D3', price: 160 }
-    ];
-    
-    // Business hours from 8:00 AM to 7:00 PM - generate proper time slots
-    const startTimes = [];
-    for (let hour = 8; hour <= 19; hour++) {
-      startTimes.push(`${hour.toString().padStart(2, '0')}:00`);
-      if (hour < 19) {  // Don't add 19:30 as it would go beyond business hours
-        startTimes.push(`${hour.toString().padStart(2, '0')}:30`);
-      }
-    }
-    
-    // Create 30 days of random appointments with better time distribution
-    for (let i = 0; i < 30; i++) {
-      const appointmentDate = new Date(currentDate);
-      appointmentDate.setDate(currentDate.getDate() + i);
-      
-      // Random number of appointments per day (2-6)
-      const numAppointments = Math.floor(Math.random() * 5) + 2;
-      const usedTimes = new Set();
-      
-      for (let j = 0; j < numAppointments; j++) {
-        // Get unique time slots
-        let startTime;
-        do {
-          startTime = startTimes[Math.floor(Math.random() * startTimes.length)];
-        } while (usedTimes.has(startTime));
-        usedTimes.add(startTime);
-        
-        const service = services[Math.floor(Math.random() * services.length)];
-        const clientName = clientNames[Math.floor(Math.random() * clientNames.length)];
-        
-        appointments.push({
-          id: `${i}-${j}`,
-          customer: clientName,
-          service: service.name,
-          startTime: startTime, // Format: 'HH:MM'
-          duration: service.duration,
-          color: service.color,
-          date: new Date(appointmentDate),
-          price: `₪${service.price}`
-        });
-      }
-    }
-    
-    // Sort appointments by date and time for consistency
-    return appointments.sort((a, b) => {
-      // First compare by date
-      const dateComparison = a.date.getTime() - b.date.getTime();
-      if (dateComparison !== 0) return dateComparison;
-      
-      // If same date, compare by time
-      const getMinutes = (timeStr: string) => {
-        const [hours, minutes] = timeStr.split(':').map(Number);
-        return hours * 60 + minutes;
-      };
-      
-      return getMinutes(a.startTime) - getMinutes(b.startTime);
-    });
-  };
-  
-  // Mock appointments data
-  const allAppointments = generateRandomAppointments();
-
-  // Filter appointments whenever the selected date changes
+  // Mock data for appointments
   useEffect(() => {
-    const filterAppointmentsByDate = () => {
-      // Filter appointments for the selected date
-      const filtered = allAppointments.filter(appointment => {
-        if (!appointment.date) return false;
-        
-        return (
-          appointment.date.getFullYear() === selectedDate.getFullYear() &&
-          appointment.date.getMonth() === selectedDate.getMonth() &&
-          appointment.date.getDate() === selectedDate.getDate()
-        );
-      });
+    const fetchAppointments = async () => {
+      // Simulate API call delay
+      await new Promise(resolve => setTimeout(resolve, 800));
       
-      setFilteredAppointments(filtered);
+      // Mock appointment data
+      const mockData: Appointment[] = [
+        {
+          id: '1',
+          customer_name: 'שרה כהן',
+          service: 'מניקור ג\'ל',
+          date: '2025-04-10',
+          time: '10:00',
+          duration: '60',
+          status: 'scheduled'
+        },
+        {
+          id: '2',
+          customer_name: 'אמילי לוי',
+          service: 'אקריליק מלא',
+          date: '2025-04-10',
+          time: '12:30',
+          duration: '90',
+          status: 'scheduled'
+        },
+        {
+          id: '3',
+          customer_name: 'ליאת ונג',
+          service: 'פדיקור',
+          date: '2025-04-10',
+          time: '14:00',
+          duration: '75',
+          status: 'cancelled'
+        },
+        {
+          id: '4',
+          customer_name: 'מיכל אברהם',
+          service: 'לק ג\'ל',
+          date: '2025-04-11',
+          time: '11:00',
+          duration: '45',
+          status: 'scheduled'
+        },
+        {
+          id: '5',
+          customer_name: 'רחל גולן',
+          service: 'בניית ציפורניים',
+          date: '2025-04-11',
+          time: '13:00',
+          duration: '120',
+          status: 'scheduled'
+        },
+      ];
+      
+      setAppointments(mockData);
+      setLoading(false);
     };
+    
+    fetchAppointments();
+  }, []);
 
-    filterAppointmentsByDate();
-  }, [selectedDate]);
+  // Filter appointments based on search query and active tab
+  const filteredAppointments = appointments.filter(appointment => {
+    // Filter by search query
+    const matchesSearch = 
+      appointment.customer_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      appointment.service.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    // Filter by tab
+    const matchesTab = 
+      (activeTab === 'upcoming' && appointment.status === 'scheduled') ||
+      (activeTab === 'completed' && appointment.status === 'completed') ||
+      (activeTab === 'cancelled' && appointment.status === 'cancelled') ||
+      activeTab === 'all';
+    
+    return matchesSearch && matchesTab;
+  });
+
+  // Group appointments by date
+  const appointmentsByDate = filteredAppointments.reduce<{ [key: string]: Appointment[] }>((acc, appointment) => {
+    if (!acc[appointment.date]) {
+      acc[appointment.date] = [];
+    }
+    acc[appointment.date].push(appointment);
+    return acc;
+  }, {});
+
+  // Sort dates
+  const sortedDates = Object.keys(appointmentsByDate).sort();
+
+  // Format date display
+  const formatDateDisplay = (dateString: string) => {
+    const date = parseISO(dateString);
+    
+    if (isToday(date)) {
+      return 'היום';
+    } else if (isTomorrow(date)) {
+      return 'מחר';
+    } else {
+      return format(date, 'EEEE, d בMMMM', { locale: he });
+    }
+  };
+
+  // Handle appointment status display
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'scheduled':
+        return <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">מתוכנן</Badge>;
+      case 'completed':
+        return <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">הושלם</Badge>;
+      case 'cancelled':
+        return <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">בוטל</Badge>;
+      default:
+        return null;
+    }
+  };
 
   return (
-    <div dir="rtl">
-      <div className={`flex flex-col ${isMobile ? 'gap-3 mb-4' : 'sm:flex-row sm:justify-between sm:items-center gap-4 mb-6'}`}>
-        <div>
-          <h1 className={`font-bold ${isMobile ? 'text-xl' : 'text-2xl'}`}>לוח פגישות</h1>
-          <p className={`text-muted-foreground ${isMobile ? 'text-xs' : ''}`}>
-            ניהול הפגישות שלך וארגון היום בצורה יעילה.
-          </p>
+    <div className="container mx-auto py-6" dir="rtl">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 space-y-2 sm:space-y-0">
+        <h1 className="text-2xl font-bold">לוח פגישות</h1>
+        <div className="flex space-x-2 space-x-reverse">
+          <Button 
+            variant="outline"
+            onClick={() => navigate('/calendar')}
+          >
+            <CalendarDays className="mr-2 h-4 w-4" />
+            צפייה בלוח שנה
+          </Button>
+          <Button 
+            onClick={() => navigate('/scheduling/new')}
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            פגישה חדשה
+          </Button>
         </div>
-        
-        <div className={`flex ${isMobile ? 'gap-2 flex-col' : 'gap-4 flex-col sm:flex-row'}`}>
-          {/* Filter buttons - in RTL direction (Day on the right, Month on the left) */}
-          <div className="flex rounded-full bg-secondary/50 p-1">
-            <Button
-              variant={activeFilter === 'day' ? 'default' : 'ghost'}
-              size={isMobile ? "sm" : "sm"}
-              onClick={() => setActiveFilter('day')}
-              className="flex-1"
-            >
-              יום
-            </Button>
-            <Button
-              variant={activeFilter === 'week' ? 'default' : 'ghost'}
-              size={isMobile ? "sm" : "sm"}
-              onClick={() => setActiveFilter('week')}
-              className="flex-1"
-            >
-              שבוע
-            </Button>
-            <Button
-              variant={activeFilter === 'month' ? 'default' : 'ghost'}
-              size={isMobile ? "sm" : "sm"}
-              onClick={() => setActiveFilter('month')}
-              className="flex-1"
-            >
-              חודש
-            </Button>
-          </div>
+      </div>
 
-          <Link to="/scheduling/new" className={isMobile ? 'w-full' : ''}>
-            <Button className={isMobile ? 'w-full text-sm' : ''}>
-              <CalendarPlus className={`${isMobile ? 'h-4 w-4 ml-1.5' : 'h-4 w-4 ml-2'}`} />
-              פגישה חדשה
-            </Button>
-          </Link>
+      <div className="mb-6">
+        <div className="relative">
+          <Search className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
+          <Input 
+            placeholder="חיפוש לפי שם לקוח או סוג שירות..." 
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-3 pr-10"
+          />
         </div>
       </div>
-      
-      <div className={`space-y-${isMobile ? '4' : '6'}`}>
-        <Card className={isMobile ? "shadow-sm" : "shadow-sm"}>
-          <CardContent className={isMobile ? "p-3" : "p-4"}>
-            <CalendarSync />
-          </CardContent>
-        </Card>
-        
-        <GanttChart
-          appointments={allAppointments}
-          date={selectedDate}
-          onDateChange={setSelectedDate}
-        />
-      </div>
+
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="mb-4">
+          <TabsTrigger value="upcoming">פגישות מתוכננות</TabsTrigger>
+          <TabsTrigger value="completed">פגישות שהושלמו</TabsTrigger>
+          <TabsTrigger value="cancelled">פגישות שבוטלו</TabsTrigger>
+          <TabsTrigger value="all">כל הפגישות</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value={activeTab} className="space-y-4">
+          {loading ? (
+            <Card>
+              <CardContent className="flex justify-center items-center py-8">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+              </CardContent>
+            </Card>
+          ) : filteredAppointments.length === 0 ? (
+            <Card>
+              <CardContent className="flex flex-col items-center justify-center text-center py-12">
+                <CalendarIcon className="h-12 w-12 text-muted-foreground mb-4" />
+                <h3 className="font-medium text-lg mb-2">אין פגישות להצגה</h3>
+                <p className="text-muted-foreground mb-4">
+                  {activeTab === 'upcoming' ? 'אין פגישות מתוכננות בקרוב' :
+                   activeTab === 'completed' ? 'אין פגישות שהושלמו להצגה' :
+                   activeTab === 'cancelled' ? 'אין פגישות שבוטלו להצגה' :
+                   'אין פגישות להצגה כרגע'}
+                </p>
+                <Button onClick={() => navigate('/scheduling/new')}>
+                  <Plus className="mr-2 h-4 w-4" />
+                  צור פגישה חדשה
+                </Button>
+              </CardContent>
+            </Card>
+          ) : (
+            sortedDates.map(date => (
+              <div key={date}>
+                <h2 className="text-md font-semibold mb-2 flex items-center">
+                  <CalendarIcon className="w-4 h-4 inline-block ml-2" />
+                  {formatDateDisplay(date)}
+                </h2>
+                
+                <Card className="mb-6">
+                  <CardContent className="p-0">
+                    <div className="divide-y">
+                      {appointmentsByDate[date]
+                        .sort((a, b) => a.time.localeCompare(b.time))
+                        .map(appointment => (
+                          <div 
+                            key={appointment.id} 
+                            className={cn(
+                              "p-4 hover:bg-muted/50 cursor-pointer transition-colors",
+                              appointment.status === 'cancelled' && "bg-muted/20"
+                            )}
+                            onClick={() => navigate(`/scheduling/${appointment.id}`)}
+                          >
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center">
+                                <div className={cn(
+                                  "w-10 h-10 rounded-full flex items-center justify-center ml-3",
+                                  appointment.status === 'scheduled' ? "bg-blue-100 text-blue-700" :
+                                  appointment.status === 'completed' ? "bg-green-100 text-green-700" :
+                                  "bg-red-100 text-red-700"
+                                )}>
+                                  {appointment.status === 'scheduled' && <Clock className="h-5 w-5" />}
+                                  {appointment.status === 'completed' && <Check className="h-5 w-5" />}
+                                  {appointment.status === 'cancelled' && <X className="h-5 w-5" />}
+                                </div>
+                                <div>
+                                  <div className="font-medium">{appointment.time} - {appointment.customer_name}</div>
+                                  <div className="flex items-center text-sm text-muted-foreground space-x-4 space-x-reverse">
+                                    <span className="flex items-center">
+                                      <Scissors className="h-3 w-3 mr-1" />
+                                      {appointment.service}
+                                    </span>
+                                    <span className="flex items-center">
+                                      <Clock className="h-3 w-3 mr-1" />
+                                      {appointment.duration} דקות
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="flex items-center">
+                                {getStatusBadge(appointment.status)}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            ))
+          )}
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
