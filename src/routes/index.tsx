@@ -1,6 +1,6 @@
-
 import React from 'react';
 import { createBrowserRouter, Navigate, RouteObject, Outlet } from 'react-router-dom';
+import { AuthProvider } from '@/contexts/auth';
 
 import Layout from '../components/layout/Layout';
 import Dashboard from '../pages/Dashboard';
@@ -73,232 +73,246 @@ const defaultProtectedRouteProps: ProtectedRouteProps = {
   setRedirectPath: () => {},
 };
 
+// Create an AuthLayout component that provides the AuthContext
+const AuthLayout = () => {
+  return (
+    <AuthProvider>
+      <Outlet />
+    </AuthProvider>
+  );
+};
+
 const routes: RouteObject[] = [
   {
-    path: '/',
-    element: <Layout>{<Outlet />}</Layout>,
+    element: <AuthLayout />,
     children: [
       {
         path: '/',
-        element: <Navigate to="/dashboard" replace />,
-      },
-      {
-        // Protected routes that require authentication
-        path: '/',
-        element: <ProtectedRouteWrapper {...defaultProtectedRouteProps}>
-          <Outlet />
-        </ProtectedRouteWrapper>,
+        element: <Layout>{<Outlet />}</Layout>,
         children: [
           {
-            path: '/dashboard',
-            element: <Dashboard />,
-          },
-          // Customer paths
-          {
-            path: '/customers',
-            element: <Customers />,
+            path: '/',
+            element: <Navigate to="/dashboard" replace />,
           },
           {
-            path: '/customers/new',
-            element: <NewCustomer />,
+            // Protected routes that require authentication
+            path: '/',
+            element: <ProtectedRouteWrapper {...defaultProtectedRouteProps}>
+              <Outlet />
+            </ProtectedRouteWrapper>,
+            children: [
+              {
+                path: '/dashboard',
+                element: <Dashboard />,
+              },
+              // Customer paths
+              {
+                path: '/customers',
+                element: <Customers />,
+              },
+              {
+                path: '/customers/new',
+                element: <NewCustomer />,
+              },
+              {
+                path: '/customers/:id',
+                element: <ViewCustomer />,
+              },
+              {
+                path: '/customers/:id/edit',
+                element: <EditCustomer />,
+              },
+              // Client paths
+              {
+                path: '/clients',
+                element: <ClientsPage />,
+              },
+              {
+                path: '/clients/new',
+                element: <NewClientPage />,
+              },
+              {
+                path: '/clients/:id',
+                element: <ClientDetailPage />,
+              },
+              {
+                path: '/clients/:id/edit',
+                element: <EditClientPage />,
+              },
+              {
+                path: '/clients/:id/activity/new',
+                element: <NewActivityPage />,
+              },
+              // Scheduling paths
+              {
+                path: '/scheduling',
+                element: <Scheduling />,
+              },
+              {
+                path: '/calendar',
+                element: <AppointmentCalendar />,
+              },
+              {
+                path: '/scheduling/new',
+                element: <NewAppointment />,
+              },
+              {
+                path: '/scheduling/:id',
+                element: <EditAppointment />,
+              },
+              // System management
+              {
+                path: '/settings',
+                element: <Settings />,
+              },
+              {
+                path: '/expenses',
+                element: <Expenses />,
+              },
+              {
+                path: '/inventory',
+                element: <Inventory />,
+              },
+              {
+                path: '/inventory/new',
+                element: <NewInventoryItem />,
+              },
+              {
+                path: '/portfolio',
+                element: <PortfolioPage />,
+              },
+              {
+                path: '/tasks',
+                element: <Tasks />,
+              },
+              {
+                path: '/notifications',
+                element: <Notifications />,
+              },
+              {
+                path: '/loyalty',
+                element: <LoyaltyPage />,
+              },
+              {
+                path: '/reports',
+                element: <Reports />,
+              },
+              // Social Media
+              {
+                path: '/social-media',
+                element: <SocialMedia />,
+              },
+              {
+                path: '/social-media/meta',
+                element: <SocialMediaMeta />,
+              },
+              // User Management
+              {
+                path: '/users',
+                element: <UserManagement />,
+              },
+              {
+                path: '/users/roles',
+                element: <UserRolesPage />,
+              },
+              {
+                path: '/profile',
+                element: <UserProfilePage />,
+              },
+              // AI Assistant
+              {
+                path: '/ai-assistant',
+                element: <AIAssistant />,
+              },
+              // Payments
+              {
+                path: '/payments/new',
+                element: <NewPayment />,
+              },
+              // Marketing
+              {
+                path: '/marketing',
+                element: <MarketingPage />,
+              },
+              {
+                path: '/marketing/templates',
+                element: <MarketingTemplates />,
+              },
+              {
+                path: '/marketing/templates/new',
+                element: <NewTemplateForm />,
+              },
+              {
+                path: '/marketing/templates/:id',
+                element: <EditTemplateForm />,
+              },
+              {
+                path: '/marketing/campaigns/new',
+                element: <NewCampaignForm />,
+              },
+              {
+                path: '/marketing/campaigns/:id',
+                element: <EditCampaignForm />,
+              },
+              // Financial Management (new)
+              {
+                path: '/finances',
+                element: <BusinessManagement />,
+              },
+              {
+                path: '/finances/revenues',
+                element: <Revenues />,
+              },
+              {
+                path: '/finances/cashflow',
+                element: <CashFlow />,
+              },
+              {
+                path: '/finances/reports',
+                element: <FinancialReports />,
+              },
+              {
+                path: '/finances/insights',
+                element: <BusinessInsights />,
+              },
+            ],
           },
+          // Public routes (setup wizard)
           {
-            path: '/customers/:id',
-            element: <ViewCustomer />,
+            path: '/setup',
+            element: <InitialSetupPage />,
           },
+          // Public Online Booking
           {
-            path: '/customers/:id/edit',
-            element: <EditCustomer />,
-          },
-          // Client paths
-          {
-            path: '/clients',
-            element: <ClientsPage />,
-          },
-          {
-            path: '/clients/new',
-            element: <NewClientPage />,
-          },
-          {
-            path: '/clients/:id',
-            element: <ClientDetailPage />,
-          },
-          {
-            path: '/clients/:id/edit',
-            element: <EditClientPage />,
-          },
-          {
-            path: '/clients/:id/activity/new',
-            element: <NewActivityPage />,
-          },
-          // Scheduling paths
-          {
-            path: '/scheduling',
-            element: <Scheduling />,
-          },
-          {
-            path: '/calendar',
-            element: <AppointmentCalendar />,
-          },
-          {
-            path: '/scheduling/new',
-            element: <NewAppointment />,
-          },
-          {
-            path: '/scheduling/:id',
-            element: <EditAppointment />,
-          },
-          // System management
-          {
-            path: '/settings',
-            element: <Settings />,
-          },
-          {
-            path: '/expenses',
-            element: <Expenses />,
-          },
-          {
-            path: '/inventory',
-            element: <Inventory />,
-          },
-          {
-            path: '/inventory/new',
-            element: <NewInventoryItem />,
-          },
-          {
-            path: '/portfolio',
-            element: <PortfolioPage />,
-          },
-          {
-            path: '/tasks',
-            element: <Tasks />,
-          },
-          {
-            path: '/notifications',
-            element: <Notifications />,
-          },
-          {
-            path: '/loyalty',
-            element: <LoyaltyPage />,
-          },
-          {
-            path: '/reports',
-            element: <Reports />,
-          },
-          // Social Media
-          {
-            path: '/social-media',
-            element: <SocialMedia />,
-          },
-          {
-            path: '/social-media/meta',
-            element: <SocialMediaMeta />,
-          },
-          // User Management
-          {
-            path: '/users',
-            element: <UserManagement />,
-          },
-          {
-            path: '/users/roles',
-            element: <UserRolesPage />,
-          },
-          {
-            path: '/profile',
-            element: <UserProfilePage />,
-          },
-          // AI Assistant
-          {
-            path: '/ai-assistant',
-            element: <AIAssistant />,
-          },
-          // Payments
-          {
-            path: '/payments/new',
-            element: <NewPayment />,
-          },
-          // Marketing
-          {
-            path: '/marketing',
-            element: <MarketingPage />,
-          },
-          {
-            path: '/marketing/templates',
-            element: <MarketingTemplates />,
-          },
-          {
-            path: '/marketing/templates/new',
-            element: <NewTemplateForm />,
-          },
-          {
-            path: '/marketing/templates/:id',
-            element: <EditTemplateForm />,
-          },
-          {
-            path: '/marketing/campaigns/new',
-            element: <NewCampaignForm />,
-          },
-          {
-            path: '/marketing/campaigns/:id',
-            element: <EditCampaignForm />,
-          },
-          // Financial Management (new)
-          {
-            path: '/finances',
-            element: <BusinessManagement />,
-          },
-          {
-            path: '/finances/revenues',
-            element: <Revenues />,
-          },
-          {
-            path: '/finances/cashflow',
-            element: <CashFlow />,
-          },
-          {
-            path: '/finances/reports',
-            element: <FinancialReports />,
-          },
-          {
-            path: '/finances/insights',
-            element: <BusinessInsights />,
+            path: '/online-booking',
+            element: <OnlineBooking />,
           },
         ],
       },
-      // Public routes (setup wizard)
+      // Authentication routes (outside the main layout)
       {
-        path: '/setup',
-        element: <InitialSetupPage />,
+        path: '/login',
+        element: <Login />,
       },
-      // Public Online Booking
       {
-        path: '/online-booking',
-        element: <OnlineBooking />,
+        path: '/register',
+        element: <Register />,
       },
-    ],
-  },
-  // Authentication routes (outside the main layout)
-  {
-    path: '/login',
-    element: <Login />,
-  },
-  {
-    path: '/register',
-    element: <Register />,
-  },
-  {
-    path: '/forgot-password',
-    element: <ForgotPassword />,
-  },
-  {
-    path: '/reset-password',
-    element: <ResetPassword />,
-  },
-  // Catch-all for 404s
-  {
-    path: '*',
-    element: <NotFound />,
-  },
+      {
+        path: '/forgot-password',
+        element: <ForgotPassword />,
+      },
+      {
+        path: '/reset-password',
+        element: <ResetPassword />,
+      },
+      // Catch-all for 404s
+      {
+        path: '*',
+        element: <NotFound />,
+      },
+    ]
+  }
 ];
 
 const router = createBrowserRouter(routes);

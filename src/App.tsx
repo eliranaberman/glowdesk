@@ -2,7 +2,6 @@
 import { useEffect, useState } from 'react';
 import { RouterProvider } from 'react-router-dom';
 import router from './routes';
-import { AuthProvider } from '@/contexts/AuthContext';
 import { Toaster } from '@/components/ui/toaster';
 import { initializeStorage } from '@/services/storageService';
 import { HelmetProvider } from 'react-helmet-async';
@@ -29,10 +28,8 @@ function App() {
 
   return (
     <HelmetProvider>
-      <AuthProvider>
-        <RouterProvider router={router} />
-        <Toaster />
-      </AuthProvider>
+      <RouterProvider router={router} />
+      <Toaster />
     </HelmetProvider>
   );
 }
