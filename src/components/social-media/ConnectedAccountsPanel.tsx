@@ -53,7 +53,6 @@ const ConnectedAccountsPanel = ({ connectedAccounts, connectPlatform }: Connecte
     <>
       <Card>
         <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-lg">פלטפורמות מחוברות</CardTitle>
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -66,6 +65,7 @@ const ConnectedAccountsPanel = ({ connectedAccounts, connectPlatform }: Connecte
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
+          <CardTitle className="text-lg">פלטפורמות מחוברות</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
@@ -76,6 +76,17 @@ const ConnectedAccountsPanel = ({ connectedAccounts, connectPlatform }: Connecte
                   index < socialAccounts.length - 1 ? 'border-b pb-2' : ''
                 }`}
               >
+                <div className="flex flex-col text-right">
+                  <div className="flex items-center gap-1.5">
+                    {account.icon}
+                    <span className="font-medium">{account.name}</span>
+                  </div>
+                  <span className="text-xs text-muted-foreground">
+                    {account.connected 
+                      ? `${account.followers.toLocaleString()} עוקבים` 
+                      : "לא מחובר"}
+                  </span>
+                </div>
                 <Button 
                   variant={account.connected ? "soft" : "outline"} 
                   className="gap-2"
@@ -84,17 +95,6 @@ const ConnectedAccountsPanel = ({ connectedAccounts, connectPlatform }: Connecte
                   {account.connected ? "מחובר" : "חבר חשבון"}
                   {account.icon}
                 </Button>
-                <div className="flex flex-col text-right">
-                  <div className="flex items-center gap-1.5">
-                    <span className="font-medium">{account.name}</span>
-                    {account.icon}
-                  </div>
-                  <span className="text-xs text-muted-foreground">
-                    {account.connected 
-                      ? `${account.followers.toLocaleString()} עוקבים` 
-                      : "לא מחובר"}
-                  </span>
-                </div>
               </div>
             ))}
           </div>

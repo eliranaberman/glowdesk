@@ -6,7 +6,6 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Upload, Calendar, Send } from "lucide-react";
-import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import {
   Popover,
@@ -120,6 +119,11 @@ const PostCreationPanel = () => {
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
+        <CardTitle className="mx-auto text-center">פרסום פוסטים</CardTitle>
+        <Button variant="soft" onClick={handleUploadClick}>
+          <Upload className="ml-2" size={16} />
+          העלה מדיה
+        </Button>
         <input 
           type="file" 
           ref={fileInputRef} 
@@ -127,15 +131,38 @@ const PostCreationPanel = () => {
           accept="image/*,video/*"
           onChange={handleFileInput}
         />
-        <Button variant="soft" onClick={handleUploadClick}>
-          <Upload className="ml-2" size={16} />
-          העלה מדיה
-        </Button>
-        <CardTitle className="mx-auto text-center">פרסום פוסטים</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="md:order-first md:col-span-2">
+          {/* Media preview - Now on the right for RTL */}
+          <div className={`bg-muted/30 rounded-lg flex items-center justify-center p-4 ${uploadedMedia ? 'overflow-hidden' : ''} order-last md:order-first`}>
+            {uploadedMedia ? (
+              <div className="relative w-full h-full min-h-[200px]">
+                <img 
+                  src={uploadedMedia} 
+                  alt="Preview" 
+                  className="w-full h-full object-cover rounded-lg"
+                />
+                <Button 
+                  variant="destructive" 
+                  size="sm" 
+                  className="absolute top-2 right-2 opacity-80"
+                  onClick={() => setUploadedMedia(null)}
+                >
+                  הסר
+                </Button>
+              </div>
+            ) : (
+              <div className="text-center">
+                <Upload size={32} className="mx-auto mb-2 text-muted-foreground" />
+                <p className="text-muted-foreground text-sm mb-2">גרור תמונות או וידאו לכאן</p>
+                <Button variant="outline" size="sm" onClick={handleSelectFiles}>בחר קבצים</Button>
+              </div>
+            )}
+          </div>
+          
+          {/* Form inputs - Now on the left for RTL */}
+          <div className="md:order-last md:col-span-2">
             <div className="space-y-4">
               <div>
                 <label className="block text-right mb-1 text-sm">טקסט הפוסט</label>
@@ -200,43 +227,9 @@ const PostCreationPanel = () => {
               </div>
             </div>
           </div>
-          <div className={`bg-muted/30 rounded-lg flex items-center justify-center p-4 ${uploadedMedia ? 'overflow-hidden' : ''}`}>
-            {uploadedMedia ? (
-              <div className="relative w-full h-full min-h-[200px]">
-                <img 
-                  src={uploadedMedia} 
-                  alt="Preview" 
-                  className="w-full h-full object-cover rounded-lg"
-                />
-                <Button 
-                  variant="destructive" 
-                  size="sm" 
-                  className="absolute top-2 left-2 opacity-80"
-                  onClick={() => setUploadedMedia(null)}
-                >
-                  הסר
-                </Button>
-              </div>
-            ) : (
-              <div className="text-center">
-                <Upload size={32} className="mx-auto mb-2 text-muted-foreground" />
-                <p className="text-muted-foreground text-sm mb-2">גרור תמונות או וידאו לכאן</p>
-                <Button variant="outline" size="sm" onClick={handleSelectFiles}>בחר קבצים</Button>
-              </div>
-            )}
-          </div>
         </div>
         
         <div className="flex justify-between mt-6 pt-4 border-t">
-          <Button 
-            onClick={handlePublishNow} 
-            disabled={isPublishing}
-            className="gap-2"
-          >
-            <Send size={16} />
-            {isPublishing ? "מפרסם..." : "פרסם עכשיו"}
-          </Button>
-          
           <Popover>
             <PopoverTrigger asChild>
               <Button variant="outline" className="gap-2">
@@ -257,6 +250,15 @@ const PostCreationPanel = () => {
               </div>
             </PopoverContent>
           </Popover>
+          
+          <Button 
+            onClick={handlePublishNow} 
+            disabled={isPublishing}
+            className="gap-2"
+          >
+            <Send size={16} />
+            {isPublishing ? "מפרסם..." : "פרסם עכשיו"}
+          </Button>
         </div>
       </CardContent>
     </Card>

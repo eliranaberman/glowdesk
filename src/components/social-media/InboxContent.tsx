@@ -138,8 +138,45 @@ const InboxContent = () => {
         </div>
       )}
       
-      {/* Conversation area - Now on the left */}
-      <Card className={`${isMobile && !selectedMessage ? 'hidden' : 'block'} lg:col-span-2 flex flex-col h-full order-last lg:order-first`}>
+      {/* Right side - message list (in RTL view) */}
+      <Card className={`${isMobile && selectedMessage ? 'hidden' : 'block'} lg:col-span-1 order-first lg:order-first`}>
+        <CardHeader className="flex flex-row items-center justify-between p-4">
+          <CardTitle className="mx-auto text-lg">הודעות</CardTitle>
+          {messages.some(msg => !msg.read) && (
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={handleMarkAllAsRead}
+              className="px-2 py-1 h-8 text-xs whitespace-nowrap"
+            >
+              סמן הכל כנקרא
+            </Button>
+          )}
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => setIsModalOpen(true)}
+            className="px-2 py-1 h-8"
+          >
+            חבר חשבון
+          </Button>
+        </CardHeader>
+        
+        <CardContent className="p-0">
+          <MessageList 
+            messages={filteredMessages} 
+            selectedMessage={selectedMessage} 
+            setSelectedMessage={setSelectedMessage} 
+            handleReply={handleReply} 
+            handleMarkAllAsRead={handleMarkAllAsRead}
+            activePlatform={activePlatform}
+            setActivePlatform={setActivePlatform}
+          />
+        </CardContent>
+      </Card>
+
+      {/* Left side - conversation area (in RTL view) */}
+      <Card className={`${isMobile && !selectedMessage ? 'hidden' : 'block'} lg:col-span-2 flex flex-col h-full order-last lg:order-last`}>
         {selectedMessage ? (
           <>
             <CardHeader className="flex flex-row items-center justify-between p-4 border-b">
@@ -169,18 +206,18 @@ const InboxContent = () => {
               {/* Messages */}
               <div className="flex-1 overflow-y-auto p-4 space-y-6 bg-muted/10 mb-2 border rounded-lg">
                 <div className="flex gap-3 items-start max-w-[80%]">
-                  <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
-                    <img src={selectedMessage.avatar} alt={selectedMessage.sender} className="w-full h-full object-cover" />
-                  </div>
                   <div className="bg-muted/30 p-4 rounded-lg">
                     <p className="mb-2">{selectedMessage.message}</p>
                     <span className="text-xs text-muted-foreground">{selectedMessage.time}</span>
+                  </div>
+                  <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
+                    <img src={selectedMessage.avatar} alt={selectedMessage.sender} className="w-full h-full object-cover" />
                   </div>
                 </div>
                 
                 {selectedMessage.id % 2 === 0 && (
                   <>
-                    <div className="flex justify-end">
+                    <div className="flex justify-start">
                       <div className="bg-primary/10 p-4 rounded-lg max-w-[80%]">
                         <p className="mb-2">תודה על פנייתך! אשמח לעזור. אפשר לתת מחיר מדויק בטלפון או כשאראה את המצב הקיים.</p>
                         <span className="text-xs text-muted-foreground">10:30</span>
@@ -192,6 +229,15 @@ const InboxContent = () => {
               
               {/* Reply input */}
               <div className="flex items-end gap-3">
+                <Button 
+                  onClick={handleSendReply} 
+                  disabled={!replyText.trim()} 
+                  size="sm"
+                  className="mb-1 px-5 gap-2"
+                >
+                  <Send size={14} />
+                  שלח
+                </Button>
                 <div className="flex-1 relative">
                   <textarea 
                     value={replyText} 
@@ -199,7 +245,7 @@ const InboxContent = () => {
                     className="w-full rounded-lg border p-3 focus:outline-none focus:ring-2 focus:ring-primary/30 min-h-[80px] resize-none" 
                     placeholder="כתוב את תגובתך כאן..." 
                   />
-                  <div className="absolute left-2 bottom-2 flex gap-1">
+                  <div className="absolute right-2 bottom-2 flex gap-1">
                     <Button variant="ghost" size="icon" className="rounded-full h-8 w-8">
                       <Image size={16} />
                     </Button>
@@ -211,15 +257,6 @@ const InboxContent = () => {
                     </Button>
                   </div>
                 </div>
-                <Button 
-                  onClick={handleSendReply} 
-                  disabled={!replyText.trim()} 
-                  size="sm"
-                  className="mb-1 px-5 gap-2"
-                >
-                  <Send size={14} />
-                  שלח
-                </Button>
               </div>
             </CardContent>
           </>
@@ -234,44 +271,7 @@ const InboxContent = () => {
         )}
       </Card>
 
-      {/* Messages sidebar - Now on the right */}
-      <Card className={`${isMobile && selectedMessage ? 'hidden' : 'block'} lg:col-span-1 order-first lg:order-last`}>
-        <CardHeader className="flex flex-row items-center justify-between p-4">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={() => setIsModalOpen(true)}
-            className="px-2 py-1 h-8"
-          >
-            חבר חשבון
-          </Button>
-          <CardTitle className="mx-auto text-lg">הודעות</CardTitle>
-          {messages.some(msg => !msg.read) && (
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={handleMarkAllAsRead}
-              className="px-2 py-1 h-8 text-xs whitespace-nowrap"
-            >
-              סמן הכל כנקרא
-            </Button>
-          )}
-        </CardHeader>
-        
-        <CardContent className="p-0">
-          <MessageList 
-            messages={filteredMessages} 
-            selectedMessage={selectedMessage} 
-            setSelectedMessage={setSelectedMessage} 
-            handleReply={handleReply} 
-            handleMarkAllAsRead={handleMarkAllAsRead}
-            activePlatform={activePlatform}
-            setActivePlatform={setActivePlatform}
-          />
-        </CardContent>
-      </Card>
-
-      {/* Modals */}
+      {/* Modals - keep existing */}
       <ConnectionModal 
         open={isModalOpen} 
         onOpenChange={setIsModalOpen} 
