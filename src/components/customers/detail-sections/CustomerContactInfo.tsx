@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { format } from 'date-fns';
 import { Award, Calendar, Clock, Mail, Phone, Plus, Tag, X } from 'lucide-react';
-import { Customer } from '@/services/customerService';
+import { Customer } from '@/services/customers';
 
 interface CustomerContactInfoProps {
   customer: Customer;

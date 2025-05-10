@@ -50,7 +50,7 @@ import {
   downloadIcsFile
 } from '@/services/appointmentService';
 import { sendAppointmentNotification } from '@/services/notificationService';
-import { Customer, getCustomers } from '@/services/customerService';
+import { Customer, getCustomers } from '@/services/customers';
 import { getUserCalendarConnections } from '@/services/calendarService';
 
 // Extended form schema with notification and calendar options
