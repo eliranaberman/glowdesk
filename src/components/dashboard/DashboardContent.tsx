@@ -1,0 +1,110 @@
+
+import React, { Suspense } from 'react';
+import { usePermissions } from '@/hooks/use-permissions';
+import PermissionGuard from '@/components/auth/PermissionGuard';
+import BusinessAnalytics from '@/components/dashboard/BusinessAnalytics';
+
+const DailySummary = React.lazy(() => import('../dashboard/DailySummary'));
+const RecentAppointments = React.lazy(() => import('../dashboard/RecentAppointments'));
+const BusinessInsights = React.lazy(() => import('../dashboard/BusinessInsights'));
+const CashFlowForecast = React.lazy(() => import('../dashboard/CashFlowForecast'));
+const LoyaltyProgram = React.lazy(() => import('../dashboard/LoyaltyProgram'));
+const MarketingMessages = React.lazy(() => import('../dashboard/MarketingMessages'));
+const InactiveClientsAlert = React.lazy(() => import('../dashboard/InactiveClientsAlert'));
+const AnalyticsCharts = React.lazy(() => import('../dashboard/AnalyticsCharts'));
+
+const LoadingFallback = () => (
+  <div className="animate-pulse p-6 bg-card rounded-xl shadow-soft">
+    <div className="h-8 w-48 bg-muted rounded mb-4"></div>
+    <div className="space-y-3">
+      <div className="h-4 bg-muted rounded w-full"></div>
+      <div className="h-4 bg-muted rounded w-5/6"></div>
+    </div>
+  </div>
+);
+
+interface DashboardContentProps {
+  appointments: any[];
+  dailyData: {
+    customers: number;
+    hours: number;
+    revenue: number;
+    deficiencies: string[];
+  };
+  monthlyData: any[];
+  retentionData: any[];
+  servicesData: any[];
+  bookingsData: any[];
+}
+
+const DashboardContent = ({
+  appointments,
+  dailyData,
+  monthlyData,
+  retentionData,
+  servicesData,
+  bookingsData
+}: DashboardContentProps) => {
+  const { isAdmin, isOwner } = usePermissions();
+  const hasFinanceAccess = isAdmin || isOwner;
+
+  return (
+    <>
+      {/* Business Analytics Section - Only visible to users with finance permissions */}
+      {hasFinanceAccess && (
+        <PermissionGuard requiredResource="finances" requiredPermission="read" showLoadingState={false}>
+          <div className="mb-8">
+            <BusinessAnalytics timeFrame="month" />
+          </div>
+        </PermissionGuard>
+      )}
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
+        <div className="flex flex-col gap-6 order-first">
+          <Suspense fallback={<LoadingFallback />}>
+            <DailySummary 
+              customers={dailyData.customers}
+              hours={dailyData.hours}
+              revenue={dailyData.revenue}
+              deficiencies={dailyData.deficiencies}
+            />
+          </Suspense>
+          <Suspense fallback={<LoadingFallback />}>
+            <RecentAppointments appointments={appointments} />
+          </Suspense>
+        </div>
+        
+        <div className="flex flex-col gap-6">
+          <Suspense fallback={<LoadingFallback />}>
+            <BusinessInsights />
+            <CashFlowForecast />
+          </Suspense>
+        </div>
+      </div>
+      
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
+        <Suspense fallback={<LoadingFallback />}>
+          <MarketingMessages />
+          <LoyaltyProgram />
+        </Suspense>
+      </div>
+      
+      <Suspense fallback={<LoadingFallback />}>
+        <InactiveClientsAlert />
+      </Suspense>
+      
+      <div className="mb-6 md:mb-8">
+        <Suspense fallback={<LoadingFallback />}>
+          <AnalyticsCharts 
+            monthlyData={monthlyData}
+            retentionData={retentionData}
+            servicesData={servicesData}
+            bookingsData={bookingsData}
+          />
+        </Suspense>
+      </div>
+    </>
+  );
+};
+
+export default DashboardContent;
