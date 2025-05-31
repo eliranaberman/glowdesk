@@ -16,8 +16,8 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   },
   global: {
     // Increase timeout for calendar sync operations that might take longer
-    fetch: (url, options = {}) => {
-      const timeout = options?.headers?.['x-supabase-function'] ? 30000 : 10000;
+    fetch: (url: string | URL | Request, options: RequestInit = {}) => {
+      const timeout = (options.headers as Record<string, string>)?.['x-supabase-function'] ? 30000 : 10000;
       
       // Create an AbortController for timeout
       const controller = new AbortController();
