@@ -3,6 +3,7 @@ import React, { Suspense } from 'react';
 import { usePermissions } from '@/hooks/use-permissions';
 import PermissionGuard from '@/components/auth/PermissionGuard';
 import BusinessAnalytics from '@/components/dashboard/BusinessAnalytics';
+import LoadingFallback from '@/components/dashboard/LoadingFallback';
 
 const DailySummary = React.lazy(() => import('../dashboard/DailySummary'));
 const RecentAppointments = React.lazy(() => import('../dashboard/RecentAppointments'));
@@ -12,16 +13,6 @@ const LoyaltyProgram = React.lazy(() => import('../dashboard/LoyaltyProgram'));
 const MarketingMessages = React.lazy(() => import('../dashboard/MarketingMessages'));
 const InactiveClientsAlert = React.lazy(() => import('../dashboard/InactiveClientsAlert'));
 const AnalyticsCharts = React.lazy(() => import('../dashboard/AnalyticsCharts'));
-
-const LoadingFallback = () => (
-  <div className="animate-pulse p-6 bg-card rounded-xl shadow-soft">
-    <div className="h-8 w-48 bg-muted rounded mb-4"></div>
-    <div className="space-y-3">
-      <div className="h-4 bg-muted rounded w-full"></div>
-      <div className="h-4 bg-muted rounded w-5/6"></div>
-    </div>
-  </div>
-);
 
 interface DashboardContentProps {
   appointments: any[];
@@ -54,7 +45,9 @@ const DashboardContent = ({
       {hasFinanceAccess && (
         <PermissionGuard requiredResource="finances" requiredPermission="read" showLoadingState={false}>
           <div className="mb-8">
-            <BusinessAnalytics timeFrame="month" />
+            <Suspense fallback={<LoadingFallback />}>
+              <BusinessAnalytics timeFrame="month" />
+            </Suspense>
           </div>
         </PermissionGuard>
       )}
