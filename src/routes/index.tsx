@@ -12,10 +12,83 @@ import { marketingRoutes } from './marketingRoutes';
 import { financeRoutes } from './financeRoutes';
 import { publicRoutes } from './publicRoutes';
 
+// Import all the main pages
+import Dashboard from '../pages/Dashboard';
+import AIAssistant from '../pages/AIAssistant';
+import Tasks from '../pages/Tasks';
+import Expenses from '../pages/Expenses';
+import Reports from '../pages/Reports';
+import Notifications from '../pages/Notifications';
+import Settings from '../pages/Settings';
+import UserManagement from '../pages/UserManagement';
+import UserRolesPage from '../pages/UserRolesPage';
+import UserProfilePage from '../pages/UserProfilePage';
+import LoyaltyPage from '../pages/LoyaltyPage';
+import SocialMedia from '../pages/SocialMedia';
+import SocialMediaMeta from '../pages/SocialMediaMeta';
+import PortfolioPage from '../pages/PortfolioPage';
+
+// Create additional main routes for pages that should be directly accessible
+const additionalMainRoutes: RouteObject[] = [
+  {
+    path: '/ai-assistant',
+    element: <AIAssistant />,
+  },
+  {
+    path: '/tasks',
+    element: <Tasks />,
+  },
+  {
+    path: '/expenses',
+    element: <Expenses />,
+  },
+  {
+    path: '/reports',
+    element: <Reports />,
+  },
+  {
+    path: '/notifications',
+    element: <Notifications />,
+  },
+  {
+    path: '/settings',
+    element: <Settings />,
+  },
+  {
+    path: '/users',
+    element: <UserManagement />,
+  },
+  {
+    path: '/user-roles',
+    element: <UserRolesPage />,
+  },
+  {
+    path: '/user-profile',
+    element: <UserProfilePage />,
+  },
+  {
+    path: '/loyalty',
+    element: <LoyaltyPage />,
+  },
+  {
+    path: '/social-media',
+    element: <SocialMedia />,
+  },
+  {
+    path: '/social-media-meta',
+    element: <SocialMediaMeta />,
+  },
+  {
+    path: '/portfolio',
+    element: <PortfolioPage />,
+  },
+];
+
 // Combine all protected routes
 const createProtectedRoutes = (): RouteObject[] => {
   // Combine all the routes that need authentication
   return [
+    ...additionalMainRoutes,
     ...customerRoutes,
     ...clientRoutes,
     ...schedulingRoutes,
