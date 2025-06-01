@@ -19,6 +19,7 @@ import LoyaltyPage from '@/pages/LoyaltyPage';
 import SocialMedia from '@/pages/SocialMedia';
 import SocialMediaMeta from '@/pages/SocialMediaMeta';
 import PortfolioPage from '@/pages/PortfolioPage';
+import Customers from '@/pages/Customers';
 
 // Create an AuthLayout component that provides the AuthContext
 export const AuthLayout = () => {
@@ -111,6 +112,10 @@ export const createMainRoutes = (children: ChildrenProp): RouteObject => ({
         {
           path: '/portfolio',
           element: <PortfolioPage />,
+        },
+        {
+          path: '/customers',
+          element: <Customers />,
         },
         // The children parameter will be inserted here by index.tsx
       ]
