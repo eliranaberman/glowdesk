@@ -20,6 +20,13 @@ import SocialMedia from '@/pages/SocialMedia';
 import SocialMediaMeta from '@/pages/SocialMediaMeta';
 import PortfolioPage from '@/pages/PortfolioPage';
 import Customers from '@/pages/Customers';
+import Scheduling from '@/pages/Scheduling';
+import AppointmentCalendar from '@/pages/AppointmentCalendar';
+import NewAppointment from '@/pages/scheduling/NewAppointment';
+import EditAppointment from '@/pages/scheduling/EditAppointment';
+import MarketingTemplates from '@/pages/marketing/MarketingTemplates';
+import NewTemplateForm from '@/pages/marketing/NewTemplateForm';
+import EditTemplateForm from '@/pages/marketing/EditTemplateForm';
 
 // Create an AuthLayout component that provides the AuthContext
 export const AuthLayout = () => {
@@ -116,6 +123,38 @@ export const createMainRoutes = (children: ChildrenProp): RouteObject => ({
         {
           path: '/customers',
           element: <Customers />,
+        },
+        {
+          path: '/clients',
+          element: <Customers />,
+        },
+        {
+          path: '/scheduling',
+          element: <Scheduling />,
+        },
+        {
+          path: '/calendar',
+          element: <AppointmentCalendar />,
+        },
+        {
+          path: '/scheduling/new',
+          element: <NewAppointment />,
+        },
+        {
+          path: '/scheduling/:id',
+          element: <EditAppointment />,
+        },
+        {
+          path: '/marketing/templates',
+          element: <MarketingTemplates />,
+        },
+        {
+          path: '/marketing/templates/new',
+          element: <NewTemplateForm />,
+        },
+        {
+          path: '/marketing/templates/:id',
+          element: <EditTemplateForm />,
         },
         // The children parameter will be inserted here by index.tsx
       ]

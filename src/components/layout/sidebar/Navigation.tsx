@@ -55,7 +55,7 @@ const Navigation = ({ onLinkClick }: NavigationProps) => {
       icon: LayoutDashboard
     },
     {
-      href: '/clients',
+      href: '/customers',
       label: 'לקוחות',
       icon: Contact2
     },
