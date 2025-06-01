@@ -6,6 +6,19 @@ import Layout from '@/components/layout/Layout';
 import ProtectedRouteWrapper from '@/components/auth/ProtectedRouteWrapper';
 import NotFound from '@/pages/NotFound';
 import Dashboard from '@/pages/Dashboard';
+import AIAssistant from '@/pages/AIAssistant';
+import Tasks from '@/pages/Tasks';
+import Expenses from '@/pages/Expenses';
+import Reports from '@/pages/Reports';
+import Notifications from '@/pages/Notifications';
+import Settings from '@/pages/Settings';
+import UserManagement from '@/pages/UserManagement';
+import UserRolesPage from '@/pages/UserRolesPage';
+import UserProfilePage from '@/pages/UserProfilePage';
+import LoyaltyPage from '@/pages/LoyaltyPage';
+import SocialMedia from '@/pages/SocialMedia';
+import SocialMediaMeta from '@/pages/SocialMediaMeta';
+import PortfolioPage from '@/pages/PortfolioPage';
 
 // Create an AuthLayout component that provides the AuthContext
 export const AuthLayout = () => {
@@ -46,6 +59,58 @@ export const createMainRoutes = (children: ChildrenProp): RouteObject => ({
         {
           path: '/dashboard',
           element: <Dashboard />,
+        },
+        {
+          path: '/ai-assistant',
+          element: <AIAssistant />,
+        },
+        {
+          path: '/tasks',
+          element: <Tasks />,
+        },
+        {
+          path: '/expenses',
+          element: <Expenses />,
+        },
+        {
+          path: '/reports',
+          element: <Reports />,
+        },
+        {
+          path: '/notifications',
+          element: <Notifications />,
+        },
+        {
+          path: '/settings',
+          element: <Settings />,
+        },
+        {
+          path: '/users',
+          element: <UserManagement />,
+        },
+        {
+          path: '/user-roles',
+          element: <UserRolesPage />,
+        },
+        {
+          path: '/user-profile',
+          element: <UserProfilePage />,
+        },
+        {
+          path: '/loyalty',
+          element: <LoyaltyPage />,
+        },
+        {
+          path: '/social-media',
+          element: <SocialMedia />,
+        },
+        {
+          path: '/social-media-meta',
+          element: <SocialMediaMeta />,
+        },
+        {
+          path: '/portfolio',
+          element: <PortfolioPage />,
         },
         // The children parameter will be inserted here by index.tsx
       ]
