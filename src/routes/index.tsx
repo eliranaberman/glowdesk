@@ -20,7 +20,6 @@ import Reports from '@/pages/Reports';
 import Settings from '@/pages/Settings';
 import LoyaltyPage from '@/pages/LoyaltyPage';
 import SocialMedia from '@/pages/SocialMedia';
-import SocialMediaMeta from '@/pages/SocialMediaMeta';
 import AIAssistant from '@/pages/AIAssistant';
 import Notifications from '@/pages/Notifications';
 import PortfolioPage from '@/pages/PortfolioPage';
@@ -106,7 +105,6 @@ export default function AppRoutes() {
         <Route path="/loyalty" element={<LoyaltyPage />} />
         <Route path="/online-booking" element={<OnlineBooking />} />
         <Route path="/social-media" element={<SocialMedia />} />
-        <Route path="/social-media-meta" element={<SocialMediaMeta />} />
         <Route path="/portfolio" element={<PortfolioPage />} />
         
         {/* Marketing routes */}

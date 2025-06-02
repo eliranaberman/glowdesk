@@ -10,6 +10,6 @@ export interface PortfolioItem {
 
 export interface PortfolioItemFormData {
   title: string;
-  description: string;
-  image: File | null;
+  description?: string;
+  image: File;
 }

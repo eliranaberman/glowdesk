@@ -5,10 +5,9 @@ import { fetchConnectedAccounts, disconnectAccount } from '@/services/socialMedi
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { Facebook, Instagram, Trash2, RefreshCw, Loader2 } from 'lucide-react';
+import { Facebook, Instagram, Trash2, RefreshCw, Loader2, Plus } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import ConnectAccountButton from './ConnectAccountButton';
 
 interface AccountsListProps {
   onSelectAccount: (account: SocialMediaAccount) => void;
@@ -88,7 +87,10 @@ const AccountsList = ({ onSelectAccount, selectedAccount }: AccountsListProps) =
               <RefreshCw className="h-4 w-4" />
             )}
           </Button>
-          <ConnectAccountButton onSuccess={loadAccounts} />
+          <Button variant="outline" size="sm">
+            <Plus className="h-4 w-4 ml-1" />
+            חבר חשבון
+          </Button>
         </div>
       </div>
       
@@ -100,7 +102,10 @@ const AccountsList = ({ onSelectAccount, selectedAccount }: AccountsListProps) =
         <Card>
           <CardContent className="p-6 text-center">
             <p className="text-muted-foreground mb-4">אין חשבונות מחוברים עדיין</p>
-            <ConnectAccountButton onSuccess={loadAccounts} />
+            <Button variant="outline">
+              <Plus className="h-4 w-4 ml-1" />
+              חבר חשבון ראשון
+            </Button>
           </CardContent>
         </Card>
       ) : (

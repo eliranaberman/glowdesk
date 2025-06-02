@@ -18,15 +18,15 @@ export interface ReportData {
   id: string;
   title: string;
   description: string;
-  timeFrame: TimeFrame;
+  time_frame: TimeFrame;
   type: ReportType;
-  generatedAt: string;
+  generated_at: string;
   data: any;
   format: 'csv' | 'pdf' | 'json';
   user_id: string;
 }
 
-export interface ReportDataCreate extends Omit<ReportData, 'id' | 'generatedAt'> {}
+export interface ReportDataCreate extends Omit<ReportData, 'id' | 'generated_at'> {}
 
 // Get date range based on timeframe
 export const getDateRangeForTimeFrame = (timeFrame: TimeFrame): { startDate: string, endDate: string } => {
@@ -78,8 +78,8 @@ export const generateRevenueReport = async (timeFrame: TimeFrame, filter?: Repor
     return {
       title: `דוח הכנסות - ${getTimeFrameName(timeFrame)}`,
       type: 'revenue' as ReportType,
-      timeFrame,
-      generatedAt: new Date().toISOString(),
+      time_frame: timeFrame,
+      generated_at: new Date().toISOString(),
       data,
     };
   } catch (error) {
@@ -111,8 +111,8 @@ export const generateExpensesReport = async (timeFrame: TimeFrame, filter?: Repo
     return {
       title: `דוח הוצאות - ${getTimeFrameName(timeFrame)}`,
       type: 'expenses' as ReportType,
-      timeFrame,
-      generatedAt: new Date().toISOString(),
+      time_frame: timeFrame,
+      generated_at: new Date().toISOString(),
       data,
     };
   } catch (error) {
@@ -156,8 +156,8 @@ export const generateCashFlowReport = async (timeFrame: TimeFrame, filter?: Repo
     return {
       title: `דוח תזרים מזומנים - ${getTimeFrameName(timeFrame)}`,
       type: 'cashflow' as ReportType,
-      timeFrame,
-      generatedAt: new Date().toISOString(),
+      time_frame: timeFrame,
+      generated_at: new Date().toISOString(),
       data: dailyData,
       summary: {
         totalRevenue,
@@ -179,7 +179,7 @@ export const saveReport = async (report: ReportDataCreate): Promise<string | nul
       .from('reports')
       .insert([{
         ...report,
-        generatedAt: new Date().toISOString(),
+        generated_at: new Date().toISOString(),
       }])
       .select()
       .single();
@@ -224,7 +224,7 @@ export const getUserReports = async (): Promise<ReportData[]> => {
       .from('reports')
       .select('*')
       .eq('user_id', user.user.id)
-      .order('generatedAt', { ascending: false });
+      .order('generated_at', { ascending: false });
       
     if (error) throw error;
     

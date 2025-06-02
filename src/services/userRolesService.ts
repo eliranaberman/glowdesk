@@ -1,7 +1,8 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 
-export type UserRole = 'admin' | 'owner' | 'employee' | 'social_manager';
+export type UserRole = 'admin' | 'owner' | 'employee' | 'social_manager' | 'finance_manager';
 
 export interface UserRoleMapping {
   id: string;
