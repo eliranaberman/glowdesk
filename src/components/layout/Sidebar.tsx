@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useLocation, Link, NavLink } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -22,7 +23,6 @@ import {
   Users, 
   Contact2, 
   BrainCircuit, 
-  Facebook, 
   ShieldCheck, 
   UserCog,
   Award,
@@ -146,11 +146,6 @@ const Sidebar = ({
             href: '/portfolio',
             label: 'גלריה',
             icon: ImageIcon
-          },
-          {
-            href: '/social-media-meta',
-            label: 'חיבור Meta API',
-            icon: Facebook
           }
         ]
       },
@@ -213,7 +208,7 @@ const Sidebar = ({
                   className={cn(
                     "group flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-all hover:bg-secondary hover:text-secondary-foreground",
                     (isLinkActive(link.href) || isParentActive(link.subLinks)) ? "bg-secondary text-secondary-foreground" : "text-muted-foreground",
-                    "text-right justify-end cursor-pointer" // Updated to justify-end for right alignment
+                    "text-right justify-end cursor-pointer"
                   )}
                   onClick={() => toggleMenu(link.label)}
                 >
@@ -236,7 +231,7 @@ const Sidebar = ({
                         className={({isActive}) => cn(
                           "group flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-all hover:bg-secondary hover:text-secondary-foreground",
                           isActive ? "bg-secondary text-secondary-foreground" : "text-muted-foreground",
-                          "text-right justify-end" // Right alignment
+                          "text-right justify-end"
                         )}
                       >
                         <span>{subLink.label}</span>
@@ -253,7 +248,7 @@ const Sidebar = ({
                 className={({isActive}) => cn(
                   "group flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-all hover:bg-secondary hover:text-secondary-foreground",
                   isActive ? "bg-secondary text-secondary-foreground" : "text-muted-foreground",
-                  "text-right justify-end" // Right alignment for standard links
+                  "text-right justify-end"
                 )}
               >
                 <span>{link.label}</span>
@@ -270,7 +265,7 @@ const Sidebar = ({
     <div className={cn(
       "flex h-screen flex-col border-r border-r-border/50 bg-sidebar text-sidebar-foreground shadow-md transition-all", 
       isCollapsed ? "w-16" : "w-64", 
-      "h-full" // Ensure full height
+      "h-full"
     )}>
       <div className="flex-1 overflow-hidden px-3 py-4">
         <Link to="/dashboard" className="flex items-center justify-end pl-1.5 font-semibold mb-4">

@@ -178,7 +178,13 @@ export const saveReport = async (report: ReportDataCreate): Promise<string | nul
     const { data, error } = await supabase
       .from('reports')
       .insert([{
-        ...report,
+        title: report.title,
+        description: report.description,
+        time_frame: report.time_frame,
+        type: report.type,
+        data: report.data,
+        format: report.format,
+        user_id: report.user_id,
         generated_at: new Date().toISOString(),
       }])
       .select()
@@ -204,7 +210,17 @@ export const getReport = async (reportId: string): Promise<ReportData | null> =>
       
     if (error) throw error;
     
-    return data;
+    return {
+      id: data.id,
+      title: data.title,
+      description: data.description,
+      time_frame: data.time_frame as TimeFrame,
+      type: data.type as ReportType,
+      generated_at: data.generated_at,
+      data: data.data,
+      format: data.format as 'csv' | 'pdf' | 'json',
+      user_id: data.user_id,
+    };
   } catch (error) {
     console.error('Error retrieving report:', error);
     return null;
@@ -228,7 +244,17 @@ export const getUserReports = async (): Promise<ReportData[]> => {
       
     if (error) throw error;
     
-    return data || [];
+    return (data || []).map(item => ({
+      id: item.id,
+      title: item.title,
+      description: item.description,
+      time_frame: item.time_frame as TimeFrame,
+      type: item.type as ReportType,
+      generated_at: item.generated_at,
+      data: item.data,
+      format: item.format as 'csv' | 'pdf' | 'json',
+      user_id: item.user_id,
+    }));
   } catch (error) {
     console.error('Error retrieving user reports:', error);
     return [];
