@@ -1,160 +1,346 @@
-
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Calendar as CalendarIcon, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { format, addMonths, subMonths, startOfMonth, endOfMonth, eachDayOfInterval, isToday, isWeekend, isSameMonth } from 'date-fns';
-import { he } from 'date-fns/locale';
-import { Badge } from '@/components/ui/badge';
-import { cn } from '@/lib/utils';
+import { Helmet } from 'react-helmet-async';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { toast } from 'sonner';
+import { Plus, Search } from 'lucide-react';
+import GanttChart from '@/components/scheduling/GanttChart';
+import AppointmentForm from '@/components/scheduling/AppointmentForm';
+import { 
+  getEmployees, 
+  getUniqueServiceTypes, 
+  getAppointments,
+  generateMockAppointments
+} from '@/services/appointmentService';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const AppointmentCalendar = () => {
   const navigate = useNavigate();
-  const [currentMonth, setCurrentMonth] = useState(new Date());
-  
-  // Mock appointments data
-  const mockAppointments = [
-    { date: '2025-04-10', count: 3 },
-    { date: '2025-04-15', count: 2 },
-    { date: '2025-04-20', count: 1 },
-    { date: '2025-04-22', count: 4 },
-    { date: '2025-04-28', count: 2 },
-  ];
+  const isMobile = useIsMobile();
+  const [activeTab, setActiveTab] = useState('appointments');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [isNewAppointmentOpen, setIsNewAppointmentOpen] = useState(false);
+  const [selectedEmployeeId, setSelectedEmployeeId] = useState<string | null>(null);
+  const [selectedServiceType, setSelectedServiceType] = useState<string | null>(null);
+  const [selectedStatus, setSelectedStatus] = useState<string>('all');
+  const [employees, setEmployees] = useState<{ id: string; name: string }[]>([]);
+  const [serviceTypes, setServiceTypes] = useState<string[]>([]);
+  const [appointments, setAppointments] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isFiltersVisible, setIsFiltersVisible] = useState(!isMobile);
 
-  // Navigate to previous month
-  const prevMonth = () => {
-    setCurrentMonth(prevDate => subMonths(prevDate, 1));
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+        const employeesData = await getEmployees();
+        setEmployees(employeesData);
+        
+        const serviceTypesData = await getUniqueServiceTypes();
+        setServiceTypes(serviceTypesData);
+        
+        await loadAppointments();
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        toast.error('שגיאה בטעינת הנתונים');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    loadAppointments();
+  }, [selectedDate, selectedEmployeeId, selectedServiceType, selectedStatus, searchQuery]);
+
+  const loadAppointments = async () => {
+    try {
+      setIsLoading(true);
+      const appointmentsData = await getAppointments({
+        employee_id: selectedEmployeeId,
+        service_type: selectedServiceType,
+        status: selectedStatus === 'all' ? 'all' : selectedStatus as any,
+        search: searchQuery,
+        date_from: new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1),
+        date_to: new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1, 0),
+      });
+
+      const formattedAppointments = appointmentsData.map(appointment => {
+        let color;
+        switch (appointment.status) {
+          case 'scheduled':
+            color = '#E5DEFF';
+            break;
+          case 'completed':
+            color = '#F2FCE2';
+            break;
+          case 'cancelled':
+            color = '#FFDEE2';
+            break;
+          default:
+            color = '#D3E4FD';
+        }
+
+        return {
+          id: appointment.id,
+          customer: appointment.customer?.full_name || 'לקוח לא ידוע',
+          service: appointment.service_type,
+          startTime: appointment.start_time,
+          duration: calculateDuration(appointment.start_time, appointment.end_time),
+          date: new Date(appointment.date),
+          color,
+          price: '₪120',
+          status: appointment.status,
+          employeeId: appointment.employee_id,
+        };
+      });
+
+      setAppointments(formattedAppointments);
+    } catch (error) {
+      console.error('Error loading appointments:', error);
+      toast.error('שגיאה בטעינת הפגישות');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  // Navigate to next month
-  const nextMonth = () => {
-    setCurrentMonth(prevDate => addMonths(prevDate, 1));
+  const calculateDuration = (startTime: string, endTime: string): number => {
+    const [startHours, startMinutes] = startTime.split(':').map(Number);
+    const [endHours, endMinutes] = endTime.split(':').map(Number);
+    
+    const startTotalMinutes = startHours * 60 + startMinutes;
+    const endTotalMinutes = endHours * 60 + endMinutes;
+    
+    return endTotalMinutes - startTotalMinutes;
   };
 
-  // Generate array of days for current month view
-  const monthDays = eachDayOfInterval({
-    start: startOfMonth(currentMonth),
-    end: endOfMonth(currentMonth)
-  });
-
-  // Handle day click
-  const handleDayClick = (date: Date) => {
-    navigate(`/scheduling?date=${format(date, 'yyyy-MM-dd')}`);
+  const handleGenerateMockData = async () => {
+    try {
+      await generateMockAppointments();
+      toast.success('נוצרו 30 פגישות לדוגמה');
+      await loadAppointments();
+    } catch (error) {
+      console.error('Error generating mock data:', error);
+      toast.error('שגיאה ביצירת נתוני דוגמה');
+    }
   };
 
-  // Check if a day has appointments
-  const getAppointmentsForDay = (date: Date) => {
-    const dateStr = format(date, 'yyyy-MM-dd');
-    return mockAppointments.find(appt => appt.date === dateStr);
+  const handleResetFilters = () => {
+    setSearchQuery('');
+    setSelectedEmployeeId(null);
+    setSelectedServiceType(null);
+    setSelectedStatus('all');
   };
 
-  // Day name headers (starting from Sunday in Hebrew)
-  const dayNames = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
+  const toggleFilters = () => {
+    setIsFiltersVisible(!isFiltersVisible);
+  };
 
   return (
-    <div className="container mx-auto py-6" dir="rtl">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">לוח שנה</h1>
-        <Button 
-          variant="default"
-          onClick={() => navigate('/scheduling/new')}
-        >
-          <CalendarIcon className="mr-2 h-4 w-4" />
-          פגישה חדשה
-        </Button>
+    <div>
+      <Helmet>
+        <title>יומן פגישות | Chen Mizrahi</title>
+      </Helmet>
+
+      <div className={`flex justify-between items-center ${isMobile ? 'mb-4' : 'mb-6'}`}>
+        <div>
+          <h1 className={`font-bold ${isMobile ? 'text-xl' : 'text-2xl'} mb-1`}>יומן פגישות</h1>
+          <p className={`text-muted-foreground ${isMobile ? 'text-xs' : ''}`}>
+            ניהול ותזמון הפגישות שלך
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          {isMobile ? null : (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleGenerateMockData}
+            >
+              צור נתוני דוגמה
+            </Button>
+          )}
+          <Button 
+            onClick={() => setIsNewAppointmentOpen(true)}
+            className={`flex items-center gap-2 ${isMobile ? 'h-8 text-xs' : ''}`}
+          >
+            <Plus className={isMobile ? "h-3 w-3" : "h-4 w-4"} />
+            {isMobile ? 'חדש' : 'פגישה חדשה'}
+          </Button>
+        </div>
       </div>
 
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>פגישות - {format(currentMonth, 'MMMM yyyy', { locale: he })}</CardTitle>
-          <div className="flex items-center space-x-2 space-x-reverse">
-            <Button 
-              variant="outline" 
-              size="icon"
-              onClick={prevMonth}
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-            <Button 
-              variant="outline" 
-              size="icon"
-              onClick={() => setCurrentMonth(new Date())}
-            >
-              <span className="sr-only">החודש הנוכחי</span>
-              <CalendarIcon className="h-4 w-4" />
-            </Button>
-            <Button 
-              variant="outline" 
-              size="icon"
-              onClick={nextMonth}
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {/* Weekday headers */}
-          <div className="grid grid-cols-7 gap-1 mb-2">
-            {dayNames.map((day) => (
-              <div 
-                key={day} 
-                className="text-center font-medium text-sm py-1"
-              >
-                {day}
-              </div>
-            ))}
-          </div>
-          
-          {/* Calendar grid */}
-          <div className="grid grid-cols-7 gap-1">
-            {/* Empty cells for days before the start of the month */}
-            {Array.from({ length: monthDays[0].getDay() }).map((_, i) => (
-              <div key={`empty-start-${i}`} className="h-24 rounded-md p-2"></div>
-            ))}
-            
-            {/* Actual days of the month */}
-            {monthDays.map((day) => {
-              const appointmentsForDay = getAppointmentsForDay(day);
-              return (
-                <div 
-                  key={day.toISOString()}
-                  className={cn(
-                    "min-h-[6rem] rounded-md border p-2 transition-all cursor-pointer hover:bg-muted/50",
-                    isToday(day) && "bg-yellow-50 border-yellow-200",
-                    isWeekend(day) && "bg-gray-50",
-                    !isSameMonth(day, currentMonth) && "opacity-50"
-                  )}
-                  onClick={() => handleDayClick(day)}
-                >
-                  <div className="flex justify-between items-start">
-                    <span className={cn(
-                      "text-sm font-medium",
-                      isToday(day) && "text-primary bg-primary/10 rounded-full w-6 h-6 flex items-center justify-center"
-                    )}>
-                      {format(day, 'd')}
-                    </span>
-                    {appointmentsForDay && (
-                      <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">
-                        {appointmentsForDay.count} פגישות
-                      </Badge>
-                    )}
-                  </div>
+      <Tabs
+        defaultValue="appointments"
+        value={activeTab}
+        onValueChange={setActiveTab}
+        className={isMobile ? "mb-4" : "mb-6"}
+        dir="rtl"
+      >
+        <TabsList className="mb-4">
+          <TabsTrigger value="appointments">פגישות</TabsTrigger>
+          <TabsTrigger value="calendar">לוח שנה</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="appointments" className="space-y-4">
+          <Card>
+            <CardContent className={isMobile ? "p-3" : "p-6"}>
+              <div className={`flex ${isMobile ? 'flex-col gap-2 mb-2' : 'flex-col md:flex-row gap-4 mb-4'}`}>
+                <div className="flex-1 relative">
+                  <Search className={`absolute left-3 ${isMobile ? 'top-2 h-3 w-3' : 'top-3 h-4 w-4'} text-muted-foreground`} />
+                  <Input
+                    placeholder="חפש לפי שם לקוח..."
+                    className={`pl-10 ${isMobile ? 'h-8 text-sm' : ''}`}
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
                 </div>
-              );
-            })}
-            
-            {/* Empty cells for days after the end of the month */}
-            {Array.from({ length: (6 - monthDays[monthDays.length - 1].getDay()) % 7 }).map((_, i) => (
-              <div key={`empty-end-${i}`} className="h-24 rounded-md p-2"></div>
-            ))}
-          </div>
-          
-          <div className="flex justify-center mt-4 text-sm text-muted-foreground">
-            לחץ על יום כלשהו כדי לצפות בפגישות באותו היום
-          </div>
-        </CardContent>
-      </Card>
+                
+                {isMobile ? (
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={toggleFilters}
+                    className="text-xs"
+                  >
+                    {isFiltersVisible ? 'הסתר סינון' : 'הצג סינון'}
+                  </Button>
+                ) : null}
+                
+                {isFiltersVisible && (
+                  <div className={`flex ${isMobile ? 'flex-col gap-2' : 'items-center gap-4 flex-wrap'}`}>
+                    <div className={isMobile ? "w-full" : "min-w-36"}>
+                      <Select
+                        value={selectedEmployeeId || ''}
+                        onValueChange={(value) => setSelectedEmployeeId(value || null)}
+                      >
+                        <SelectTrigger className={isMobile ? "h-8 text-sm" : ""}>
+                          <SelectValue placeholder="כל העובדים" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="">כל העובדים</SelectItem>
+                          {employees.map((employee) => (
+                            <SelectItem key={employee.id} value={employee.id}>
+                              {employee.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <div className={isMobile ? "w-full" : "min-w-36"}>
+                      <Select
+                        value={selectedServiceType || ''}
+                        onValueChange={(value) => setSelectedServiceType(value || null)}
+                      >
+                        <SelectTrigger className={isMobile ? "h-8 text-sm" : ""}>
+                          <SelectValue placeholder="כל השירותים" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="">כל השירותים</SelectItem>
+                          {serviceTypes.map((type) => (
+                            <SelectItem key={type} value={type}>
+                              {type}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <div className={isMobile ? "w-full" : "min-w-36"}>
+                      <Select
+                        value={selectedStatus}
+                        onValueChange={setSelectedStatus}
+                      >
+                        <SelectTrigger className={isMobile ? "h-8 text-sm" : ""}>
+                          <SelectValue placeholder="כל הסטטוסים" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">כל הסטטוסים</SelectItem>
+                          <SelectItem value="scheduled">מתוכנן</SelectItem>
+                          <SelectItem value="completed">הושלם</SelectItem>
+                          <SelectItem value="cancelled">בוטל</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={handleResetFilters}
+                      className={isMobile ? "text-xs" : ""}
+                    >
+                      אפס סינון
+                    </Button>
+                  </div>
+                )}
+              </div>
+              
+              <GanttChart 
+                appointments={appointments}
+                date={selectedDate}
+                onDateChange={setSelectedDate}
+              />
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="calendar" className="space-y-4">
+          <Card>
+            <CardContent className={isMobile ? "p-3" : "p-6"}>
+              <div className={`text-center ${isMobile ? 'p-8' : 'p-16'}`}>
+                <h3 className={`font-medium ${isMobile ? 'text-base' : 'text-lg'}`}>תצוגת לוח שנה מורחבת</h3>
+                <p className={`text-muted-foreground mt-2 ${isMobile ? 'text-xs' : ''}`}>
+                  תצוגה זו תהיה זמינה בגרסה הבאה. כרגע ניתן להשתמש בתצוגת הפגישות.
+                </p>
+                <Button
+                  variant="secondary"
+                  onClick={() => setActiveTab('appointments')}
+                  className={`mt-4 ${isMobile ? 'text-xs' : ''}`}
+                >
+                  חזור לתצוגת פגישות
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+
+      <Dialog open={isNewAppointmentOpen} onOpenChange={setIsNewAppointmentOpen}>
+        <DialogContent className={isMobile ? "max-w-[320px]" : "max-w-md"}>
+          <DialogHeader>
+            <DialogTitle className={isMobile ? "text-lg" : ""}>פגישה חדשה</DialogTitle>
+            <DialogDescription className={isMobile ? "text-xs" : ""}>צור פגישה חדשה ביומן</DialogDescription>
+          </DialogHeader>
+          <AppointmentForm 
+            onSuccess={() => {
+              setIsNewAppointmentOpen(false);
+              loadAppointments();
+            }}
+            onCancel={() => setIsNewAppointmentOpen(false)}
+            initialDate={selectedDate}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

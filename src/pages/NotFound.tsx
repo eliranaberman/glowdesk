@@ -2,7 +2,7 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
 const NotFound = () => {
   const navigate = useNavigate();
@@ -15,17 +15,15 @@ const NotFound = () => {
   }, []);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-warmBeige/5">
-      <div className="text-center p-8 bg-white rounded-lg shadow-md max-w-md w-full">
-        <h1 className="text-5xl font-bold mb-6 text-neutral-700">404</h1>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-warmBeige/10 to-background">
+      <div className="text-center p-6 bg-white rounded-lg shadow-md max-w-md w-full">
+        <h1 className="text-4xl font-bold mb-4 text-primary">404</h1>
         <p className="text-xl text-gray-600 mb-6">הדף שחיפשת לא נמצא</p>
         <Button 
           onClick={() => navigate("/")} 
-          variant="warm"
-          size="lg"
-          className="mx-auto flex items-center gap-2 font-medium px-6"
+          className="mx-auto flex items-center"
         >
-          <ArrowLeft className="h-5 w-5" />
+          <ArrowRight className="mr-2 h-4 w-4" />
           חזרה לדף הבית
         </Button>
       </div>

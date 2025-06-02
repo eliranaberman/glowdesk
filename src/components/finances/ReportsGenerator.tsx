@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,7 +10,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { format } from 'date-fns';
 import { CalendarIcon, Download, FileText, BarChart, PieChart, BarChartHorizontal } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from '@/hooks/use-toast';
 import { 
   generateRevenueReport, 
   generateExpensesReport, 
@@ -34,7 +35,6 @@ const ReportsGenerator = ({
   const [isGenerating, setIsGenerating] = useState(false);
   const [reportData, setReportData] = useState<any>(null);
   const [exportFormat, setExportFormat] = useState<'csv' | 'pdf'>('csv');
-  const { toast } = useToast();
 
   const handleGenerateReport = async () => {
     setIsGenerating(true);

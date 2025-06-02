@@ -1,79 +1,110 @@
 
-
-// Mock notification service
+import { supabase } from '@/lib/supabase';
 
 export interface NotificationPreference {
+  id: string;
+  user_id: string;
   whatsapp_enabled: boolean;
   sms_fallback_enabled: boolean;
+  created_at: string;
+  updated_at: string;
 }
 
-/**
- * Send a notification related to an appointment
- * @param appointmentId The ID of the appointment
- * @param type The type of notification to send
- * @returns Promise that resolves when notification is sent
- */
-export const sendAppointmentNotification = async (
-  appointmentId: string, 
-  type: 'confirmation' | 'reminder' | 'cancellation'
-): Promise<boolean> => {
-  await new Promise(resolve => setTimeout(resolve, 500)); // Simulate API delay
+// Get notification preferences for the current user
+export const getUserNotificationPreferences = async (): Promise<NotificationPreference | null> => {
+  const { data: user } = await supabase.auth.getUser();
   
-  // In a real app, this would send a notification through the appropriate channel
-  console.log(`Sending ${type} notification for appointment ${appointmentId}`);
+  if (!user.user) {
+    return null;
+  }
   
-  return true;
+  const { data, error } = await supabase
+    .from('notification_preferences')
+    .select('*')
+    .eq('user_id', user.user.id)
+    .maybeSingle();
+  
+  if (error && error.code !== 'PGRST116') { // PGRST116 is "no rows returned"
+    console.error('Error fetching notification preferences:', error);
+    throw new Error(error.message);
+  }
+  
+  return data || null;
 };
 
-/**
- * Set notification preferences for a user
- * @param userId User ID
- * @param preferences Preferences object
- */
-export const setNotificationPreferences = async (
-  userId: string,
-  preferences: Partial<NotificationPreference>
-): Promise<void> => {
-  await new Promise(resolve => setTimeout(resolve, 300)); // Simulate API delay
+// Create or update notification preferences
+export const upsertNotificationPreferences = async (preferences: Partial<NotificationPreference>): Promise<NotificationPreference> => {
+  const { data: user } = await supabase.auth.getUser();
   
-  // In a real app, this would update the user's notification preferences
-  console.log(`Updated notification preferences for user ${userId}:`, preferences);
-};
-
-/**
- * Get notification preferences for a user
- * @param userId User ID
- */
-export const getNotificationPreferences = async (
-  userId: string
-): Promise<NotificationPreference> => {
-  await new Promise(resolve => setTimeout(resolve, 200)); // Simulate API delay
+  if (!user.user) {
+    throw new Error('User not authenticated');
+  }
   
-  // Default preferences
-  return {
-    whatsapp_enabled: true,
-    sms_fallback_enabled: true
-  };
+  const { data: existing } = await supabase
+    .from('notification_preferences')
+    .select('id')
+    .eq('user_id', user.user.id)
+    .maybeSingle();
+  
+  let result;
+  if (existing) {
+    // Update existing preferences
+    const { data, error } = await supabase
+      .from('notification_preferences')
+      .update({
+        ...preferences,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', existing.id)
+      .select()
+      .single();
+    
+    if (error) {
+      console.error('Error updating notification preferences:', error);
+      throw new Error(error.message);
+    }
+    
+    result = data;
+  } else {
+    // Create new preferences
+    const { data, error } = await supabase
+      .from('notification_preferences')
+      .insert({
+        user_id: user.user.id,
+        ...preferences
+      })
+      .select()
+      .single();
+    
+    if (error) {
+      console.error('Error creating notification preferences:', error);
+      throw new Error(error.message);
+    }
+    
+    result = data;
+  }
+  
+  return result;
 };
 
-/**
- * Get user notification preferences (alias for getNotificationPreferences)
- * @param userId User ID (optional)
- */
-export const getUserNotificationPreferences = async (
-  userId: string = 'current-user'
-): Promise<NotificationPreference> => {
-  return getNotificationPreferences(userId);
-};
-
-/**
- * Update or insert notification preferences
- * @param preferences Partial preferences to update
- * @param userId User ID (optional)
- */
-export const upsertNotificationPreferences = async (
-  preferences: Partial<NotificationPreference>,
-  userId: string = 'current-user'
-): Promise<void> => {
-  return setNotificationPreferences(userId, preferences);
+// Send appointment notification via WhatsApp or SMS fallback
+export const sendAppointmentNotification = async (appointmentId: string, notificationType: 'confirmation' | 'reminder' | 'cancellation'): Promise<void> => {
+  try {
+    const { data, error } = await supabase.functions.invoke('whatsapp-notification', {
+      body: {
+        appointmentId,
+        notificationType
+      }
+    });
+    
+    if (error) {
+      console.error('Notification error:', error);
+      throw new Error(error.message);
+    }
+    
+    console.log('Notification sent successfully:', data);
+  } catch (error) {
+    console.error('Error sending notification:', error);
+    throw error;
+  }
 };

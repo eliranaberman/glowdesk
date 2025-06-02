@@ -1,5 +1,4 @@
 
-// First section of the file up to the appointmentSchema
 import { useState, useEffect } from 'react';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
@@ -50,7 +49,7 @@ import {
   downloadIcsFile
 } from '@/services/appointmentService';
 import { sendAppointmentNotification } from '@/services/notificationService';
-import { Customer, getCustomers } from '@/services/customers';
+import { Customer, getCustomers } from '@/services/customerService';
 import { getUserCalendarConnections } from '@/services/calendarService';
 
 // Extended form schema with notification and calendar options
@@ -61,7 +60,7 @@ const appointmentSchema = z.object({
   date: z.date({ required_error: 'נא לבחור תאריך' }),
   start_time: z.string().min(1, { message: 'נא להזין שעת התחלה' }),
   end_time: z.string().min(1, { message: 'נא להזין שעת סיום' }),
-  status: z.enum(['scheduled', 'cancelled', 'completed', 'no_show'], {
+  status: z.enum(['scheduled', 'cancelled', 'completed'], {
     required_error: 'נא לבחור סטטוס',
   }),
   notes: z.string().nullable(),

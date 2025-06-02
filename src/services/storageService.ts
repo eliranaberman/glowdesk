@@ -35,6 +35,14 @@ export const createBucketIfNotExists = async (bucketName: string): Promise<boole
     return true;
   } catch (error) {
     console.error('Error checking storage bucket:', error);
+    // Only show the error toast when we encounter an unexpected error
+    if (error instanceof Error && error.message !== 'new row violates row-level security policy') {
+      toast({
+        title: 'שגיאה בבדיקת מאגר קבצים',
+        description: 'אירעה שגיאה בבדיקת מאגר הקבצים. נסה שוב מאוחר יותר.',
+        variant: 'destructive',
+      });
+    }
     return false;
   }
 };
@@ -43,20 +51,10 @@ export const initializeStorage = async (): Promise<void> => {
   // Check for necessary buckets when the app starts
   // But don't try to create them directly
   try {
-    const buckets = ['expenses', 'profile-images', 'portfolio'];
-    
-    for (const bucket of buckets) {
-      const exists = await createBucketIfNotExists(bucket);
-      if (exists) {
-        console.log(`✅ Storage bucket '${bucket}' is ready`);
-      } else {
-        console.warn(`⚠️ Storage bucket '${bucket}' may not be available`);
-      }
-    }
-    
+    await createBucketIfNotExists('expenses');
+    await createBucketIfNotExists('profile-images');
     console.log('Storage initialization complete');
   } catch (error) {
     console.error('Storage initialization error:', error);
-    // Don't show toast for storage errors as they're not critical for basic functionality
   }
 };

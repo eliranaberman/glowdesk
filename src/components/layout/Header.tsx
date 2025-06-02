@@ -1,86 +1,217 @@
 
-import { Bell, Menu, User, LogOut, AlertTriangle } from 'lucide-react';
+import { useState } from 'react';
+import { Bell, Search, Menu, User, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuTrigger 
+import { Input } from '@/components/ui/input';
+import { useNavigate } from 'react-router-dom';
+import { useToast } from '@/hooks/use-toast';
+import { User as SupabaseUser } from '@supabase/supabase-js';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { useAuth } from '@/contexts/AuthContext';
-import ConnectionStatus from '@/components/auth/ConnectionStatus';
+import {
+  Avatar,
+  AvatarFallback,
+} from '@/components/ui/avatar';
 
 interface HeaderProps {
   pageTitle: string;
   toggleMobileSidebar: () => void;
-  handleLogout: () => void;
-  user: any;
+  handleLogout: () => Promise<void>;
+  user: SupabaseUser | null;
 }
 
 const Header = ({ pageTitle, toggleMobileSidebar, handleLogout, user }: HeaderProps) => {
-  const { connectionError } = useAuth();
+  const [notificationCount] = useState(3);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  // Get user initials for avatar
+  const getUserInitials = (): string => {
+    if (!user) return '';
+    
+    const fullName = user.user_metadata?.full_name || '';
+    if (!fullName) return user.email?.charAt(0).toUpperCase() || '';
+    
+    const nameParts = fullName.split(' ');
+    if (nameParts.length === 1) return nameParts[0].charAt(0).toUpperCase();
+    
+    return (nameParts[0].charAt(0) + nameParts[nameParts.length - 1].charAt(0)).toUpperCase();
+  };
+
+  // Get display name
+  const getDisplayName = (): string => {
+    if (!user) return '';
+    return user.user_metadata?.full_name || user.email || '';
+  };
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      // In a real app, this would perform an actual search
+      toast({
+        title: "חיפוש",
+        description: `מחפש: "${searchQuery}"`,
+      });
+      
+      // For demo purposes, navigate to a relevant page based on search
+      if (searchQuery.toLowerCase().includes('לקוח') || 
+          searchQuery.toLowerCase().includes('client')) {
+        navigate('/customers');
+      } else if (searchQuery.toLowerCase().includes('פגיש') || 
+                searchQuery.toLowerCase().includes('appoint')) {
+        navigate('/scheduling');
+      } else if (searchQuery.toLowerCase().includes('שיווק') || 
+                searchQuery.toLowerCase().includes('market')) {
+        navigate('/social-media');
+      } else {
+        // Default search results page could be added here
+        toast({
+          title: "תוצאות חיפוש",
+          description: "לא נמצאו תוצאות התואמות לחיפוש שלך",
+          variant: "destructive",
+        });
+      }
+      
+      setSearchQuery('');
+    }
+  };
+
+  // Enhanced logout with loading state
+  const performLogout = async () => {
+    try {
+      setIsLoggingOut(true);
+      await handleLogout();
+      // Navigation is handled in AuthContext
+    } catch (error) {
+      console.error('Logout error:', error);
+      toast({
+        title: "שגיאה בהתנתקות",
+        description: "אירעה שגיאה בתהליך ההתנתקות, אנא נסו שוב",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
 
   return (
-    <header className="h-16 border-b border-border bg-background px-4 md:px-6 flex items-center justify-between shadow-sm">
-      <div className="flex items-center gap-4">
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          className="lg:hidden" 
-          onClick={toggleMobileSidebar}
-        >
-          <Menu className="h-5 w-5" />
-        </Button>
-        <h1 className="text-lg md:text-xl font-semibold text-primary">
-          {pageTitle}
-        </h1>
-        {connectionError && (
-          <Badge variant="destructive" className="text-xs flex items-center gap-1">
-            <AlertTriangle className="h-3 w-3" />
-            בעיית חיבור
-          </Badge>
-        )}
-      </div>
-      
-      <div className="flex items-center gap-2 md:gap-4">
-        <ConnectionStatus />
-        
-        <Button variant="ghost" size="icon" className="relative">
-          <Bell className="h-5 w-5" />
-          <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 text-xs">
-            3
-          </Badge>
-        </Button>
-        
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="flex items-center gap-2 px-2">
-              <Avatar className="h-8 w-8">
-                <AvatarFallback className="bg-primary text-primary-foreground">
-                  {user?.email?.charAt(0).toUpperCase() || 'U'}
-                </AvatarFallback>
-              </Avatar>
-              <span className="hidden md:inline text-sm">
-                {user?.email || 'משתמש'}
-              </span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56">
-            <DropdownMenuItem className="flex items-center gap-2">
-              <User className="h-4 w-4" />
-              פרופיל משתמש
-            </DropdownMenuItem>
-            <DropdownMenuItem 
-              className="flex items-center gap-2 text-destructive"
-              onClick={handleLogout}
-            >
-              <LogOut className="h-4 w-4" />
-              התנתקות
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+    <header className="w-full bg-background sticky top-0 z-10 border-b border-border">
+      <div className="flex items-center justify-between px-4 py-2">
+        <div className="flex items-center gap-4">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="lg:hidden"
+            onClick={toggleMobileSidebar}
+            type="button"
+          >
+            <Menu className="h-5 w-5" />
+          </Button>
+          <h1 className="text-xl font-semibold text-center">By Chen Mizrahi</h1>
+        </div>
+
+        <form onSubmit={handleSearch} className="hidden md:flex items-center max-w-sm flex-1 mx-4">
+          <div className="relative w-full">
+            <Search className="absolute right-2 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="חיפוש..."
+              className="pr-8 rounded-full bg-secondary border-none text-right"
+              dir="rtl"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+        </form>
+
+        <div className="flex items-center gap-2">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="relative">
+                <Bell className="h-5 w-5" />
+                {notificationCount > 0 && (
+                  <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] text-primary-foreground">
+                    {notificationCount}
+                  </span>
+                )}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-80 text-right">
+              <DropdownMenuLabel className="text-right">התראות</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <div className="max-h-[300px] overflow-y-auto">
+                <DropdownMenuItem onClick={() => navigate("/notifications")}>
+                  <div className="flex flex-col gap-1 text-right w-full">
+                    <p className="text-sm font-medium">נקבעה פגישה חדשה</p>
+                    <p className="text-xs text-muted-foreground">רחל כהן - היום, 14:00</p>
+                  </div>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate("/inventory")}>
+                  <div className="flex flex-col gap-1 text-right w-full">
+                    <p className="text-sm font-medium">התראת מלאי נמוך</p>
+                    <p className="text-xs text-muted-foreground">לק ג'ל אדום (נותרו 2)</p>
+                  </div>
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <div className="flex flex-col gap-1 text-right w-full">
+                    <p className="text-sm font-medium">תזכורת</p>
+                    <p className="text-xs text-muted-foreground">להזמין מלאי חדש</p>
+                  </div>
+                </DropdownMenuItem>
+              </div>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem className="justify-center font-medium text-primary" onClick={() => navigate("/notifications")}>
+                צפה בכל ההתראות
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {/* User Menu */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="relative rounded-full h-8 w-8">
+                <Avatar className="h-8 w-8">
+                  <AvatarFallback className="bg-primary/10 text-primary text-sm">
+                    {getUserInitials()}
+                  </AvatarFallback>
+                </Avatar>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56 text-right">
+              <DropdownMenuLabel className="font-normal">
+                <div className="flex flex-col space-y-1">
+                  <p className="text-sm font-medium leading-none">{getDisplayName()}</p>
+                  <p className="text-xs leading-none text-muted-foreground">
+                    {user?.email}
+                  </p>
+                </div>
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem className="flex justify-end gap-2" onClick={() => navigate("/settings")}>
+                <div>הגדרות</div>
+                <User className="h-4 w-4" />
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem 
+                className="flex justify-end gap-2 text-destructive" 
+                onClick={performLogout}
+                disabled={isLoggingOut}
+              >
+                <div>
+                  {isLoggingOut ? 'מתנתק...' : 'התנתקות'}
+                </div>
+                <LogOut className="h-4 w-4" />
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
     </header>
   );

@@ -175,32 +175,18 @@ export const generateCashFlowReport = async (timeFrame: TimeFrame, filter?: Repo
 // Save a report to the database for future reference
 export const saveReport = async (report: ReportDataCreate): Promise<string | null> => {
   try {
-    const { data: userData } = await supabase.auth.getUser();
-    
-    if (!userData.user) {
-      throw new Error('User not authenticated');
-    }
-    
-    // Correctly format the report data to match the database schema
-    const reportToSave = {
-      title: report.title,
-      description: report.description || '',
-      type: report.type,
-      time_frame: report.timeFrame,
-      format: report.format,
-      data: report.data,
-      generated_at: new Date().toISOString(),
-      user_id: userData.user.id
-    };
-    
     const { data, error } = await supabase
       .from('reports')
-      .insert([reportToSave])
-      .select();
+      .insert([{
+        ...report,
+        generatedAt: new Date().toISOString(),
+      }])
+      .select()
+      .single();
       
     if (error) throw error;
     
-    return data[0]?.id || null;
+    return data.id;
   } catch (error) {
     console.error('Error saving report:', error);
     return null;
@@ -218,7 +204,7 @@ export const getReport = async (reportId: string): Promise<ReportData | null> =>
       
     if (error) throw error;
     
-    return data as unknown as ReportData;
+    return data;
   } catch (error) {
     console.error('Error retrieving report:', error);
     return null;
@@ -228,21 +214,21 @@ export const getReport = async (reportId: string): Promise<ReportData | null> =>
 // Get all reports for the current user
 export const getUserReports = async (): Promise<ReportData[]> => {
   try {
-    const { data: userData } = await supabase.auth.getUser();
+    const { data: user } = await supabase.auth.getUser();
     
-    if (!userData.user) {
+    if (!user.user) {
       throw new Error('User not authenticated');
     }
     
     const { data, error } = await supabase
       .from('reports')
       .select('*')
-      .eq('user_id', userData.user.id)
-      .order('generated_at', { ascending: false });
+      .eq('user_id', user.user.id)
+      .order('generatedAt', { ascending: false });
       
     if (error) throw error;
     
-    return (data as unknown as ReportData[]) || [];
+    return data || [];
   } catch (error) {
     console.error('Error retrieving user reports:', error);
     return [];
