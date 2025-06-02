@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -135,7 +136,10 @@ const SocialMedia = () => {
   const handleButtonAction = () => {
     switch (activeTab) {
       case "dashboard":
-        setIsConnectionModalOpen(true);
+        toast({
+          title: "חיבור חשבונות",
+          description: "חיבור Meta API הוסר מהמערכת"
+        });
         break;
       case "inbox":
         toast({
@@ -144,13 +148,19 @@ const SocialMedia = () => {
         });
         break;
       case "posts":
-        navigate("/social-media/create-post");
+        toast({
+          title: "יצירת פוסט",
+          description: "תכונה זו תהיה זמינה בקרוב"
+        });
         break;
       case "analytics":
         navigate("/marketing");
         break;
       case "ai-tools":
-        navigate("/social-media/ai-generate");
+        toast({
+          title: "כלי AI",
+          description: "כלי השיווק AI יהיו זמינים בקרוב"
+        });
         break;
     }
   };
@@ -167,7 +177,7 @@ const SocialMedia = () => {
   };
 
   return (
-    <div className="space-y-6" dir="rtl">
+    <div className="space-y-6 p-6" dir="rtl">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-semibold text-center tracking-tight">מדיה חברתית ושיווק</h1>
         <div className="flex gap-2">
@@ -249,13 +259,6 @@ const SocialMedia = () => {
           <AIMarketingTools />
         </TabsContent>
       </Tabs>
-      
-      <ConnectionModal
-        open={isConnectionModalOpen}
-        onOpenChange={setIsConnectionModalOpen}
-        connectedAccounts={connectedAccounts}
-        onConnect={connectPlatform}
-      />
     </div>
   );
 };

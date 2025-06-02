@@ -1,15 +1,14 @@
+
 import { useState, useEffect } from 'react';
-import { DollarSign, Upload, FileText, FileImage, Trash2, Filter, Calendar } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { DollarSign, Upload, FileText, Trash2, Filter, Calendar, Plus } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Separator } from '@/components/ui/separator';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Badge } from '@/components/ui/badge'; // Added Badge import
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Badge } from '@/components/ui/badge';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
@@ -22,7 +21,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { 
   Table, 
   TableBody, 
-  TableCaption, 
   TableCell, 
   TableHead, 
   TableHeader, 
@@ -37,15 +35,12 @@ import {
   getExpensesByDateRange,
   getExpensesByCategory,
   addExpense,
-  updateExpense,
   deleteExpense,
   uploadInvoice,
   getExpenseCategories,
-  getExpenseSummaryByMonth,
   type Expense
 } from '@/services/expensesService';
 
-// Define form schema
 const formSchema = z.object({
   date: z.date({
     required_error: "יש לבחור תאריך",
@@ -63,8 +58,6 @@ const Expenses = () => {
   const { canWrite, canDelete } = usePermissions();
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [openAddDialog, setOpenAddDialog] = useState(false);
-  const [openUploadDialog, setOpenUploadDialog] = useState(false);
-  const [openFilterDialog, setOpenFilterDialog] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(true);
   const [canModifyExpenses, setCanModifyExpenses] = useState(false);
@@ -91,91 +84,117 @@ const Expenses = () => {
     const loadData = async () => {
       setLoading(true);
       
-      // Load expenses
-      const fetchedExpenses = await getExpenses();
-      setExpenses(fetchedExpenses);
-      
-      // Load expense categories
-      const categories = await getExpenseCategories();
-      if (categories.length > 0) {
-        setExpenseCategories(categories);
+      try {
+        const fetchedExpenses = await getExpenses();
+        setExpenses(fetchedExpenses);
+        
+        const categories = await getExpenseCategories();
+        if (categories.length > 0) {
+          setExpenseCategories(categories);
+        }
+      } catch (error) {
+        console.error('Error loading expenses:', error);
+        toast({
+          title: "שגיאה בטעינת הוצאות",
+          description: "אירעה שגיאה בטעינת רשימת ההוצאות",
+          variant: "destructive",
+        });
       }
       
       setLoading(false);
     };
     
     loadData();
-  }, []);
+  }, [toast]);
   
   useEffect(() => {
     const checkPermissions = async () => {
       if (user?.id) {
-        const hasWritePermission = await canWrite('expenses');
-        setCanModifyExpenses(hasWritePermission);
+        try {
+          const hasWritePermission = await canWrite('expenses');
+          setCanModifyExpenses(hasWritePermission);
+        } catch (error) {
+          console.error('Error checking permissions:', error);
+          setCanModifyExpenses(false);
+        }
       }
     };
 
     checkPermissions();
   }, [user, canWrite]);
 
-  // Handle filtering
   useEffect(() => {
     const applyFilters = async () => {
       setLoading(true);
       
-      let filteredExpenses: Expense[] = [];
-      
-      // Apply date range filter
-      if (filterDateRange.from && filterDateRange.to) {
-        const fromStr = format(filterDateRange.from, 'yyyy-MM-dd');
-        const toStr = format(filterDateRange.to, 'yyyy-MM-dd');
-        filteredExpenses = await getExpensesByDateRange(fromStr, toStr);
-      }
-      
-      // Apply category filter (if both filters active, category filter applies on date-filtered results)
-      if (filterCategory) {
-        if (filteredExpenses.length > 0) {
-          filteredExpenses = filteredExpenses.filter(e => e.category === filterCategory);
-        } else {
-          filteredExpenses = await getExpensesByCategory(filterCategory);
+      try {
+        let filteredExpenses: Expense[] = [];
+        
+        if (filterDateRange.from && filterDateRange.to) {
+          const fromStr = format(filterDateRange.from, 'yyyy-MM-dd');
+          const toStr = format(filterDateRange.to, 'yyyy-MM-dd');
+          filteredExpenses = await getExpensesByDateRange(fromStr, toStr);
         }
+        
+        if (filterCategory) {
+          if (filteredExpenses.length > 0) {
+            filteredExpenses = filteredExpenses.filter(e => e.category === filterCategory);
+          } else {
+            filteredExpenses = await getExpensesByCategory(filterCategory);
+          }
+        }
+        
+        if (!filterCategory && !filterDateRange.from && !filterDateRange.to) {
+          filteredExpenses = await getExpenses();
+        }
+        
+        setExpenses(filteredExpenses);
+      } catch (error) {
+        console.error('Error applying filters:', error);
+        toast({
+          title: "שגיאה בסינון",
+          description: "אירעה שגיאה בסינון ההוצאות",
+          variant: "destructive",
+        });
       }
       
-      // If no filters active, get all expenses
-      if (!filterCategory && !filterDateRange.from && !filterDateRange.to) {
-        filteredExpenses = await getExpenses();
-      }
-      
-      setExpenses(filteredExpenses);
       setLoading(false);
     };
     
     applyFilters();
-  }, [filterCategory, filterDateRange]);
+  }, [filterCategory, filterDateRange, toast]);
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    const newExpense = {
-      amount: parseFloat(values.amount),
-      category: values.category,
-      vendor: values.vendor,
-      description: values.description || "",
-      date: format(values.date, 'yyyy-MM-dd'),
-      payment_method: values.payment_method
-    };
-    
-    const addedExpense = await addExpense(newExpense);
-    
-    if (addedExpense) {
-      setExpenses([addedExpense, ...expenses]);
+    try {
+      const newExpense = {
+        amount: parseFloat(values.amount),
+        category: values.category,
+        vendor: values.vendor,
+        description: values.description || "",
+        date: format(values.date, 'yyyy-MM-dd'),
+        payment_method: values.payment_method
+      };
       
-      // Upload invoice if selected
-      if (selectedFile && addedExpense.id) {
-        await uploadInvoice(selectedFile, addedExpense.id);
+      const addedExpense = await addExpense(newExpense);
+      
+      if (addedExpense) {
+        setExpenses([addedExpense, ...expenses]);
+        
+        if (selectedFile && addedExpense.id) {
+          await uploadInvoice(selectedFile, addedExpense.id);
+        }
+        
+        form.reset();
+        setSelectedFile(null);
+        setOpenAddDialog(false);
       }
-      
-      form.reset();
-      setSelectedFile(null);
-      setOpenAddDialog(false);
+    } catch (error) {
+      console.error('Error adding expense:', error);
+      toast({
+        title: "שגיאה בהוספת הוצאה",
+        description: "אירעה שגיאה בהוספת ההוצאה",
+        variant: "destructive",
+      });
     }
   };
 
@@ -192,19 +211,28 @@ const Expenses = () => {
   };
 
   const handleDeleteExpense = async (id: string) => {
-    const canUserDelete = await canDelete('expenses');
-    if (!canUserDelete) {
+    try {
+      const canUserDelete = await canDelete('expenses');
+      if (!canUserDelete) {
+        toast({
+          title: "אין הרשאות",
+          description: "אין לך הרשאה למחוק הוצאות",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      const success = await deleteExpense(id);
+      if (success) {
+        setExpenses(expenses.filter(expense => expense.id !== id));
+      }
+    } catch (error) {
+      console.error('Error deleting expense:', error);
       toast({
-        title: "אין הרשאות",
-        description: "אין לך הרשאה למחוק הוצאות",
+        title: "שגיאה במחיקת הוצאה",
+        description: "אירעה שגיאה במחיקת ההוצאה",
         variant: "destructive",
       });
-      return;
-    }
-    
-    const success = await deleteExpense(id);
-    if (success) {
-      setExpenses(expenses.filter(expense => expense.id !== id));
     }
   };
 
@@ -216,27 +244,26 @@ const Expenses = () => {
     });
   };
 
-  // Calculate total expenses
   const totalExpenses = expenses.reduce((total, expense) => total + expense.amount, 0);
 
   return (
     <PermissionGuard requiredResource="finances" requiredPermission="read" redirectTo="/dashboard">
-      <div className="space-y-6">
+      <div className="space-y-6 p-6" dir="rtl">
         <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-bold">ניהול הוצאות</h1>
+          <h1 className="text-3xl font-bold">ניהול הוצאות</h1>
           <div className="flex gap-2">
             {canModifyExpenses && (
               <Dialog open={openAddDialog} onOpenChange={setOpenAddDialog}>
                 <DialogTrigger asChild>
                   <Button className="gap-2">
-                    <DollarSign className="h-4 w-4" />
+                    <Plus className="h-4 w-4" />
                     הוסף הוצאה
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-[500px]">
                   <DialogHeader>
-                    <DialogTitle className="text-right">הוספת הוצאה חדשה</DialogTitle>
-                    <DialogDescription className="text-right">
+                    <DialogTitle>הוספת הוצאה חדשה</DialogTitle>
+                    <DialogDescription>
                       הזן את פרטי ההוצאה החדשה להוספה למערכת
                     </DialogDescription>
                   </DialogHeader>
@@ -248,13 +275,13 @@ const Expenses = () => {
                           name="date"
                           render={({ field }) => (
                             <FormItem className="flex flex-col">
-                              <FormLabel className="text-right">תאריך</FormLabel>
+                              <FormLabel>תאריך</FormLabel>
                               <Popover>
                                 <PopoverTrigger asChild>
                                   <FormControl>
                                     <Button
                                       variant="outline"
-                                      className={`w-full text-right justify-between ${!field.value && "text-muted-foreground"}`}
+                                      className={`w-full justify-between ${!field.value && "text-muted-foreground"}`}
                                     >
                                       {field.value ? format(field.value, "P", { locale: he }) : "בחר תאריך"}
                                       <Calendar className="ml-auto h-4 w-4" />
@@ -280,9 +307,9 @@ const Expenses = () => {
                           name="amount"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel className="text-right">סכום (₪)</FormLabel>
+                              <FormLabel>סכום (₪)</FormLabel>
                               <FormControl>
-                                <Input type="number" placeholder="100" {...field} className="text-right" />
+                                <Input type="number" placeholder="100" {...field} />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -294,9 +321,9 @@ const Expenses = () => {
                         name="vendor"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="text-right">שם ספק</FormLabel>
+                            <FormLabel>שם ספק</FormLabel>
                             <FormControl>
-                              <Input placeholder="הזן שם ספק" {...field} className="text-right" />
+                              <Input placeholder="הזן שם ספק" {...field} />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -307,7 +334,7 @@ const Expenses = () => {
                         name="category"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="text-right">קטגוריה</FormLabel>
+                            <FormLabel>קטגוריה</FormLabel>
                             <Select onValueChange={field.onChange} defaultValue={field.value}>
                               <FormControl>
                                 <SelectTrigger>
@@ -331,7 +358,7 @@ const Expenses = () => {
                         name="payment_method"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="text-right">אמצעי תשלום</FormLabel>
+                            <FormLabel>אמצעי תשלום</FormLabel>
                             <Select onValueChange={field.onChange} defaultValue={field.value}>
                               <FormControl>
                                 <SelectTrigger>
@@ -355,27 +382,26 @@ const Expenses = () => {
                         name="description"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="text-right">תיאור (אופציונלי)</FormLabel>
+                            <FormLabel>תיאור (אופציונלי)</FormLabel>
                             <FormControl>
-                              <Textarea placeholder="הזן תיאור להוצאה" {...field} className="text-right" />
+                              <Textarea placeholder="הזן תיאור להוצאה" {...field} />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
                         )}
                       />
                       <div>
-                        <Label htmlFor="invoice-upload" className="text-right block mb-2">חשבונית (אופציונלי)</Label>
+                        <Label htmlFor="invoice-upload" className="block mb-2">חשבונית (אופציונלי)</Label>
                         <div className="flex items-center gap-2">
                           <Input
                             id="invoice-upload"
                             type="file"
                             accept=".pdf,.jpg,.jpeg,.png"
                             onChange={handleFileChange}
-                            className="text-right"
                           />
                         </div>
                         {selectedFile && (
-                          <p className="text-sm text-muted-foreground mt-1 text-right">
+                          <p className="text-sm text-muted-foreground mt-1">
                             נבחר: {selectedFile.name}
                           </p>
                         )}
@@ -388,127 +414,26 @@ const Expenses = () => {
                 </DialogContent>
               </Dialog>
             )}
-            
-            <Dialog open={openFilterDialog} onOpenChange={setOpenFilterDialog}>
-              <DialogTrigger asChild>
-                <Button variant="outline" className="gap-2">
-                  <Filter className="h-4 w-4" />
-                  סנן הוצאות
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle className="text-right">סינון הוצאות</DialogTitle>
-                  <DialogDescription className="text-right">
-                    סנן את רשימת ההוצאות לפי תאריך או קטגוריה
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="space-y-4 py-4">
-                  <div className="space-y-2">
-                    <Label className="text-right block">קטגוריה</Label>
-                    <Select
-                      value={filterCategory}
-                      onValueChange={setFilterCategory}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="בחר קטגוריה" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="">כל הקטגוריות</SelectItem>
-                        {expenseCategories.map(category => (
-                          <SelectItem key={category} value={category}>{category}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label className="text-right block">טווח תאריכים</Label>
-                    <div className="flex flex-col space-y-2">
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Button
-                            variant="outline"
-                            className="justify-between text-right"
-                          >
-                            {filterDateRange.from ? (
-                              format(filterDateRange.from, "dd/MM/yyyy")
-                            ) : (
-                              "תאריך התחלה"
-                            )}
-                            <Calendar className="h-4 w-4 opacity-50" />
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0">
-                          <CalendarComponent
-                            mode="single"
-                            selected={filterDateRange.from}
-                            onSelect={(date) => setFilterDateRange(prev => ({ ...prev, from: date }))}
-                            disabled={(date) => date > new Date()}
-                            initialFocus
-                          />
-                        </PopoverContent>
-                      </Popover>
-                      
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Button
-                            variant="outline"
-                            className="justify-between text-right"
-                          >
-                            {filterDateRange.to ? (
-                              format(filterDateRange.to, "dd/MM/yyyy")
-                            ) : (
-                              "תאריך סיום"
-                            )}
-                            <Calendar className="h-4 w-4 opacity-50" />
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0">
-                          <CalendarComponent
-                            mode="single"
-                            selected={filterDateRange.to}
-                            onSelect={(date) => setFilterDateRange(prev => ({ ...prev, to: date }))}
-                            disabled={(date) => 
-                              (filterDateRange.from && date < filterDateRange.from) || date > new Date()
-                            }
-                            initialFocus
-                          />
-                        </PopoverContent>
-                      </Popover>
-                    </div>
-                  </div>
-                </div>
-                <DialogFooter className="flex space-x-2 justify-end">
-                  <Button variant="outline" onClick={clearFilters}>
-                    נקה סינון
-                  </Button>
-                  <Button onClick={() => setOpenFilterDialog(false)}>
-                    סנן
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
           </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-lg text-right">סה"כ הוצאות</CardTitle>
-              <CardDescription className="text-right">סה"כ ההוצאות המוצגות</CardDescription>
+              <CardTitle className="text-lg">סה"כ הוצאות</CardTitle>
+              <CardDescription>סה"כ ההוצאות המוצגות</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-right">₪{totalExpenses.toFixed(2)}</div>
+              <div className="text-2xl font-bold">₪{totalExpenses.toFixed(2)}</div>
             </CardContent>
           </Card>
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-lg text-right">קטגוריה מובילה</CardTitle>
-              <CardDescription className="text-right">קטגוריית ההוצאה הגבוהה ביותר</CardDescription>
+              <CardTitle className="text-lg">קטגוריה מובילה</CardTitle>
+              <CardDescription>קטגוריית ההוצאה הגבוהה ביותר</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-right">
+              <div className="text-2xl font-bold">
                 {expenses.length > 0 
                   ? [...new Set(expenses.map(e => e.category))]
                     .map(cat => ({
@@ -525,11 +450,11 @@ const Expenses = () => {
           </Card>
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-lg text-right">חשבוניות</CardTitle>
-              <CardDescription className="text-right">מספר ההוצאות עם חשבוניות</CardDescription>
+              <CardTitle className="text-lg">חשבוניות</CardTitle>
+              <CardDescription>מספר ההוצאות עם חשבוניות</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-right">
+              <div className="text-2xl font-bold">
                 {expenses.filter(e => e.has_invoice).length}
               </div>
             </CardContent>
@@ -538,25 +463,7 @@ const Expenses = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-right">רשימת הוצאות</CardTitle>
-            {(filterCategory || (filterDateRange.from && filterDateRange.to)) && (
-              <div className="flex items-center gap-2 justify-end">
-                <span className="text-sm text-muted-foreground">מסונן לפי:</span>
-                {filterCategory && (
-                  <Badge variant="secondary" className="text-xs">
-                    {filterCategory}
-                  </Badge>
-                )}
-                {filterDateRange.from && filterDateRange.to && (
-                  <Badge variant="secondary" className="text-xs">
-                    {format(filterDateRange.from, "dd/MM/yyyy")} - {format(filterDateRange.to, "dd/MM/yyyy")}
-                  </Badge>
-                )}
-                <Button variant="ghost" size="sm" onClick={clearFilters} className="h-6 px-2">
-                  נקה סינון
-                </Button>
-              </div>
-            )}
+            <CardTitle>רשימת הוצאות</CardTitle>
           </CardHeader>
           <CardContent>
             {loading ? (
@@ -568,14 +475,14 @@ const Expenses = () => {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="text-right">תאריך</TableHead>
-                    <TableHead className="text-right">ספק</TableHead>
-                    <TableHead className="text-right">קטגוריה</TableHead>
-                    <TableHead className="text-right">תיאור</TableHead>
-                    <TableHead className="text-right">סכום</TableHead>
-                    <TableHead className="text-right">חשבונית</TableHead>
+                    <TableHead>תאריך</TableHead>
+                    <TableHead>ספק</TableHead>
+                    <TableHead>קטגוריה</TableHead>
+                    <TableHead>תיאור</TableHead>
+                    <TableHead>סכום</TableHead>
+                    <TableHead>חשבונית</TableHead>
                     {canModifyExpenses && (
-                      <TableHead className="text-right">פעולות</TableHead>
+                      <TableHead>פעולות</TableHead>
                     )}
                   </TableRow>
                 </TableHeader>
@@ -583,20 +490,20 @@ const Expenses = () => {
                   {expenses.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={canModifyExpenses ? 7 : 6} className="text-center py-8">
-                        לא נמצאו הוצאות התואמות את החיפוש
+                        לא נמצאו הוצאות
                       </TableCell>
                     </TableRow>
                   ) : (
                     expenses.map((expense) => (
                       <TableRow key={expense.id}>
-                        <TableCell className="text-right">
+                        <TableCell>
                           {format(new Date(expense.date), "dd/MM/yyyy")}
                         </TableCell>
-                        <TableCell className="text-right">{expense.vendor}</TableCell>
-                        <TableCell className="text-right">{expense.category}</TableCell>
-                        <TableCell className="text-right">{expense.description || "—"}</TableCell>
-                        <TableCell className="text-right font-medium">₪{expense.amount.toFixed(2)}</TableCell>
-                        <TableCell className="text-right">
+                        <TableCell>{expense.vendor}</TableCell>
+                        <TableCell>{expense.category}</TableCell>
+                        <TableCell>{expense.description || "—"}</TableCell>
+                        <TableCell className="font-medium">₪{expense.amount.toFixed(2)}</TableCell>
+                        <TableCell>
                           {expense.has_invoice ? (
                             <Button 
                               variant="ghost" 
@@ -615,7 +522,7 @@ const Expenses = () => {
                           )}
                         </TableCell>
                         {canModifyExpenses && (
-                          <TableCell className="text-right">
+                          <TableCell>
                             <AlertDialog>
                               <AlertDialogTrigger asChild>
                                 <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-destructive hover:text-destructive/90 hover:bg-destructive/10">

@@ -1,7 +1,7 @@
 
 import { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { Upload, X, ImagePlus } from 'lucide-react';
+import { Upload, X, ImagePlus, Camera } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface ImageUploaderProps {
@@ -13,20 +13,21 @@ export const ImageUploader = ({ onImageSelected, className }: ImageUploaderProps
   const [dragActive, setDragActive] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = (file: File | null) => {
     if (!file) return;
     
     // Validate file type
-    const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/heic'];
     if (!validTypes.includes(file.type)) {
-      alert('Please upload a valid image file (JPG, PNG, or WEBP)');
+      alert('אנא העלה קובץ תמונה תקין (JPG, PNG, WEBP, HEIC)');
       return;
     }
     
-    // Validate file size (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      alert('Image must be smaller than 5MB');
+    // Validate file size (max 10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      alert('גודל התמונה חייב להיות קטן מ-10MB');
       return;
     }
     
@@ -61,8 +62,12 @@ export const ImageUploader = ({ onImageSelected, className }: ImageUploaderProps
     }
   };
 
-  const handleButtonClick = () => {
+  const handleGalleryClick = () => {
     inputRef.current?.click();
+  };
+
+  const handleCameraClick = () => {
+    cameraInputRef.current?.click();
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -74,58 +79,100 @@ export const ImageUploader = ({ onImageSelected, className }: ImageUploaderProps
   const clearImage = () => {
     setPreviewImage(null);
     if (inputRef.current) inputRef.current.value = '';
-    onImageSelected(null as any); // Clear the selected image
+    if (cameraInputRef.current) cameraInputRef.current.value = '';
+    onImageSelected(null as any);
   };
 
   return (
     <div className={cn("w-full", className)}>
+      {/* Hidden file inputs */}
       <input
         type="file"
         ref={inputRef}
         onChange={handleInputChange}
-        accept=".jpg,.jpeg,.png,.webp"
+        accept=".jpg,.jpeg,.png,.webp,.heic"
+        className="hidden"
+      />
+      <input
+        type="file"
+        ref={cameraInputRef}
+        onChange={handleInputChange}
+        accept="image/*"
+        capture="environment"
         className="hidden"
       />
       
       {!previewImage ? (
         <div
           className={cn(
-            "border-2 border-dashed rounded-xl p-6 text-center flex flex-col items-center justify-center min-h-[200px] cursor-pointer transition-colors",
-            dragActive ? "border-primary bg-primary/5" : "border-muted",
+            "border-2 border-dashed rounded-2xl p-8 text-center flex flex-col items-center justify-center min-h-[280px] cursor-pointer transition-all duration-300 bg-gradient-to-br from-gray-50 to-gray-100",
+            dragActive 
+              ? "border-pink-400 bg-pink-50 shadow-lg transform scale-105" 
+              : "border-gray-300 hover:border-gray-400 hover:bg-gray-50",
             className
           )}
           onDragEnter={handleDrag}
           onDragOver={handleDrag}
           onDragLeave={handleDrag}
           onDrop={handleDrop}
-          onClick={handleButtonClick}
+          onClick={handleGalleryClick}
         >
-          <ImagePlus className="h-12 w-12 text-muted-foreground mb-4" />
-          <p className="text-muted-foreground mb-2">
-            גרור ושחרר תמונה או
+          <div className="bg-white rounded-full p-6 shadow-lg mb-6">
+            <ImagePlus className="h-12 w-12 text-gray-400" />
+          </div>
+          
+          <h3 className="text-xl font-semibold text-gray-900 mb-2">
+            העלה תמונה חדשה
+          </h3>
+          
+          <p className="text-gray-600 mb-6 max-w-sm">
+            גרור ושחרר תמונה או בחר מהאפשרויות למטה
           </p>
-          <Button type="button" variant="secondary" className="mt-2">
-            <Upload className="h-4 w-4 mr-2" />
-            בחר תמונה
-          </Button>
-          <p className="text-xs text-muted-foreground mt-4">
-            JPG, PNG, WEBP נתמכים (עד 5MB)
+          
+          <div className="flex gap-3">
+            <Button 
+              type="button" 
+              onClick={handleGalleryClick}
+              className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-xl px-6 py-3 font-medium shadow-lg"
+            >
+              <Upload className="h-4 w-4 ml-2" />
+              בחר מהגלריה
+            </Button>
+            
+            <Button 
+              type="button" 
+              onClick={handleCameraClick}
+              className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-xl px-6 py-3 font-medium shadow-lg"
+            >
+              <Camera className="h-4 w-4 ml-2" />
+              צלם עכשיו
+            </Button>
+          </div>
+          
+          <p className="text-xs text-gray-500 mt-4">
+            JPG, PNG, WEBP, HEIC נתמכים (עד 10MB)
           </p>
         </div>
       ) : (
-        <div className="relative rounded-xl overflow-hidden border border-border">
+        <div className="relative rounded-2xl overflow-hidden border border-gray-200 bg-white shadow-xl">
           <img 
             src={previewImage}
-            alt="Image preview" 
-            className="w-full h-auto object-cover aspect-square"
+            alt="תצוגה מקדימה" 
+            className="w-full h-auto object-cover max-h-96"
           />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+          
           <button
             type="button"
             onClick={clearImage}
-            className="absolute top-2 right-2 bg-background/80 p-1 rounded-full hover:bg-background"
+            className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm p-2 rounded-full hover:bg-white shadow-lg transition-all duration-200 hover:scale-110"
           >
-            <X className="h-5 w-5" />
+            <X className="h-5 w-5 text-gray-700" />
           </button>
+          
+          <div className="absolute bottom-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-sm font-medium text-gray-700">
+            תמונה נבחרה ✓
+          </div>
         </div>
       )}
     </div>

@@ -9,6 +9,90 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      appointments: {
+        Row: {
+          attendance_confirmed_at: string | null
+          attendance_confirmed_by: string | null
+          attendance_status: string | null
+          calendar_sync_status: string | null
+          cancel_reason: string | null
+          cancelled_at: string | null
+          created_at: string | null
+          customer_id: string
+          date: string
+          employee_id: string | null
+          end_time: string
+          external_calendar_id: string | null
+          id: string
+          last_sync_at: string | null
+          late_cancellation: boolean | null
+          notes: string | null
+          notification_sent_at: string | null
+          payment_required: boolean | null
+          reminder_24h_sent: boolean | null
+          reminder_3h_sent: boolean | null
+          service_type: string
+          sms_notification_sent: boolean | null
+          start_time: string
+          status: string
+          whatsapp_notification_sent: boolean | null
+        }
+        Insert: {
+          attendance_confirmed_at?: string | null
+          attendance_confirmed_by?: string | null
+          attendance_status?: string | null
+          calendar_sync_status?: string | null
+          cancel_reason?: string | null
+          cancelled_at?: string | null
+          created_at?: string | null
+          customer_id: string
+          date: string
+          employee_id?: string | null
+          end_time: string
+          external_calendar_id?: string | null
+          id?: string
+          last_sync_at?: string | null
+          late_cancellation?: boolean | null
+          notes?: string | null
+          notification_sent_at?: string | null
+          payment_required?: boolean | null
+          reminder_24h_sent?: boolean | null
+          reminder_3h_sent?: boolean | null
+          service_type: string
+          sms_notification_sent?: boolean | null
+          start_time: string
+          status?: string
+          whatsapp_notification_sent?: boolean | null
+        }
+        Update: {
+          attendance_confirmed_at?: string | null
+          attendance_confirmed_by?: string | null
+          attendance_status?: string | null
+          calendar_sync_status?: string | null
+          cancel_reason?: string | null
+          cancelled_at?: string | null
+          created_at?: string | null
+          customer_id?: string
+          date?: string
+          employee_id?: string | null
+          end_time?: string
+          external_calendar_id?: string | null
+          id?: string
+          last_sync_at?: string | null
+          late_cancellation?: boolean | null
+          notes?: string | null
+          notification_sent_at?: string | null
+          payment_required?: boolean | null
+          reminder_24h_sent?: boolean | null
+          reminder_3h_sent?: boolean | null
+          service_type?: string
+          sms_notification_sent?: boolean | null
+          start_time?: string
+          status?: string
+          whatsapp_notification_sent?: boolean | null
+        }
+        Relationships: []
+      }
       calendar_connections: {
         Row: {
           access_token: string | null
@@ -56,6 +140,41 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      cancellation_tokens: {
+        Row: {
+          appointment_id: string
+          created_at: string | null
+          expires_at: string
+          id: string
+          token: string
+          used: boolean | null
+        }
+        Insert: {
+          appointment_id: string
+          created_at?: string | null
+          expires_at: string
+          id?: string
+          token: string
+          used?: boolean | null
+        }
+        Update: {
+          appointment_id?: string
+          created_at?: string | null
+          expires_at?: string
+          id?: string
+          token?: string
+          used?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cancellation_tokens_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       client_activity: {
         Row: {
@@ -486,6 +605,84 @@ export type Database = {
           id?: string
           image_url?: string
           title?: string
+        }
+        Relationships: []
+      }
+      reports: {
+        Row: {
+          created_at: string
+          data: Json
+          description: string | null
+          format: string
+          generated_at: string
+          id: string
+          time_frame: string
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          data: Json
+          description?: string | null
+          format: string
+          generated_at?: string
+          id?: string
+          time_frame: string
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          data?: Json
+          description?: string | null
+          format?: string
+          generated_at?: string
+          id?: string
+          time_frame?: string
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      revenues: {
+        Row: {
+          amount: number
+          created_at: string | null
+          created_by: string | null
+          customer_id: string | null
+          date: string
+          description: string | null
+          id: string
+          payment_method: string | null
+          service_id: string | null
+          source: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string | null
+          created_by?: string | null
+          customer_id?: string | null
+          date?: string
+          description?: string | null
+          id?: string
+          payment_method?: string | null
+          service_id?: string | null
+          source: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string | null
+          created_by?: string | null
+          customer_id?: string | null
+          date?: string
+          description?: string | null
+          id?: string
+          payment_method?: string | null
+          service_id?: string | null
+          source?: string
         }
         Relationships: []
       }

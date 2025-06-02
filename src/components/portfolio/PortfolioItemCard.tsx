@@ -1,119 +1,142 @@
 
 import { useState } from 'react';
 import { PortfolioItem } from '@/types/portfolio';
-import { Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogClose } from '@/components/ui/dialog';
-import { useAuth } from '@/contexts/AuthContext';
+import { Trash2, Edit, MoreVertical } from 'lucide-react';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { deletePortfolioItem } from '@/services/portfolioService';
+import { useToast } from '@/hooks/use-toast';
 import { usePermissions } from '@/hooks/use-permissions';
 
 interface PortfolioItemCardProps {
   item: PortfolioItem;
   onDelete: () => void;
+  showOnlyControls?: boolean;
 }
 
-export const PortfolioItemCard = ({ item, onDelete }: PortfolioItemCardProps) => {
-  const [imageLoaded, setImageLoaded] = useState(false);
-  const [isOpen, setIsOpen] = useState(false);
+export const PortfolioItemCard = ({ item, onDelete, showOnlyControls = false }: PortfolioItemCardProps) => {
   const [isDeleting, setIsDeleting] = useState(false);
-  const { user } = useAuth();
+  const { toast } = useToast();
   const { isAdmin, isSocialManager } = usePermissions();
   
-  // Check if current user can delete this item
-  const canDelete = user && (isAdmin || isSocialManager) && user.id === item.created_by;
+  const canManage = isAdmin || isSocialManager;
 
-  const handleDelete = async (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent opening the modal
+  const handleDelete = async () => {
+    if (!canManage) {
+      toast({
+        title: "אין הרשאות",
+        description: "אין לך הרשאה למחוק פריטים מהגלריה",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsDeleting(true);
+    const success = await deletePortfolioItem(item.id);
     
-    if (confirm('האם אתה בטוח שברצונך למחוק פריט זה?')) {
-      setIsDeleting(true);
-      await deletePortfolioItem(item.id);
-      setIsDeleting(false);
+    if (success) {
       onDelete();
     }
+    
+    setIsDeleting(false);
   };
 
-  return (
-    <>
-      <div 
-        className="group relative overflow-hidden rounded-lg cursor-pointer"
-        onClick={() => setIsOpen(true)}
-      >
-        {/* Blurred placeholder */}
-        <div 
-          className={`absolute inset-0 bg-gray-200 ${imageLoaded ? 'opacity-0' : 'opacity-100'} transition-opacity duration-300`}
-          style={{ 
-            backgroundImage: `url(${item.image_url})`, 
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            filter: 'blur(10px)',
-            transform: 'scale(1.1)'
-          }}
-        />
-        
-        {/* Actual image (lazy loaded) */}
-        <img 
-          src={item.image_url} 
-          alt={item.title}
-          loading="lazy"
-          className={`w-full h-full object-cover aspect-square ${imageLoaded ? 'opacity-100' : 'opacity-0'} transition-opacity duration-300`}
-          onLoad={() => setImageLoaded(true)}
-        />
-        
-        {/* Overlay with title */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4 text-white">
-          <h3 className="font-medium text-lg">{item.title}</h3>
-          {item.description && (
-            <p className="text-sm text-white/80 line-clamp-2">{item.description}</p>
-          )}
-        </div>
-        
-        {/* Delete button (only for admins/social managers who created the item) */}
-        {canDelete && (
-          <button
-            onClick={handleDelete}
-            disabled={isDeleting}
-            className="absolute top-2 right-2 p-2 rounded-full bg-black/50 text-white opacity-0 group-hover:opacity-100 hover:bg-red-600 transition-all duration-200"
-            aria-label="מחק פריט"
+  if (showOnlyControls && canManage) {
+    return (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            size="sm"
+            variant="secondary"
+            className="bg-white/20 backdrop-blur-sm border-white/30 text-white hover:bg-white/30 rounded-full p-2"
           >
-            <Trash2 className="h-4 w-4" />
-          </button>
+            <MoreVertical className="h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="bg-white/95 backdrop-blur-sm">
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-red-600 focus:text-red-700">
+                <Trash2 className="h-4 w-4 ml-2" />
+                מחק פריט
+              </DropdownMenuItem>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>האם אתה בטוח?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  פעולה זו תמחק את הפריט "{item.title}" לצמיתות מהגלריה. לא ניתן לבטל פעולה זו.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>ביטול</AlertDialogCancel>
+                <AlertDialogAction 
+                  onClick={handleDelete}
+                  disabled={isDeleting}
+                  className="bg-red-600 hover:bg-red-700"
+                >
+                  {isDeleting ? 'מוחק...' : 'מחק פריט'}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    );
+  }
+
+  if (showOnlyControls) {
+    return null; // Don't show controls if user doesn't have permissions
+  }
+
+  // Full card view (fallback for compatibility)
+  return (
+    <div className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
+      <div className="aspect-square overflow-hidden">
+        <img
+          src={item.image_url}
+          alt={item.title}
+          className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+        />
+      </div>
+      
+      <div className="p-4">
+        <h3 className="font-semibold text-lg mb-2 text-gray-900">{item.title}</h3>
+        {item.description && (
+          <p className="text-gray-600 text-sm line-clamp-2 mb-3">{item.description}</p>
+        )}
+        
+        {canManage && (
+          <div className="flex justify-end gap-2">
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700 hover:bg-red-50">
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>האם אתה בטוח?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    פעולה זו תמחק את הפריט "{item.title}" לצמיתות מהגלריה. לא ניתן לבטל פעולה זו.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>ביטול</AlertDialogCancel>
+                  <AlertDialogAction 
+                    onClick={handleDelete}
+                    disabled={isDeleting}
+                    className="bg-red-600 hover:bg-red-700"
+                  >
+                    {isDeleting ? 'מוחק...' : 'מחק פריט'}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
         )}
       </div>
-
-      {/* Image preview modal */}
-      <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="max-w-3xl w-[90vw] p-0 overflow-hidden">
-          <div className="relative">
-            <img 
-              src={item.image_url} 
-              alt={item.title}
-              className="w-full h-auto"
-            />
-            
-            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 text-white">
-              <h3 className="font-medium text-xl">{item.title}</h3>
-              {item.description && (
-                <p className="text-white/90 mt-1">{item.description}</p>
-              )}
-            </div>
-            
-            {canDelete && (
-              <Button
-                onClick={handleDelete}
-                disabled={isDeleting}
-                variant="destructive"
-                size="sm"
-                className="absolute bottom-4 right-4"
-              >
-                <Trash2 className="h-4 w-4 mr-2" />
-                מחק
-              </Button>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
-    </>
+    </div>
   );
 };
