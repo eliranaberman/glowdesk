@@ -61,7 +61,7 @@ export const PortfolioItemForm = ({ onSuccess, onCancel }: PortfolioItemFormProp
     try {
       const result = await createPortfolioItem(
         {
-          title: values.title, // Explicitly pass title as required
+          title: values.title,
           description: values.description,
           image: selectedImage,
         },

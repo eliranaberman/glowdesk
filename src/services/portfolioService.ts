@@ -1,7 +1,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { PortfolioItem, PortfolioItemFormData } from '@/types/portfolio';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from '@/hooks/use-toast';
 
 // Get all portfolio items
 export const getPortfolioItems = async (): Promise<PortfolioItem[]> => {
@@ -54,7 +54,6 @@ export const createPortfolioItem = async (
   data: PortfolioItemFormData,
   userId: string
 ): Promise<{ success: boolean; error: string | null; item?: PortfolioItem }> => {
-  const { toast } = useToast();
   try {
     if (!data.image) {
       return { success: false, error: 'תמונה נדרשת' };
@@ -102,7 +101,6 @@ export const createPortfolioItem = async (
 
 // Delete a portfolio item
 export const deletePortfolioItem = async (id: string): Promise<boolean> => {
-  const { toast } = useToast();
   try {
     // Get the item to find the image URL
     const { data: item } = await supabase
