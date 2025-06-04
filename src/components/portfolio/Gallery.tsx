@@ -24,7 +24,10 @@ export const Gallery = () => {
   const { user } = useAuth();
   const { isAdmin, isSocialManager } = usePermissions();
   
-  const canAddItems = user && (isAdmin || isSocialManager);
+  // Allow all authenticated users to add items
+  const canAddItems = !!user;
+  // Only admins and social managers can manage (delete) items
+  const canManageItems = user && (isAdmin || isSocialManager);
 
   const loadItems = async () => {
     setIsLoading(true);
@@ -132,8 +135,8 @@ export const Gallery = () => {
             </div>
           </div>
 
-          {/* Add Button */}
-          {canAddItems && (
+          {/* Add Button - Show for all authenticated users */}
+          {canAddItems ? (
             <Button 
               onClick={() => setIsAddDialogOpen(true)}
               className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white rounded-xl px-6 py-3 font-medium shadow-lg hover:shadow-xl transition-all duration-300"
@@ -141,6 +144,10 @@ export const Gallery = () => {
               <PlusCircle className="h-5 w-5 ml-2" />
               הוסף תמונה חדשה
             </Button>
+          ) : (
+            <div className="text-center text-gray-500 text-sm">
+              יש להתחבר למערכת כדי להעלות תמונות
+            </div>
           )}
         </div>
 
@@ -214,8 +221,8 @@ export const Gallery = () => {
                   </div>
                 </div>
 
-                {/* Management Controls for authorized users */}
-                {canAddItems && (
+                {/* Management Controls - only for admins/social managers OR item owner */}
+                {(canManageItems || item.created_by === user?.id) && (
                   <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                     <PortfolioItemCard 
                       item={item} 

@@ -8,6 +8,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { deletePortfolioItem } from '@/services/portfolioService';
 import { useToast } from '@/hooks/use-toast';
 import { usePermissions } from '@/hooks/use-permissions';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface PortfolioItemCardProps {
   item: PortfolioItem;
@@ -19,14 +20,16 @@ export const PortfolioItemCard = ({ item, onDelete, showOnlyControls = false }: 
   const [isDeleting, setIsDeleting] = useState(false);
   const { toast } = useToast();
   const { isAdmin, isSocialManager } = usePermissions();
+  const { user } = useAuth();
   
-  const canManage = isAdmin || isSocialManager;
+  // Allow deletion if user is admin/social manager OR if user is the item creator
+  const canDelete = isAdmin || isSocialManager || item.created_by === user?.id;
 
   const handleDelete = async () => {
-    if (!canManage) {
+    if (!canDelete) {
       toast({
         title: "אין הרשאות",
-        description: "אין לך הרשאה למחוק פריטים מהגלריה",
+        description: "אין לך הרשאה למחוק פריט זה מהגלריה",
         variant: "destructive"
       });
       return;
@@ -42,7 +45,7 @@ export const PortfolioItemCard = ({ item, onDelete, showOnlyControls = false }: 
     setIsDeleting(false);
   };
 
-  if (showOnlyControls && canManage) {
+  if (showOnlyControls && canDelete) {
     return (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
@@ -107,7 +110,7 @@ export const PortfolioItemCard = ({ item, onDelete, showOnlyControls = false }: 
           <p className="text-gray-600 text-sm line-clamp-2 mb-3">{item.description}</p>
         )}
         
-        {canManage && (
+        {canDelete && (
           <div className="flex justify-end gap-2">
             <AlertDialog>
               <AlertDialogTrigger asChild>
