@@ -13,20 +13,21 @@ import { format } from 'date-fns';
 import { he } from 'date-fns/locale';
 import { Helmet } from 'react-helmet-async';
 import { EmptyStateWrapper } from '@/components/empty-states/EmptyStateWrapper';
+import { Task, TaskPriority, TaskStatus } from '@/types/tasks';
 
-interface Task {
+interface LocalTask {
   id: string;
   title: string;
   description?: string;
   dueDate: Date;
-  priority: 'low' | 'medium' | 'high';
-  status: 'pending' | 'in-progress' | 'completed';
+  priority: TaskPriority;
+  status: TaskStatus;
   category: 'client' | 'inventory' | 'marketing' | 'other';
 }
 
 const Tasks = () => {
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [filteredTasks, setFilteredTasks] = useState<Task[]>([]);
+  const [tasks, setTasks] = useState<LocalTask[]>([]);
+  const [filteredTasks, setFilteredTasks] = useState<LocalTask[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [filterPriority, setFilterPriority] = useState<string>('all');
@@ -35,8 +36,8 @@ const Tasks = () => {
     title: '',
     description: '',
     dueDate: '',
-    priority: 'medium' as Task['priority'],
-    category: 'other' as Task['category']
+    priority: 'medium' as TaskPriority,
+    category: 'other' as LocalTask['category']
   });
 
   // Load tasks from localStorage on component mount
@@ -50,14 +51,14 @@ const Tasks = () => {
       setTasks(parsedTasks);
     } else {
       // Add some sample tasks for demonstration
-      const sampleTasks: Task[] = [
+      const sampleTasks: LocalTask[] = [
         {
           id: '1',
           title: 'הזמנת חומרי גלם חדשים',
           description: 'להזמין לק ג\'ל חדש ואצטון',
           dueDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
           priority: 'high',
-          status: 'pending',
+          status: 'open',
           category: 'inventory'
         },
         {
@@ -66,7 +67,7 @@ const Tasks = () => {
           description: 'פוסט על העבודה החדשה עם שרה',
           dueDate: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000),
           priority: 'medium',
-          status: 'in-progress',
+          status: 'in_progress',
           category: 'marketing'
         }
       ];
@@ -100,13 +101,13 @@ const Tasks = () => {
   const handleAddTask = () => {
     if (!newTask.title.trim()) return;
 
-    const task: Task = {
+    const task: LocalTask = {
       id: Date.now().toString(),
       title: newTask.title,
       description: newTask.description,
       dueDate: newTask.dueDate ? new Date(newTask.dueDate) : new Date(),
       priority: newTask.priority,
-      status: 'pending',
+      status: 'open',
       category: newTask.category
     };
 
@@ -127,7 +128,7 @@ const Tasks = () => {
   const toggleTaskStatus = (taskId: string) => {
     const updatedTasks = tasks.map(task => {
       if (task.id === taskId) {
-        const newStatus = task.status === 'completed' ? 'pending' : 'completed';
+        const newStatus = task.status === 'completed' ? 'open' : 'completed';
         return { ...task, status: newStatus };
       }
       return task;
@@ -136,7 +137,7 @@ const Tasks = () => {
     localStorage.setItem('tasks', JSON.stringify(updatedTasks));
   };
 
-  const getPriorityColor = (priority: Task['priority']) => {
+  const getPriorityColor = (priority: TaskPriority) => {
     switch (priority) {
       case 'high': return 'bg-red-100 text-red-800 border-red-200';
       case 'medium': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
@@ -144,11 +145,12 @@ const Tasks = () => {
     }
   };
 
-  const getStatusIcon = (status: Task['status']) => {
+  const getStatusIcon = (status: TaskStatus) => {
     switch (status) {
       case 'completed': return <CheckCircle2 className="h-4 w-4 text-green-600" />;
-      case 'in-progress': return <Clock className="h-4 w-4 text-blue-600" />;
-      case 'pending': return <AlertCircle className="h-4 w-4 text-yellow-600" />;
+      case 'in_progress': return <Clock className="h-4 w-4 text-blue-600" />;
+      case 'open': return <AlertCircle className="h-4 w-4 text-yellow-600" />;
+      case 'archived': return <AlertCircle className="h-4 w-4 text-gray-600" />;
     }
   };
 
@@ -201,7 +203,7 @@ const Tasks = () => {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="priority">עדיפות</Label>
-                    <Select value={newTask.priority} onValueChange={(value: Task['priority']) => setNewTask(prev => ({ ...prev, priority: value }))}>
+                    <Select value={newTask.priority} onValueChange={(value: TaskPriority) => setNewTask(prev => ({ ...prev, priority: value }))}>
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
@@ -215,7 +217,7 @@ const Tasks = () => {
                   
                   <div>
                     <Label htmlFor="category">קטגוריה</Label>
-                    <Select value={newTask.category} onValueChange={(value: Task['category']) => setNewTask(prev => ({ ...prev, category: value }))}>
+                    <Select value={newTask.category} onValueChange={(value: LocalTask['category']) => setNewTask(prev => ({ ...prev, category: value }))}>
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
@@ -303,7 +305,7 @@ const Tasks = () => {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="priority">עדיפות</Label>
-                    <Select value={newTask.priority} onValueChange={(value: Task['priority']) => setNewTask(prev => ({ ...prev, priority: value }))}>
+                    <Select value={newTask.priority} onValueChange={(value: TaskPriority) => setNewTask(prev => ({ ...prev, priority: value }))}>
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
@@ -317,7 +319,7 @@ const Tasks = () => {
                   
                   <div>
                     <Label htmlFor="category">קטגוריה</Label>
-                    <Select value={newTask.category} onValueChange={(value: Task['category']) => setNewTask(prev => ({ ...prev, category: value }))}>
+                    <Select value={newTask.category} onValueChange={(value: LocalTask['category']) => setNewTask(prev => ({ ...prev, category: value }))}>
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
@@ -376,9 +378,10 @@ const Tasks = () => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">הכל</SelectItem>
-                <SelectItem value="pending">ממתין</SelectItem>
-                <SelectItem value="in-progress">בתהליך</SelectItem>
+                <SelectItem value="open">פתוח</SelectItem>
+                <SelectItem value="in_progress">בתהליך</SelectItem>
                 <SelectItem value="completed">הושלם</SelectItem>
+                <SelectItem value="archived">בארכיון</SelectItem>
               </SelectContent>
             </Select>
 
