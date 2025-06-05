@@ -3,13 +3,12 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Calendar, Plus, Filter, Search, Clock, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Plus, Calendar } from 'lucide-react';
 import { format } from 'date-fns';
 import { he } from 'date-fns/locale';
 import { Helmet } from 'react-helmet-async';
@@ -27,10 +26,6 @@ interface LocalTask {
 
 const Tasks = () => {
   const [tasks, setTasks] = useState<LocalTask[]>([]);
-  const [filteredTasks, setFilteredTasks] = useState<LocalTask[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterStatus, setFilterStatus] = useState<string>('all');
-  const [filterPriority, setFilterPriority] = useState<string>('all');
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [newTask, setNewTask] = useState({
     title: '',
@@ -69,34 +64,21 @@ const Tasks = () => {
           priority: 'medium' as TaskPriority,
           status: 'in_progress' as TaskStatus,
           category: 'marketing'
+        },
+        {
+          id: '3',
+          title: 'עדכון אתר',
+          description: 'להוסיף תמונות חדשות לגלריה',
+          dueDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
+          priority: 'low' as TaskPriority,
+          status: 'completed' as TaskStatus,
+          category: 'marketing'
         }
       ];
       setTasks(sampleTasks);
       localStorage.setItem('tasks', JSON.stringify(sampleTasks));
     }
   }, []);
-
-  // Filtering logic
-  useEffect(() => {
-    let filtered = tasks;
-
-    if (searchTerm) {
-      filtered = filtered.filter(task => 
-        task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        task.description?.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-
-    if (filterStatus !== 'all') {
-      filtered = filtered.filter(task => task.status === filterStatus);
-    }
-
-    if (filterPriority !== 'all') {
-      filtered = filtered.filter(task => task.priority === filterPriority);
-    }
-
-    setFilteredTasks(filtered);
-  }, [tasks, searchTerm, filterStatus, filterPriority]);
 
   const handleAddTask = () => {
     if (!newTask.title.trim()) return;
@@ -125,14 +107,10 @@ const Tasks = () => {
     setIsAddDialogOpen(false);
   };
 
-  const toggleTaskStatus = (taskId: string) => {
-    const updatedTasks = tasks.map(task => {
-      if (task.id === taskId) {
-        const newStatus: TaskStatus = task.status === 'completed' ? 'open' : 'completed';
-        return { ...task, status: newStatus };
-      }
-      return task;
-    });
+  const moveTask = (taskId: string, newStatus: TaskStatus) => {
+    const updatedTasks = tasks.map(task => 
+      task.id === taskId ? { ...task, status: newStatus } : task
+    );
     setTasks(updatedTasks);
     localStorage.setItem('tasks', JSON.stringify(updatedTasks));
   };
@@ -145,23 +123,80 @@ const Tasks = () => {
     }
   };
 
-  const getStatusIcon = (status: TaskStatus) => {
-    switch (status) {
-      case 'completed': return <CheckCircle2 className="h-4 w-4 text-green-600" />;
-      case 'in_progress': return <Clock className="h-4 w-4 text-blue-600" />;
-      case 'open': return <AlertCircle className="h-4 w-4 text-yellow-600" />;
-      case 'archived': return <AlertCircle className="h-4 w-4 text-gray-600" />;
+  const getPriorityText = (priority: TaskPriority) => {
+    switch (priority) {
+      case 'high': return 'גבוהה';
+      case 'medium': return 'בינונית';
+      case 'low': return 'נמוכה';
     }
   };
+
+  const getTasksByStatus = (status: TaskStatus) => {
+    return tasks.filter(task => task.status === status);
+  };
+
+  const TaskCard = ({ task }: { task: LocalTask }) => (
+    <Card className="mb-3 cursor-pointer hover:shadow-md transition-shadow">
+      <CardHeader className="pb-2">
+        <div className="flex justify-between items-start">
+          <CardTitle className="text-sm font-medium">{task.title}</CardTitle>
+          <Badge className={getPriorityColor(task.priority)}>
+            {getPriorityText(task.priority)}
+          </Badge>
+        </div>
+      </CardHeader>
+      <CardContent className="pt-0">
+        {task.description && (
+          <p className="text-sm text-muted-foreground mb-2">{task.description}</p>
+        )}
+        <div className="flex items-center text-xs text-muted-foreground">
+          <Calendar className="h-3 w-3 mr-1" />
+          {format(task.dueDate, 'dd/MM', { locale: he })}
+        </div>
+        <div className="flex gap-1 mt-2">
+          {task.status !== 'open' && (
+            <Button 
+              size="sm" 
+              variant="outline" 
+              className="text-xs h-6"
+              onClick={() => moveTask(task.id, 'open')}
+            >
+              פתוח
+            </Button>
+          )}
+          {task.status !== 'in_progress' && (
+            <Button 
+              size="sm" 
+              variant="outline" 
+              className="text-xs h-6"
+              onClick={() => moveTask(task.id, 'in_progress')}
+            >
+              בתהליך
+            </Button>
+          )}
+          {task.status !== 'completed' && (
+            <Button 
+              size="sm" 
+              variant="outline" 
+              className="text-xs h-6"
+              onClick={() => moveTask(task.id, 'completed')}
+            >
+              הושלם
+            </Button>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
 
   return (
     <>
       <Helmet>
         <title>משימות | GlowDesk</title>
       </Helmet>
-      <div className="space-y-6" dir="rtl">
-        {/* Header and filters */}
-        <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
+      <div className="space-y-6 p-4" dir="rtl">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold">משימות</h1>
             <p className="text-muted-foreground">נהלי את המשימות היומיות שלך</p>
@@ -169,14 +204,14 @@ const Tasks = () => {
           
           <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
             <DialogTrigger asChild>
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
+              <Button className="gap-2">
+                <Plus className="h-4 w-4" />
                 משימה חדשה
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-md">
+            <DialogContent className="w-[90vw] max-w-sm sm:max-w-md">
               <DialogHeader>
-                <DialogTitle>משימה חדשה</DialogTitle>
+                <DialogTitle className="text-center">משימה חדשה</DialogTitle>
               </DialogHeader>
               <div className="space-y-4">
                 <div>
@@ -196,10 +231,11 @@ const Tasks = () => {
                     value={newTask.description}
                     onChange={(e) => setNewTask(prev => ({ ...prev, description: e.target.value }))}
                     placeholder="תיאור נוסף על המשימה..."
+                    className="min-h-[60px]"
                   />
                 </div>
                 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="priority">עדיפות</Label>
                     <Select value={newTask.priority} onValueChange={(value: TaskPriority) => setNewTask(prev => ({ ...prev, priority: value }))}>
@@ -240,7 +276,7 @@ const Tasks = () => {
                   />
                 </div>
                 
-                <div className="flex gap-2 pt-4">
+                <div className="flex flex-col sm:flex-row gap-2 pt-4">
                   <Button onClick={handleAddTask} className="flex-1">
                     הוסף משימה
                   </Button>
@@ -253,80 +289,52 @@ const Tasks = () => {
           </Dialog>
         </div>
 
-        {/* Filters */}
-        <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Input
-              type="text"
-              placeholder="חיפוש משימות..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="max-w-xs"
-            />
-            <Button variant="outline" size="icon">
-              <Search className="h-4 w-4" />
-            </Button>
+        {/* Task Columns */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Open Tasks */}
+          <div>
+            <h2 className="text-lg font-semibold mb-4 text-center">
+              משימות פתוחות ({getTasksByStatus('open').length})
+            </h2>
+            <div className="min-h-[200px] bg-gray-50 rounded-lg p-4">
+              {getTasksByStatus('open').map(task => (
+                <TaskCard key={task.id} task={task} />
+              ))}
+              {getTasksByStatus('open').length === 0 && (
+                <p className="text-center text-muted-foreground">אין משימות פתוחות</p>
+              )}
+            </div>
           </div>
 
-          <div className="flex items-center gap-3">
-            <Select value={filterStatus} onValueChange={setFilterStatus}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="סטטוס: הכל" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">הכל</SelectItem>
-                <SelectItem value="open">פתוח</SelectItem>
-                <SelectItem value="in_progress">בתהליך</SelectItem>
-                <SelectItem value="completed">הושלם</SelectItem>
-                <SelectItem value="archived">בארכיון</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Select value={filterPriority} onValueChange={setFilterPriority}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="עדיפות: הכל" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">הכל</SelectItem>
-                <SelectItem value="low">נמוכה</SelectItem>
-                <SelectItem value="medium">בינונית</SelectItem>
-                <SelectItem value="high">גבוהה</SelectItem>
-              </SelectContent>
-            </Select>
+          {/* In Progress Tasks */}
+          <div>
+            <h2 className="text-lg font-semibold mb-4 text-center">
+              בתהליך ({getTasksByStatus('in_progress').length})
+            </h2>
+            <div className="min-h-[200px] bg-blue-50 rounded-lg p-4">
+              {getTasksByStatus('in_progress').map(task => (
+                <TaskCard key={task.id} task={task} />
+              ))}
+              {getTasksByStatus('in_progress').length === 0 && (
+                <p className="text-center text-muted-foreground">אין משימות בתהליך</p>
+              )}
+            </div>
           </div>
-        </div>
 
-        {/* Task List */}
-        <div className="grid gap-4">
-          {filteredTasks.map((task) => (
-            <Card key={task.id}>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">{task.title}</CardTitle>
-                <Checkbox
-                  id={`task-${task.id}`}
-                  checked={task.status === 'completed'}
-                  onCheckedChange={() => toggleTaskStatus(task.id)}
-                />
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center justify-between text-xs text-muted-foreground">
-                  <div className="flex items-center">
-                    {getStatusIcon(task.status)}
-                    <span className="mr-1">{task.status}</span>
-                  </div>
-                  <Badge className={getPriorityColor(task.priority)}>
-                    {task.priority}
-                  </Badge>
-                </div>
-                <p className="text-sm text-muted-foreground mt-2">
-                  {task.description}
-                </p>
-                <div className="text-xs text-muted-foreground mt-4">
-                  תאריך יעד: {format(task.dueDate, 'dd/MM/yyyy', { locale: he })}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+          {/* Completed Tasks */}
+          <div>
+            <h2 className="text-lg font-semibold mb-4 text-center">
+              הושלמו ({getTasksByStatus('completed').length})
+            </h2>
+            <div className="min-h-[200px] bg-green-50 rounded-lg p-4">
+              {getTasksByStatus('completed').map(task => (
+                <TaskCard key={task.id} task={task} />
+              ))}
+              {getTasksByStatus('completed').length === 0 && (
+                <p className="text-center text-muted-foreground">אין משימות שהושלמו</p>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </>
