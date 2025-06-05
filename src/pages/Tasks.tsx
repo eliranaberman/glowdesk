@@ -1,717 +1,435 @@
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { 
-  Plus, 
-  Search, 
-  Calendar, 
-  User, 
-  AlertTriangle,
-  Filter,
-  ArrowDown,
-  ArrowUp,
-  SquareKanban,
-  Info,
-  Loader2,
-  Check
-} from "lucide-react";
-import { format } from "date-fns";
-import { he } from "date-fns/locale";
-import TaskCard from "@/components/tasks/TaskCard";
-import TaskForm from "@/components/tasks/TaskForm";
-import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/lib/supabase";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { 
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from "@/components/ui/select";
-import { TaskPriority, TaskStatus, Task, User as UserType } from "@/types/tasks";
-import { Skeleton } from "@/components/ui/skeleton";
+import { useState, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Calendar, Plus, Filter, Search, Clock, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { format } from 'date-fns';
+import { he } from 'date-fns/locale';
+import { Helmet } from 'react-helmet-async';
+import { EmptyStateWrapper } from '@/components/empty-states/EmptyStateWrapper';
 
-const sampleTasks = [
-  {
-    id: "1",
-    title: "לבדוק את הודעות הדואר האלקטרוני",
-    description: "לעבור על כל הודעות המייל ולהשיב לפניות דחופות",
-    priority: "high",
-    status: "open",
-    assigned_to: "user1",
-    due_date: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // מחר
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
-  },
-  {
-    id: "2",
-    title: "הכנת מצגת לישיבה",
-    description: "להכין מצגת עבור ישיבת צוות של יום שני הבא",
-    priority: "medium",
-    status: "in_progress",
-    assigned_to: "user2",
-    due_date: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(), // עוד 3 ימים
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
-  },
-  {
-    id: "3",
-    title: "לתקן באגים באתר",
-    description: "לטפל בבאגים שדווחו במערכת המשימות",
-    priority: "high",
-    status: "in_progress",
-    assigned_to: "user1",
-    due_date: new Date().toISOString(), // היום
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
-  },
-  {
-    id: "4",
-    title: "לעדכן את מסמך הדרישות",
-    description: "להוסיף את הדרישות החדשות שהתקבלו מהלקוח",
-    priority: "low",
-    status: "completed",
-    assigned_to: "user2",
-    due_date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), // לפני יומיים
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
-  },
-  {
-    id: "5",
-    title: "פגישה עם לקוח חדש",
-    description: "פגישת הכרות ראשונית עם לקוח פוטנציאלי",
-    priority: "medium",
-    status: "open",
-    assigned_to: "user3",
-    due_date: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(), // עוד 5 ימים
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
-  },
-  {
-    id: "6",
-    title: "גיבוי נתוני המערכת",
-    description: "לבצע גיבוי של כל הנתונים במערכת",
-    priority: "high",
-    status: "completed",
-    assigned_to: "user1",
-    due_date: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(), // אתמול
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
-  }
-];
-
-const sampleUsers = [
-  {
-    id: "user1",
-    full_name: "ישראל ישראלי",
-    email: "israel@example.com",
-    avatar_url: "https://i.pravatar.cc/150?u=user1"
-  },
-  {
-    id: "user2",
-    full_name: "מיכל כהן",
-    email: "michal@example.com",
-    avatar_url: "https://i.pravatar.cc/150?u=user2"
-  },
-  {
-    id: "user3",
-    full_name: "דוד לוי",
-    email: "david@example.com",
-    avatar_url: "https://i.pravatar.cc/150?u=user3"
-  }
-];
+interface Task {
+  id: string;
+  title: string;
+  description?: string;
+  dueDate: Date;
+  priority: 'low' | 'medium' | 'high';
+  status: 'pending' | 'in-progress' | 'completed';
+  category: 'client' | 'inventory' | 'marketing' | 'other';
+}
 
 const Tasks = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [filteredTasks, setFilteredTasks] = useState<Task[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedUser, setSelectedUser] = useState<string | null>(null);
-  const [selectedPriority, setSelectedPriority] = useState<TaskPriority | null>(null);
-  const [selectedDueDate, setSelectedDueDate] = useState<string | null>(null);
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
-  const [users, setUsers] = useState<UserType[]>([]);
-  const [isTaskFormOpen, setIsTaskFormOpen] = useState(false);
-  const [editingTask, setEditingTask] = useState<Task | null>(null);
-  const { toast } = useToast();
-  const { user, isAdmin } = useAuth();
-  const [loadingDemo, setLoadingDemo] = useState(true);
-  
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterStatus, setFilterStatus] = useState<string>('all');
+  const [filterPriority, setFilterPriority] = useState<string>('all');
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [newTask, setNewTask] = useState({
+    title: '',
+    description: '',
+    dueDate: '',
+    priority: 'medium' as Task['priority'],
+    category: 'other' as Task['category']
+  });
+
+  // Load tasks from localStorage on component mount
   useEffect(() => {
-    const fetchTasks = async () => {
-      setIsLoading(true);
-      
-      try {
-        let query = supabase
-          .from('tasks')
-          .select(`
-            *,
-            assigned_to_user:users!tasks_assigned_user_id_fkey(id, full_name, email, avatar_url),
-            created_by_user:users!tasks_created_by_fkey(id, full_name)
-          `)
-          .order('created_at', { ascending: false });
-          
-        if (!isAdmin) {
-          query = query.eq('assigned_to', user?.id);
+    const savedTasks = localStorage.getItem('tasks');
+    if (savedTasks) {
+      const parsedTasks = JSON.parse(savedTasks).map((task: any) => ({
+        ...task,
+        dueDate: new Date(task.dueDate)
+      }));
+      setTasks(parsedTasks);
+    } else {
+      // Add some sample tasks for demonstration
+      const sampleTasks: Task[] = [
+        {
+          id: '1',
+          title: 'הזמנת חומרי גלם חדשים',
+          description: 'להזמין לק ג\'ל חדש ואצטון',
+          dueDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
+          priority: 'high',
+          status: 'pending',
+          category: 'inventory'
+        },
+        {
+          id: '2',
+          title: 'יצירת פוסט לאינסטגרם',
+          description: 'פוסט על העבודה החדשה עם שרה',
+          dueDate: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000),
+          priority: 'medium',
+          status: 'in-progress',
+          category: 'marketing'
         }
-        
-        const { data, error } = await query;
-        
-        if (error) {
-          console.error('Error fetching tasks:', error);
-          setTasks(sampleTasks as Task[]);
-        } else {
-          setTasks(data || []);
-        }
-      } catch (error) {
-        console.error('Error fetching tasks:', error);
-        setTasks(sampleTasks as Task[]);
-        toast({
-          title: "לא ניתן לטעון משימות מהשרת",
-          description: "מציג נתוני דוגמה במקום",
-          variant: "default",
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
-    const fetchUsers = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('users')
-          .select('id, full_name, email, avatar_url')
-          .order('full_name');
-          
-        if (error) {
-          console.error('Error fetching users:', error);
-          setUsers(sampleUsers);
-        } else {
-          setUsers(data || []);
-        }
-      } catch (error) {
-        console.error('Error fetching users:', error);
-        setUsers(sampleUsers);
-      }
-    };
-    
-    setTimeout(() => {
-      setLoadingDemo(false);
-    }, 1500);
-    
-    fetchTasks();
-    fetchUsers();
-    
-    try {
-      const tasksSubscription = supabase
-        .channel('tasks-changes')
-        .on('postgres_changes', 
-          { 
-            event: '*', 
-            schema: 'public', 
-            table: 'tasks'
-          }, 
-          (payload) => {
-            console.log('Realtime update:', payload);
-            fetchTasks();
-          }
-        )
-        .subscribe();
-        
-      return () => {
-        supabase.removeChannel(tasksSubscription);
-      };
-    } catch (error) {
-      console.error('Error setting up realtime subscription:', error);
+      ];
+      setTasks(sampleTasks);
+      localStorage.setItem('tasks', JSON.stringify(sampleTasks));
     }
-  }, [user?.id, isAdmin, toast]);
-  
+  }, []);
+
+  // Filtering logic
   useEffect(() => {
-    let result = [...tasks];
-    
+    let filtered = tasks;
+
     if (searchTerm) {
-      const search = searchTerm.toLowerCase();
-      result = result.filter(
-        task => 
-          task.title.toLowerCase().includes(search) || 
-          (task.description && task.description.toLowerCase().includes(search)) ||
-          (task.assigned_to_user?.full_name.toLowerCase().includes(search))
+      filtered = filtered.filter(task => 
+        task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        task.description?.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
-    
-    if (selectedUser && selectedUser !== "all") {
-      result = result.filter(task => task.assigned_to === selectedUser);
+
+    if (filterStatus !== 'all') {
+      filtered = filtered.filter(task => task.status === filterStatus);
     }
-    
-    if (selectedPriority && selectedPriority !== "all" as any) {
-      result = result.filter(task => task.priority === selectedPriority);
+
+    if (filterPriority !== 'all') {
+      filtered = filtered.filter(task => task.priority === filterPriority);
     }
-    
-    if (selectedDueDate && selectedDueDate !== "all") {
-      if (selectedDueDate === 'today') {
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        
-        result = result.filter(task => {
-          if (!task.due_date) return false;
-          const dueDate = new Date(task.due_date);
-          dueDate.setHours(0, 0, 0, 0);
-          return dueDate.getTime() === today.getTime();
-        });
-      } else if (selectedDueDate === 'week') {
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const oneWeek = new Date(today);
-        oneWeek.setDate(today.getDate() + 7);
-        
-        result = result.filter(task => {
-          if (!task.due_date) return false;
-          const dueDate = new Date(task.due_date);
-          return dueDate >= today && dueDate <= oneWeek;
-        });
-      } else if (selectedDueDate === 'overdue') {
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        
-        result = result.filter(task => {
-          if (!task.due_date) return false;
-          const dueDate = new Date(task.due_date);
-          dueDate.setHours(0, 0, 0, 0);
-          return dueDate < today && task.status !== 'completed';
-        });
-      }
-    }
-    
-    result.sort((a, b) => {
-      if (!a.due_date && !b.due_date) return 0;
-      if (!a.due_date) return sortOrder === "asc" ? 1 : -1;
-      if (!b.due_date) return sortOrder === "asc" ? -1 : 1;
-      
-      const dateA = new Date(a.due_date).getTime();
-      const dateB = new Date(b.due_date).getTime();
-      
-      return sortOrder === "asc" ? dateA - dateB : dateB - dateA;
-    });
-    
-    setFilteredTasks(result);
-  }, [tasks, searchTerm, selectedUser, selectedPriority, selectedDueDate, sortOrder]);
-  
-  const handleOpenTaskForm = (task: Task | null = null) => {
-    setEditingTask(task);
-    setIsTaskFormOpen(true);
-  };
-  
-  const handleTaskFormClose = () => {
-    setEditingTask(null);
-    setIsTaskFormOpen(false);
-  };
-  
-  const handleStatusChange = async (taskId: string, newStatus: TaskStatus) => {
-    try {
-      const taskToUpdate = tasks.find(t => t.id === taskId);
-      if (!taskToUpdate) return;
-      
-      setTasks(prevTasks => prevTasks.map(t => 
-        t.id === taskId ? { ...t, status: newStatus, updated_at: new Date().toISOString() } : t
-      ));
-      
-      const { error } = await supabase
-        .from('tasks')
-        .update({ status: newStatus, updated_at: new Date().toISOString() })
-        .eq('id', taskId);
-      
-      if (error) {
-        throw error;
-      }
-      
-      toast({
-        title: "סטטוס משימה עודכן",
-        description: "סטטוס המשימה עודכן בהצלחה",
-      });
-      
-    } catch (error) {
-      console.error('Error updating task status:', error);
-      toast({
-        title: "שגיאה בעדכון סטטוס",
-        description: "אירעה שגיאה בעדכון סטטוס המשימה",
-        variant: "destructive",
-      });
-      
-      setTasks(prevTasks => [...prevTasks]);
-    }
-  };
-  
-  const handleDragStart = (e: React.DragEvent, taskId: string) => {
-    e.dataTransfer.setData('taskId', taskId);
-    if (e.currentTarget instanceof HTMLElement) {
-      e.currentTarget.style.opacity = '0.4';
-      e.currentTarget.style.transform = 'scale(1.02)';
-    }
-  };
-  
-  const handleDragEnd = (e: React.DragEvent) => {
-    if (e.currentTarget instanceof HTMLElement) {
-      e.currentTarget.style.opacity = '1';
-      e.currentTarget.style.transform = '';
-    }
-  };
-  
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    if (e.currentTarget instanceof HTMLElement) {
-      e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.05)';
-      e.currentTarget.style.boxShadow = 'inset 0 0 0 2px rgba(0, 0, 0, 0.1)';
-    }
-  };
-  
-  const handleDragLeave = (e: React.DragEvent) => {
-    if (e.currentTarget instanceof HTMLElement) {
-      e.currentTarget.style.backgroundColor = '';
-      e.currentTarget.style.boxShadow = '';
-    }
-  };
-  
-  const handleDrop = (e: React.DragEvent, status: TaskStatus) => {
-    e.preventDefault();
-    if (e.currentTarget instanceof HTMLElement) {
-      e.currentTarget.style.backgroundColor = '';
-      e.currentTarget.style.boxShadow = '';
-    }
-    
-    const taskId = e.dataTransfer.getData('taskId');
-    
-    const task = tasks.find(t => t.id === taskId);
-    if (task && task.status !== status) {
-      handleStatusChange(taskId, status);
-    }
-  };
-  
-  const toggleSortOrder = () => {
-    setSortOrder(sortOrder === "asc" ? "desc" : "asc");
-  };
-  
-  const openTasks = filteredTasks.filter(task => task.status === 'open');
-  const inProgressTasks = filteredTasks.filter(task => task.status === 'in_progress');
-  const completedTasks = filteredTasks.filter(task => task.status === 'completed');
-  
-  const shouldShowTaskForm = isTaskFormOpen || editingTask;
-  
-  const renderEmptyState = (status: TaskStatus) => {
-    const messages = {
-      open: {
-        title: "רוצה להתחיל משימה חדשה?",
-        description: "אין משימות פתוחות כרגע. בוא נתחיל!",
-        icon: <Plus className="h-12 w-12 text-yellow-500/40" />
-      },
-      in_progress: {
-        title: "הכל רגוע כרגע",
-        description: "אין משימות בתהליך ביצוע.",
-        icon: <Loader2 className="h-12 w-12 text-blue-500/40" />
-      },
-      completed: {
-        title: "בקרוב יהיו פה משימות שהושלמו",
-        description: "אין עדיין משימות שהושלמו.",
-        icon: <Check className="h-12 w-12 text-green-500/40" />
-      }
+
+    setFilteredTasks(filtered);
+  }, [tasks, searchTerm, filterStatus, filterPriority]);
+
+  const handleAddTask = () => {
+    if (!newTask.title.trim()) return;
+
+    const task: Task = {
+      id: Date.now().toString(),
+      title: newTask.title,
+      description: newTask.description,
+      dueDate: newTask.dueDate ? new Date(newTask.dueDate) : new Date(),
+      priority: newTask.priority,
+      status: 'pending',
+      category: newTask.category
     };
+
+    const updatedTasks = [...tasks, task];
+    setTasks(updatedTasks);
+    localStorage.setItem('tasks', JSON.stringify(updatedTasks));
     
-    return (
-      <div className="flex flex-col items-center justify-center text-center py-10 text-muted-foreground border border-dashed rounded-lg bg-background/50 px-4 animate-fade-in">
-        <div className="mb-4">
-          {messages[status].icon}
-        </div>
-        <h3 className="text-lg font-medium mb-1">{messages[status].title}</h3>
-        <p className="text-sm text-muted-foreground">{messages[status].description}</p>
-        {status === 'open' && (
-          <Button 
-            variant="outline" 
-            className="mt-4 hover:bg-yellow-50"
-            onClick={() => handleOpenTaskForm()}
-          >
-            <Plus className="ml-2 h-4 w-4" />
-            צור משימה חדשה
-          </Button>
-        )}
-      </div>
-    );
+    setNewTask({
+      title: '',
+      description: '',
+      dueDate: '',
+      priority: 'medium',
+      category: 'other'
+    });
+    setIsAddDialogOpen(false);
   };
-  
-  const renderSkeleton = () => (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-      {[1, 2, 3].map((colIndex) => (
-        <div key={colIndex} className="space-y-4 p-4 rounded-lg bg-muted/30 animate-pulse">
-          <div className="flex items-center justify-between">
-            <div className="h-6 w-24 bg-muted rounded-full" />
-            <div className="h-6 w-8 bg-muted rounded-full" />
-          </div>
-          <div className="space-y-3">
-            {[1, 2, 3].map((index) => (
-              <div key={index} className="p-4 border rounded-lg bg-card">
-                <div className="h-5 w-full bg-muted rounded mb-2" />
-                <div className="h-4 w-3/4 bg-muted rounded mb-3" />
-                <div className="flex justify-between items-center mt-2">
-                  <div className="h-6 w-16 bg-muted rounded-full" />
-                  <div className="h-6 w-6 bg-muted rounded-full" />
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-  
-  return (
-    <div dir="rtl" className="space-y-4 max-w-6xl mx-auto px-4">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-2xl font-bold">ניהול משימות</h1>
-          <p className="text-muted-foreground">
-            נהל, עדכן וסגור משימות בצורה קלה ומהירה
-          </p>
-        </div>
-        
-        <Button 
-          onClick={() => handleOpenTaskForm()}
-          className="shrink-0 shadow-sm"
-          size="lg"
+
+  const toggleTaskStatus = (taskId: string) => {
+    const updatedTasks = tasks.map(task => {
+      if (task.id === taskId) {
+        const newStatus = task.status === 'completed' ? 'pending' : 'completed';
+        return { ...task, status: newStatus };
+      }
+      return task;
+    });
+    setTasks(updatedTasks);
+    localStorage.setItem('tasks', JSON.stringify(updatedTasks));
+  };
+
+  const getPriorityColor = (priority: Task['priority']) => {
+    switch (priority) {
+      case 'high': return 'bg-red-100 text-red-800 border-red-200';
+      case 'medium': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'low': return 'bg-green-100 text-green-800 border-green-200';
+    }
+  };
+
+  const getStatusIcon = (status: Task['status']) => {
+    switch (status) {
+      case 'completed': return <CheckCircle2 className="h-4 w-4 text-green-600" />;
+      case 'in-progress': return <Clock className="h-4 w-4 text-blue-600" />;
+      case 'pending': return <AlertCircle className="h-4 w-4 text-yellow-600" />;
+    }
+  };
+
+  // Show empty state if no tasks
+  if (tasks.length === 0) {
+    return (
+      <>
+        <Helmet>
+          <title>משימות | GlowDesk</title>
+        </Helmet>
+        <EmptyStateWrapper
+          title="עדיין אין משימות"
+          description="תתחילי לנהל את המשימות היומיות שלך - הוספת מלאי, יצירת תכנים, מעקב אחר לקוחות ועוד."
+          actionText="הוסף משימה ראשונה"
+          actionHref="#"
+          helpText="המשימות יעזרו לך לא לפספס דברים חשובים ולנהל את העסק בצורה מסודרת"
         >
-          <Plus className="ml-2 h-5 w-5" />
-          משימה חדשה
-        </Button>
-      </div>
-      
-      <Card className="shadow-md border-border/40">
-        <CardHeader className="pb-3">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-            <div className="w-full md:w-1/3">
-              <div className="relative">
-                <Search className="absolute right-3 top-3 h-4 w-4 text-muted-foreground pointer-events-none" />
-                <Input
-                  placeholder="חיפוש משימות לפי כותרת, תיאור או משתמש..."
-                  className="pr-9"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
+          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+            <DialogTrigger asChild>
+              <Button className="w-full mt-4">
+                <Plus className="h-4 w-4 mr-2" />
+                הוסף משימה ראשונה
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle>משימה חדשה</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="title">כותרת המשימה</Label>
+                  <Input
+                    id="title"
+                    value={newTask.title}
+                    onChange={(e) => setNewTask(prev => ({ ...prev, title: e.target.value }))}
+                    placeholder="לדוגמה: הזמנת חומרי גלם"
+                  />
+                </div>
+                
+                <div>
+                  <Label htmlFor="description">תיאור (אופציונלי)</Label>
+                  <Textarea
+                    id="description"
+                    value={newTask.description}
+                    onChange={(e) => setNewTask(prev => ({ ...prev, description: e.target.value }))}
+                    placeholder="תיאור נוסף על המשימה..."
+                  />
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="priority">עדיפות</Label>
+                    <Select value={newTask.priority} onValueChange={(value: Task['priority']) => setNewTask(prev => ({ ...prev, priority: value }))}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="low">נמוכה</SelectItem>
+                        <SelectItem value="medium">בינונית</SelectItem>
+                        <SelectItem value="high">גבוהה</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="category">קטגוריה</Label>
+                    <Select value={newTask.category} onValueChange={(value: Task['category']) => setNewTask(prev => ({ ...prev, category: value }))}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="client">לקוחות</SelectItem>
+                        <SelectItem value="inventory">מלאי</SelectItem>
+                        <SelectItem value="marketing">שיווק</SelectItem>
+                        <SelectItem value="other">אחר</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                
+                <div>
+                  <Label htmlFor="dueDate">תאריך יעד</Label>
+                  <Input
+                    id="dueDate"
+                    type="date"
+                    value={newTask.dueDate}
+                    onChange={(e) => setNewTask(prev => ({ ...prev, dueDate: e.target.value }))}
+                  />
+                </div>
+                
+                <div className="flex gap-2 pt-4">
+                  <Button onClick={handleAddTask} className="flex-1">
+                    הוסף משימה
+                  </Button>
+                  <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
+                    ביטול
+                  </Button>
+                </div>
               </div>
-            </div>
-            
-            <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
-              <Select
-                value={selectedUser || "all"}
-                onValueChange={(value) => setSelectedUser(value === "all" ? null : value)}
-              >
-                <SelectTrigger className="w-full md:w-40">
-                  <SelectValue placeholder="סינון לפי משתמש" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">כל המשתמשים</SelectItem>
-                  {users.map((user) => (
-                    <SelectItem key={user.id} value={user.id}>
-                      {user.full_name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              
-              <Select
-                value={selectedPriority || "all"}
-                onValueChange={(value) => 
-                  setSelectedPriority(value === "all" ? null : value as TaskPriority)
-                }
-              >
-                <SelectTrigger className="w-full md:w-32">
-                  <SelectValue placeholder="עדיפות" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">כל העדיפויות</SelectItem>
-                  <SelectItem value="high">גבוהה</SelectItem>
-                  <SelectItem value="medium">בינונית</SelectItem>
-                  <SelectItem value="low">נמוכה</SelectItem>
-                </SelectContent>
-              </Select>
-              
-              <Select
-                value={selectedDueDate || "all"}
-                onValueChange={(value) => setSelectedDueDate(value === "all" ? null : value)}
-              >
-                <SelectTrigger className="w-full md:w-36">
-                  <SelectValue placeholder="תאריך יעד" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">כל התאריכים</SelectItem>
-                  <SelectItem value="today">היום</SelectItem>
-                  <SelectItem value="week">השבוע</SelectItem>
-                  <SelectItem value="overdue">באיחור</SelectItem>
-                </SelectContent>
-              </Select>
-              
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={toggleSortOrder}
-                title="מיון לפי תאריך יעד"
-              >
-                {sortOrder === "asc" ? (
-                  <ArrowUp className="h-4 w-4" />
-                ) : (
-                  <ArrowDown className="h-4 w-4" />
-                )}
-              </Button>
-              
-              <Button 
-                variant="outline" 
-                size="icon"
-                onClick={() => {
-                  setSearchTerm("");
-                  setSelectedUser(null);
-                  setSelectedPriority(null);
-                  setSelectedDueDate(null);
-                  setSortOrder("asc");
-                }}
-                title="נקה סינון"
-              >
-                <Filter className="h-4 w-4" />
-              </Button>
-            </div>
+            </DialogContent>
+          </Dialog>
+        </EmptyStateWrapper>
+      </>
+    );
+  }
+
+  return (
+    <>
+      <Helmet>
+        <title>משימות | GlowDesk</title>
+      </Helmet>
+      <div className="space-y-6" dir="rtl">
+        {/* Header and filters */}
+        <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold">משימות</h1>
+            <p className="text-muted-foreground">נהלי את המשימות היומיות שלך</p>
           </div>
-        </CardHeader>
-        
-        <CardContent>
-          {isLoading || loadingDemo ? (
-            <div className="py-4 flex justify-center items-center">
-              <div className="text-center">
-                <Loader2 className="h-10 w-10 animate-spin text-primary mx-auto mb-2" />
-                <p className="text-muted-foreground">טוען משימות...</p>
-              </div>
-              {renderSkeleton()}
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div
-                className="space-y-4 p-4 bg-muted/10 rounded-lg transition-colors duration-200"
-                onDragOver={handleDragOver}
-                onDragLeave={handleDragLeave}
-                onDrop={(e) => handleDrop(e, 'open')}
-              >
-                <div className="flex items-center justify-between">
-                  <h3 className="font-medium flex items-center">
-                    <Badge variant="open" className="mr-2">
-                      {openTasks.length}
-                    </Badge>
-                    <span className="flex items-center">
-                      משימות פתוחות
-                    </span>
-                  </h3>
+          
+          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="h-4 w-4 mr-2" />
+                משימה חדשה
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle>משימה חדשה</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="title">כותרת המשימה</Label>
+                  <Input
+                    id="title"
+                    value={newTask.title}
+                    onChange={(e) => setNewTask(prev => ({ ...prev, title: e.target.value }))}
+                    placeholder="לדוגמה: הזמנת חומרי גלם"
+                  />
                 </div>
                 
-                <div className="space-y-3 min-h-[100px]">
-                  {openTasks.length === 0 ? (
-                    renderEmptyState('open')
-                  ) : (
-                    openTasks.map((task) => (
-                      <TaskCard
-                        key={task.id}
-                        task={task}
-                        onEdit={() => handleOpenTaskForm(task)}
-                        onDragStart={(e) => handleDragStart(e, task.id)}
-                        onDragEnd={handleDragEnd}
-                        users={users}
-                      />
-                    ))
-                  )}
-                </div>
-              </div>
-              
-              <div
-                className="space-y-4 p-4 bg-muted/10 rounded-lg transition-colors duration-200"
-                onDragOver={handleDragOver}
-                onDragLeave={handleDragLeave}
-                onDrop={(e) => handleDrop(e, 'in_progress')}
-              >
-                <div className="flex items-center justify-between">
-                  <h3 className="font-medium flex items-center">
-                    <Badge variant="inProgress" className="mr-2">
-                      {inProgressTasks.length}
-                    </Badge>
-                    <span className="flex items-center">
-                      בתהליך
-                    </span>
-                  </h3>
+                <div>
+                  <Label htmlFor="description">תיאור (אופציונלי)</Label>
+                  <Textarea
+                    id="description"
+                    value={newTask.description}
+                    onChange={(e) => setNewTask(prev => ({ ...prev, description: e.target.value }))}
+                    placeholder="תיאור נוסף על המשימה..."
+                  />
                 </div>
                 
-                <div className="space-y-3 min-h-[100px]">
-                  {inProgressTasks.length === 0 ? (
-                    renderEmptyState('in_progress')
-                  ) : (
-                    inProgressTasks.map((task) => (
-                      <TaskCard
-                        key={task.id}
-                        task={task}
-                        onEdit={() => handleOpenTaskForm(task)}
-                        onDragStart={(e) => handleDragStart(e, task.id)}
-                        onDragEnd={handleDragEnd}
-                        users={users}
-                      />
-                    ))
-                  )}
-                </div>
-              </div>
-              
-              <div
-                className="space-y-4 p-4 bg-muted/10 rounded-lg transition-colors duration-200"
-                onDragOver={handleDragOver}
-                onDragLeave={handleDragLeave}
-                onDrop={(e) => handleDrop(e, 'completed')}
-              >
-                <div className="flex items-center justify-between">
-                  <h3 className="font-medium flex items-center">
-                    <Badge variant="completed" className="mr-2">
-                      {completedTasks.length}
-                    </Badge>
-                    <span className="flex items-center">
-                      הושלמו
-                    </span>
-                  </h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="priority">עדיפות</Label>
+                    <Select value={newTask.priority} onValueChange={(value: Task['priority']) => setNewTask(prev => ({ ...prev, priority: value }))}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="low">נמוכה</SelectItem>
+                        <SelectItem value="medium">בינונית</SelectItem>
+                        <SelectItem value="high">גבוהה</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="category">קטגוריה</Label>
+                    <Select value={newTask.category} onValueChange={(value: Task['category']) => setNewTask(prev => ({ ...prev, category: value }))}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="client">לקוחות</SelectItem>
+                        <SelectItem value="inventory">מלאי</SelectItem>
+                        <SelectItem value="marketing">שיווק</SelectItem>
+                        <SelectItem value="other">אחר</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
                 
-                <div className="space-y-3 min-h-[100px]">
-                  {completedTasks.length === 0 ? (
-                    renderEmptyState('completed')
-                  ) : (
-                    completedTasks.map((task) => (
-                      <TaskCard
-                        key={task.id}
-                        task={task}
-                        onEdit={() => handleOpenTaskForm(task)}
-                        onDragStart={(e) => handleDragStart(e, task.id)}
-                        onDragEnd={handleDragEnd}
-                        users={users}
-                      />
-                    ))
-                  )}
+                <div>
+                  <Label htmlFor="dueDate">תאריך יעד</Label>
+                  <Input
+                    id="dueDate"
+                    type="date"
+                    value={newTask.dueDate}
+                    onChange={(e) => setNewTask(prev => ({ ...prev, dueDate: e.target.value }))}
+                  />
+                </div>
+                
+                <div className="flex gap-2 pt-4">
+                  <Button onClick={handleAddTask} className="flex-1">
+                    הוסף משימה
+                  </Button>
+                  <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
+                    ביטול
+                  </Button>
                 </div>
               </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-      
-      {shouldShowTaskForm && (
-        <TaskForm
-          task={editingTask}
-          onClose={handleTaskFormClose}
-          users={users}
-          isAdmin={isAdmin}
-          currentUser={user}
-        />
-      )}
-    </div>
+            </DialogContent>
+          </Dialog>
+        </div>
+
+        {/* Filters */}
+        <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Input
+              type="text"
+              placeholder="חיפוש משימות..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="max-w-xs"
+            />
+            <Button variant="outline" size="icon">
+              <Search className="h-4 w-4" />
+            </Button>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <Select value={filterStatus} onValueChange={setFilterStatus}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="סטטוס: הכל" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">הכל</SelectItem>
+                <SelectItem value="pending">ממתין</SelectItem>
+                <SelectItem value="in-progress">בתהליך</SelectItem>
+                <SelectItem value="completed">הושלם</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={filterPriority} onValueChange={setFilterPriority}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="עדיפות: הכל" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">הכל</SelectItem>
+                <SelectItem value="low">נמוכה</SelectItem>
+                <SelectItem value="medium">בינונית</SelectItem>
+                <SelectItem value="high">גבוהה</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        {/* Task List */}
+        <div className="grid gap-4">
+          {filteredTasks.map((task) => (
+            <Card key={task.id}>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">{task.title}</CardTitle>
+                <Checkbox
+                  id={`task-${task.id}`}
+                  checked={task.status === 'completed'}
+                  onCheckedChange={() => toggleTaskStatus(task.id)}
+                />
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center justify-between text-xs text-muted-foreground">
+                  <div className="flex items-center">
+                    {getStatusIcon(task.status)}
+                    <span className="mr-1">{task.status}</span>
+                  </div>
+                  <Badge className={getPriorityColor(task.priority)}>
+                    {task.priority}
+                  </Badge>
+                </div>
+                <p className="text-sm text-muted-foreground mt-2">
+                  {task.description}
+                </p>
+                <div className="text-xs text-muted-foreground mt-4">
+                  תאריך יעד: {format(task.dueDate, 'dd/MM/yyyy', { locale: he })}
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    </>
   );
 };
 

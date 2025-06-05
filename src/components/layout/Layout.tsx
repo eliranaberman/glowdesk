@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Sidebar from './Sidebar';
@@ -26,9 +27,13 @@ const Layout = ({ children }: LayoutProps) => {
     const path = location.pathname;
     
     if (path === '/') return 'דשבורד';
+    if (path === '/dashboard') return 'דשבורד';
     if (path === '/customers') return 'לקוחות';
     if (path === '/customers/new') return 'הוספת לקוח';
     if (path.startsWith('/customers/edit/')) return 'עריכת לקוח';
+    if (path === '/clients') return 'לקוחות';
+    if (path === '/clients/new') return 'הוספת לקוח';
+    if (path.startsWith('/clients/edit/')) return 'עריכת לקוח';
     if (path === '/scheduling') return 'יומן';
     if (path === '/scheduling/new') return 'פגישה חדשה';
     if (path.startsWith('/scheduling/edit/')) return 'עריכת פגישה';
@@ -46,13 +51,15 @@ const Layout = ({ children }: LayoutProps) => {
     if (path === '/finances/insights') return 'תובנות עסקיות';
     if (path === '/loyalty') return 'תוכנית נאמנות';
     if (path === '/marketing/templates') return 'תבניות הודעות';
+    if (path === '/portfolio') return 'גלריה';
+    if (path === '/ai-assistant') return 'עוזר AI';
 
     return 'דשבורד'; // Default
   };
 
   const shouldShowBackButton = (): boolean => {
     const path = location.pathname;
-    return path !== '/dashboard'; // Show back button on all pages except the dashboard
+    return path !== '/dashboard' && path !== '/'; // Show back button on all pages except the dashboard
   };
 
   const handleBackClick = () => {

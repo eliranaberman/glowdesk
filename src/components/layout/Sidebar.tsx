@@ -31,7 +31,6 @@ import {
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { NavigationMenu, NavigationMenuList, NavigationMenuItem, NavigationMenuTrigger, NavigationMenuContent, NavigationMenuLink } from "@/components/ui/navigation-menu";
 
 interface NavLinkProps {
   href: string;
@@ -123,6 +122,11 @@ const Sidebar = ({
         icon: Calendar
       },
       {
+        href: '/portfolio',
+        label: 'גלריה',
+        icon: ImageIcon
+      },
+      {
         href: '#',
         label: 'מדיה חברתית ושיווק',
         icon: MessageSquare,
@@ -141,11 +145,6 @@ const Sidebar = ({
             href: '/loyalty',
             label: 'תוכנית נאמנות',
             icon: Award
-          },
-          {
-            href: '/portfolio',
-            label: 'גלריה',
-            icon: ImageIcon
           }
         ]
       },

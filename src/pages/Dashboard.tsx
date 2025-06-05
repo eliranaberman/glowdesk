@@ -9,6 +9,7 @@ import { initializeMarketingData } from '@/services/marketing';
 import { usePermissions } from '@/hooks/use-permissions';
 import PermissionGuard from '@/components/auth/PermissionGuard';
 import BusinessAnalytics from '@/components/dashboard/BusinessAnalytics';
+import { WelcomeModal } from '@/components/welcome/WelcomeModal';
 
 const DailySummary = React.lazy(() => import('../components/dashboard/DailySummary'));
 const RecentAppointments = React.lazy(() => import('../components/dashboard/RecentAppointments'));
@@ -107,6 +108,38 @@ const Dashboard = () => {
 
   return (
     <div className="space-y-6 md:space-y-8 animate-fade-in" dir="rtl">
+      <WelcomeModal />
+      
+      {/* הודעת התחלה למשתמשים חדשים */}
+      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-4 md:p-6">
+        <div className="flex items-center gap-3 mb-3">
+          <div className="bg-blue-500 text-white p-2 rounded-full">
+            <Users className="h-5 w-5" />
+          </div>
+          <h2 className="text-lg font-semibold text-blue-900">התחלת עבודה מהירה</h2>
+        </div>
+        <p className="text-blue-700 mb-4">
+          המערכת מוכנה לעבודה! הוסיפי לקוח ראשון, תזמני פגישה, או העלי תמונות לגלריה כדי להתחיל.
+        </p>
+        <div className="flex gap-2 flex-wrap">
+          <Link to="/clients/new">
+            <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
+              הוסף לקוח ראשון
+            </Button>
+          </Link>
+          <Link to="/scheduling/new">
+            <Button size="sm" variant="outline" className="border-blue-300 text-blue-700 hover:bg-blue-50">
+              תזמן פגישה
+            </Button>
+          </Link>
+          <Link to="/portfolio">
+            <Button size="sm" variant="outline" className="border-blue-300 text-blue-700 hover:bg-blue-50">
+              הוסף לגלריה
+            </Button>
+          </Link>
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         {stats.map((stat) => (
           <StatCard
@@ -183,7 +216,7 @@ const Dashboard = () => {
             <h3 className="font-medium text-primary mb-1">פגישה חדשה</h3>
             <p className="text-xs md:text-sm text-muted-foreground mt-1">תזמון פגישה ללקוח חדש</p>
           </Link>
-          <Link to="/customers/new" className="bg-card hover:bg-accent/20 p-4 md:p-5 rounded-xl cursor-pointer transition-all duration-300 shadow-soft hover:shadow-soft-lg flex flex-col transform hover:-translate-y-1">
+          <Link to="/clients/new" className="bg-card hover:bg-accent/20 p-4 md:p-5 rounded-xl cursor-pointer transition-all duration-300 shadow-soft hover:shadow-soft-lg flex flex-col transform hover:-translate-y-1">
             <h3 className="font-medium text-primary mb-1">הוספת לקוח</h3>
             <p className="text-xs md:text-sm text-muted-foreground mt-1">יצירת פרופיל לקוח חדש</p>
           </Link>
