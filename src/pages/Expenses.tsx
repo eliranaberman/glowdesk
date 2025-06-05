@@ -59,7 +59,7 @@ const Expenses = () => {
   const [openAddDialog, setOpenAddDialog] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(true);
-  const [canModifyExpenses, setCanModifyExpenses] = useState(true); // Default to true for now
+  const [canModifyExpenses, setCanModifyExpenses] = useState(true); 
   const [expenseCategories, setExpenseCategories] = useState<string[]>([
     "חומרים", "ציוד", "שכירות", "שיווק", "משכורות", "הכשרה", "אחר"
   ]);
@@ -114,7 +114,7 @@ const Expenses = () => {
           setCanModifyExpenses(hasWritePermission);
         } catch (error) {
           console.error('Error checking permissions:', error);
-          setCanModifyExpenses(true); // Fallback to true
+          setCanModifyExpenses(true);
         }
       }
     };
@@ -259,7 +259,7 @@ const Expenses = () => {
                     הוסף הוצאה
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="sm:max-w-[500px]">
+                <DialogContent className="max-w-[95vw] sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
                   <DialogHeader>
                     <DialogTitle>הוספת הוצאה חדשה</DialogTitle>
                     <DialogDescription>
@@ -268,7 +268,7 @@ const Expenses = () => {
                   </DialogHeader>
                   <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <FormField
                           control={form.control}
                           name="date"
@@ -405,7 +405,7 @@ const Expenses = () => {
                           </p>
                         )}
                       </div>
-                      <DialogFooter>
+                      <DialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
                         <Button type="submit" className="w-full">שמור הוצאה</Button>
                       </DialogFooter>
                     </form>
