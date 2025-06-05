@@ -13,7 +13,7 @@ import { format } from 'date-fns';
 import { he } from 'date-fns/locale';
 import { Helmet } from 'react-helmet-async';
 import { EmptyStateWrapper } from '@/components/empty-states/EmptyStateWrapper';
-import { Task, TaskPriority, TaskStatus } from '@/types/tasks';
+import { TaskPriority, TaskStatus } from '@/types/tasks';
 
 interface LocalTask {
   id: string;
@@ -57,8 +57,8 @@ const Tasks = () => {
           title: 'הזמנת חומרי גלם חדשים',
           description: 'להזמין לק ג\'ל חדש ואצטון',
           dueDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
-          priority: 'high',
-          status: 'open',
+          priority: 'high' as TaskPriority,
+          status: 'open' as TaskStatus,
           category: 'inventory'
         },
         {
@@ -66,8 +66,8 @@ const Tasks = () => {
           title: 'יצירת פוסט לאינסטגרם',
           description: 'פוסט על העבודה החדשה עם שרה',
           dueDate: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000),
-          priority: 'medium',
-          status: 'in_progress',
+          priority: 'medium' as TaskPriority,
+          status: 'in_progress' as TaskStatus,
           category: 'marketing'
         }
       ];
@@ -107,7 +107,7 @@ const Tasks = () => {
       description: newTask.description,
       dueDate: newTask.dueDate ? new Date(newTask.dueDate) : new Date(),
       priority: newTask.priority,
-      status: 'open',
+      status: 'open' as TaskStatus,
       category: newTask.category
     };
 
@@ -128,7 +128,7 @@ const Tasks = () => {
   const toggleTaskStatus = (taskId: string) => {
     const updatedTasks = tasks.map(task => {
       if (task.id === taskId) {
-        const newStatus = task.status === 'completed' ? 'open' : 'completed';
+        const newStatus: TaskStatus = task.status === 'completed' ? 'open' : 'completed';
         return { ...task, status: newStatus };
       }
       return task;
