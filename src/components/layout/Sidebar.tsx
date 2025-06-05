@@ -207,17 +207,17 @@ const Sidebar = ({
                   className={cn(
                     "group flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-all hover:bg-secondary hover:text-secondary-foreground",
                     (isLinkActive(link.href) || isParentActive(link.subLinks)) ? "bg-secondary text-secondary-foreground" : "text-muted-foreground",
-                    "text-right justify-end cursor-pointer"
+                    "text-right justify-end cursor-pointer relative"
                   )}
                   onClick={() => toggleMenu(link.label)}
                 >
+                  {isMenuExpanded(link.label) ? (
+                    <ChevronDown className="h-4 w-4 absolute left-2" />
+                  ) : (
+                    <ChevronRight className="h-4 w-4 absolute left-2" />
+                  )}
                   <span>{link.label}</span>
                   <link.icon className="h-4 w-4" />
-                  {isMenuExpanded(link.label) ? (
-                    <ChevronDown className="h-4 w-4 mr-auto" />
-                  ) : (
-                    <ChevronRight className="h-4 w-4 mr-auto" />
-                  )}
                 </div>
                 
                 {isMenuExpanded(link.label) && (

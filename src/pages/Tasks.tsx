@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,7 +13,6 @@ import { Calendar, Plus, Filter, Search, Clock, AlertCircle, CheckCircle2 } from
 import { format } from 'date-fns';
 import { he } from 'date-fns/locale';
 import { Helmet } from 'react-helmet-async';
-import { EmptyStateWrapper } from '@/components/empty-states/EmptyStateWrapper';
 import { TaskPriority, TaskStatus } from '@/types/tasks';
 
 interface LocalTask {
@@ -153,109 +153,6 @@ const Tasks = () => {
       case 'archived': return <AlertCircle className="h-4 w-4 text-gray-600" />;
     }
   };
-
-  // Show empty state if no tasks
-  if (tasks.length === 0) {
-    return (
-      <>
-        <Helmet>
-          <title>משימות | GlowDesk</title>
-        </Helmet>
-        <EmptyStateWrapper
-          title="עדיין אין משימות"
-          description="תתחילי לנהל את המשימות היומיות שלך - הוספת מלאי, יצירת תכנים, מעקב אחר לקוחות ועוד."
-          actionText="הוסף משימה ראשונה"
-          actionHref="#"
-          helpText="המשימות יעזרו לך לא לפספס דברים חשובים ולנהל את העסק בצורה מסודרת"
-        >
-          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="w-full mt-4">
-                <Plus className="h-4 w-4 mr-2" />
-                הוסף משימה ראשונה
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-md">
-              <DialogHeader>
-                <DialogTitle>משימה חדשה</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="title">כותרת המשימה</Label>
-                  <Input
-                    id="title"
-                    value={newTask.title}
-                    onChange={(e) => setNewTask(prev => ({ ...prev, title: e.target.value }))}
-                    placeholder="לדוגמה: הזמנת חומרי גלם"
-                  />
-                </div>
-                
-                <div>
-                  <Label htmlFor="description">תיאור (אופציונלי)</Label>
-                  <Textarea
-                    id="description"
-                    value={newTask.description}
-                    onChange={(e) => setNewTask(prev => ({ ...prev, description: e.target.value }))}
-                    placeholder="תיאור נוסף על המשימה..."
-                  />
-                </div>
-                
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="priority">עדיפות</Label>
-                    <Select value={newTask.priority} onValueChange={(value: TaskPriority) => setNewTask(prev => ({ ...prev, priority: value }))}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="low">נמוכה</SelectItem>
-                        <SelectItem value="medium">בינונית</SelectItem>
-                        <SelectItem value="high">גבוהה</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="category">קטגוריה</Label>
-                    <Select value={newTask.category} onValueChange={(value: LocalTask['category']) => setNewTask(prev => ({ ...prev, category: value }))}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="client">לקוחות</SelectItem>
-                        <SelectItem value="inventory">מלאי</SelectItem>
-                        <SelectItem value="marketing">שיווק</SelectItem>
-                        <SelectItem value="other">אחר</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-                
-                <div>
-                  <Label htmlFor="dueDate">תאריך יעד</Label>
-                  <Input
-                    id="dueDate"
-                    type="date"
-                    value={newTask.dueDate}
-                    onChange={(e) => setNewTask(prev => ({ ...prev, dueDate: e.target.value }))}
-                  />
-                </div>
-                
-                <div className="flex gap-2 pt-4">
-                  <Button onClick={handleAddTask} className="flex-1">
-                    הוסף משימה
-                  </Button>
-                  <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
-                    ביטול
-                  </Button>
-                </div>
-              </div>
-            </DialogContent>
-          </Dialog>
-        </EmptyStateWrapper>
-      </>
-    );
-  }
 
   return (
     <>
