@@ -1,20 +1,19 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Calendar, Users, DollarSign, TrendingUp, Clock, Star } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { StatCard } from "@/components/dashboard/StatCard";
-import { RecentAppointments } from "@/components/dashboard/RecentAppointments";
-import { BusinessInsights } from "@/components/dashboard/BusinessInsights";
-import { DailySummary } from "@/components/dashboard/DailySummary";
-import { InactiveClientsAlert } from "@/components/dashboard/InactiveClientsAlert";
-import { LoyaltyProgram } from "@/components/dashboard/LoyaltyProgram";
-import { MarketingMessages } from "@/components/dashboard/MarketingMessages";
-import { BusinessAnalytics } from "@/components/dashboard/BusinessAnalytics";
-import { AnalyticsCharts } from "@/components/dashboard/AnalyticsCharts";
-import { CashFlowForecast } from "@/components/dashboard/CashFlowForecast";
+import StatCard from "@/components/dashboard/StatCard";
+import RecentAppointments from "@/components/dashboard/RecentAppointments";
+import BusinessInsights from "@/components/dashboard/BusinessInsights";
+import DailySummary from "@/components/dashboard/DailySummary";
+import InactiveClientsAlert from "@/components/dashboard/InactiveClientsAlert";
+import LoyaltyProgram from "@/components/dashboard/LoyaltyProgram";
+import MarketingMessages from "@/components/dashboard/MarketingMessages";
+import BusinessAnalytics from "@/components/dashboard/BusinessAnalytics";
+import AnalyticsCharts from "@/components/dashboard/AnalyticsCharts";
+import CashFlowForecast from "@/components/dashboard/CashFlowForecast";
 
 const Dashboard = () => {
   const { toast } = useToast();
