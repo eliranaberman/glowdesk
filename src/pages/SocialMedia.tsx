@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -18,10 +17,12 @@ import PostCreationPanel from "@/components/social-media/PostCreationPanel";
 import AnalyticsContent from "@/components/social-media/AnalyticsContent";
 import ConnectionModal from "@/components/social-media/ConnectionModal";
 import AIMarketingTools from "@/components/social-media/AIMarketingTools";
+import MetaAuthCallback from "@/components/social-media/MetaAuthCallback";
 import { ConnectedAccountsMap, Message } from "@/components/social-media/types";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { getMarketingStats } from "@/services/marketingService";
+import { fetchConnectedAccounts } from "@/services/socialMediaService";
 import { MarketingStats } from "@/types/marketing";
 
 const SocialMedia = () => {
@@ -122,6 +123,26 @@ const SocialMedia = () => {
     loadMarketingStats();
   }, [activeTab, toast]);
 
+  // Load connected accounts on component mount
+  useEffect(() => {
+    const loadConnectedAccounts = async () => {
+      try {
+        const accounts = await fetchConnectedAccounts();
+        const accountsMap: ConnectedAccountsMap = {
+          instagram: accounts.some(acc => acc.platform === 'instagram'),
+          facebook: accounts.some(acc => acc.platform === 'facebook'),
+          twitter: accounts.some(acc => acc.platform === 'twitter'),
+          tiktok: accounts.some(acc => acc.platform === 'tiktok'),
+        };
+        setConnectedAccounts(accountsMap);
+      } catch (error) {
+        console.error("Error loading connected accounts:", error);
+      }
+    };
+
+    loadConnectedAccounts();
+  }, []);
+
   const connectPlatform = (platform: string) => {
     setConnectedAccounts(prev => ({
       ...prev,
@@ -178,6 +199,8 @@ const SocialMedia = () => {
 
   return (
     <div className="space-y-6 p-6" dir="rtl">
+      <MetaAuthCallback />
+      
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-semibold text-center tracking-tight">מדיה חברתית ושיווק</h1>
         <div className="flex gap-2">
