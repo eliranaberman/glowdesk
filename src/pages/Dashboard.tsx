@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -31,69 +32,77 @@ const Dashboard = () => {
     {
       title: "תורים היום",
       value: "12",
-      change: "+15% מהחודש הקודם",
-      icon: Calendar,
-      trend: "up" as const,
-      color: "text-primary"
+      icon: <Calendar className="h-4 w-4" />,
+      change: {
+        value: "+15%",
+        positive: true
+      },
+      className: "text-primary"
     },
     {
       title: "לקוחות פעילים",
       value: "145",
-      change: "+8% מהחודש הקודם",
-      icon: Users,
-      trend: "up" as const,
-      color: "text-secondary"
+      icon: <Users className="h-4 w-4" />,
+      change: {
+        value: "+8%",
+        positive: true
+      },
+      className: "text-secondary"
     },
     {
       title: "הכנסות החודש",
       value: "₪12,450",
-      change: "+23% מהחודש הקודם",
-      icon: DollarSign,
-      trend: "up" as const,
-      color: "text-oliveGreen"
+      icon: <DollarSign className="h-4 w-4" />,
+      change: {
+        value: "+23%",
+        positive: true
+      },
+      className: "text-oliveGreen"
     },
     {
       title: "ממוצע דירוג",
       value: "4.8",
-      change: "מתוך 5 כוכבים",
-      icon: Star,
-      trend: "stable" as const,
-      color: "text-roseGold"
+      icon: <Star className="h-4 w-4" />,
+      change: {
+        value: "מתוך 5 כוכבים",
+        positive: true
+      },
+      className: "text-roseGold"
     }
   ];
 
   const todayAppointments = [
     {
       id: "1",
-      time: "09:00",
-      clientName: "שרה כהן",
+      customer: "שרה כהן",
       service: "מניקור ופדיקור",
-      duration: 90,
-      status: "confirmed" as const
+      time: "09:00",
+      price: 120,
+      status: "completed" as const
     },
     {
       id: "2",
-      time: "10:30",
-      clientName: "מיכל לוי",
+      customer: "מיכל לוי",
       service: "בנייה בג'ל",
-      duration: 120,
-      status: "confirmed" as const
+      time: "10:30",
+      price: 150,
+      status: "completed" as const
     },
     {
       id: "3",
-      time: "13:00",
-      clientName: "רונית שמש",
+      customer: "רונית שמש",
       service: "טיפוח ציפורניים",
-      duration: 60,
-      status: "pending" as const
+      time: "13:00",
+      price: 80,
+      status: "upcoming" as const
     },
     {
       id: "4",
-      time: "14:30",
-      clientName: "דנה אברהם",
+      customer: "דנה אברהם",
       service: "עיצוב נוכחי",
-      duration: 75,
-      status: "confirmed" as const
+      time: "14:30",
+      price: 100,
+      status: "upcoming" as const
     }
   ];
 
@@ -144,7 +153,12 @@ const Dashboard = () => {
 
         {/* Right Column - 1/3 width */}
         <div className="space-y-6">
-          <DailySummary />
+          <DailySummary 
+            customers={12}
+            hours={8}
+            revenue={1250}
+            deficiencies={["לק ג'ל אדום", "מגבות נקיות", "אקססוריז לעיצוב"]}
+          />
           <InactiveClientsAlert />
           <LoyaltyProgram />
           <MarketingMessages />
