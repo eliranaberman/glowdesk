@@ -131,8 +131,8 @@ const SocialMedia = () => {
         const accountsMap: ConnectedAccountsMap = {
           instagram: accounts.some(acc => acc.platform === 'instagram'),
           facebook: accounts.some(acc => acc.platform === 'facebook'),
-          twitter: accounts.some(acc => acc.platform === 'twitter'),
-          tiktok: accounts.some(acc => acc.platform === 'tiktok'),
+          twitter: false, // Not implemented yet
+          tiktok: false, // Not implemented yet
         };
         setConnectedAccounts(accountsMap);
       } catch (error) {
