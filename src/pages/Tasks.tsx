@@ -36,7 +36,7 @@ const Tasks = () => {
 
   // Load tasks from localStorage on component mount
   useEffect(() => {
-    const savedTasks = localStorage.getItem('tasks');
+    const savedTasks = localStorage.getItem('tasks_v2');
     if (savedTasks) {
       const parsedTasks = JSON.parse(savedTasks).map((task: any) => ({
         ...task,
@@ -159,7 +159,7 @@ const Tasks = () => {
         }
       ];
       setTasks(sampleTasks);
-      localStorage.setItem('tasks', JSON.stringify(sampleTasks));
+      localStorage.setItem('tasks_v2', JSON.stringify(sampleTasks));
     }
   }, []);
 
@@ -178,7 +178,7 @@ const Tasks = () => {
 
     const updatedTasks = [...tasks, task];
     setTasks(updatedTasks);
-    localStorage.setItem('tasks', JSON.stringify(updatedTasks));
+    localStorage.setItem('tasks_v2', JSON.stringify(updatedTasks));
     
     setNewTask({
       title: '',
@@ -195,7 +195,7 @@ const Tasks = () => {
       task.id === taskId ? { ...task, status: newStatus } : task
     );
     setTasks(updatedTasks);
-    localStorage.setItem('tasks', JSON.stringify(updatedTasks));
+    localStorage.setItem('tasks_v2', JSON.stringify(updatedTasks));
   };
 
   const getPriorityColor = (priority: TaskPriority) => {
