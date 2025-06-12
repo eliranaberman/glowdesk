@@ -6,12 +6,18 @@ import { toast } from '@/hooks/use-toast';
 // Get all portfolio items
 export const getPortfolioItems = async (): Promise<PortfolioItem[]> => {
   try {
+    console.log('Fetching portfolio items...');
     const { data, error } = await supabase
       .from('portfolio_items')
       .select('*')
       .order('created_at', { ascending: false });
 
-    if (error) throw error;
+    if (error) {
+      console.error('Error fetching portfolio items:', error);
+      throw error;
+    }
+    
+    console.log('Portfolio items fetched successfully:', data?.length || 0);
     return data || [];
   } catch (error) {
     console.error('Error fetching portfolio items:', error);
@@ -25,26 +31,42 @@ export const uploadPortfolioImage = async (
   userId: string
 ): Promise<string | null> => {
   try {
+    console.log('Starting image upload for user:', userId);
+    console.log('File details:', { name: file.name, size: file.size, type: file.type });
+    
     // Create a unique file name
     const fileExt = file.name.split('.').pop();
     const fileName = `${userId}-${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
     const filePath = `${fileName}`;
 
+    console.log('Uploading file to path:', filePath);
+
     // Upload the file
-    const { error: uploadError } = await supabase.storage
+    const { data: uploadData, error: uploadError } = await supabase.storage
       .from('portfolio')
       .upload(filePath, file);
 
-    if (uploadError) throw uploadError;
+    if (uploadError) {
+      console.error('Upload error:', uploadError);
+      throw uploadError;
+    }
+
+    console.log('File uploaded successfully:', uploadData);
 
     // Get the public URL
     const { data } = supabase.storage
       .from('portfolio')
       .getPublicUrl(filePath);
 
+    console.log('Public URL generated:', data.publicUrl);
     return data.publicUrl;
   } catch (error) {
     console.error('Error uploading image:', error);
+    toast({
+      title: "שגיאה בהעלאת התמונה",
+      description: error.message || "אנא נסו שוב מאוחר יותר",
+      variant: "destructive"
+    });
     return null;
   }
 }
@@ -55,6 +77,9 @@ export const createPortfolioItem = async (
   userId: string
 ): Promise<{ success: boolean; error: string | null; item?: PortfolioItem }> => {
   try {
+    console.log('Creating portfolio item for user:', userId);
+    console.log('Form data:', { title: data.title, description: data.description, hasImage: !!data.image });
+
     if (!data.image) {
       return { success: false, error: 'תמונה נדרשת' };
     }
@@ -64,6 +89,8 @@ export const createPortfolioItem = async (
     if (!imageUrl) {
       return { success: false, error: 'שגיאה בהעלאת התמונה' };
     }
+
+    console.log('Image uploaded, creating portfolio item with URL:', imageUrl);
 
     // Create the portfolio item
     const { data: itemData, error } = await supabase
@@ -77,7 +104,12 @@ export const createPortfolioItem = async (
       .select()
       .single();
 
-    if (error) throw error;
+    if (error) {
+      console.error('Error creating portfolio item:', error);
+      throw error;
+    }
+
+    console.log('Portfolio item created successfully:', itemData);
 
     toast({
       title: "פריט הועלה בהצלחה",
@@ -89,12 +121,12 @@ export const createPortfolioItem = async (
     console.error('Error creating portfolio item:', error);
     toast({
       title: "שגיאה בהעלאת הפריט",
-      description: "אנא נסו שוב מאוחר יותר",
+      description: error.message || "אנא נסו שוב מאוחר יותר",
       variant: "destructive"
     });
     return { 
       success: false, 
-      error: 'התרחשה שגיאה בהעלאת הפריט. אנא נסו שוב מאוחר יותר.' 
+      error: error.message || 'התרחשה שגיאה בהעלאת הפריט. אנא נסו שוב מאוחר יותר.' 
     };
   }
 }
