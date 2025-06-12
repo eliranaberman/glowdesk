@@ -5,22 +5,26 @@ import { Upload, X, ImagePlus, Camera } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface ImageUploaderProps {
-  onImageSelected: (file: File) => void;
+  onImageSelected: (file: File | null) => void;
   className?: string;
 }
 
 export const ImageUploader = ({ onImageSelected, className }: ImageUploaderProps) => {
   const [dragActive, setDragActive] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = (file: File | null) => {
-    if (!file) return;
+    if (!file) {
+      clearImage();
+      return;
+    }
     
     // Validate file type
-    const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/heic'];
-    if (!validTypes.includes(file.type)) {
+    const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/jpg'];
+    if (!validTypes.includes(file.type.toLowerCase())) {
       alert('אנא העלה קובץ תמונה תקין (JPG, PNG, WEBP, HEIC)');
       return;
     }
@@ -31,14 +35,21 @@ export const ImageUploader = ({ onImageSelected, className }: ImageUploaderProps
       return;
     }
     
+    console.log('Selected file:', { name: file.name, size: file.size, type: file.type });
+    
     // Create preview
     const reader = new FileReader();
     reader.onload = (e) => {
-      setPreviewImage(e.target?.result as string);
+      const result = e.target?.result as string;
+      setPreviewImage(result);
+      setSelectedFile(file);
+      onImageSelected(file);
+    };
+    reader.onerror = () => {
+      console.error('Error reading file');
+      alert('שגיאה בקריאת הקובץ');
     };
     reader.readAsDataURL(file);
-    
-    onImageSelected(file);
   };
 
   const handleDrag = (e: React.DragEvent) => {
@@ -77,10 +88,12 @@ export const ImageUploader = ({ onImageSelected, className }: ImageUploaderProps
   };
 
   const clearImage = () => {
+    console.log('Clearing image selection');
     setPreviewImage(null);
+    setSelectedFile(null);
     if (inputRef.current) inputRef.current.value = '';
     if (cameraInputRef.current) cameraInputRef.current.value = '';
-    onImageSelected(null as any);
+    onImageSelected(null);
   };
 
   return (
@@ -90,7 +103,7 @@ export const ImageUploader = ({ onImageSelected, className }: ImageUploaderProps
         type="file"
         ref={inputRef}
         onChange={handleInputChange}
-        accept=".jpg,.jpeg,.png,.webp,.heic"
+        accept=".jpg,.jpeg,.png,.webp,.heic,image/*"
         className="hidden"
       />
       <input
@@ -108,8 +121,7 @@ export const ImageUploader = ({ onImageSelected, className }: ImageUploaderProps
             "border-2 border-dashed rounded-2xl p-8 text-center flex flex-col items-center justify-center min-h-[280px] cursor-pointer transition-all duration-300 bg-gradient-to-br from-gray-50 to-gray-100",
             dragActive 
               ? "border-pink-400 bg-pink-50 shadow-lg transform scale-105" 
-              : "border-gray-300 hover:border-gray-400 hover:bg-gray-50",
-            className
+              : "border-gray-300 hover:border-gray-400 hover:bg-gray-50"
           )}
           onDragEnter={handleDrag}
           onDragOver={handleDrag}
@@ -132,7 +144,10 @@ export const ImageUploader = ({ onImageSelected, className }: ImageUploaderProps
           <div className="flex gap-3">
             <Button 
               type="button" 
-              onClick={handleGalleryClick}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleGalleryClick();
+              }}
               className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-xl px-6 py-3 font-medium shadow-lg"
             >
               <Upload className="h-4 w-4 ml-2" />
@@ -141,7 +156,10 @@ export const ImageUploader = ({ onImageSelected, className }: ImageUploaderProps
             
             <Button 
               type="button" 
-              onClick={handleCameraClick}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleCameraClick();
+              }}
               className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-xl px-6 py-3 font-medium shadow-lg"
             >
               <Camera className="h-4 w-4 ml-2" />
@@ -164,7 +182,10 @@ export const ImageUploader = ({ onImageSelected, className }: ImageUploaderProps
           
           <button
             type="button"
-            onClick={clearImage}
+            onClick={(e) => {
+              e.stopPropagation();
+              clearImage();
+            }}
             className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm p-2 rounded-full hover:bg-white shadow-lg transition-all duration-200 hover:scale-110"
           >
             <X className="h-5 w-5 text-gray-700" />

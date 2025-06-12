@@ -34,39 +34,67 @@ export const uploadPortfolioImage = async (
     console.log('Starting image upload for user:', userId);
     console.log('File details:', { name: file.name, size: file.size, type: file.type });
     
-    // Create a unique file name
-    const fileExt = file.name.split('.').pop();
+    // Create a unique file name with proper extension
+    const fileExt = file.name.split('.').pop()?.toLowerCase() || 'jpg';
     const fileName = `${userId}-${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
-    const filePath = `${fileName}`;
+    const filePath = fileName;
 
     console.log('Uploading file to path:', filePath);
+
+    // Check if the portfolio bucket exists and is accessible
+    const { data: bucketData, error: bucketError } = await supabase.storage
+      .from('portfolio')
+      .list('', { limit: 1 });
+
+    if (bucketError) {
+      console.error('Storage bucket error:', bucketError);
+      throw new Error('שגיאה בגישה לאחסון התמונות');
+    }
+
+    console.log('Portfolio bucket is accessible');
 
     // Upload the file
     const { data: uploadData, error: uploadError } = await supabase.storage
       .from('portfolio')
-      .upload(filePath, file);
+      .upload(filePath, file, {
+        cacheControl: '3600',
+        upsert: false
+      });
 
     if (uploadError) {
       console.error('Upload error:', uploadError);
-      throw uploadError;
+      
+      if (uploadError.message?.includes('duplicate')) {
+        throw new Error('קובץ עם שם זהה כבר קיים');
+      }
+      
+      throw new Error(`שגיאה בהעלאת התמונה: ${uploadError.message}`);
     }
 
     console.log('File uploaded successfully:', uploadData);
 
     // Get the public URL
-    const { data } = supabase.storage
+    const { data: urlData } = supabase.storage
       .from('portfolio')
       .getPublicUrl(filePath);
 
-    console.log('Public URL generated:', data.publicUrl);
-    return data.publicUrl;
-  } catch (error) {
+    if (!urlData.publicUrl) {
+      throw new Error('שגיאה ביצירת קישור לתמונה');
+    }
+
+    console.log('Public URL generated:', urlData.publicUrl);
+    return urlData.publicUrl;
+  } catch (error: any) {
     console.error('Error uploading image:', error);
+    
+    const errorMessage = error.message || "שגיאה לא ידועה בהעלאת התמונה";
+    
     toast({
       title: "שגיאה בהעלאת התמונה",
-      description: error.message || "אנא נסו שוב מאוחר יותר",
+      description: errorMessage,
       variant: "destructive"
     });
+    
     return null;
   }
 }
@@ -78,26 +106,37 @@ export const createPortfolioItem = async (
 ): Promise<{ success: boolean; error: string | null; item?: PortfolioItem }> => {
   try {
     console.log('Creating portfolio item for user:', userId);
-    console.log('Form data:', { title: data.title, description: data.description, hasImage: !!data.image });
+    console.log('Form data:', { 
+      title: data.title, 
+      description: data.description, 
+      hasImage: !!data.image,
+      imageSize: data.image?.size,
+      imageType: data.image?.type
+    });
 
     if (!data.image) {
       return { success: false, error: 'תמונה נדרשת' };
     }
 
-    // Upload the image
+    if (!data.title?.trim()) {
+      return { success: false, error: 'כותרת נדרשת' };
+    }
+
+    // Upload the image first
+    console.log('Uploading image...');
     const imageUrl = await uploadPortfolioImage(data.image, userId);
     if (!imageUrl) {
       return { success: false, error: 'שגיאה בהעלאת התמונה' };
     }
 
-    console.log('Image uploaded, creating portfolio item with URL:', imageUrl);
+    console.log('Image uploaded successfully, creating portfolio item with URL:', imageUrl);
 
     // Create the portfolio item
     const { data: itemData, error } = await supabase
       .from('portfolio_items')
       .insert({
-        title: data.title,
-        description: data.description || null,
+        title: data.title.trim(),
+        description: data.description?.trim() || null,
         image_url: imageUrl,
         created_by: userId
       })
@@ -106,27 +145,43 @@ export const createPortfolioItem = async (
 
     if (error) {
       console.error('Error creating portfolio item:', error);
+      
+      // If portfolio item creation fails, try to clean up the uploaded image
+      try {
+        const fileName = imageUrl.split('/').pop();
+        if (fileName) {
+          await supabase.storage.from('portfolio').remove([fileName]);
+          console.log('Cleaned up uploaded image after portfolio item creation failure');
+        }
+      } catch (cleanupError) {
+        console.error('Failed to cleanup uploaded image:', cleanupError);
+      }
+      
       throw error;
     }
 
     console.log('Portfolio item created successfully:', itemData);
 
     toast({
-      title: "פריט הועלה בהצלחה",
-      description: "הפריט נוסף לגלריה"
+      title: "הצלחה!",
+      description: "התמונה נוספה לגלריה בהצלחה"
     });
 
     return { success: true, error: null, item: itemData };
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error creating portfolio item:', error);
+    
+    const errorMessage = error.message || 'התרחשה שגיאה בהעלאת הפריט. אנא נסו שוב מאוחר יותר.';
+    
     toast({
       title: "שגיאה בהעלאת הפריט",
-      description: error.message || "אנא נסו שוב מאוחר יותר",
+      description: errorMessage,
       variant: "destructive"
     });
+    
     return { 
       success: false, 
-      error: error.message || 'התרחשה שגיאה בהעלאת הפריט. אנא נסו שוב מאוחר יותר.' 
+      error: errorMessage
     };
   }
 }
@@ -134,6 +189,8 @@ export const createPortfolioItem = async (
 // Delete a portfolio item
 export const deletePortfolioItem = async (id: string): Promise<boolean> => {
   try {
+    console.log('Deleting portfolio item:', id);
+    
     // Get the item to find the image URL
     const { data: item } = await supabase
       .from('portfolio_items')
@@ -147,10 +204,16 @@ export const deletePortfolioItem = async (id: string): Promise<boolean> => {
       const filePath = url.pathname.split('/').pop();
       
       if (filePath) {
+        console.log('Deleting image file:', filePath);
         // Delete the file from storage
-        await supabase.storage
+        const { error: storageError } = await supabase.storage
           .from('portfolio')
           .remove([filePath]);
+          
+        if (storageError) {
+          console.error('Error deleting image file:', storageError);
+          // Continue with item deletion even if file deletion fails
+        }
       }
     }
 
@@ -160,7 +223,12 @@ export const deletePortfolioItem = async (id: string): Promise<boolean> => {
       .delete()
       .eq('id', id);
 
-    if (error) throw error;
+    if (error) {
+      console.error('Error deleting portfolio item:', error);
+      throw error;
+    }
+
+    console.log('Portfolio item deleted successfully');
 
     toast({
       title: "פריט נמחק בהצלחה",
@@ -168,11 +236,11 @@ export const deletePortfolioItem = async (id: string): Promise<boolean> => {
     });
 
     return true;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error deleting portfolio item:', error);
     toast({
       title: "שגיאה במחיקת הפריט",
-      description: "אנא נסו שוב מאוחר יותר",
+      description: error.message || "אנא נסו שוב מאוחר יותר",
       variant: "destructive"
     });
     return false;

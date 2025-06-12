@@ -38,7 +38,13 @@ export const PortfolioItemForm = ({ onSuccess, onCancel }: PortfolioItemFormProp
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    console.log('Form submission started');
+    console.log('Selected image:', selectedImage);
+    console.log('Form values:', values);
+    console.log('User:', user?.id);
+
     if (!selectedImage) {
+      console.error('No image selected');
       toast({
         title: "תמונה נדרשת",
         description: "אנא בחר תמונה להעלאה",
@@ -48,6 +54,7 @@ export const PortfolioItemForm = ({ onSuccess, onCancel }: PortfolioItemFormProp
     }
 
     if (!user?.id) {
+      console.error('User not authenticated');
       toast({
         title: "שגיאת אימות",
         description: "יש להתחבר למערכת",
@@ -56,22 +63,44 @@ export const PortfolioItemForm = ({ onSuccess, onCancel }: PortfolioItemFormProp
       return;
     }
 
+    if (isSubmitting) {
+      console.log('Already submitting, ignoring duplicate submission');
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
+      console.log('Creating portfolio item...');
       const result = await createPortfolioItem(
         {
-          title: values.title,
-          description: values.description,
+          title: values.title.trim(),
+          description: values.description?.trim() || '',
           image: selectedImage,
         },
         user.id
       );
 
+      console.log('Create portfolio item result:', result);
+
       if (result.success) {
-        onSuccess();
+        console.log('Portfolio item created successfully');
+        toast({
+          title: "הצלחה!",
+          description: "התמונה נוספה לגלריה בהצלחה",
+        });
+        
+        // Reset form and close dialog
         form.reset();
         setSelectedImage(null);
+        onSuccess();
+      } else {
+        console.error('Failed to create portfolio item:', result.error);
+        toast({
+          title: "שגיאה בהעלאת הפריט",
+          description: result.error || "אנא נסה שוב מאוחר יותר",
+          variant: "destructive"
+        });
       }
     } catch (error) {
       console.error('Error creating portfolio item:', error);
@@ -85,13 +114,29 @@ export const PortfolioItemForm = ({ onSuccess, onCancel }: PortfolioItemFormProp
     }
   };
 
+  const handleImageSelected = (file: File | null) => {
+    console.log('Image selected:', file);
+    setSelectedImage(file);
+  };
+
+  const handleCancel = () => {
+    if (isSubmitting) {
+      return; // Don't allow cancel during submission
+    }
+    
+    console.log('Form cancelled');
+    form.reset();
+    setSelectedImage(null);
+    onCancel();
+  };
+
   return (
     <div className="space-y-6">
       {/* Image Upload Section */}
       <div className="space-y-2">
         <label className="text-sm font-medium text-gray-900">תמונה *</label>
         <ImageUploader
-          onImageSelected={setSelectedImage}
+          onImageSelected={handleImageSelected}
           className="w-full"
         />
       </div>
@@ -109,6 +154,7 @@ export const PortfolioItemForm = ({ onSuccess, onCancel }: PortfolioItemFormProp
                   <Input 
                     placeholder="הזן כותרת לתמונה..." 
                     {...field}
+                    disabled={isSubmitting}
                     className="rounded-xl border-gray-300 focus:border-pink-500 focus:ring-pink-500"
                   />
                 </FormControl>
@@ -128,6 +174,7 @@ export const PortfolioItemForm = ({ onSuccess, onCancel }: PortfolioItemFormProp
                     placeholder="הוסף תיאור לתמונה..."
                     rows={4}
                     {...field}
+                    disabled={isSubmitting}
                     className="rounded-xl border-gray-300 focus:border-pink-500 focus:ring-pink-500 resize-none"
                   />
                 </FormControl>
@@ -141,7 +188,7 @@ export const PortfolioItemForm = ({ onSuccess, onCancel }: PortfolioItemFormProp
             <Button 
               type="submit" 
               disabled={isSubmitting || !selectedImage}
-              className="flex-1 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white rounded-xl py-3 font-medium shadow-lg hover:shadow-xl transition-all duration-300"
+              className="flex-1 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white rounded-xl py-3 font-medium shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isSubmitting ? (
                 <>
@@ -159,7 +206,7 @@ export const PortfolioItemForm = ({ onSuccess, onCancel }: PortfolioItemFormProp
             <Button 
               type="button" 
               variant="outline" 
-              onClick={onCancel}
+              onClick={handleCancel}
               className="px-6 py-3 rounded-xl border-gray-300 hover:bg-gray-50"
               disabled={isSubmitting}
             >
