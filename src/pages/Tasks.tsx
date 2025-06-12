@@ -45,33 +45,33 @@ const Tasks = () => {
       }));
       setTasks(parsedTasks);
     } else {
-      // Add some sample tasks for demonstration
+      // Add example tasks for new users
       const sampleTasks: LocalTask[] = [
         {
           id: '1',
-          title: 'הזמנת חומרי גלם חדשים',
-          description: 'להזמין לק ג\'ל חדש ואצטון',
-          dueDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
+          title: 'עדכני את שעות הפעילות שלך',
+          description: 'עדכני את שעות הפעילות באתר ובמדיה חברתית',
+          dueDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000),
           priority: 'high' as TaskPriority,
           status: 'open' as TaskStatus,
-          category: 'inventory'
+          category: 'other'
         },
         {
           id: '2',
-          title: 'יצירת פוסט לאינסטגרם',
-          description: 'פוסט על העבודה החדשה עם שרה',
+          title: 'הוסיפי לקוחה ראשונה',
+          description: 'הוסיפי את הלקוחה הראשונה למערכת',
           dueDate: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000),
           priority: 'medium' as TaskPriority,
-          status: 'in_progress' as TaskStatus,
-          category: 'marketing'
+          status: 'open' as TaskStatus,
+          category: 'client'
         },
         {
           id: '3',
-          title: 'עדכון אתר',
-          description: 'להוסיף תמונות חדשות לגלריה',
-          dueDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
+          title: 'שלחי הודעת תזכורת אוטומטית',
+          description: 'הגדירי הודעות תזכורת אוטומטיות ללקוחות',
+          dueDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
           priority: 'low' as TaskPriority,
-          status: 'completed' as TaskStatus,
+          status: 'open' as TaskStatus,
           category: 'marketing'
         }
       ];

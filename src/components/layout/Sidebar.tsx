@@ -22,7 +22,6 @@ import {
   LayoutTemplate, 
   Users, 
   Contact2, 
-  BrainCircuit, 
   ShieldCheck, 
   UserCog,
   Award,
@@ -122,11 +121,6 @@ const Sidebar = ({
         icon: Calendar
       },
       {
-        href: '/portfolio',
-        label: 'גלריה',
-        icon: ImageIcon
-      },
-      {
         href: '#',
         label: 'מדיה חברתית ושיווק',
         icon: MessageSquare,
@@ -149,11 +143,6 @@ const Sidebar = ({
         ]
       },
       {
-        href: '/ai-assistant',
-        label: 'עוזר AI',
-        icon: BrainCircuit
-      },
-      {
         href: '/tasks',
         label: 'משימות',
         icon: ListChecks
@@ -162,6 +151,11 @@ const Sidebar = ({
         href: '/expenses',
         label: 'הוצאות',
         icon: Coins
+      },
+      {
+        href: '/portfolio',
+        label: 'גלריה',
+        icon: ImageIcon
       },
       {
         href: '/reports',

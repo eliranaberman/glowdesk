@@ -82,8 +82,73 @@ const Expenses = () => {
       setLoading(true);
       
       try {
-        const fetchedExpenses = await getExpenses();
-        setExpenses(fetchedExpenses);
+        // Check if there are saved expenses in localStorage
+        const savedExpenses = localStorage.getItem('expenses');
+        if (savedExpenses) {
+          const parsedExpenses = JSON.parse(savedExpenses);
+          setExpenses(parsedExpenses);
+        } else {
+          // Add sample expenses for new users
+          const sampleExpenses: Expense[] = [
+            {
+              id: '1',
+              amount: 450,
+              category: 'חומרים',
+              vendor: 'חנות הציפורניים',
+              description: 'לק ג\'ל צבעוני וקובצי',
+              date: '2025-01-10',
+              payment_method: 'אשראי',
+              has_invoice: true,
+              invoice_file_path: null
+            },
+            {
+              id: '2',
+              amount: 220,
+              category: 'ציוד',
+              vendor: 'BeautyPro',
+              description: 'מנורת UV חדשה',
+              date: '2025-01-08',
+              payment_method: 'מזומן',
+              has_invoice: false,
+              invoice_file_path: null
+            },
+            {
+              id: '3',
+              amount: 180,
+              category: 'שיווק',
+              vendor: 'פייסבוק',
+              description: 'פרסום במדיה חברתית',
+              date: '2025-01-05',
+              payment_method: 'אשראי',
+              has_invoice: true,
+              invoice_file_path: null
+            },
+            {
+              id: '4',
+              amount: 320,
+              category: 'חומרים',
+              vendor: 'נייל אקספרס',
+              description: 'אצטון ותכשירי ניקוי',
+              date: '2025-01-03',
+              payment_method: 'העברה בנקאית',
+              has_invoice: true,
+              invoice_file_path: null
+            },
+            {
+              id: '5',
+              amount: 150,
+              category: 'הכשרה',
+              vendor: 'אקדמיית יופי',
+              description: 'קורס טכניקות חדשות',
+              date: '2025-01-01',
+              payment_method: 'אשראי',
+              has_invoice: false,
+              invoice_file_path: null
+            }
+          ];
+          setExpenses(sampleExpenses);
+          localStorage.setItem('expenses', JSON.stringify(sampleExpenses));
+        }
         
         const categories = await getExpenseCategories();
         if (categories.length > 0) {

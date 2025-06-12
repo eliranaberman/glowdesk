@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { BadgePercent, Gift, User, ArrowRight, Users, Clock } from "lucide-react";
+import { BadgePercent, Gift, User, ArrowRight, Users, Clock, Lightbulb } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -57,6 +57,41 @@ const LoyaltyPage = () => {
           צור קופון חדש
         </Button>
       </div>
+
+      {/* דוגמאות לתוכנית נאמנות */}
+      <Card className="mb-6 bg-gradient-to-r from-warmBeige/20 to-softRose/20 border-softRose/30">
+        <CardHeader>
+          <CardTitle className="flex items-center">
+            <Lightbulb className="ml-2 h-5 w-5 text-primary" />
+            דוגמאות לתוכנית נאמנות
+          </CardTitle>
+          <CardDescription>
+            הנה כמה רעיונות לתוכנית נאמנות שיעזרו לך להתחיל
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-4 md:grid-cols-3">
+            <div className="p-4 bg-card rounded-xl border border-border/50">
+              <h3 className="font-semibold text-primary mb-2">צברי 10 טיפולים וקבלי אחד חינם</h3>
+              <p className="text-sm text-muted-foreground">
+                הלקוחה מקבלת חותמת בכל ביקור, ולאחר 10 חותמות זוכה לטיפול חינם
+              </p>
+            </div>
+            <div className="p-4 bg-card rounded-xl border border-border/50">
+              <h3 className="font-semibold text-primary mb-2">בכל 300 ₪ קבלי 30 ₪ מתנה</h3>
+              <p className="text-sm text-muted-foreground">
+                מערכת נקודות: כל שקל = נקודה אחת, 300 נקודות = 30 ₪ הנחה
+              </p>
+            </div>
+            <div className="p-4 bg-card rounded-xl border border-border/50">
+              <h3 className="font-semibold text-primary mb-2">חברה מביאה חברה – שתיכן מקבלות 20 ₪ הנחה</h3>
+              <p className="text-sm text-muted-foreground">
+                כשלקוחה מביאה חברה חדשה, שתיהן מקבלות 20 ₪ הנחה על הטיפול הבא
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
         <Card>

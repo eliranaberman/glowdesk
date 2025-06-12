@@ -1,5 +1,6 @@
+
 import React, { useState, useEffect, Suspense } from 'react';
-import { CalendarClock, Users, DollarSign, TrendingUp, Bot } from 'lucide-react';
+import { CalendarClock, Users, DollarSign, TrendingUp } from 'lucide-react';
 import StatCard from '../components/dashboard/StatCard';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -9,7 +10,6 @@ import { initializeMarketingData } from '@/services/marketing';
 import { usePermissions } from '@/hooks/use-permissions';
 import PermissionGuard from '@/components/auth/PermissionGuard';
 import BusinessAnalytics from '@/components/dashboard/BusinessAnalytics';
-import { WelcomeModal } from '@/components/welcome/WelcomeModal';
 
 const DailySummary = React.lazy(() => import('../components/dashboard/DailySummary'));
 const RecentAppointments = React.lazy(() => import('../components/dashboard/RecentAppointments'));
@@ -108,38 +108,6 @@ const Dashboard = () => {
 
   return (
     <div className="space-y-6 md:space-y-8 animate-fade-in" dir="rtl">
-      <WelcomeModal />
-      
-      {/* הודעת התחלה למשתמשים חדשים */}
-      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-4 md:p-6">
-        <div className="flex items-center gap-3 mb-3">
-          <div className="bg-blue-500 text-white p-2 rounded-full">
-            <Users className="h-5 w-5" />
-          </div>
-          <h2 className="text-lg font-semibold text-blue-900">התחלת עבודה מהירה</h2>
-        </div>
-        <p className="text-blue-700 mb-4">
-          המערכת מוכנה לעבודה! הוסיפי לקוח ראשון, תזמני פגישה, או העלי תמונות לגלריה כדי להתחיל.
-        </p>
-        <div className="flex gap-2 flex-wrap">
-          <Link to="/clients/new">
-            <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
-              הוסף לקוח ראשון
-            </Button>
-          </Link>
-          <Link to="/scheduling/new">
-            <Button size="sm" variant="outline" className="border-blue-300 text-blue-700 hover:bg-blue-50">
-              תזמן פגישה
-            </Button>
-          </Link>
-          <Link to="/portfolio">
-            <Button size="sm" variant="outline" className="border-blue-300 text-blue-700 hover:bg-blue-50">
-              הוסף לגלריה
-            </Button>
-          </Link>
-        </div>
-      </div>
-
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         {stats.map((stat) => (
           <StatCard
@@ -211,7 +179,7 @@ const Dashboard = () => {
           <span className="bg-softRose/40 w-1 h-6 rounded mr-2"></span>
           פעולות מהירות
         </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-5 gap-3 md:gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
           <Link to="/scheduling/new" className="bg-card hover:bg-accent/20 p-4 md:p-5 rounded-xl cursor-pointer transition-all duration-300 shadow-soft hover:shadow-soft-lg flex flex-col transform hover:-translate-y-1">
             <h3 className="font-medium text-primary mb-1">פגישה חדשה</h3>
             <p className="text-xs md:text-sm text-muted-foreground mt-1">תזמון פגישה ללקוח חדש</p>
@@ -228,10 +196,6 @@ const Dashboard = () => {
             <h3 className="font-medium text-primary mb-1">עדכון מלאי</h3>
             <p className="text-xs md:text-sm text-muted-foreground mt-1">רישום מוצרים חדשים או חוסרים</p>
           </Link>
-          <Link to="/ai-assistant" className="bg-card hover:bg-accent/20 p-4 md:p-5 rounded-xl cursor-pointer transition-all duration-300 shadow-soft hover:shadow-soft-lg flex flex-col transform hover:-translate-y-1">
-            <h3 className="font-medium text-primary mb-1">העוזרת החכמה</h3>
-            <p className="text-xs md:text-sm text-muted-foreground mt-1">ייעוץ אישי מבוסס AI</p>
-          </Link>
         </div>
       </div>
 
@@ -247,30 +211,6 @@ const Dashboard = () => {
             <Link to="/online-booking" className="w-full md:w-auto">
               <Button variant="warm" size={isMobile ? "default" : "lg"} className="font-display w-full md:w-auto">
                 קביעת פגישות אונליין
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </div>
-      
-      <div className="bg-gradient-to-r from-accent/30 to-accent/10 border border-accent/20 rounded-xl p-4 md:p-6 shadow-soft">
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 md:gap-0">
-          <div className="mb-4 md:mb-0 flex items-center gap-3">
-            <div className="bg-primary/10 p-2 rounded-full">
-              <Bot className="h-6 w-6 text-primary" />
-            </div>
-            <div>
-              <h2 className="text-lg md:text-xl font-display font-medium text-deepNavy mb-1">העוזרת החכמה שלך</h2>
-              <p className="text-sm md:text-base text-muted-foreground max-w-2xl">
-                פנה לעוזרת החכמה לעזרה בניהול העסק, תזכורות ללקוחות, פוסטים לרשתות חברתיות ועוד.
-              </p>
-            </div>
-          </div>
-          <div className="flex gap-4 w-full md:w-auto">
-            <Link to="/ai-assistant" className="w-full md:w-auto">
-              <Button variant="warm" size={isMobile ? "default" : "lg"} className="font-display w-full md:w-auto group">
-                <Bot className="h-5 w-5 mr-2 group-hover:animate-pulse" />
-                התחל לדבר עם העוזרת
               </Button>
             </Link>
           </div>
