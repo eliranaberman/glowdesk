@@ -1,9 +1,9 @@
-
 import { useState, useEffect } from 'react';
 import { PortfolioItem } from '@/types/portfolio';
 import { Button } from '@/components/ui/button';
 import { PlusCircle, X, Camera, Image as ImageIcon, Search, Grid3X3, Grid, Maximize2 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Input } from '@/components/ui/input';
 import { PortfolioItemCard } from './PortfolioItemCard';
 import { PortfolioItemForm } from './PortfolioItemForm';
@@ -236,18 +236,20 @@ export const Gallery = () => {
           </div>
         )}
 
-        {/* Add new item dialog */}
+        {/* Add new item dialog - עם ScrollArea */}
         <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
+          <DialogContent className="max-w-2xl max-h-[90vh] p-0">
+            <DialogHeader className="p-6 pb-0">
               <DialogTitle className="text-2xl font-bold text-center mb-2">
                 הוספת תמונה חדשה לגלריה
               </DialogTitle>
             </DialogHeader>
-            <PortfolioItemForm 
-              onSuccess={handleFormSuccess}
-              onCancel={() => setIsAddDialogOpen(false)}
-            />
+            <ScrollArea className="max-h-[calc(90vh-120px)] p-6">
+              <PortfolioItemForm 
+                onSuccess={handleFormSuccess}
+                onCancel={() => setIsAddDialogOpen(false)}
+              />
+            </ScrollArea>
           </DialogContent>
         </Dialog>
 

@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 
@@ -27,12 +26,19 @@ export interface Permission {
 
 export const getUserRoles = async (userId: string): Promise<UserRole[]> => {
   try {
+    console.log('Fetching roles for user:', userId);
     const { data, error } = await supabase
       .from('user_roles')
       .select('role')
       .eq('user_id', userId);
 
-    if (error) throw error;
+    if (error) {
+      console.error('Error fetching user roles:', error);
+      // במקרה של שגיאה, נחזיר רשימה ריקה במקום להשליך שגיאה
+      return [];
+    }
+    
+    console.log('User roles fetched:', data);
     return data?.map(r => r.role as UserRole) || [];
   } catch (error) {
     console.error('Error fetching user roles:', error);
@@ -42,11 +48,24 @@ export const getUserRoles = async (userId: string): Promise<UserRole[]> => {
 
 export const hasRole = async (userId: string, requiredRole: UserRole): Promise<boolean> => {
   try {
+    console.log('Checking if user has role:', { userId, requiredRole });
+    
+    // נשתמש בשאילתה ישירה במקום ב-RPC כדי להימנע מבעיות RLS
     const { data, error } = await supabase
-      .rpc('has_role', { user_id: userId, required_role: requiredRole });
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', userId)
+      .eq('role', requiredRole)
+      .limit(1);
 
-    if (error) throw error;
-    return !!data;
+    if (error) {
+      console.error('Error checking role:', error);
+      return false;
+    }
+    
+    const hasRoleResult = (data && data.length > 0);
+    console.log('Has role result:', hasRoleResult);
+    return hasRoleResult;
   } catch (error) {
     console.error('Error checking role:', error);
     return false;
@@ -59,15 +78,31 @@ export const hasPermission = async (
   permission: string
 ): Promise<boolean> => {
   try {
+    console.log('Checking permission:', { userId, resource, permission });
+    
+    // נשתמש בשאילתה ישירה עם JOIN
     const { data, error } = await supabase
-      .rpc('has_permission', { 
-        user_id: userId, 
-        resource, 
-        required_permission: permission 
-      });
+      .from('user_roles')
+      .select(`
+        role,
+        role_permissions!inner(
+          resource,
+          permission
+        )
+      `)
+      .eq('user_id', userId)
+      .eq('role_permissions.resource', resource)
+      .eq('role_permissions.permission', permission)
+      .limit(1);
 
-    if (error) throw error;
-    return !!data;
+    if (error) {
+      console.error('Error checking permission:', error);
+      return false;
+    }
+    
+    const hasPermissionResult = (data && data.length > 0);
+    console.log('Has permission result:', hasPermissionResult);
+    return hasPermissionResult;
   } catch (error) {
     console.error('Error checking permission:', error);
     return false;
