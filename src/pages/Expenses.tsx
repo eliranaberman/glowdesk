@@ -53,6 +53,7 @@ const Expenses = () => {
   const { toast } = useToast();
   const { user } = useAuth();
   const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [allExpenses, setAllExpenses] = useState<Expense[]>([]);
   const [openAddDialog, setOpenAddDialog] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(true);
@@ -86,6 +87,7 @@ const Expenses = () => {
         if (savedExpenses) {
           const parsedExpenses = JSON.parse(savedExpenses);
           setExpenses(parsedExpenses);
+          setAllExpenses(parsedExpenses);
         } else {
           // Add sample expenses for new users (6 total)
           const sampleExpenses: Expense[] = [
@@ -157,6 +159,7 @@ const Expenses = () => {
             }
           ];
           setExpenses(sampleExpenses);
+          setAllExpenses(sampleExpenses);
           localStorage.setItem('expenses', JSON.stringify(sampleExpenses));
         }
         
@@ -180,28 +183,24 @@ const Expenses = () => {
   }, [toast]);
 
   useEffect(() => {
-    const applyFilters = async () => {
+    const applyFilters = () => {
       setLoading(true);
       
       try {
-        let filteredExpenses: Expense[] = [];
+        let filteredExpenses = [...allExpenses];
         
+        // Apply date range filter
         if (filterDateRange.from && filterDateRange.to) {
           const fromStr = format(filterDateRange.from, 'yyyy-MM-dd');
           const toStr = format(filterDateRange.to, 'yyyy-MM-dd');
-          filteredExpenses = await getExpensesByDateRange(fromStr, toStr);
+          filteredExpenses = filteredExpenses.filter(expense => {
+            return expense.date >= fromStr && expense.date <= toStr;
+          });
         }
         
+        // Apply category filter
         if (filterCategory) {
-          if (filteredExpenses.length > 0) {
-            filteredExpenses = filteredExpenses.filter(e => e.category === filterCategory);
-          } else {
-            filteredExpenses = await getExpensesByCategory(filterCategory);
-          }
-        }
-        
-        if (!filterCategory && !filterDateRange.from && !filterDateRange.to) {
-          filteredExpenses = await getExpenses();
+          filteredExpenses = filteredExpenses.filter(expense => expense.category === filterCategory);
         }
         
         setExpenses(filteredExpenses);
@@ -218,7 +217,7 @@ const Expenses = () => {
     };
     
     applyFilters();
-  }, [filterCategory, filterDateRange, toast]);
+  }, [filterCategory, filterDateRange, allExpenses, toast]);
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
@@ -234,7 +233,10 @@ const Expenses = () => {
       const addedExpense = await addExpense(newExpense);
       
       if (addedExpense) {
+        const updatedExpenses = [addedExpense, ...allExpenses];
+        setAllExpenses(updatedExpenses);
         setExpenses([addedExpense, ...expenses]);
+        localStorage.setItem('expenses', JSON.stringify(updatedExpenses));
         
         if (selectedFile && addedExpense.id) {
           await uploadInvoice(selectedFile, addedExpense.id);
@@ -270,7 +272,11 @@ const Expenses = () => {
     try {
       const success = await deleteExpense(id);
       if (success) {
-        setExpenses(expenses.filter(expense => expense.id !== id));
+        const updatedAllExpenses = allExpenses.filter(expense => expense.id !== id);
+        const updatedExpenses = expenses.filter(expense => expense.id !== id);
+        setAllExpenses(updatedAllExpenses);
+        setExpenses(updatedExpenses);
+        localStorage.setItem('expenses', JSON.stringify(updatedAllExpenses));
       }
     } catch (error) {
       console.error('Error deleting expense:', error);
