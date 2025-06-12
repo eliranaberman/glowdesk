@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -143,19 +144,18 @@ const MarketingMessages = () => {
                   יצירת תבנית חדשה
                 </Button>
               </div> : <div className="grid gap-2">
-                {templates.slice(0, 4).map(template => <div key={template.id} className="flex items-center justify-between p-2 border rounded-lg hover:bg-accent/10 transition-colors">
-                    <div className="flex items-center flex-grow overflow-hidden">
-                      <Button variant="soft" size="sm" className="flex items-center gap-1 mr-1 text-xs" onClick={() => handleSendTemplate(template.id)}>
+                {templates.slice(0, 4).map(template => <div key={template.id} className="flex items-center justify-center p-2 border rounded-lg hover:bg-accent/10 transition-colors">
+                    <div className="flex flex-col items-center space-y-2 w-full">
+                      <span className="text-xs text-center">{template.title}</span>
+                      <Button variant="soft" size="sm" className="flex items-center gap-1 text-xs" onClick={() => handleSendTemplate(template.id)}>
                         <Send className="h-3 w-3" />
                         שלח
                       </Button>
-                      <Mail className="h-3 w-3 text-muted-foreground ml-1" />
-                      <span className="truncate text-xs">{template.title}</span>
                     </div>
                   </div>)}
               </div>}
 
-            <div className="flex justify-end pt-2">
+            <div className="flex justify-center pt-2">
               <Button onClick={() => navigate('/marketing/campaigns/new')} className="w-full text-xs">
                 יצירת קמפיין חדש
               </Button>
