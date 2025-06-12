@@ -8,13 +8,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AlertTriangle, Calendar, Check, Download, RefreshCw, Trash2 } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   Card,
   CardContent,
   CardDescription,
@@ -25,22 +18,21 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { 
   CalendarConnection, 
   getUserCalendarConnections, 
-  createCalendarConnection,
   updateCalendarConnection,
   deleteCalendarConnection,
-  downloadIcsFile
+  downloadIcsFile,
+  initiateGoogleCalendarAuth,
+  handleOAuthCallback
 } from '@/services/calendarService';
 import { 
   NotificationPreference, 
   getUserNotificationPreferences,
   upsertNotificationPreferences
 } from '@/services/notificationService';
-import { supabase } from '@/lib/supabase';
 
 const CalendarSync = () => {
   const isMobile = useIsMobile();
   const [activeTab, setActiveTab] = useState('calendar');
-  const [calendarType, setCalendarType] = useState<string>('');
   const [calendarEmail, setCalendarEmail] = useState<string>('');
   const [isConnecting, setIsConnecting] = useState(false);
   const [isDisconnecting, setIsDisconnecting] = useState(false);
@@ -52,6 +44,26 @@ const CalendarSync = () => {
 
   useEffect(() => {
     loadData();
+    // Check for OAuth callback
+    const callbackResult = handleOAuthCallback();
+    if (callbackResult) {
+      if (callbackResult.success) {
+        toast({
+          title: "הצלחה!",
+          description: callbackResult.message,
+        });
+        // Reload data after successful auth
+        loadData();
+      } else {
+        toast({
+          title: "שגיאה",
+          description: callbackResult.message,
+          variant: "destructive"
+        });
+      }
+      // Clean up URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
   }, []);
 
   const loadData = async () => {
@@ -88,34 +100,11 @@ const CalendarSync = () => {
 
     setIsConnecting(true);
     try {
-      // In production, this would redirect to Google OAuth flow
-      // For now, we'll simulate a successful connection
-      const { data: user } = await supabase.auth.getUser();
+      // Get OAuth URL from the edge function
+      const authUrl = await initiateGoogleCalendarAuth(calendarEmail);
       
-      if (!user.user) {
-        throw new Error("משתמש לא מחובר");
-      }
-      
-      await createCalendarConnection({
-        user_id: user.user.id,
-        calendar_type: 'google',
-        calendar_email: calendarEmail,
-        calendar_id: `primary_${Date.now()}`,
-        access_token: "simulated_access_token",
-        refresh_token: "simulated_refresh_token",
-        token_expiry: new Date(Date.now() + 3600000).toISOString(),
-        is_active: true,
-        last_sync_at: null
-      });
-      
-      toast({
-        title: "Google Calendar מחובר",
-        description: `החשבון ${calendarEmail} חובר בהצלחה`,
-      });
-      
-      await loadData();
-      setCalendarEmail('');
-      setCalendarType('');
+      // Redirect to Google OAuth
+      window.location.href = authUrl;
     } catch (error: any) {
       console.error("Error connecting to Google Calendar:", error);
       toast({
@@ -123,109 +112,6 @@ const CalendarSync = () => {
         description: error.message || "לא ניתן לחבר את לוח השנה. נסה שוב מאוחר יותר.",
         variant: "destructive"
       });
-    } finally {
-      setIsConnecting(false);
-    }
-  };
-
-  const handleConnectApple = async () => {
-    if (!calendarEmail) {
-      toast({
-        title: "שגיאה",
-        description: "נא להזין אימייל",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    setIsConnecting(true);
-    try {
-      // For Apple Calendar, we'll provide iCal subscription details
-      const { data: user } = await supabase.auth.getUser();
-      
-      if (!user.user) {
-        throw new Error("משתמש לא מחובר");
-      }
-      
-      await createCalendarConnection({
-        user_id: user.user.id,
-        calendar_type: 'apple',
-        calendar_email: calendarEmail,
-        calendar_id: `ical_${Date.now()}`,
-        access_token: null,
-        refresh_token: null,
-        token_expiry: null,
-        is_active: true,
-        last_sync_at: null
-      });
-      
-      toast({
-        title: "Apple Calendar מחובר",
-        description: `החשבון ${calendarEmail} חובר בהצלחה`,
-      });
-      
-      await loadData();
-      setCalendarEmail('');
-      setCalendarType('');
-    } catch (error: any) {
-      console.error("Error connecting to Apple Calendar:", error);
-      toast({
-        title: "שגיאה בחיבור",
-        description: error.message || "לא ניתן לחבר את לוח השנה. נסה שוב מאוחר יותר.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsConnecting(false);
-    }
-  };
-
-  const handleConnectOutlook = async () => {
-    if (!calendarEmail) {
-      toast({
-        title: "שגיאה",
-        description: "נא להזין אימייל",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    setIsConnecting(true);
-    try {
-      // In production, this would redirect to Microsoft OAuth flow
-      const { data: user } = await supabase.auth.getUser();
-      
-      if (!user.user) {
-        throw new Error("משתמש לא מחובר");
-      }
-      
-      await createCalendarConnection({
-        user_id: user.user.id,
-        calendar_type: 'outlook',
-        calendar_email: calendarEmail,
-        calendar_id: `outlook_${Date.now()}`,
-        access_token: "simulated_access_token",
-        refresh_token: "simulated_refresh_token",
-        token_expiry: new Date(Date.now() + 3600000).toISOString(),
-        is_active: true,
-        last_sync_at: null
-      });
-      
-      toast({
-        title: "Outlook Calendar מחובר",
-        description: `החשבון ${calendarEmail} חובר בהצלחה`,
-      });
-      
-      await loadData();
-      setCalendarEmail('');
-      setCalendarType('');
-    } catch (error: any) {
-      console.error("Error connecting to Outlook Calendar:", error);
-      toast({
-        title: "שגיאה בחיבור",
-        description: error.message || "לא ניתן לחבר את לוח השנה. נסה שוב מאוחר יותר.",
-        variant: "destructive"
-      });
-    } finally {
       setIsConnecting(false);
     }
   };
@@ -322,10 +208,64 @@ const CalendarSync = () => {
     }
   };
 
-  const renderConnectionForm = () => {
-    switch (calendarType) {
-      case 'google':
-        return (
+  const renderCalendarContent = () => {
+    if (isLoading) {
+      return (
+        <div className="flex justify-center items-center py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
+      );
+    }
+
+    const googleConnections = connections.filter(conn => conn.calendar_type === 'google');
+
+    return (
+      <div className="space-y-4">
+        {googleConnections.length > 0 && (
+          <div className="space-y-3">
+            <h3 className="font-medium">חיבורי Google Calendar</h3>
+            {googleConnections.map(connection => (
+              <div key={connection.id} className="bg-muted/50 rounded-lg p-4">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <span className="font-medium">{connection.calendar_email}</span>
+                    <div className="text-xs text-muted-foreground">
+                      Google Calendar
+                    </div>
+                    <div className="text-xs mt-1">
+                      {connection.last_sync_at ? 
+                        `סנכרון אחרון: ${new Date(connection.last_sync_at).toLocaleString('he-IL')}` : 
+                        'טרם סונכרן'}
+                    </div>
+                  </div>
+                  <div className="flex flex-col space-y-2">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs">פעיל</span>
+                      <Switch 
+                        checked={connection.is_active}
+                        onCheckedChange={(checked) => handleToggleCalendarActive(connection.id, checked)}
+                      />
+                    </div>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => initiateDisconnect(connection.id)}
+                      className="text-xs text-destructive hover:text-destructive"
+                    >
+                      <Trash2 className="h-3 w-3 mr-1" />
+                      נתק
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <div className={googleConnections.length > 0 ? "border-t pt-4" : ""}>
+          <p className="text-sm font-medium mb-2">
+            {googleConnections.length > 0 ? "חיבור Google Calendar נוסף" : "חיבור Google Calendar"}
+          </p>
           <div className="space-y-4">
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="calendar-email" className="text-right">
@@ -349,155 +289,14 @@ const CalendarSync = () => {
               {isConnecting ? 'מתחבר...' : 'חבר לוח שנה'}
             </Button>
           </div>
-        );
-      
-      case 'apple':
-        return (
-          <div className="space-y-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="calendar-email" className="text-right">
-                חשבון Apple
-              </Label>
-              <Input
-                id="calendar-email"
-                type="email"
-                placeholder="name@icloud.com"
-                className="col-span-3"
-                value={calendarEmail}
-                onChange={(e) => setCalendarEmail(e.target.value)}
-              />
-            </div>
-            
-            <Button 
-              onClick={handleConnectApple} 
-              className="mt-2 w-full"
-              disabled={isConnecting}
-            >
-              {isConnecting ? 'מתחבר...' : 'חבר לוח שנה'}
-            </Button>
-          </div>
-        );
-      
-      case 'outlook':
-        return (
-          <div className="space-y-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="calendar-email" className="text-right">
-                חשבון Outlook
-              </Label>
-              <Input
-                id="calendar-email"
-                type="email"
-                placeholder="name@outlook.com"
-                className="col-span-3"
-                value={calendarEmail}
-                onChange={(e) => setCalendarEmail(e.target.value)}
-              />
-            </div>
-            
-            <Button 
-              onClick={handleConnectOutlook} 
-              className="mt-2 w-full"
-              disabled={isConnecting}
-            >
-              {isConnecting ? 'מתחבר...' : 'חבר לוח שנה'}
-            </Button>
-          </div>
-        );
-      
-      default:
-        return (
-          <div className="grid gap-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="calendar-type" className="text-right">
-                סוג לוח שנה
-              </Label>
-              <select
-                id="calendar-type"
-                className="col-span-3 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                value={calendarType}
-                onChange={(e) => setCalendarType(e.target.value)}
-              >
-                <option value="">בחרו סוג לוח שנה</option>
-                <option value="google">Google Calendar</option>
-                <option value="apple">Apple Calendar</option>
-                <option value="outlook">Microsoft Outlook</option>
-              </select>
-            </div>
-          </div>
-        );
-    }
-  };
-
-  const renderCalendarContent = () => {
-    if (isLoading) {
-      return (
-        <div className="flex justify-center items-center py-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-        </div>
-      );
-    }
-
-    if (connections.length === 0) {
-      return (
-        <div className="space-y-4">
-          {renderConnectionForm()}
-          
-          <div className="mt-6 border-t pt-4">
-            <p className="text-sm text-muted-foreground mb-2">לחילופין, ניתן לייצא את הפגישות כקובץ .ics:</p>
-            <Button variant="outline" className="w-full">
-              <Download className="w-4 h-4 mr-2" />
-              הורד כקובץ .ics
-            </Button>
-          </div>
-        </div>
-      );
-    }
-
-    return (
-      <div className="space-y-4">
-        <div className="space-y-3">
-          {connections.map(connection => (
-            <div key={connection.id} className="bg-muted/50 rounded-lg p-4">
-              <div className="flex justify-between items-center">
-                <div>
-                  <span className="font-medium">{connection.calendar_email}</span>
-                  <div className="text-xs text-muted-foreground">
-                    {connection.calendar_type === 'google' ? 'Google Calendar' : 
-                     connection.calendar_type === 'apple' ? 'Apple Calendar' : 'Microsoft Outlook'}
-                  </div>
-                  <div className="text-xs mt-1">
-                    {connection.last_sync_at ? 
-                      `סנכרון אחרון: ${new Date(connection.last_sync_at).toLocaleString('he-IL')}` : 
-                      'טרם סונכרן'}
-                  </div>
-                </div>
-                <div className="flex flex-col space-y-2">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs">פעיל</span>
-                    <Switch 
-                      checked={connection.is_active}
-                      onCheckedChange={(checked) => handleToggleCalendarActive(connection.id, checked)}
-                    />
-                  </div>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    onClick={() => initiateDisconnect(connection.id)}
-                    className="text-xs text-destructive hover:text-destructive"
-                  >
-                    <Trash2 className="h-3 w-3 mr-1" />
-                    נתק
-                  </Button>
-                </div>
-              </div>
-            </div>
-          ))}
         </div>
 
-        <div className="border-t pt-4">
-          <p className="text-sm font-medium mb-2">חיבור לוח שנה נוסף</p>
-          {renderConnectionForm()}
+        <div className="mt-6 border-t pt-4">
+          <p className="text-sm text-muted-foreground mb-2">לחילופין, ניתן לייצא את הפגישות כקובץ .ics:</p>
+          <Button variant="outline" className="w-full">
+            <Download className="w-4 h-4 mr-2" />
+            הורד כקובץ .ics
+          </Button>
         </div>
       </div>
     );

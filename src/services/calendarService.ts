@@ -78,6 +78,32 @@ export const deleteCalendarConnection = async (id: string): Promise<void> => {
   }
 };
 
+// Initiate Google Calendar OAuth flow
+export const initiateGoogleCalendarAuth = async (email: string): Promise<string> => {
+  try {
+    const { data, error } = await supabase.functions.invoke('calendar-sync', {
+      body: {
+        action: 'auth',
+        email: email
+      }
+    });
+    
+    if (error) {
+      console.error('Google auth initiation error:', error);
+      throw new Error(error.message);
+    }
+    
+    if (!data.authUrl) {
+      throw new Error('No auth URL received');
+    }
+    
+    return data.authUrl;
+  } catch (error) {
+    console.error('Error initiating Google Calendar auth:', error);
+    throw error;
+  }
+};
+
 // Generate an ICS file content for an appointment
 export const generateIcsFileContent = (appointment: any): string => {
   const startDate = new Date(`${appointment.date}T${appointment.start_time}`);
@@ -127,6 +153,52 @@ export const syncAppointmentWithCalendar = async (appointmentId: string, calenda
   }
 };
 
+// Update appointment in external calendar
+export const updateAppointmentInCalendar = async (appointmentId: string, calendarConnectionId: string): Promise<void> => {
+  try {
+    const { data, error } = await supabase.functions.invoke('calendar-sync', {
+      body: {
+        action: 'update',
+        appointmentId,
+        calendarConnectionId
+      }
+    });
+    
+    if (error) {
+      console.error('Calendar update error:', error);
+      throw new Error(error.message);
+    }
+    
+    console.log('Calendar update successful:', data);
+  } catch (error) {
+    console.error('Error updating calendar:', error);
+    throw error;
+  }
+};
+
+// Delete appointment from external calendar
+export const deleteAppointmentFromCalendar = async (appointmentId: string, calendarConnectionId: string): Promise<void> => {
+  try {
+    const { data, error } = await supabase.functions.invoke('calendar-sync', {
+      body: {
+        action: 'delete',
+        appointmentId,
+        calendarConnectionId
+      }
+    });
+    
+    if (error) {
+      console.error('Calendar delete error:', error);
+      throw new Error(error.message);
+    }
+    
+    console.log('Calendar delete successful:', data);
+  } catch (error) {
+    console.error('Error deleting from calendar:', error);
+    throw error;
+  }
+};
+
 // Download ICS file for an appointment
 export const downloadIcsFile = (appointment: any): void => {
   const icsContent = generateIcsFileContent(appointment);
@@ -142,4 +214,18 @@ export const downloadIcsFile = (appointment: any): void => {
   // Clean up
   document.body.removeChild(link);
   URL.revokeObjectURL(url);
+};
+
+// Handle OAuth redirect callback
+export const handleOAuthCallback = () => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const authStatus = urlParams.get('auth');
+  
+  if (authStatus === 'success') {
+    return { success: true, message: 'Google Calendar connected successfully!' };
+  } else if (authStatus === 'error') {
+    return { success: false, message: 'Failed to connect Google Calendar. Please try again.' };
+  }
+  
+  return null;
 };
