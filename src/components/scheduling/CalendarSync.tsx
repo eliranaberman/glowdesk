@@ -69,18 +69,34 @@ const CalendarSync = () => {
   const loadData = async () => {
     try {
       setIsLoading(true);
+      
       // Load calendar connections
       const connectionsData = await getUserCalendarConnections();
+      console.log('Loaded calendar connections:', connectionsData);
       setConnections(connectionsData);
       
-      // Load notification preferences
-      const prefsData = await getUserNotificationPreferences();
-      setNotificationPrefs(prefsData);
+      // Load notification preferences with error handling
+      try {
+        const prefsData = await getUserNotificationPreferences();
+        console.log('Loaded notification preferences:', prefsData);
+        setNotificationPrefs(prefsData);
+      } catch (error) {
+        console.error("Error loading notification preferences:", error);
+        // Set default preferences if loading fails
+        setNotificationPrefs({
+          id: '',
+          user_id: '',
+          whatsapp_enabled: true,
+          sms_fallback_enabled: true,
+          created_at: '',
+          updated_at: ''
+        });
+      }
     } catch (error) {
-      console.error("Error loading data:", error);
+      console.error("Error loading calendar data:", error);
       toast({
         title: "שגיאה בטעינת נתונים",
-        description: "לא ניתן לטעון את הנתונים. נסה שוב מאוחר יותר.",
+        description: "לא ניתן לטעון את נתוני לוח השנה. נסה שוב מאוחר יותר.",
         variant: "destructive"
       });
     } finally {
@@ -100,8 +116,10 @@ const CalendarSync = () => {
 
     setIsConnecting(true);
     try {
+      console.log('Initiating Google Calendar auth for email:', calendarEmail);
       // Get OAuth URL from the edge function
       const authUrl = await initiateGoogleCalendarAuth(calendarEmail);
+      console.log('Received auth URL:', authUrl);
       
       // Redirect to Google OAuth
       window.location.href = authUrl;
