@@ -41,19 +41,7 @@ export const uploadPortfolioImage = async (
 
     console.log('Uploading file to path:', filePath);
 
-    // Check if the portfolio bucket exists and is accessible
-    const { data: bucketData, error: bucketError } = await supabase.storage
-      .from('portfolio')
-      .list('', { limit: 1 });
-
-    if (bucketError) {
-      console.error('Storage bucket error:', bucketError);
-      throw new Error('שגיאה בגישה לאחסון התמונות');
-    }
-
-    console.log('Portfolio bucket is accessible');
-
-    // Upload the file
+    // Upload the file to the public portfolio bucket
     const { data: uploadData, error: uploadError } = await supabase.storage
       .from('portfolio')
       .upload(filePath, file, {
