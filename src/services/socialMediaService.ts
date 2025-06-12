@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { 
   SocialMediaAccount, 
@@ -8,6 +7,7 @@ import {
   CreatePostResponse,
   PostFormData
 } from '@/types/socialMedia';
+import { useToast } from '@/hooks/use-toast';
 
 export const initiateMetaAuth = async (): Promise<{ url: string; state: string } | null> => {
   try {
@@ -91,6 +91,7 @@ export const fetchConnectedAccounts = async (): Promise<SocialMediaAccount[]> =>
       return [];
     }
     
+    // Cast the data to the correct type
     return (data || []) as SocialMediaAccount[];
   } catch (error) {
     console.error('Failed to fetch connected accounts:', error);
@@ -198,7 +199,7 @@ export const createPost = async (formData: PostFormData): Promise<CreatePostResp
       const fileName = `${Date.now()}-${formData.image.name.replace(/\s+/g, '-')}`;
       
       const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('social-media')
+        .from('social_media')
         .upload(fileName, formData.image);
       
       if (uploadError) {
@@ -207,7 +208,7 @@ export const createPost = async (formData: PostFormData): Promise<CreatePostResp
       }
       
       // Get the public URL
-      const { data } = supabase.storage.from('social-media').getPublicUrl(fileName);
+      const { data } = supabase.storage.from('social_media').getPublicUrl(fileName);
       imageUrl = data.publicUrl;
     }
     
