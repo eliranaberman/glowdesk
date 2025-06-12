@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -45,7 +44,7 @@ const Tasks = () => {
       }));
       setTasks(parsedTasks);
     } else {
-      // Add example tasks for new users
+      // Add example tasks for new users (6 total)
       const sampleTasks: LocalTask[] = [
         {
           id: '1',
@@ -73,6 +72,33 @@ const Tasks = () => {
           priority: 'low' as TaskPriority,
           status: 'open' as TaskStatus,
           category: 'marketing'
+        },
+        {
+          id: '4',
+          title: 'התקני מערכת תשלומים דיגיטלית',
+          description: 'הגדירי אפשרויות תשלום דיגיטליות ללקוחות',
+          dueDate: new Date(Date.now() + 4 * 24 * 60 * 60 * 1000),
+          priority: 'high' as TaskPriority,
+          status: 'open' as TaskStatus,
+          category: 'other'
+        },
+        {
+          id: '5',
+          title: 'צרי תפריט שירותים מעודכן',
+          description: 'עדכני את תפריט השירותים והמחירים',
+          dueDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
+          priority: 'medium' as TaskPriority,
+          status: 'open' as TaskStatus,
+          category: 'marketing'
+        },
+        {
+          id: '6',
+          title: 'הגדירי מערכת ניהול תורים',
+          description: 'התקני מערכת לניהול תורים ותזמון פגישות',
+          dueDate: new Date(Date.now() + 6 * 24 * 60 * 60 * 1000),
+          priority: 'low' as TaskPriority,
+          status: 'open' as TaskStatus,
+          category: 'other'
         }
       ];
       setTasks(sampleTasks);

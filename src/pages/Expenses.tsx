@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { DollarSign, Upload, FileText, Trash2, Filter, Calendar, Plus } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -88,7 +87,7 @@ const Expenses = () => {
           const parsedExpenses = JSON.parse(savedExpenses);
           setExpenses(parsedExpenses);
         } else {
-          // Add sample expenses for new users
+          // Add sample expenses for new users (6 total)
           const sampleExpenses: Expense[] = [
             {
               id: '1',
@@ -143,6 +142,17 @@ const Expenses = () => {
               date: '2025-01-01',
               payment_method: 'אשראי',
               has_invoice: false,
+              invoice_file_path: null
+            },
+            {
+              id: '6',
+              amount: 280,
+              category: 'אחר',
+              vendor: 'חברת ביטוח',
+              description: 'ביטוח עסק שנתי',
+              date: '2024-12-28',
+              payment_method: 'העברה בנקאית',
+              has_invoice: true,
               invoice_file_path: null
             }
           ];
