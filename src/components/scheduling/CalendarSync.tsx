@@ -43,10 +43,12 @@ const CalendarSync = () => {
   const [selectedConnectionId, setSelectedConnectionId] = useState<string | null>(null);
 
   useEffect(() => {
+    console.log('CalendarSync component mounted');
     loadData();
     // Check for OAuth callback
     const callbackResult = handleOAuthCallback();
     if (callbackResult) {
+      console.log('OAuth callback result:', callbackResult);
       if (callbackResult.success) {
         toast({
           title: "הצלחה!",
@@ -67,22 +69,32 @@ const CalendarSync = () => {
   }, []);
 
   const loadData = async () => {
+    console.log('Starting loadData...');
     try {
       setIsLoading(true);
       
       // Load calendar connections
+      console.log('Loading calendar connections...');
       const connectionsData = await getUserCalendarConnections();
-      console.log('Loaded calendar connections:', connectionsData);
+      console.log('Calendar connections loaded successfully:', connectionsData);
       setConnections(connectionsData);
       
       // Load notification preferences with error handling
+      console.log('Loading notification preferences...');
       try {
         const prefsData = await getUserNotificationPreferences();
-        console.log('Loaded notification preferences:', prefsData);
+        console.log('Notification preferences loaded successfully:', prefsData);
         setNotificationPrefs(prefsData);
-      } catch (error) {
-        console.error("Error loading notification preferences:", error);
+      } catch (prefError: any) {
+        console.error("Error loading notification preferences:", prefError);
+        console.error("Notification preferences error details:", {
+          message: prefError.message,
+          code: prefError.code,
+          details: prefError.details
+        });
+        
         // Set default preferences if loading fails
+        console.log('Setting default notification preferences');
         setNotificationPrefs({
           id: '',
           user_id: '',
@@ -92,20 +104,32 @@ const CalendarSync = () => {
           updated_at: ''
         });
       }
-    } catch (error) {
-      console.error("Error loading calendar data:", error);
+      console.log('loadData completed successfully');
+    } catch (error: any) {
+      console.error("Error in loadData:", error);
+      console.error("loadData error details:", {
+        message: error.message,
+        code: error.code,
+        details: error.details,
+        stack: error.stack
+      });
+      
       toast({
         title: "שגיאה בטעינת נתונים",
-        description: "לא ניתן לטעון את נתוני לוח השנה. נסה שוב מאוחר יותר.",
+        description: `שגיאה: ${error.message || 'לא ניתן לטעון את נתוני לוח השנה'}`,
         variant: "destructive"
       });
     } finally {
       setIsLoading(false);
+      console.log('loadData finished, isLoading set to false');
     }
   };
 
   const handleConnectGoogle = async () => {
+    console.log('handleConnectGoogle called with email:', calendarEmail);
+    
     if (!calendarEmail) {
+      console.log('No email provided');
       toast({
         title: "שגיאה",
         description: "נא להזין אימייל",
@@ -115,19 +139,28 @@ const CalendarSync = () => {
     }
 
     setIsConnecting(true);
+    console.log('Starting Google Calendar connection process...');
+    
     try {
-      console.log('Initiating Google Calendar auth for email:', calendarEmail);
-      // Get OAuth URL from the edge function
+      console.log('Calling initiateGoogleCalendarAuth...');
       const authUrl = await initiateGoogleCalendarAuth(calendarEmail);
-      console.log('Received auth URL:', authUrl);
+      console.log('Auth URL received successfully:', authUrl);
       
       // Redirect to Google OAuth
+      console.log('Redirecting to Google OAuth...');
       window.location.href = authUrl;
     } catch (error: any) {
-      console.error("Error connecting to Google Calendar:", error);
+      console.error("Error in handleConnectGoogle:", error);
+      console.error("Google Calendar connection error details:", {
+        message: error.message,
+        code: error.code,
+        details: error.details,
+        stack: error.stack
+      });
+      
       toast({
         title: "שגיאה בחיבור",
-        description: error.message || "לא ניתן לחבר את לוח השנה. נסה שוב מאוחר יותר.",
+        description: `שגיאה: ${error.message || 'לא ניתן לחבר את לוח השנה'}`,
         variant: "destructive"
       });
       setIsConnecting(false);
