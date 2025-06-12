@@ -44,8 +44,9 @@ const Tasks = () => {
       }));
       setTasks(parsedTasks);
     } else {
-      // Add example tasks for new users (6 total)
+      // Add 12 example tasks with proper distribution (4 open, 4 in_progress, 4 completed)
       const sampleTasks: LocalTask[] = [
+        // 4 Open Tasks
         {
           id: '1',
           title: 'עדכני את שעות הפעילות שלך',
@@ -66,38 +67,94 @@ const Tasks = () => {
         },
         {
           id: '3',
-          title: 'שלחי הודעת תזכורת אוטומטית',
-          description: 'הגדירי הודעות תזכורת אוטומטיות ללקוחות',
+          title: 'עדכון מלאי לקים וג\'לים',
+          description: 'בדיקה ועדכון של כל מוצרי הלקים והג\'לים במלאי',
           dueDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
-          priority: 'low' as TaskPriority,
+          priority: 'high' as TaskPriority,
           status: 'open' as TaskStatus,
-          category: 'marketing'
+          category: 'inventory'
         },
         {
           id: '4',
-          title: 'התקני מערכת תשלומים דיגיטלית',
-          description: 'הגדירי אפשרויות תשלום דיגיטליות ללקוחות',
+          title: 'יצירת קמפיין לרשתות חברתיות',
+          description: 'הכנת תוכן חדש לאינסטגרם ופייסבוק',
           dueDate: new Date(Date.now() + 4 * 24 * 60 * 60 * 1000),
-          priority: 'high' as TaskPriority,
-          status: 'open' as TaskStatus,
-          category: 'other'
-        },
-        {
-          id: '5',
-          title: 'צרי תפריט שירותים מעודכן',
-          description: 'עדכני את תפריט השירותים והמחירים',
-          dueDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
           priority: 'medium' as TaskPriority,
           status: 'open' as TaskStatus,
           category: 'marketing'
         },
+        // 4 In Progress Tasks
+        {
+          id: '5',
+          title: 'שלחי הודעת תזכורת אוטומטית',
+          description: 'הגדירי הודעות תזכורת אוטומטיות ללקוחות',
+          dueDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
+          priority: 'low' as TaskPriority,
+          status: 'in_progress' as TaskStatus,
+          category: 'marketing'
+        },
         {
           id: '6',
+          title: 'התקני מערכת תשלומים דיגיטלית',
+          description: 'הגדירי אפשרויות תשלום דיגיטליות ללקוחות',
+          dueDate: new Date(Date.now() + 6 * 24 * 60 * 60 * 1000),
+          priority: 'high' as TaskPriority,
+          status: 'in_progress' as TaskStatus,
+          category: 'other'
+        },
+        {
+          id: '7',
+          title: 'הזמנת ציוד חדש מהספק',
+          description: 'הזמנת מברשות וכלים חדשים לעבודה',
+          dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+          priority: 'medium' as TaskPriority,
+          status: 'in_progress' as TaskStatus,
+          category: 'inventory'
+        },
+        {
+          id: '8',
+          title: 'עדכון תפריט חורף והמחירים',
+          description: 'עדכון המחירים והשירותים לעונת החורף',
+          dueDate: new Date(Date.now() + 8 * 24 * 60 * 60 * 1000),
+          priority: 'medium' as TaskPriority,
+          status: 'in_progress' as TaskStatus,
+          category: 'marketing'
+        },
+        // 4 Completed Tasks
+        {
+          id: '9',
+          title: 'צרי תפריט שירותים מעודכן',
+          description: 'עדכני את תפריט השירותים והמחירים',
+          dueDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
+          priority: 'medium' as TaskPriority,
+          status: 'completed' as TaskStatus,
+          category: 'marketing'
+        },
+        {
+          id: '10',
           title: 'הגדירי מערכת ניהול תורים',
           description: 'התקני מערכת לניהול תורים ותזמון פגישות',
-          dueDate: new Date(Date.now() + 6 * 24 * 60 * 60 * 1000),
+          dueDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
           priority: 'low' as TaskPriority,
-          status: 'open' as TaskStatus,
+          status: 'completed' as TaskStatus,
+          category: 'other'
+        },
+        {
+          id: '11',
+          title: 'אימון על טכניקות חדשות',
+          description: 'השתתפות בקורס טכניקות מניקור מתקדמות',
+          dueDate: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
+          priority: 'high' as TaskPriority,
+          status: 'completed' as TaskStatus,
+          category: 'other'
+        },
+        {
+          id: '12',
+          title: 'ניקוי עמוק של החדר',
+          description: 'ניקוי וחיטוי מקיף של חדר הטיפולים',
+          dueDate: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000),
+          priority: 'low' as TaskPriority,
+          status: 'completed' as TaskStatus,
           category: 'other'
         }
       ];
