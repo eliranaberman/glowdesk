@@ -52,6 +52,13 @@ function generateGoogleAuthUrl(email: string): string {
   const scope = 'https://www.googleapis.com/auth/calendar';
   const state = btoa(JSON.stringify({ email, timestamp: Date.now() }));
   
+  console.log('Generating Google Auth URL with:', {
+    clientId: googleClientId ? 'Present' : 'Missing',
+    redirectUri,
+    scope,
+    email
+  });
+  
   const params = new URLSearchParams({
     client_id: googleClientId,
     redirect_uri: redirectUri,
@@ -62,12 +69,16 @@ function generateGoogleAuthUrl(email: string): string {
     state: state,
   });
   
-  return `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
+  const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
+  console.log('Generated auth URL successfully');
+  return authUrl;
 }
 
 // Exchange authorization code for tokens
 async function exchangeCodeForTokens(code: string): Promise<any> {
   const redirectUri = `${supabaseUrl}/functions/v1/calendar-sync`;
+  
+  console.log('Exchanging code for tokens...');
   
   const response = await fetch('https://oauth2.googleapis.com/token', {
     method: 'POST',
@@ -85,14 +96,19 @@ async function exchangeCodeForTokens(code: string): Promise<any> {
   
   if (!response.ok) {
     const error = await response.text();
+    console.error('Token exchange failed:', error);
     throw new Error(`Token exchange failed: ${error}`);
   }
   
-  return await response.json();
+  const tokens = await response.json();
+  console.log('Token exchange successful');
+  return tokens;
 }
 
 // Refresh access token
 async function refreshAccessToken(refreshToken: string): Promise<any> {
+  console.log('Refreshing access token...');
+  
   const response = await fetch('https://oauth2.googleapis.com/token', {
     method: 'POST',
     headers: {
@@ -108,10 +124,13 @@ async function refreshAccessToken(refreshToken: string): Promise<any> {
   
   if (!response.ok) {
     const error = await response.text();
+    console.error('Token refresh failed:', error);
     throw new Error(`Token refresh failed: ${error}`);
   }
   
-  return await response.json();
+  const tokens = await response.json();
+  console.log('Token refresh successful');
+  return tokens;
 }
 
 // Create event in Google Calendar
@@ -138,6 +157,8 @@ async function createGoogleCalendarEvent(
     ] : [],
   };
   
+  console.log('Creating Google Calendar event...');
+  
   const response = await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events', {
     method: 'POST',
     headers: {
@@ -154,6 +175,7 @@ async function createGoogleCalendarEvent(
   }
   
   const createdEvent = await response.json();
+  console.log('Calendar event created successfully');
   return { success: true, external_id: createdEvent.id };
 }
 
@@ -182,6 +204,8 @@ async function updateGoogleCalendarEvent(
     ] : [],
   };
   
+  console.log('Updating Google Calendar event...');
+  
   const response = await fetch(`https://www.googleapis.com/calendar/v3/calendars/primary/events/${eventId}`, {
     method: 'PUT',
     headers: {
@@ -197,6 +221,7 @@ async function updateGoogleCalendarEvent(
     throw new Error(`Failed to update calendar event: ${error}`);
   }
   
+  console.log('Calendar event updated successfully');
   return { success: true };
 }
 
@@ -205,6 +230,8 @@ async function deleteGoogleCalendarEvent(
   accessToken: string,
   eventId: string
 ): Promise<{ success: boolean }> {
+  console.log('Deleting Google Calendar event...');
+  
   const response = await fetch(`https://www.googleapis.com/calendar/v3/calendars/primary/events/${eventId}`, {
     method: 'DELETE',
     headers: {
@@ -218,6 +245,7 @@ async function deleteGoogleCalendarEvent(
     throw new Error(`Failed to delete calendar event: ${error}`);
   }
   
+  console.log('Calendar event deleted successfully');
   return { success: true };
 }
 
@@ -227,6 +255,8 @@ async function getValidAccessToken(connection: CalendarConnection): Promise<stri
     throw new Error('No access token available');
   }
   
+  console.log('Checking token validity...');
+  
   // Try to use current token first
   const testResponse = await fetch('https://www.googleapis.com/calendar/v3/calendars/primary', {
     headers: {
@@ -235,8 +265,11 @@ async function getValidAccessToken(connection: CalendarConnection): Promise<stri
   });
   
   if (testResponse.ok) {
+    console.log('Access token is valid');
     return connection.access_token;
   }
+  
+  console.log('Access token expired, refreshing...');
   
   // Token is invalid, try to refresh
   if (!connection.refresh_token) {
@@ -255,6 +288,7 @@ async function getValidAccessToken(connection: CalendarConnection): Promise<stri
     })
     .eq('id', connection.id);
   
+  console.log('Token refreshed and updated');
   return tokenData.access_token;
 }
 
@@ -262,8 +296,11 @@ async function handleCalendarSync(req: Request): Promise<Response> {
   try {
     const url = new URL(req.url);
     
+    console.log('Calendar sync request received:', req.method);
+    
     // Handle OAuth callback
     if (url.searchParams.has('code') && url.searchParams.has('state')) {
+      console.log('Processing OAuth callback...');
       const code = url.searchParams.get('code')!;
       const state = url.searchParams.get('state')!;
       
@@ -271,23 +308,38 @@ async function handleCalendarSync(req: Request): Promise<Response> {
         const stateData = JSON.parse(atob(state));
         const { email } = stateData;
         
+        console.log('OAuth callback for email:', email);
+        
         // Exchange code for tokens
         const tokenData = await exchangeCodeForTokens(code);
         
         // Get user info from Google
+        console.log('Getting user info from Google...');
         const userInfoResponse = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
           headers: {
             'Authorization': `Bearer ${tokenData.access_token}`,
           },
         });
         
-        const userInfo = await userInfoResponse.json();
+        if (!userInfoResponse.ok) {
+          throw new Error('Failed to get user info from Google');
+        }
         
-        // Get current user
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) {
+        const userInfo = await userInfoResponse.json();
+        console.log('User info received:', userInfo.email);
+        
+        // Get current user from auth header
+        const authHeader = req.headers.get('authorization');
+        if (!authHeader) {
+          throw new Error('No authorization header found');
+        }
+        
+        const { data: { user }, error: authError } = await supabase.auth.getUser(authHeader.replace('Bearer ', ''));
+        if (authError || !user) {
           throw new Error('User not authenticated');
         }
+        
+        console.log('Authenticated user:', user.id);
         
         // Create or update calendar connection
         const { data: existingConnection } = await supabase
@@ -299,7 +351,7 @@ async function handleCalendarSync(req: Request): Promise<Response> {
           .single();
         
         if (existingConnection) {
-          // Update existing connection
+          console.log('Updating existing connection...');
           await supabase
             .from('calendar_connections')
             .update({
@@ -311,7 +363,7 @@ async function handleCalendarSync(req: Request): Promise<Response> {
             })
             .eq('id', existingConnection.id);
         } else {
-          // Create new connection
+          console.log('Creating new connection...');
           await supabase
             .from('calendar_connections')
             .insert({
@@ -326,12 +378,17 @@ async function handleCalendarSync(req: Request): Promise<Response> {
             });
         }
         
+        console.log('Calendar connection saved successfully');
+        
         // Redirect back to scheduling page with success
-        return Response.redirect(`${supabaseUrl.replace('.supabase.co', '.lovable.app')}/scheduling?auth=success`, 302);
+        const redirectUrl = `${supabaseUrl.replace('.supabase.co', '.lovable.app')}/scheduling?auth=success`;
+        console.log('Redirecting to:', redirectUrl);
+        return Response.redirect(redirectUrl, 302);
         
       } catch (error) {
         console.error('OAuth callback error:', error);
-        return Response.redirect(`${supabaseUrl.replace('.supabase.co', '.lovable.app')}/scheduling?auth=error`, 302);
+        const redirectUrl = `${supabaseUrl.replace('.supabase.co', '.lovable.app')}/scheduling?auth=error`;
+        return Response.redirect(redirectUrl, 302);
       }
     }
     
@@ -340,6 +397,15 @@ async function handleCalendarSync(req: Request): Promise<Response> {
     const { action, appointmentId, calendarConnectionId, email } = requestData;
     
     console.log('Calendar sync request:', requestData);
+    
+    // Validate environment variables
+    if (!googleClientId || !googleClientSecret) {
+      console.error('Missing Google OAuth credentials');
+      return new Response(
+        JSON.stringify({ error: 'Google OAuth credentials not configured' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
     
     if (action === 'auth') {
       // Generate OAuth URL
@@ -350,6 +416,7 @@ async function handleCalendarSync(req: Request): Promise<Response> {
         );
       }
       
+      console.log('Generating auth URL for email:', email);
       const authUrl = generateGoogleAuthUrl(email);
       return new Response(
         JSON.stringify({ authUrl }),
@@ -462,6 +529,7 @@ async function handleCalendarSync(req: Request): Promise<Response> {
         .eq('id', calendarConnectionId);
     }
     
+    console.log('Calendar sync completed successfully');
     return new Response(
       JSON.stringify({ success: result?.success, external_id: result?.external_id }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
