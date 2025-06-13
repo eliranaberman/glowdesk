@@ -28,21 +28,6 @@ export const getUserRoles = async (userId: string): Promise<UserRole[]> => {
   try {
     console.log('Fetching roles for user:', userId);
     
-    // בדיקה אם המשתמש הוא admin - רק admins יכולים לראות תפקידים
-    const { data: adminCheck, error: adminError } = await supabase
-      .rpc('is_admin_user', { user_id: userId });
-
-    if (adminError) {
-      console.error('Error checking admin status:', adminError);
-      // אם אין הרשאת admin, נחזיר רשימה ריקה
-      return [];
-    }
-
-    if (!adminCheck) {
-      console.log('User is not admin, returning empty roles array');
-      return [];
-    }
-
     const { data, error } = await supabase
       .from('user_roles')
       .select('role')
@@ -65,20 +50,6 @@ export const hasRole = async (userId: string, requiredRole: UserRole): Promise<b
   try {
     console.log('Checking if user has role:', { userId, requiredRole });
     
-    // בדיקה אם המשתמש הוא admin
-    const { data: adminCheck, error: adminError } = await supabase
-      .rpc('is_admin_user', { user_id: userId });
-
-    if (adminError) {
-      console.error('Error checking admin status:', adminError);
-      return false;
-    }
-
-    if (!adminCheck) {
-      console.log('User is not admin, cannot check roles');
-      return false;
-    }
-
     const { data, error } = await supabase
       .from('user_roles')
       .select('role')
@@ -108,42 +79,60 @@ export const hasPermission = async (
   try {
     console.log('Checking permission:', { userId, resource, permission });
     
-    // תחילה נבדוק אם המשתמש הוא admin
-    const { data: adminCheck, error: adminError } = await supabase
-      .rpc('is_admin_user', { user_id: userId });
-
-    if (adminError) {
-      console.error('Error checking admin status:', adminError);
-      return false;
-    }
-
-    // אם המשתמש הוא admin, יש לו הרשאה לכל
-    if (adminCheck) {
-      console.log('User is admin, granting permission');
+    // תחילה נבדוק אם המשתמש הוא admin או owner
+    const userRoles = await getUserRoles(userId);
+    
+    // אם המשתמש הוא admin או owner, יש לו הרשאה לכל
+    if (userRoles.includes('admin') || userRoles.includes('owner')) {
+      console.log('User is admin/owner, granting permission');
       return true;
     }
 
-    // אם לא admin, נוודא שיש לו הרשאה לצפות בתפקידים
-    console.log('User is not admin, checking specific permissions');
+    // אחרת, נבדוק הרשאות ספציפיות בטבלת role_permissions
+    const { data, error } = await supabase
+      .from('role_permissions')
+      .select('*')
+      .in('role', userRoles)
+      .eq('resource', resource)
+      .eq('permission', permission)
+      .limit(1);
+
+    if (error) {
+      console.error('Error checking specific permission:', error);
+      // במקרה של שגיאה, נתן הרשאות בסיסיות
+      return grantBasicPermissions(resource, permission);
+    }
+
+    const hasSpecificPermission = (data && data.length > 0);
     
-    // לכל המשתמשים שאינם admin, נתן הרשאות בסיסיות
-    const basicPermissions = [
-      { resource: 'expenses', permission: 'read' },
-      { resource: 'revenues', permission: 'read' },
-      { resource: 'clients', permission: 'read' },
-      { resource: 'appointments', permission: 'read' }
-    ];
+    // אם אין הרשאה ספציפית, נבדוק הרשאות בסיסיות
+    if (!hasSpecificPermission) {
+      return grantBasicPermissions(resource, permission);
+    }
 
-    const hasBasicPermission = basicPermissions.some(
-      p => p.resource === resource && p.permission === permission
-    );
-
-    console.log('Has basic permission:', hasBasicPermission);
-    return hasBasicPermission;
+    console.log('Has specific permission:', hasSpecificPermission);
+    return hasSpecificPermission;
   } catch (error) {
     console.error('Error checking permission:', error);
-    return false;
+    return grantBasicPermissions(resource, permission);
   }
+};
+
+const grantBasicPermissions = (resource: string, permission: string): boolean => {
+  // הרשאות בסיסיות לכל המשתמשים
+  const basicPermissions = [
+    { resource: 'expenses', permission: 'read' },
+    { resource: 'revenues', permission: 'read' },
+    { resource: 'clients', permission: 'read' },
+    { resource: 'appointments', permission: 'read' }
+  ];
+
+  const hasBasicPermission = basicPermissions.some(
+    p => p.resource === resource && p.permission === permission
+  );
+
+  console.log('Granting basic permission:', hasBasicPermission);
+  return hasBasicPermission;
 };
 
 export const assignRole = async (userId: string, role: UserRole): Promise<boolean> => {
@@ -224,7 +213,7 @@ export const getAllUsers = async (): Promise<UserWithRoles[]> => {
       created_at: user.created_at
     }));
     
-    // נשיג תפקידים רק עבור admins
+    // נשיג תפקידים עבור כל המשתמשים
     const { data: rolesData, error: rolesError } = await supabase
       .from('user_roles')
       .select('user_id, role');

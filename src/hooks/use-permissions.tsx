@@ -37,10 +37,12 @@ export const usePermissions = (): PermissionHook => {
       }
 
       try {
+        console.log('Fetching roles for user in hook:', user.id);
         const roles = await getUserRoles(user.id);
+        console.log('Roles received in hook:', roles);
         setUserRoles(roles);
       } catch (error) {
-        console.error('Error fetching user roles:', error);
+        console.error('Error fetching user roles in hook:', error);
         // במקרה של שגיאה, נניח שהמשתמש הוא employee רגיל
         setUserRoles(['employee']);
       } finally {
