@@ -9,7 +9,6 @@ import {
 } from '@/services/userRolesService';
 
 interface PermissionHook {
-  // Role checking
   userRoles: UserRole[];
   isAdmin: boolean;
   isOwner: boolean;
@@ -17,7 +16,6 @@ interface PermissionHook {
   isSocialManager: boolean;
   checkRole: (role: UserRole) => boolean;
   
-  // Permission checking
   loading: boolean;
   canRead: (resource: string) => Promise<boolean>;
   canWrite: (resource: string) => Promise<boolean>;
@@ -43,6 +41,8 @@ export const usePermissions = (): PermissionHook => {
         setUserRoles(roles);
       } catch (error) {
         console.error('Error fetching user roles:', error);
+        // במקרה של שגיאה, נניח שהמשתמש הוא employee רגיל
+        setUserRoles(['employee']);
       } finally {
         setLoading(false);
       }
@@ -51,7 +51,6 @@ export const usePermissions = (): PermissionHook => {
     fetchUserRoles();
   }, [user?.id]);
 
-  // Role checking helpers
   const isAdmin = userRoles.includes('admin');
   const isOwner = userRoles.includes('owner');
   const isEmployee = userRoles.includes('employee');
@@ -61,7 +60,6 @@ export const usePermissions = (): PermissionHook => {
     return userRoles.includes(role);
   };
 
-  // Permission checking helpers
   const checkPermission = async (resource: string, permission: string): Promise<boolean> => {
     if (!user?.id) return false;
     

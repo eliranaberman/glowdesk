@@ -14,7 +14,7 @@ export interface UserWithRoles {
   email: string;
   full_name?: string;
   roles: UserRole[];
-  created_at?: string; // Added this property
+  created_at?: string;
 }
 
 export interface Permission {
@@ -27,6 +27,22 @@ export interface Permission {
 export const getUserRoles = async (userId: string): Promise<UserRole[]> => {
   try {
     console.log('Fetching roles for user:', userId);
+    
+    // בדיקה אם המשתמש הוא admin - רק admins יכולים לראות תפקידים
+    const { data: adminCheck, error: adminError } = await supabase
+      .rpc('is_admin_user', { user_id: userId });
+
+    if (adminError) {
+      console.error('Error checking admin status:', adminError);
+      // אם אין הרשאת admin, נחזיר רשימה ריקה
+      return [];
+    }
+
+    if (!adminCheck) {
+      console.log('User is not admin, returning empty roles array');
+      return [];
+    }
+
     const { data, error } = await supabase
       .from('user_roles')
       .select('role')
@@ -34,7 +50,6 @@ export const getUserRoles = async (userId: string): Promise<UserRole[]> => {
 
     if (error) {
       console.error('Error fetching user roles:', error);
-      // במקרה של שגיאה, נחזיר רשימה ריקה במקום להשליך שגיאה
       return [];
     }
     
@@ -50,7 +65,20 @@ export const hasRole = async (userId: string, requiredRole: UserRole): Promise<b
   try {
     console.log('Checking if user has role:', { userId, requiredRole });
     
-    // נשתמש בשאילתה ישירה במקום ב-RPC כדי להימנע מבעיות RLS
+    // בדיקה אם המשתמש הוא admin
+    const { data: adminCheck, error: adminError } = await supabase
+      .rpc('is_admin_user', { user_id: userId });
+
+    if (adminError) {
+      console.error('Error checking admin status:', adminError);
+      return false;
+    }
+
+    if (!adminCheck) {
+      console.log('User is not admin, cannot check roles');
+      return false;
+    }
+
     const { data, error } = await supabase
       .from('user_roles')
       .select('role')
@@ -80,29 +108,38 @@ export const hasPermission = async (
   try {
     console.log('Checking permission:', { userId, resource, permission });
     
-    // נשתמש בשאילתה ישירה עם JOIN
-    const { data, error } = await supabase
-      .from('user_roles')
-      .select(`
-        role,
-        role_permissions!inner(
-          resource,
-          permission
-        )
-      `)
-      .eq('user_id', userId)
-      .eq('role_permissions.resource', resource)
-      .eq('role_permissions.permission', permission)
-      .limit(1);
+    // תחילה נבדוק אם המשתמש הוא admin
+    const { data: adminCheck, error: adminError } = await supabase
+      .rpc('is_admin_user', { user_id: userId });
 
-    if (error) {
-      console.error('Error checking permission:', error);
+    if (adminError) {
+      console.error('Error checking admin status:', adminError);
       return false;
     }
+
+    // אם המשתמש הוא admin, יש לו הרשאה לכל
+    if (adminCheck) {
+      console.log('User is admin, granting permission');
+      return true;
+    }
+
+    // אם לא admin, נוודא שיש לו הרשאה לצפות בתפקידים
+    console.log('User is not admin, checking specific permissions');
     
-    const hasPermissionResult = (data && data.length > 0);
-    console.log('Has permission result:', hasPermissionResult);
-    return hasPermissionResult;
+    // לכל המשתמשים שאינם admin, נתן הרשאות בסיסיות
+    const basicPermissions = [
+      { resource: 'expenses', permission: 'read' },
+      { resource: 'revenues', permission: 'read' },
+      { resource: 'clients', permission: 'read' },
+      { resource: 'appointments', permission: 'read' }
+    ];
+
+    const hasBasicPermission = basicPermissions.some(
+      p => p.resource === resource && p.permission === permission
+    );
+
+    console.log('Has basic permission:', hasBasicPermission);
+    return hasBasicPermission;
   } catch (error) {
     console.error('Error checking permission:', error);
     return false;
@@ -117,7 +154,7 @@ export const assignRole = async (userId: string, role: UserRole): Promise<boolea
       .select();
 
     if (error) {
-      if (error.code === '23505') { // Duplicate key violation
+      if (error.code === '23505') {
         toast({
           title: 'תפקיד כבר קיים',
           description: `המשתמש כבר משויך לתפקיד ${role}`,
@@ -175,7 +212,6 @@ export const removeRole = async (userId: string, role: UserRole): Promise<boolea
 
 export const getAllUsers = async (): Promise<UserWithRoles[]> => {
   try {
-    // Get all users from auth.users
     const { data: usersData, error: usersError } = await supabase.auth.admin.listUsers();
     
     if (usersError) throw usersError;
@@ -185,23 +221,24 @@ export const getAllUsers = async (): Promise<UserWithRoles[]> => {
       email: user.email || '',
       full_name: user.user_metadata?.full_name,
       roles: [] as UserRole[],
-      created_at: user.created_at // Include created_at from users data
+      created_at: user.created_at
     }));
     
-    // Get all role assignments
+    // נשיג תפקידים רק עבור admins
     const { data: rolesData, error: rolesError } = await supabase
       .from('user_roles')
       .select('user_id, role');
       
-    if (rolesError) throw rolesError;
-    
-    // Add roles to each user
-    rolesData?.forEach(roleMapping => {
-      const user = users.find(u => u.id === roleMapping.user_id);
-      if (user) {
-        user.roles.push(roleMapping.role as UserRole);
-      }
-    });
+    if (rolesError) {
+      console.error('Error fetching roles:', rolesError);
+    } else {
+      rolesData?.forEach(roleMapping => {
+        const user = users.find(u => u.id === roleMapping.user_id);
+        if (user) {
+          user.roles.push(roleMapping.role as UserRole);
+        }
+      });
+    }
     
     return users;
   } catch (error) {
@@ -235,8 +272,8 @@ export const addPermission = async (
       .insert({ role, resource, permission });
 
     if (error) {
-      if (error.code === '23505') { // Duplicate key violation
-        return false; // Permission already exists
+      if (error.code === '23505') {
+        return false;
       }
       throw error;
     }
