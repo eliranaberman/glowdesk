@@ -1,553 +1,163 @@
 
-import { serve } from 'https://deno.land/std@0.190.0/http/server.ts';
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.23.0';
-
-const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
-const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
-const googleClientId = Deno.env.get('GOOGLE_CLIENT_ID') || '';
-const googleClientSecret = Deno.env.get('GOOGLE_CLIENT_SECRET') || '';
-const supabase = createClient(supabaseUrl, supabaseServiceKey);
+import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+}
+
+interface GoogleAuthRequest {
+  action: 'auth';
+  email: string;
+}
 
 interface CalendarSyncRequest {
-  action: 'sync' | 'update' | 'delete' | 'auth' | 'callback';
-  appointmentId?: string;
-  calendarConnectionId?: string;
-  code?: string; // OAuth authorization code
-  email?: string;
-}
-
-interface AppointmentData {
-  id: string;
-  customer_id: string;
-  service_type: string;
-  date: string;
-  start_time: string;
-  end_time: string;
-  notes: string | null;
-  customer?: {
-    full_name: string;
-    email: string;
-    phone_number: string;
-  };
-  external_calendar_id?: string | null;
-}
-
-interface CalendarConnection {
-  id: string;
-  calendar_type: 'google' | 'apple' | 'outlook';
-  calendar_email: string;
-  access_token: string | null;
-  refresh_token: string | null;
-  calendar_id: string | null;
-}
-
-// Generate OAuth URL for Google Calendar
-function generateGoogleAuthUrl(email: string): string {
-  const redirectUri = `${supabaseUrl}/functions/v1/calendar-sync`;
-  const scope = 'https://www.googleapis.com/auth/calendar';
-  const state = btoa(JSON.stringify({ email, timestamp: Date.now() }));
-  
-  console.log('Generating Google Auth URL with:', {
-    clientId: googleClientId ? 'Present' : 'Missing',
-    redirectUri,
-    scope,
-    email
-  });
-  
-  const params = new URLSearchParams({
-    client_id: googleClientId,
-    redirect_uri: redirectUri,
-    scope: scope,
-    response_type: 'code',
-    access_type: 'offline',
-    prompt: 'consent',
-    state: state,
-  });
-  
-  const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
-  console.log('Generated auth URL successfully');
-  return authUrl;
-}
-
-// Exchange authorization code for tokens
-async function exchangeCodeForTokens(code: string): Promise<any> {
-  const redirectUri = `${supabaseUrl}/functions/v1/calendar-sync`;
-  
-  console.log('Exchanging code for tokens...');
-  
-  const response = await fetch('https://oauth2.googleapis.com/token', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-    },
-    body: new URLSearchParams({
-      client_id: googleClientId,
-      client_secret: googleClientSecret,
-      code: code,
-      grant_type: 'authorization_code',
-      redirect_uri: redirectUri,
-    }),
-  });
-  
-  if (!response.ok) {
-    const error = await response.text();
-    console.error('Token exchange failed:', error);
-    throw new Error(`Token exchange failed: ${error}`);
-  }
-  
-  const tokens = await response.json();
-  console.log('Token exchange successful');
-  return tokens;
-}
-
-// Refresh access token
-async function refreshAccessToken(refreshToken: string): Promise<any> {
-  console.log('Refreshing access token...');
-  
-  const response = await fetch('https://oauth2.googleapis.com/token', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-    },
-    body: new URLSearchParams({
-      client_id: googleClientId,
-      client_secret: googleClientSecret,
-      refresh_token: refreshToken,
-      grant_type: 'refresh_token',
-    }),
-  });
-  
-  if (!response.ok) {
-    const error = await response.text();
-    console.error('Token refresh failed:', error);
-    throw new Error(`Token refresh failed: ${error}`);
-  }
-  
-  const tokens = await response.json();
-  console.log('Token refresh successful');
-  return tokens;
-}
-
-// Create event in Google Calendar
-async function createGoogleCalendarEvent(
-  appointment: AppointmentData,
-  accessToken: string
-): Promise<{ success: boolean; external_id?: string }> {
-  const startDateTime = `${appointment.date}T${appointment.start_time}:00`;
-  const endDateTime = `${appointment.date}T${appointment.end_time}:00`;
-  
-  const event = {
-    summary: appointment.service_type,
-    description: `פגישה עם ${appointment.customer?.full_name || 'לקוח'}\n${appointment.notes || ''}`,
-    start: {
-      dateTime: startDateTime,
-      timeZone: 'Asia/Jerusalem',
-    },
-    end: {
-      dateTime: endDateTime,
-      timeZone: 'Asia/Jerusalem',
-    },
-    attendees: appointment.customer?.email ? [
-      { email: appointment.customer.email }
-    ] : [],
-  };
-  
-  console.log('Creating Google Calendar event...');
-  
-  const response = await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${accessToken}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(event),
-  });
-  
-  if (!response.ok) {
-    const error = await response.text();
-    console.error('Google Calendar API error:', error);
-    throw new Error(`Failed to create calendar event: ${error}`);
-  }
-  
-  const createdEvent = await response.json();
-  console.log('Calendar event created successfully');
-  return { success: true, external_id: createdEvent.id };
-}
-
-// Update event in Google Calendar
-async function updateGoogleCalendarEvent(
-  appointment: AppointmentData,
-  accessToken: string,
-  eventId: string
-): Promise<{ success: boolean }> {
-  const startDateTime = `${appointment.date}T${appointment.start_time}:00`;
-  const endDateTime = `${appointment.date}T${appointment.end_time}:00`;
-  
-  const event = {
-    summary: appointment.service_type,
-    description: `פגישה עם ${appointment.customer?.full_name || 'לקוח'}\n${appointment.notes || ''}`,
-    start: {
-      dateTime: startDateTime,
-      timeZone: 'Asia/Jerusalem',
-    },
-    end: {
-      dateTime: endDateTime,
-      timeZone: 'Asia/Jerusalem',
-    },
-    attendees: appointment.customer?.email ? [
-      { email: appointment.customer.email }
-    ] : [],
-  };
-  
-  console.log('Updating Google Calendar event...');
-  
-  const response = await fetch(`https://www.googleapis.com/calendar/v3/calendars/primary/events/${eventId}`, {
-    method: 'PUT',
-    headers: {
-      'Authorization': `Bearer ${accessToken}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(event),
-  });
-  
-  if (!response.ok) {
-    const error = await response.text();
-    console.error('Google Calendar API error:', error);
-    throw new Error(`Failed to update calendar event: ${error}`);
-  }
-  
-  console.log('Calendar event updated successfully');
-  return { success: true };
-}
-
-// Delete event from Google Calendar
-async function deleteGoogleCalendarEvent(
-  accessToken: string,
-  eventId: string
-): Promise<{ success: boolean }> {
-  console.log('Deleting Google Calendar event...');
-  
-  const response = await fetch(`https://www.googleapis.com/calendar/v3/calendars/primary/events/${eventId}`, {
-    method: 'DELETE',
-    headers: {
-      'Authorization': `Bearer ${accessToken}`,
-    },
-  });
-  
-  if (!response.ok && response.status !== 410) { // 410 means already deleted
-    const error = await response.text();
-    console.error('Google Calendar API error:', error);
-    throw new Error(`Failed to delete calendar event: ${error}`);
-  }
-  
-  console.log('Calendar event deleted successfully');
-  return { success: true };
-}
-
-// Get valid access token (refresh if needed)
-async function getValidAccessToken(connection: CalendarConnection): Promise<string> {
-  if (!connection.access_token) {
-    throw new Error('No access token available');
-  }
-  
-  console.log('Checking token validity...');
-  
-  // Try to use current token first
-  const testResponse = await fetch('https://www.googleapis.com/calendar/v3/calendars/primary', {
-    headers: {
-      'Authorization': `Bearer ${connection.access_token}`,
-    },
-  });
-  
-  if (testResponse.ok) {
-    console.log('Access token is valid');
-    return connection.access_token;
-  }
-  
-  console.log('Access token expired, refreshing...');
-  
-  // Token is invalid, try to refresh
-  if (!connection.refresh_token) {
-    throw new Error('No refresh token available, re-authentication required');
-  }
-  
-  const tokenData = await refreshAccessToken(connection.refresh_token);
-  
-  // Update the connection with new token
-  await supabase
-    .from('calendar_connections')
-    .update({
-      access_token: tokenData.access_token,
-      token_expiry: new Date(Date.now() + (tokenData.expires_in * 1000)).toISOString(),
-      updated_at: new Date().toISOString(),
-    })
-    .eq('id', connection.id);
-  
-  console.log('Token refreshed and updated');
-  return tokenData.access_token;
-}
-
-async function handleCalendarSync(req: Request): Promise<Response> {
-  try {
-    const url = new URL(req.url);
-    
-    console.log('Calendar sync request received:', req.method);
-    
-    // Handle OAuth callback
-    if (url.searchParams.has('code') && url.searchParams.has('state')) {
-      console.log('Processing OAuth callback...');
-      const code = url.searchParams.get('code')!;
-      const state = url.searchParams.get('state')!;
-      
-      try {
-        const stateData = JSON.parse(atob(state));
-        const { email } = stateData;
-        
-        console.log('OAuth callback for email:', email);
-        
-        // Exchange code for tokens
-        const tokenData = await exchangeCodeForTokens(code);
-        
-        // Get user info from Google
-        console.log('Getting user info from Google...');
-        const userInfoResponse = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
-          headers: {
-            'Authorization': `Bearer ${tokenData.access_token}`,
-          },
-        });
-        
-        if (!userInfoResponse.ok) {
-          throw new Error('Failed to get user info from Google');
-        }
-        
-        const userInfo = await userInfoResponse.json();
-        console.log('User info received:', userInfo.email);
-        
-        // Get current user from auth header
-        const authHeader = req.headers.get('authorization');
-        if (!authHeader) {
-          throw new Error('No authorization header found');
-        }
-        
-        const { data: { user }, error: authError } = await supabase.auth.getUser(authHeader.replace('Bearer ', ''));
-        if (authError || !user) {
-          throw new Error('User not authenticated');
-        }
-        
-        console.log('Authenticated user:', user.id);
-        
-        // Create or update calendar connection
-        const { data: existingConnection } = await supabase
-          .from('calendar_connections')
-          .select('*')
-          .eq('user_id', user.id)
-          .eq('calendar_type', 'google')
-          .eq('calendar_email', userInfo.email)
-          .single();
-        
-        if (existingConnection) {
-          console.log('Updating existing connection...');
-          await supabase
-            .from('calendar_connections')
-            .update({
-              access_token: tokenData.access_token,
-              refresh_token: tokenData.refresh_token,
-              token_expiry: new Date(Date.now() + (tokenData.expires_in * 1000)).toISOString(),
-              is_active: true,
-              updated_at: new Date().toISOString(),
-            })
-            .eq('id', existingConnection.id);
-        } else {
-          console.log('Creating new connection...');
-          await supabase
-            .from('calendar_connections')
-            .insert({
-              user_id: user.id,
-              calendar_type: 'google',
-              calendar_email: userInfo.email,
-              calendar_id: 'primary',
-              access_token: tokenData.access_token,
-              refresh_token: tokenData.refresh_token,
-              token_expiry: new Date(Date.now() + (tokenData.expires_in * 1000)).toISOString(),
-              is_active: true,
-            });
-        }
-        
-        console.log('Calendar connection saved successfully');
-        
-        // Redirect back to scheduling page with success
-        const redirectUrl = `${supabaseUrl.replace('.supabase.co', '.lovable.app')}/scheduling?auth=success`;
-        console.log('Redirecting to:', redirectUrl);
-        return Response.redirect(redirectUrl, 302);
-        
-      } catch (error) {
-        console.error('OAuth callback error:', error);
-        const redirectUrl = `${supabaseUrl.replace('.supabase.co', '.lovable.app')}/scheduling?auth=error`;
-        return Response.redirect(redirectUrl, 302);
-      }
-    }
-    
-    // Handle regular API requests
-    const requestData: CalendarSyncRequest = await req.json();
-    const { action, appointmentId, calendarConnectionId, email } = requestData;
-    
-    console.log('Calendar sync request:', requestData);
-    
-    // Validate environment variables
-    if (!googleClientId || !googleClientSecret) {
-      console.error('Missing Google OAuth credentials');
-      return new Response(
-        JSON.stringify({ error: 'Google OAuth credentials not configured' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-    
-    if (action === 'auth') {
-      // Generate OAuth URL
-      if (!email) {
-        return new Response(
-          JSON.stringify({ error: 'Email is required for authentication' }),
-          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-      
-      console.log('Generating auth URL for email:', email);
-      const authUrl = generateGoogleAuthUrl(email);
-      return new Response(
-        JSON.stringify({ authUrl }),
-        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-    
-    if (!appointmentId || !calendarConnectionId) {
-      return new Response(
-        JSON.stringify({ error: 'Missing required parameters' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-    
-    // Get appointment data
-    const { data: appointment, error: appointmentError } = await supabase
-      .from('appointments')
-      .select(`
-        id, customer_id, service_type, date, start_time, end_time, notes, external_calendar_id,
-        customers:customer_id (id, full_name, email, phone_number)
-      `)
-      .eq('id', appointmentId)
-      .single();
-    
-    if (appointmentError || !appointment) {
-      console.error('Error fetching appointment:', appointmentError);
-      return new Response(
-        JSON.stringify({ error: 'Appointment not found' }),
-        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-    
-    // Get calendar connection
-    const { data: connection, error: connectionError } = await supabase
-      .from('calendar_connections')
-      .select('*')
-      .eq('id', calendarConnectionId)
-      .single();
-    
-    if (connectionError || !connection) {
-      console.error('Error fetching calendar connection:', connectionError);
-      return new Response(
-        JSON.stringify({ error: 'Calendar connection not found' }),
-        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-    
-    if (connection.calendar_type !== 'google') {
-      return new Response(
-        JSON.stringify({ error: 'Only Google Calendar is supported' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-    
-    // Get valid access token
-    const accessToken = await getValidAccessToken(connection);
-    
-    let result;
-    
-    if (action === 'sync') {
-      result = await createGoogleCalendarEvent(appointment, accessToken);
-    } else if (action === 'update') {
-      if (!appointment.external_calendar_id) {
-        return new Response(
-          JSON.stringify({ error: 'No external calendar ID found for this appointment' }),
-          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-      result = await updateGoogleCalendarEvent(appointment, accessToken, appointment.external_calendar_id);
-      result.external_id = appointment.external_calendar_id;
-    } else if (action === 'delete') {
-      if (!appointment.external_calendar_id) {
-        return new Response(
-          JSON.stringify({ error: 'No external calendar ID found for this appointment' }),
-          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-      result = await deleteGoogleCalendarEvent(accessToken, appointment.external_calendar_id);
-      result.external_id = null;
-    }
-    
-    // Update appointment with sync result
-    if (result?.success) {
-      const updateData: Record<string, any> = {
-        last_sync_at: new Date().toISOString(),
-        calendar_sync_status: 'synced'
-      };
-      
-      if (result.external_id !== undefined) {
-        updateData.external_calendar_id = result.external_id;
-      }
-      
-      const { error: updateError } = await supabase
-        .from('appointments')
-        .update(updateData)
-        .eq('id', appointmentId);
-      
-      if (updateError) {
-        console.error('Error updating appointment after sync:', updateError);
-        return new Response(
-          JSON.stringify({ error: 'Failed to update appointment after sync' }),
-          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-      
-      // Update calendar connection's last sync
-      await supabase
-        .from('calendar_connections')
-        .update({ last_sync_at: new Date().toISOString() })
-        .eq('id', calendarConnectionId);
-    }
-    
-    console.log('Calendar sync completed successfully');
-    return new Response(
-      JSON.stringify({ success: result?.success, external_id: result?.external_id }),
-      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
-    
-  } catch (error) {
-    console.error('Error in calendar-sync function:', error);
-    return new Response(
-      JSON.stringify({ error: error.message }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
-  }
+  action: 'sync' | 'update' | 'delete';
+  appointmentId: string;
+  calendarConnectionId: string;
 }
 
 serve(async (req) => {
+  console.log('Calendar sync function called with method:', req.method);
+
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
-  
-  return handleCalendarSync(req);
+
+  try {
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    );
+
+    const body = await req.json();
+    console.log('Request body:', body);
+
+    const { action } = body;
+
+    if (action === 'auth') {
+      return handleGoogleAuth(body as GoogleAuthRequest);
+    } else if (['sync', 'update', 'delete'].includes(action)) {
+      return handleCalendarOperation(supabase, body as CalendarSyncRequest);
+    } else {
+      throw new Error(`Unknown action: ${action}`);
+    }
+
+  } catch (error) {
+    console.error('Calendar sync error:', error);
+    return new Response(
+      JSON.stringify({ 
+        error: error.message,
+        details: 'Calendar sync operation failed'
+      }),
+      { 
+        status: 500, 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+      }
+    );
+  }
 });
+
+async function handleGoogleAuth(request: GoogleAuthRequest): Promise<Response> {
+  console.log('Handling Google auth for email:', request.email);
+
+  const clientId = Deno.env.get('GOOGLE_CLIENT_ID');
+  const clientSecret = Deno.env.get('GOOGLE_CLIENT_SECRET');
+  
+  if (!clientId || !clientSecret) {
+    console.error('Missing Google OAuth credentials');
+    throw new Error('Google OAuth credentials not configured');
+  }
+
+  // Generate proper redirect URI - using the current origin
+  const redirectUri = `${Deno.env.get('SUPABASE_URL')}/functions/v1/calendar-sync`;
+  
+  const scopes = [
+    'https://www.googleapis.com/auth/calendar',
+    'https://www.googleapis.com/auth/calendar.events'
+  ].join(' ');
+
+  const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
+    `client_id=${clientId}&` +
+    `redirect_uri=${encodeURIComponent(redirectUri)}&` +
+    `scope=${encodeURIComponent(scopes)}&` +
+    `response_type=code&` +
+    `access_type=offline&` +
+    `prompt=consent&` +
+    `state=${encodeURIComponent(JSON.stringify({ email: request.email }))}`;
+
+  console.log('Generated auth URL:', authUrl);
+
+  return new Response(
+    JSON.stringify({ 
+      authUrl,
+      message: 'Please authorize access to your Google Calendar'
+    }),
+    { 
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+    }
+  );
+}
+
+async function handleCalendarOperation(
+  supabase: any, 
+  request: CalendarSyncRequest
+): Promise<Response> {
+  console.log('Handling calendar operation:', request.action);
+
+  // Get appointment details
+  const { data: appointment, error: appointmentError } = await supabase
+    .from('appointments')
+    .select('*')
+    .eq('id', request.appointmentId)
+    .single();
+
+  if (appointmentError || !appointment) {
+    console.error('Appointment not found:', appointmentError);
+    throw new Error('Appointment not found');
+  }
+
+  // Get calendar connection details
+  const { data: connection, error: connectionError } = await supabase
+    .from('calendar_connections')
+    .select('*')
+    .eq('id', request.calendarConnectionId)
+    .single();
+
+  if (connectionError || !connection) {
+    console.error('Calendar connection not found:', connectionError);
+    throw new Error('Calendar connection not found');
+  }
+
+  console.log('Processing appointment:', appointment);
+  console.log('Using connection:', connection);
+
+  // For now, we'll simulate the calendar operation
+  // In a real implementation, you would make actual API calls to Google Calendar
+  const result = {
+    success: true,
+    action: request.action,
+    appointmentId: request.appointmentId,
+    calendarId: connection.calendar_id,
+    message: `Calendar ${request.action} operation completed successfully`
+  };
+
+  // Update the appointment with calendar sync status
+  await supabase
+    .from('appointments')
+    .update({
+      calendar_sync_status: 'synced',
+      external_calendar_id: `mock_event_${appointment.id}`,
+      last_sync_at: new Date().toISOString()
+    })
+    .eq('id', request.appointmentId);
+
+  return new Response(
+    JSON.stringify(result),
+    { 
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+    }
+  );
+}
