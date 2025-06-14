@@ -37,7 +37,7 @@ export const getNotificationPreferences = async (): Promise<NotificationPreferen
     return null;
   }
   
-  // Check if the new notification_preferences table exists, otherwise fall back to existing structure
+  // Check if the notification_preferences table exists and get data
   const { data, error } = await supabase
     .from('notification_preferences')
     .select('*')
@@ -63,24 +63,37 @@ export const getNotificationPreferences = async (): Promise<NotificationPreferen
     };
   }
   
-  // If data exists, ensure it has all required fields
+  // If data exists, map it to our interface with fallback values
   if (data) {
     return {
       id: data.id,
       user_id: data.user_id,
       whatsapp_enabled: data.whatsapp_enabled ?? true,
-      sms_enabled: data.sms_enabled ?? false,
-      email_enabled: data.email_enabled ?? true,
-      appointment_reminders_enabled: data.appointment_reminders_enabled ?? true,
-      daily_summary_enabled: data.daily_summary_enabled ?? true,
-      expense_reminder_enabled: data.expense_reminder_enabled ?? true,
-      appointment_changes_enabled: data.appointment_changes_enabled ?? true,
+      sms_enabled: data.sms_fallback_enabled ?? false, // Map sms_fallback_enabled to sms_enabled
+      email_enabled: true, // Default value since field doesn't exist yet
+      appointment_reminders_enabled: true, // Default value since field doesn't exist yet
+      daily_summary_enabled: true, // Default value since field doesn't exist yet
+      expense_reminder_enabled: true, // Default value since field doesn't exist yet
+      appointment_changes_enabled: true, // Default value since field doesn't exist yet
       created_at: data.created_at,
       updated_at: data.updated_at
     };
   }
   
-  return null;
+  // If no data exists, return default preferences
+  return {
+    id: '',
+    user_id: user.user.id,
+    whatsapp_enabled: true,
+    sms_enabled: false,
+    email_enabled: true,
+    appointment_reminders_enabled: true,
+    daily_summary_enabled: true,
+    expense_reminder_enabled: true,
+    appointment_changes_enabled: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
+  };
 };
 
 // Create or update notification preferences
@@ -98,14 +111,18 @@ export const upsertNotificationPreferences = async (preferences: Partial<Notific
       .eq('user_id', user.user.id)
       .maybeSingle();
     
+    // Map our interface fields to the actual database fields
+    const dbData = {
+      whatsapp_enabled: preferences.whatsapp_enabled,
+      sms_fallback_enabled: preferences.sms_enabled, // Map sms_enabled to sms_fallback_enabled
+      updated_at: new Date().toISOString()
+    };
+    
     let result;
     if (existing) {
       const { data, error } = await supabase
         .from('notification_preferences')
-        .update({
-          ...preferences,
-          updated_at: new Date().toISOString()
-        })
+        .update(dbData)
         .eq('id', existing.id)
         .select()
         .single();
@@ -121,7 +138,7 @@ export const upsertNotificationPreferences = async (preferences: Partial<Notific
         .from('notification_preferences')
         .insert({
           user_id: user.user.id,
-          ...preferences
+          ...dbData
         })
         .select()
         .single();
@@ -134,7 +151,20 @@ export const upsertNotificationPreferences = async (preferences: Partial<Notific
       result = data;
     }
     
-    return result as NotificationPreferences;
+    // Convert back to our interface format
+    return {
+      id: result.id,
+      user_id: result.user_id,
+      whatsapp_enabled: result.whatsapp_enabled,
+      sms_enabled: result.sms_fallback_enabled,
+      email_enabled: true,
+      appointment_reminders_enabled: true,
+      daily_summary_enabled: true,
+      expense_reminder_enabled: true,
+      appointment_changes_enabled: true,
+      created_at: result.created_at,
+      updated_at: result.updated_at
+    };
   } catch (error) {
     console.error('Database error:', error);
     return null;
