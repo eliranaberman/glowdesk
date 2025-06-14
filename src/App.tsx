@@ -1,12 +1,15 @@
 
 import { useEffect, useState } from 'react';
 import { BrowserRouter as Router } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import AppRoutes from './routes';
 import { AuthProvider } from '@/contexts/auth';
 import { Toaster } from '@/components/ui/toaster';
 import { initializeStorage } from '@/services/storageService';
 import { HelmetProvider } from 'react-helmet-async';
 import './App.css';
+
+const queryClient = new QueryClient();
 
 function App() {
   const [storageInitialized, setStorageInitialized] = useState(false);
@@ -28,14 +31,16 @@ function App() {
   }, []);
 
   return (
-    <HelmetProvider>
-      <Router>
-        <AuthProvider>
-          <AppRoutes />
-          <Toaster />
-        </AuthProvider>
-      </Router>
-    </HelmetProvider>
+    <QueryClientProvider client={queryClient}>
+      <HelmetProvider>
+        <Router>
+          <AuthProvider>
+            <AppRoutes />
+            <Toaster />
+          </AuthProvider>
+        </Router>
+      </HelmetProvider>
+    </QueryClientProvider>
   );
 }
 
