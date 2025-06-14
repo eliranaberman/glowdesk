@@ -46,12 +46,11 @@ const UpcomingEvents = () => {
     }
   };
 
-  const getUrgencyColor = (appointmentTime: Date) => {
+  const getUrgencyVariant = (appointmentTime: Date) => {
     const minutesUntil = differenceInMinutes(appointmentTime, now);
     
     if (minutesUntil <= 30) return 'destructive';
-    if (minutesUntil <= 60) return 'default';
-    return 'secondary';
+    return 'default';
   };
 
   if (isLoading) {
@@ -117,7 +116,7 @@ const UpcomingEvents = () => {
           <>
             {upcomingAppointments.map((app: Appointment & { startTime: Date }) => {
               const timeUntil = getTimeUntilAppointment(app.startTime);
-              const urgency = getUrgencyColor(app.startTime);
+              const urgency = getUrgencyVariant(app.startTime);
               
               return (
                 <Alert key={app.id} variant={urgency}>
