@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import GanttChart from '../components/scheduling/GanttChart';
 import CalendarSync from '../components/scheduling/CalendarSync';
+import UpcomingEvents from '../components/scheduling/UpcomingEvents';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { CalendarPlus } from 'lucide-react';
@@ -171,6 +172,7 @@ const Scheduling = () => {
       </div>
       
       <div className={`space-y-${isMobile ? '4' : '6'}`}>
+        <UpcomingEvents />
         <Card className={isMobile ? "shadow-sm" : "shadow-sm"}>
           <CardContent className={isMobile ? "p-3" : "p-4"}>
             <CalendarSync />
