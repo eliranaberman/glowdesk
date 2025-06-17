@@ -3,6 +3,7 @@ import { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Upload, X, ImagePlus, Camera } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { supabase } from '@/integrations/supabase/client';
 
 interface ImageUploaderProps {
   onImageSelected: (file: File | null) => void;
@@ -13,8 +14,47 @@ export const ImageUploader = ({ onImageSelected, className }: ImageUploaderProps
   const [dragActive, setDragActive] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
+  const directUploadRef = useRef<HTMLInputElement>(null);
+
+  const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    
+    try {
+      const { data, error } = await supabase
+        .storage
+        .from('gallery')
+        .upload(`images/${Date.now()}-${file.name}`, file);
+
+      if (error) {
+        alert("❌ שגיאה בהעלאה: " + error.message);
+        console.error(error);
+      } else {
+        alert("✅ תמונה הועלתה בהצלחה!");
+        console.log("uploaded image:", data);
+        
+        // Create preview for the uploaded file
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const result = e.target?.result as string;
+          setPreviewImage(result);
+          setSelectedFile(file);
+          onImageSelected(file);
+        };
+        reader.readAsDataURL(file);
+      }
+    } catch (error) {
+      console.error('Upload error:', error);
+      alert("❌ שגיאה בהעלאה");
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
   const handleFileChange = (file: File | null) => {
     if (!file) {
@@ -93,6 +133,7 @@ export const ImageUploader = ({ onImageSelected, className }: ImageUploaderProps
     setSelectedFile(null);
     if (inputRef.current) inputRef.current.value = '';
     if (cameraInputRef.current) cameraInputRef.current.value = '';
+    if (directUploadRef.current) directUploadRef.current.value = '';
     onImageSelected(null);
   };
 
@@ -112,6 +153,14 @@ export const ImageUploader = ({ onImageSelected, className }: ImageUploaderProps
         onChange={handleInputChange}
         accept="image/*"
         capture="environment"
+        className="hidden"
+      />
+      {/* Direct upload input as requested */}
+      <input
+        type="file"
+        ref={directUploadRef}
+        onChange={handleUpload}
+        accept="image/*"
         className="hidden"
       />
       
@@ -141,7 +190,7 @@ export const ImageUploader = ({ onImageSelected, className }: ImageUploaderProps
             גרור ושחרר תמונה או בחר מהאפשרויות למטה
           </p>
           
-          <div className="flex gap-3">
+          <div className="flex gap-3 flex-wrap justify-center">
             <Button 
               type="button" 
               onClick={(e) => {
@@ -149,6 +198,7 @@ export const ImageUploader = ({ onImageSelected, className }: ImageUploaderProps
                 handleGalleryClick();
               }}
               className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-xl px-6 py-3 font-medium shadow-lg"
+              disabled={isUploading}
             >
               <Upload className="h-4 w-4 ml-2" />
               בחר מהגלריה
@@ -161,9 +211,23 @@ export const ImageUploader = ({ onImageSelected, className }: ImageUploaderProps
                 handleCameraClick();
               }}
               className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-xl px-6 py-3 font-medium shadow-lg"
+              disabled={isUploading}
             >
               <Camera className="h-4 w-4 ml-2" />
               צלם עכשיו
+            </Button>
+
+            <Button 
+              type="button" 
+              onClick={(e) => {
+                e.stopPropagation();
+                directUploadRef.current?.click();
+              }}
+              className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white rounded-xl px-6 py-3 font-medium shadow-lg"
+              disabled={isUploading}
+            >
+              <Upload className="h-4 w-4 ml-2" />
+              {isUploading ? 'מעלה...' : 'העלה ישירות'}
             </Button>
           </div>
           
