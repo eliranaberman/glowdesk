@@ -39,9 +39,6 @@ import BusinessInsights from '@/pages/finances/BusinessInsights';
 import FinancialReports from '@/pages/finances/FinancialReports';
 import NewPayment from '@/pages/payments/NewPayment';
 import OnlineBooking from '@/pages/OnlineBooking';
-import UserManagement from '@/pages/UserManagement';
-import UserRolesPage from '@/pages/UserRolesPage';
-import UserProfilePage from '@/pages/UserProfilePage';
 import InitialSetupPage from '@/pages/InitialSetupPage';
 import Customers from '@/pages/Customers';
 
@@ -95,11 +92,8 @@ export default function AppRoutes() {
         {/* Reports */}
         <Route path="/reports" element={<Reports />} />
         
-        {/* Settings */}
+        {/* Settings - All user management now consolidated here */}
         <Route path="/settings" element={<Settings />} />
-        <Route path="/users" element={<UserManagement />} />
-        <Route path="/user-roles" element={<UserRolesPage />} />
-        <Route path="/user-profile" element={<UserProfilePage />} />
         
         {/* Social media and marketing */}
         <Route path="/loyalty" element={<LoyaltyPage />} />
