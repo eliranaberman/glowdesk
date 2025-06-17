@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { PortfolioItem } from '@/types/portfolio';
 import { Button } from '@/components/ui/button';
@@ -30,11 +31,18 @@ export const Gallery = () => {
   const canManageItems = user && (isAdmin || isSocialManager);
 
   const loadItems = async () => {
+    console.log('Loading portfolio items...');
     setIsLoading(true);
-    const data = await getPortfolioItems();
-    setItems(data);
-    setFilteredItems(data);
-    setIsLoading(false);
+    try {
+      const data = await getPortfolioItems();
+      console.log('Loaded items:', data.length);
+      setItems(data);
+      setFilteredItems(data);
+    } catch (error) {
+      console.error('Error loading items:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -50,12 +58,19 @@ export const Gallery = () => {
   }, [searchQuery, items]);
 
   const handleItemDelete = () => {
+    console.log('Item deleted, reloading items...');
     loadItems();
   };
 
   const handleFormSuccess = () => {
+    console.log('Form success, closing dialog and reloading items...');
     setIsAddDialogOpen(false);
     loadItems();
+  };
+
+  const handleAddButtonClick = () => {
+    console.log('Add button clicked, opening dialog...');
+    setIsAddDialogOpen(true);
   };
 
   const openLightbox = (index: number) => {
@@ -138,7 +153,7 @@ export const Gallery = () => {
           {/* Add Button - Show for all authenticated users */}
           {canAddItems ? (
             <Button 
-              onClick={() => setIsAddDialogOpen(true)}
+              onClick={handleAddButtonClick}
               className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white rounded-xl px-6 py-3 font-medium shadow-lg hover:shadow-xl transition-all duration-300"
             >
               <PlusCircle className="h-5 w-5 ml-2" />
@@ -176,7 +191,7 @@ export const Gallery = () => {
               </p>
               {canAddItems && !searchQuery && (
                 <Button 
-                  onClick={() => setIsAddDialogOpen(true)}
+                  onClick={handleAddButtonClick}
                   className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white rounded-xl px-6 py-3"
                 >
                   <PlusCircle className="h-5 w-5 ml-2" />

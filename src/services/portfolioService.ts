@@ -52,8 +52,15 @@ export const uploadPortfolioImage = async (
     if (uploadError) {
       console.error('Upload error:', uploadError);
       
+      // Enhanced error handling for different upload error types
       if (uploadError.message?.includes('duplicate')) {
         throw new Error('קובץ עם שם זהה כבר קיים');
+      } else if (uploadError.message?.includes('size')) {
+        throw new Error('גודל הקובץ גדול מדי');
+      } else if (uploadError.message?.includes('permission')) {
+        throw new Error('אין הרשאה להעלות קבצים');
+      } else if (uploadError.message?.includes('bucket')) {
+        throw new Error('בעיה בהגדרות אחסון');
       }
       
       throw new Error(`שגיאה בהעלאת התמונה: ${uploadError.message}`);
@@ -110,6 +117,10 @@ export const createPortfolioItem = async (
       return { success: false, error: 'כותרת נדרשת' };
     }
 
+    if (!userId) {
+      return { success: false, error: 'יש להתחבר למערכת' };
+    }
+
     // Upload the image first
     console.log('Uploading image...');
     const imageUrl = await uploadPortfolioImage(data.image, userId);
@@ -143,6 +154,13 @@ export const createPortfolioItem = async (
         }
       } catch (cleanupError) {
         console.error('Failed to cleanup uploaded image:', cleanupError);
+      }
+      
+      // Enhanced error handling for different database error types
+      if (error.message?.includes('permission')) {
+        throw new Error('אין הרשאה ליצור פריט בגלריה');
+      } else if (error.message?.includes('constraint')) {
+        throw new Error('נתונים לא תקינים');
       }
       
       throw error;
@@ -213,6 +231,11 @@ export const deletePortfolioItem = async (id: string): Promise<boolean> => {
 
     if (error) {
       console.error('Error deleting portfolio item:', error);
+      
+      if (error.message?.includes('permission')) {
+        throw new Error('אין הרשאה למחוק פריט זה');
+      }
+      
       throw error;
     }
 
