@@ -170,24 +170,7 @@ const Sidebar = ({
       {
         href: '/settings',
         label: 'הגדרות',
-        icon: Settings,
-        subLinks: [
-          {
-            href: '/users',
-            label: 'ניהול משתמשים',
-            icon: Users
-          },
-          {
-            href: '/user-roles',
-            label: 'תפקידים והרשאות',
-            icon: ShieldCheck
-          },
-          {
-            href: '/user-profile',
-            label: 'פרופיל משתמש',
-            icon: UserCog
-          }
-        ]
+        icon: Settings
       }
     ];
 
