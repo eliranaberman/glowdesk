@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
@@ -103,7 +104,7 @@ const AppointmentCalendar = () => {
 
         return {
           id: appointment.id,
-          customer: appointment.customer?.full_name || 'לקוח לא ידוע',
+          customer: appointment.client?.full_name || 'לקוח לא ידוע',
           service: appointment.service_type,
           startTime: appointment.start_time,
           duration: calculateDuration(appointment.start_time, appointment.end_time),

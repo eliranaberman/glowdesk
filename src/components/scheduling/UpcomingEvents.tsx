@@ -128,7 +128,7 @@ const UpcomingEvents = () => {
                   <AlertDescription>
                     <div className="flex items-center gap-2 mt-1">
                       <User className="h-3 w-3" />
-                      <span><strong>{app.customer?.full_name || 'לקוח'}</strong></span>
+                      <span><strong>{app.client?.full_name || 'לקוח'}</strong></span>
                     </div>
                     <div className="mt-1 text-sm">
                       {app.service_type} • {format(app.startTime, 'HH:mm')}

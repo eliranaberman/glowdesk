@@ -89,7 +89,7 @@ const DailySummaryNotification = () => {
             <div className="space-y-1">
               {completedAppointments.slice(0, 3).map((appointment, index) => (
                 <div key={appointment.id} className="text-sm text-muted-foreground">
-                  • {appointment.customer?.full_name || 'לקוח'} - {appointment.service_type}
+                  • {appointment.client?.full_name || 'לקוח'} - {appointment.service_type}
                 </div>
               ))}
               {completedAppointments.length > 3 && (

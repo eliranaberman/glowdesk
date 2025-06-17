@@ -1,6 +1,9 @@
 import { supabase } from '@/lib/supabase';
 import { Client, ClientActivity } from '@/types/clients';
 
+// Export the Client type for use in other services
+export type { Client } from '@/types/clients';
+
 export const getClients = async (
   search?: string,
   status?: string,
