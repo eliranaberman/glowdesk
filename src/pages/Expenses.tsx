@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,7 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { ExpenseFormTest } from '@/components/expenses/ExpenseFormTest';
-import { PlusCircle, FileText, Calculator, TrendingUp } from 'lucide-react';
+import { PlusCircle, FileText, Calculator, TrendingUp, Download } from 'lucide-react';
 
 interface Expense {
   id: string;
@@ -23,6 +24,8 @@ interface Expense {
   payment_method?: string;
   created_at: string;
   created_by?: string;
+  has_invoice?: boolean;
+  invoice_file_path?: string;
 }
 
 const Expenses = () => {
@@ -168,13 +171,32 @@ const Expenses = () => {
                         <div className="flex items-center gap-2 mb-1">
                           <h3 className="font-medium">{expense.vendor}</h3>
                           <Badge variant="secondary">{expense.category}</Badge>
+                          {expense.has_invoice && (
+                            <Badge variant="outline" className="text-green-600">
+                              <FileText className="h-3 w-3 mr-1" />
+                              עם חשבונית
+                            </Badge>
+                          )}
                         </div>
                         <p className="text-sm text-muted-foreground">
                           {expense.description || 'ללא תיאור'}
                         </p>
-                        <p className="text-xs text-muted-foreground">
-                          {new Date(expense.date).toLocaleDateString('he-IL')}
-                        </p>
+                        <div className="flex items-center gap-4 mt-1">
+                          <p className="text-xs text-muted-foreground">
+                            {new Date(expense.date).toLocaleDateString('he-IL')}
+                          </p>
+                          {expense.invoice_file_path && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => window.open(expense.invoice_file_path, '_blank')}
+                              className="text-xs h-auto p-1"
+                            >
+                              <Download className="h-3 w-3 mr-1" />
+                              צפה בחשבונית
+                            </Button>
+                          )}
+                        </div>
                       </div>
                       <div className="text-left">
                         <div className="font-bold text-lg">₪{expense.amount.toLocaleString()}</div>

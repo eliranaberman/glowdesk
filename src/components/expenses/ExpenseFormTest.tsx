@@ -9,9 +9,13 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { InvoiceUploader } from './InvoiceUploader';
+import { uploadInvoice } from '@/services/expensesService';
 
 export const ExpenseFormTest = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isUploadingInvoice, setIsUploadingInvoice] = useState(false);
+  const [selectedInvoiceFile, setSelectedInvoiceFile] = useState<File | null>(null);
   const [formData, setFormData] = useState({
     amount: '',
     category: '',
@@ -65,7 +69,8 @@ export const ExpenseFormTest = () => {
     try {
       console.log('Submitting expense with data:', formData);
       
-      const { data, error } = await supabase
+      // Create the expense first
+      const { data: expenseData, error } = await supabase
         .from('expenses')
         .insert({
           amount: parseFloat(formData.amount),
@@ -75,7 +80,7 @@ export const ExpenseFormTest = () => {
           date: formData.date,
           payment_method: formData.paymentMethod,
           created_by: user.id,
-          has_invoice: false
+          has_invoice: !!selectedInvoiceFile
         })
         .select()
         .single();
@@ -85,11 +90,25 @@ export const ExpenseFormTest = () => {
         throw error;
       }
 
-      console.log('Expense created successfully:', data);
+      console.log('Expense created successfully:', expenseData);
+
+      // Upload invoice if file is selected
+      if (selectedInvoiceFile && expenseData.id) {
+        setIsUploadingInvoice(true);
+        console.log('Uploading invoice file...');
+        
+        const uploadResult = await uploadInvoice(selectedInvoiceFile, expenseData.id);
+        if (uploadResult) {
+          console.log('Invoice uploaded successfully');
+        } else {
+          console.log('Invoice upload failed, but expense was created');
+        }
+        setIsUploadingInvoice(false);
+      }
 
       toast({
         title: 'הוצאה נוספה בהצלחה',
-        description: `הוצאה בסך ${formData.amount}₪ נוספה למערכת`,
+        description: `הוצאה בסך ${formData.amount}₪ נוספה למערכת${selectedInvoiceFile ? ' עם חשבונית' : ''}`,
       });
 
       // Reset form
@@ -101,6 +120,7 @@ export const ExpenseFormTest = () => {
         date: new Date().toISOString().split('T')[0],
         paymentMethod: 'cash'
       });
+      setSelectedInvoiceFile(null);
 
     } catch (error) {
       console.error('Error adding expense:', error);
@@ -111,6 +131,7 @@ export const ExpenseFormTest = () => {
       });
     } finally {
       setIsSubmitting(false);
+      setIsUploadingInvoice(false);
     }
   };
 
@@ -210,11 +231,22 @@ export const ExpenseFormTest = () => {
                 rows={3}
               />
             </div>
+
+            {/* Invoice Upload Section */}
+            <div className="md:col-span-2">
+              <InvoiceUploader 
+                onFileSelect={setSelectedInvoiceFile}
+                isUploading={isUploadingInvoice}
+              />
+            </div>
           </div>
 
           <div className="flex justify-end">
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? 'מוסיף...' : 'הוסף הוצאה'}
+            <Button 
+              type="submit" 
+              disabled={isSubmitting || isUploadingInvoice}
+            >
+              {isSubmitting ? 'מוסיף...' : isUploadingInvoice ? 'מעלה חשבונית...' : 'הוסף הוצאה'}
             </Button>
           </div>
         </form>

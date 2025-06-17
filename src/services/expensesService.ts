@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 
@@ -164,37 +163,88 @@ export const deleteExpense = async (id: string): Promise<boolean> => {
 
 export const uploadInvoice = async (file: File, expenseId: string): Promise<string | null> => {
   try {
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${expenseId}.${fileExt}`;
-    const filePath = `invoices/${fileName}`;
+    console.log('Starting invoice upload for expense:', expenseId);
+    console.log('File details:', { name: file.name, size: file.size, type: file.type });
 
-    const { error: uploadError } = await supabase.storage
+    const fileExt = file.name.split('.').pop()?.toLowerCase() || 'pdf';
+    const fileName = `${expenseId}-${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
+    const filePath = fileName;
+
+    console.log('Uploading invoice to path:', filePath);
+
+    const { data: uploadData, error: uploadError } = await supabase.storage
       .from('expenses')
       .upload(filePath, file, {
         cacheControl: '3600',
-        upsert: true,
+        upsert: false
       });
 
-    if (uploadError) throw uploadError;
+    if (uploadError) {
+      console.error('Upload error:', uploadError);
+      
+      if (uploadError.message?.includes('duplicate')) {
+        throw new Error('קובץ עם שם זהה כבר קיים');
+      } else if (uploadError.message?.includes('size')) {
+        throw new Error('גודל הקובץ גדול מדי');
+      } else if (uploadError.message?.includes('permission')) {
+        throw new Error('אין הרשאה להעלות קבצים');
+      } else if (uploadError.message?.includes('bucket')) {
+        throw new Error('בעיה בהגדרות אחסון');
+      }
+      
+      throw new Error(`שגיאה בהעלאת החשבונית: ${uploadError.message}`);
+    }
 
-    // Get public URL
-    const { data } = supabase.storage.from('expenses').getPublicUrl(filePath);
-    const publicUrl = data.publicUrl;
+    console.log('Invoice uploaded successfully:', uploadData);
+
+    // Get the public URL
+    const { data: urlData } = supabase.storage
+      .from('expenses')
+      .getPublicUrl(filePath);
+
+    if (!urlData.publicUrl) {
+      throw new Error('שגיאה ביצירת קישור לחשבונית');
+    }
+
+    console.log('Public URL generated:', urlData.publicUrl);
 
     // Update expense with invoice path
-    await updateExpense(expenseId, { 
-      invoice_file_path: publicUrl,
-      has_invoice: true
+    const { error: updateError } = await supabase
+      .from('expenses')
+      .update({ 
+        invoice_file_path: urlData.publicUrl,
+        has_invoice: true
+      })
+      .eq('id', expenseId);
+
+    if (updateError) {
+      console.error('Error updating expense with invoice path:', updateError);
+      // Try to clean up uploaded file
+      try {
+        await supabase.storage.from('expenses').remove([filePath]);
+      } catch (cleanupError) {
+        console.error('Failed to cleanup uploaded file:', cleanupError);
+      }
+      throw new Error('שגיאה בעדכון פרטי החשבונית');
+    }
+
+    toast({
+      title: "החשבונית הועלתה בהצלחה",
+      description: "החשבונית נשמרה ונשמחה להוצאה"
     });
 
-    return publicUrl;
-  } catch (error) {
+    return urlData.publicUrl;
+  } catch (error: any) {
     console.error('Error uploading invoice:', error);
+    
+    const errorMessage = error.message || "שגיאה לא ידועה בהעלאת החשבונית";
+    
     toast({
-      title: 'שגיאה בהעלאת חשבונית',
-      description: 'אירעה שגיאה בהעלאת החשבונית',
-      variant: 'destructive',
+      title: "שגיאה בהעלאת החשבונית",
+      description: errorMessage,
+      variant: "destructive"
     });
+    
     return null;
   }
 };
