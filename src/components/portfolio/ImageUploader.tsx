@@ -28,7 +28,7 @@ export const ImageUploader = ({ onImageSelected, className }: ImageUploaderProps
     try {
       const { data, error } = await supabase
         .storage
-        .from('gallery')
+        .from('portfolio')
         .upload(`images/${Date.now()}-${file.name}`, file);
 
       if (error) {
