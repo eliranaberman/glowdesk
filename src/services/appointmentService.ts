@@ -1,6 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import { format, parseISO } from 'date-fns';
-import { Customer, getCustomerById } from './customerService';
+import { Client } from './clientService';
 
 export interface Appointment {
   id: string;
@@ -12,7 +12,7 @@ export interface Appointment {
   end_time: string; // HH:MM
   status: 'scheduled' | 'cancelled' | 'completed';
   notes: string | null;
-  customer?: Customer; // Optional customer data for frontend display
+  client?: Client; // Changed from customer to client
 }
 
 export interface AppointmentFormData {
@@ -50,7 +50,7 @@ const prepareDateFields = (data: any): any => {
 export const getAppointments = async (filter: AppointmentFilter = {}): Promise<Appointment[]> => {
   let query = supabase.from('appointments').select(`
     *,
-    customers:customer_id (id, full_name, email, phone_number)
+    clients:customer_id (id, full_name, email, phone_number)
   `);
   
   // Apply filters
@@ -75,8 +75,8 @@ export const getAppointments = async (filter: AppointmentFilter = {}): Promise<A
   }
   
   if (filter.search) {
-    // We need to use the Supabase join capability to search by customer name
-    query = query.textSearch('customers.full_name', filter.search, {
+    // We need to use the Supabase join capability to search by client name
+    query = query.textSearch('clients.full_name', filter.search, {
       type: 'websearch',
       config: 'english'
     });
@@ -92,22 +92,22 @@ export const getAppointments = async (filter: AppointmentFilter = {}): Promise<A
   // Format the appointments for frontend use
   const appointments = data?.map(appointment => ({
     ...appointment,
-    customer: appointment.customers
+    client: appointment.clients
   })) || [];
   
   return appointments;
 };
 
-// Get appointments for a specific customer
-export const getAppointmentsByCustomerId = async (customerId: string): Promise<Appointment[]> => {
+// Get appointments for a specific client
+export const getAppointmentsByClientId = async (clientId: string): Promise<Appointment[]> => {
   const { data, error } = await supabase
     .from('appointments')
     .select('*')
-    .eq('customer_id', customerId)
+    .eq('customer_id', clientId)
     .order('date', { ascending: false });
   
   if (error) {
-    console.error('Error fetching customer appointments:', error);
+    console.error('Error fetching client appointments:', error);
     throw new Error(error.message);
   }
   
@@ -120,7 +120,7 @@ export const getAppointmentById = async (id: string): Promise<Appointment> => {
     .from('appointments')
     .select(`
       *,
-      customers:customer_id (id, full_name, email, phone_number)
+      clients:customer_id (id, full_name, email, phone_number)
     `)
     .eq('id', id)
     .single();
@@ -136,7 +136,7 @@ export const getAppointmentById = async (id: string): Promise<Appointment> => {
   
   const appointment = {
     ...data,
-    customer: data.customers
+    client: data.clients
   };
   
   return appointment;
@@ -258,18 +258,18 @@ export { syncAppointmentWithCalendar, downloadIcsFile };
 
 // Generate mock appointments for testing
 export const generateMockAppointments = async (): Promise<void> => {
-  // Get all customers to use for mock data
-  const { data: customers, error: customersError } = await supabase
-    .from('customers')
+  // Get all clients to use for mock data
+  const { data: clients, error: clientsError } = await supabase
+    .from('clients')
     .select('id, full_name');
     
-  if (customersError) {
-    console.error('Error fetching customers for mock data:', customersError);
-    throw new Error(customersError.message);
+  if (clientsError) {
+    console.error('Error fetching clients for mock data:', clientsError);
+    throw new Error(clientsError.message);
   }
   
-  if (!customers || customers.length === 0) {
-    throw new Error('No customers found for generating mock appointments');
+  if (!clients || clients.length === 0) {
+    throw new Error('No clients found for generating mock appointments');
   }
   
   const serviceTypes = [
@@ -277,7 +277,7 @@ export const generateMockAppointments = async (): Promise<void> => {
     'בניית ציפורניים',
     'פדיקור',
     'לק ג׳ל',
-    'טיפול ��נים'
+    'טיפול ציפורניים'
   ];
   
   const statuses: Array<Appointment['status']> = ['scheduled', 'cancelled', 'completed'];
@@ -308,7 +308,7 @@ export const generateMockAppointments = async (): Promise<void> => {
     const endTime = `${endHour.toString().padStart(2, '0')}:${endMinute.toString().padStart(2, '0')}`;
     
     mockAppointments.push({
-      customer_id: customers[Math.floor(Math.random() * customers.length)].id,
+      customer_id: clients[Math.floor(Math.random() * clients.length)].id,
       employee_id: Math.random() < 0.8 ? employees[Math.floor(Math.random() * employees.length)].id : null,
       service_type: serviceTypes[Math.floor(Math.random() * serviceTypes.length)],
       date: format(appointmentDate, 'yyyy-MM-dd'),

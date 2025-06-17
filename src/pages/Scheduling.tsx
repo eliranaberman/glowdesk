@@ -1,7 +1,6 @@
-
 import { useState, useEffect } from 'react';
 import GanttChart from '../components/scheduling/GanttChart';
-import CalendarSync from '../components/scheduling/CalendarSync';
+import CalendarConnection from '../components/scheduling/CalendarConnection';
 import UpcomingEvents from '../components/scheduling/UpcomingEvents';
 import NotificationSettings from '../components/scheduling/NotificationSettings';
 import DailySummaryNotification from '../components/scheduling/DailySummaryNotification';
@@ -176,11 +175,7 @@ const Scheduling = () => {
       <div className={`space-y-${isMobile ? '4' : '6'}`}>
         <UpcomingEvents />
         <DailySummaryNotification />
-        <Card className={isMobile ? "shadow-sm" : "shadow-sm"}>
-          <CardContent className={isMobile ? "p-3" : "p-4"}>
-            <CalendarSync />
-          </CardContent>
-        </Card>
+        <CalendarConnection />
         <NotificationSettings />
         
         <GanttChart
