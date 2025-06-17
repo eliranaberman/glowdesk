@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Facebook, Instagram, Twitter, Info } from "lucide-react";
+import { Facebook, Instagram, Info } from "lucide-react";
 import { ConnectedAccountsMap } from "./types";
 import ConnectionModal from "./ConnectionModal";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -32,17 +32,10 @@ const ConnectedAccountsPanel = ({ connectedAccounts, connectPlatform }: Connecte
       connected: connectedAccounts.facebook
     },
     {
-      id: "twitter",
-      name: "Twitter",
-      icon: <Twitter size={16} />,
-      followers: connectedAccounts.twitter ? 780 : 0,
-      connected: connectedAccounts.twitter
-    },
-    {
       id: "tiktok",
       name: "TikTok",
       icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M9 20l3-4 3 4M10 4.5h4c3.771 0 5.657 0 6.828 1.172C22 6.843 22 8.729 22 12.5s0 5.657-1.172 6.828C19.657 20.5 17.771 20.5 14 20.5h-4c-3.771 0-5.657 0-6.828-1.172C2 18.157 2 16.271 2 12.5s0-5.657 1.172-6.828C4.343 4.5 6.229 4.5 10 4.5z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.31-4.64 2.93 2.93 0 01.88.13V9.4a6.84 6.84 0 00-.88-.05A6.33 6.33 0 005 20.1a6.34 6.34 0 0010.86-4.43v-7a8.16 8.16 0 004.77 1.52v-3.4a4.85 4.85 0 01-1.04-.1z" fill="currentColor"/>
       </svg>,
       followers: connectedAccounts.tiktok ? 3200 : 0,
       connected: connectedAccounts.tiktok

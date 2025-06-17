@@ -18,10 +18,11 @@ import PostCreationPanel from "@/components/social-media/PostCreationPanel";
 import AnalyticsContent from "@/components/social-media/AnalyticsContent";
 import ConnectionModal from "@/components/social-media/ConnectionModal";
 import AIMarketingTools from "@/components/social-media/AIMarketingTools";
-import { ConnectedAccountsMap, Message } from "@/components/social-media/types";
+import { ConnectedAccountsMap, SocialMediaMessage } from "@/components/social-media/types";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { getMarketingStats } from "@/services/marketingService";
+import { getMarketingStats } from "@/services/marketing/messageService";
+import { fetchUserMessages, getUnreadMessagesCount } from "@/services/socialMediaMessagesService";
 import { MarketingStats } from "@/types/marketing";
 
 const SocialMedia = () => {
@@ -30,43 +31,14 @@ const SocialMedia = () => {
   const [connectedAccounts, setConnectedAccounts] = useState<ConnectedAccountsMap>({
     instagram: false,
     facebook: false,
-    twitter: false,
     tiktok: false,
   });
+  const [messages, setMessages] = useState<SocialMediaMessage[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
   const [marketingStats, setMarketingStats] = useState<MarketingStats | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
-
-  const messages: Message[] = [
-    {
-      id: 1,
-      platform: "instagram",
-      sender: "sarah_nails_fan",
-      message: "היי, האם יש לך פנוי לפגישה ביום שלישי?",
-      time: "10:23",
-      read: false,
-      avatar: "https://picsum.photos/seed/1/64",
-    },
-    {
-      id: 2,
-      platform: "facebook",
-      sender: "מיכל כהן",
-      message: "מחיר לבנייה מלאה + לק ג'ל?",
-      time: "08:45",
-      read: true,
-      avatar: "https://picsum.photos/seed/2/64",
-    },
-    {
-      id: 3,
-      platform: "instagram",
-      sender: "beauty_trends",
-      message: "אהבתי את העיצוב האחרון שפרסמת! אפשר לקבוע תור?",
-      time: "יום אתמול",
-      read: true,
-      avatar: "https://picsum.photos/seed/3/64",
-    },
-  ];
 
   const analyticsData = {
     followers: [
@@ -101,25 +73,36 @@ const SocialMedia = () => {
   };
 
   useEffect(() => {
-    const loadMarketingStats = async () => {
-      if (activeTab === "dashboard" || activeTab === "analytics") {
-        try {
-          setIsLoading(true);
-          const stats = await getMarketingStats();
-          setMarketingStats(stats);
-        } catch (error) {
-          console.error("Error loading marketing stats:", error);
-          toast({
-            title: "שגיאה בטעינת נתוני שיווק",
-            description: "אירעה שגיאה בטעינת הנתונים, אנא נסה שנית"
-          });
-        } finally {
-          setIsLoading(false);
+    const loadData = async () => {
+      try {
+        setIsLoading(true);
+        
+        // Load messages and unread count
+        const [messagesData, unreadCountData, statsData] = await Promise.all([
+          fetchUserMessages(),
+          getUnreadMessagesCount(),
+          activeTab === "dashboard" || activeTab === "analytics" ? getMarketingStats() : Promise.resolve(null)
+        ]);
+        
+        setMessages(messagesData);
+        setUnreadCount(unreadCountData);
+        
+        if (statsData) {
+          setMarketingStats(statsData);
         }
+        
+      } catch (error) {
+        console.error("Error loading data:", error);
+        toast({
+          title: "שגיאה בטעינת נתונים",
+          description: "אירעה שגיאה בטעינת הנתונים, אנא נסה שנית"
+        });
+      } finally {
+        setIsLoading(false);
       }
     };
 
-    loadMarketingStats();
+    loadData();
   }, [activeTab, toast]);
 
   const connectPlatform = (platform: string) => {
@@ -131,6 +114,16 @@ const SocialMedia = () => {
 
   const handleOpenInbox = () => {
     setActiveTab("inbox");
+  };
+
+  const handleMarkAsRead = async (messageId: string) => {
+    // This will be implemented with real API calls
+    console.log("Marking message as read:", messageId);
+  };
+
+  const handleReply = async (messageId: string, reply: string) => {
+    // This will be implemented with real API calls
+    console.log("Replying to message:", messageId, reply);
   };
 
   const handleButtonAction = () => {
@@ -218,9 +211,14 @@ const SocialMedia = () => {
             <Send className="h-4 w-4" />
             <span>פרסום פוסטים</span>
           </TabsTrigger>
-          <TabsTrigger value="inbox" className="text-sm py-2.5 font-medium flex gap-2 justify-center">
+          <TabsTrigger value="inbox" className="text-sm py-2.5 font-medium flex gap-2 justify-center relative">
             <MessageSquare className="h-4 w-4" />
             <span>תיבת הודעות</span>
+            {unreadCount > 0 && (
+              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                {unreadCount > 9 ? '9+' : unreadCount}
+              </span>
+            )}
           </TabsTrigger>
           <TabsTrigger value="dashboard" className="text-sm py-2.5 font-medium flex gap-2 justify-center">
             <LayoutDashboard className="h-4 w-4" />
@@ -240,7 +238,11 @@ const SocialMedia = () => {
         </TabsContent>
 
         <TabsContent value="inbox">
-          <InboxContent />
+          <InboxContent 
+            messages={messages}
+            onMarkAsRead={handleMarkAsRead}
+            onReply={handleReply}
+          />
         </TabsContent>
 
         <TabsContent value="posts">

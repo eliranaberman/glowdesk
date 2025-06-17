@@ -746,6 +746,63 @@ export type Database = {
         }
         Relationships: []
       }
+      social_media_messages: {
+        Row: {
+          account_id: string
+          created_at: string
+          external_message_id: string
+          id: string
+          is_read: boolean | null
+          message_text: string | null
+          message_type: string | null
+          platform: string
+          received_at: string
+          replied_at: string | null
+          reply_text: string | null
+          sender_id: string
+          sender_name: string
+          thread_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          account_id: string
+          created_at?: string
+          external_message_id: string
+          id?: string
+          is_read?: boolean | null
+          message_text?: string | null
+          message_type?: string | null
+          platform: string
+          received_at: string
+          replied_at?: string | null
+          reply_text?: string | null
+          sender_id: string
+          sender_name: string
+          thread_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          account_id?: string
+          created_at?: string
+          external_message_id?: string
+          id?: string
+          is_read?: boolean | null
+          message_text?: string | null
+          message_type?: string | null
+          platform?: string
+          received_at?: string
+          replied_at?: string | null
+          reply_text?: string | null
+          sender_id?: string
+          sender_name?: string
+          thread_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       social_media_posts: {
         Row: {
           account_id: string
@@ -788,6 +845,45 @@ export type Database = {
           status?: string
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      social_media_webhooks: {
+        Row: {
+          account_id: string
+          created_at: string
+          id: string
+          is_active: boolean | null
+          platform: string
+          subscription_fields: string[] | null
+          updated_at: string
+          user_id: string
+          webhook_id: string | null
+          webhook_url: string | null
+        }
+        Insert: {
+          account_id: string
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          platform: string
+          subscription_fields?: string[] | null
+          updated_at?: string
+          user_id: string
+          webhook_id?: string | null
+          webhook_url?: string | null
+        }
+        Update: {
+          account_id?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          platform?: string
+          subscription_fields?: string[] | null
+          updated_at?: string
+          user_id?: string
+          webhook_id?: string | null
+          webhook_url?: string | null
         }
         Relationships: []
       }

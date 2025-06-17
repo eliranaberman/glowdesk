@@ -9,7 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Instagram, Facebook, X, AlertCircle } from "lucide-react";
+import { Instagram, Facebook, AlertCircle } from "lucide-react";
 import { ConnectedAccountsMap } from "./types";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -50,11 +50,16 @@ const ConnectionModal = ({
     switch (platform) {
       case "instagram": return "Instagram";
       case "facebook": return "Facebook";
-      case "twitter": return "Twitter";
       case "tiktok": return "TikTok";
       default: return platform;
     }
   };
+
+  const TikTokIcon = () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.31-4.64 2.93 2.93 0 01.88.13V9.4a6.84 6.84 0 00-.88-.05A6.33 6.33 0 005 20.1a6.34 6.34 0 0010.86-4.43v-7a8.16 8.16 0 004.77 1.52v-3.4a4.85 4.85 0 01-1.04-.1z" fill="currentColor"/>
+    </svg>
+  );
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -109,32 +114,17 @@ const ConnectionModal = ({
             <span className="font-medium">Facebook</span>
           </div>
           
-          <div className="flex items-center justify-between border-b pb-3">
+          <div className="flex items-center justify-between">
             <Button
               disabled={connecting === "tiktok"}
               onClick={() => handleConnect("tiktok")}
               variant={connectedAccounts.tiktok ? "secondary" : "outline"} 
               className="gap-2"
             >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M9 20l3-4 3 4M10 4.5h4c3.771 0 5.657 0 6.828 1.172C22 6.843 22 8.729 22 12.5s0 5.657-1.172 6.828C19.657 20.5 17.771 20.5 14 20.5h-4c-3.771 0-5.657 0-6.828-1.172C2 18.157 2 16.271 2 12.5s0-5.657 1.172-6.828C4.343 4.5 6.229 4.5 10 4.5z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
+              <TikTokIcon />
               {connecting === "tiktok" ? "מתחבר..." : connectedAccounts.tiktok ? "מחובר" : "חבר חשבון"}
             </Button>
             <span className="font-medium">TikTok</span>
-          </div>
-          
-          <div className="flex items-center justify-between">
-            <Button
-              disabled={connecting === "twitter"}
-              onClick={() => handleConnect("twitter")}
-              variant={connectedAccounts.twitter ? "secondary" : "outline"} 
-              className="gap-2"
-            >
-              <X size={18} />
-              {connecting === "twitter" ? "מתחבר..." : connectedAccounts.twitter ? "מחובר" : "חבר חשבון"}
-            </Button>
-            <span className="font-medium">Twitter / X</span>
           </div>
         </div>
         
