@@ -92,7 +92,7 @@ export default function AppRoutes() {
         {/* Reports */}
         <Route path="/reports" element={<Reports />} />
         
-        {/* Settings - All user management now consolidated here */}
+        {/* Settings - Single unified settings page */}
         <Route path="/settings" element={<Settings />} />
         
         {/* Social media and marketing */}
