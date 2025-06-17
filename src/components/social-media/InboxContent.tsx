@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -59,6 +58,16 @@ const InboxContent = ({ messages, onMarkAsRead, onReply }: InboxContentProps) =>
 
   const handleShowDetails = () => {
     setDetailsOpen(true);
+  };
+
+  const handleModalReply = async (messageId: string, reply: string) => {
+    await onReply(messageId, reply);
+    await onMarkAsRead(messageId);
+    
+    toast({
+      title: "תגובה נשלחה",
+      description: "התגובה שלך נשלחה בהצלחה"
+    });
   };
 
   return (
@@ -244,7 +253,8 @@ const InboxContent = ({ messages, onMarkAsRead, onReply }: InboxContentProps) =>
       <ReplyModal 
         open={replyModalOpen} 
         onOpenChange={setReplyModalOpen} 
-        message={selectedMessage} 
+        message={selectedMessage}
+        onSendReply={handleModalReply}
       />
       
       <CustomerDetailsDialog 

@@ -1,173 +1,99 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Message } from "./types";
-import { Send, Image, FileText, Smile } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { SocialMediaMessage } from "./types";
+import { Instagram, Facebook, MessageCircle, Send } from "lucide-react";
 
-type ReplyModalProps = {
+interface ReplyModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  message: Message | null;
-};
+  message: SocialMediaMessage | null;
+  onSendReply?: (messageId: string, reply: string) => void;
+}
 
-const ReplyModal = ({ open, onOpenChange, message }: ReplyModalProps) => {
-  const [reply, setReply] = useState("");
-  const [sending, setSending] = useState(false);
-  const isMobile = useIsMobile();
-  const { toast } = useToast();
+const ReplyModal = ({ open, onOpenChange, message, onSendReply }: ReplyModalProps) => {
+  const [replyText, setReplyText] = useState("");
 
-  // Reset reply text when modal closes
-  useEffect(() => {
-    if (!open) {
-      setReply("");
-    }
-  }, [open]);
-
-  if (!message) {
-    return null;
-  }
-
-  const handleSendReply = async () => {
-    if (!reply.trim()) {
-      toast({
-        title: "שגיאה",
-        description: "אנא הזן הודעה לפני השליחה",
-        variant: "destructive",
-      });
-      return;
-    }
+  const handleSend = () => {
+    if (!replyText.trim() || !message || !onSendReply) return;
     
-    setSending(true);
-    
-    // Simulate sending a response
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    toast({
-      title: "הודעה נשלחה",
-      description: `התגובה שלך נשלחה ל-${message.sender}`,
-    });
-    
-    setReply("");
-    setSending(false);
+    onSendReply(message.id, replyText);
+    setReplyText("");
     onOpenChange(false);
   };
 
+  const getPlatformIcon = (platform: string) => {
+    switch (platform.toLowerCase()) {
+      case "instagram":
+        return <Instagram size={16} className="text-pink-500" />;
+      case "facebook":
+        return <Facebook size={16} className="text-blue-600" />;
+      case "tiktok":
+        return <TikTokIcon />;
+      default:
+        return <MessageCircle size={16} className="text-gray-500" />;
+    }
+  };
+
+  if (!message) return null;
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className={`max-w-3xl w-[calc(100%-32px)] mx-auto flex flex-col h-auto max-h-[90vh] p-5 ${isMobile ? 'gap-3' : 'gap-4'}`}>
-        <DialogHeader className="border-b pb-3 mb-3">
-          <DialogTitle className="text-center text-xl">
-            שיחה עם {message.sender}
-          </DialogTitle>
+      <DialogContent className="max-w-md">
+        <DialogHeader className="border-b pb-4">
+          <DialogTitle className="text-center">תגובה להודעה</DialogTitle>
         </DialogHeader>
         
-        <div className="flex-1 overflow-hidden flex flex-col min-h-0">
-          {/* Message display area with improved sizing and scrolling */}
-          <ScrollArea className="flex-1 bg-muted/10 rounded-lg border border-border/50 shadow-inner mb-4">
-            <div className="p-4 space-y-6">
-              {/* Original message */}
-              <div className="flex gap-3 items-start">
-                <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 border-2 border-primary/20">
-                  <img src={message.avatar} alt={message.sender} className="w-full h-full object-cover" />
-                </div>
-                <div className="bg-muted/30 p-4 rounded-lg flex-1">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs text-muted-foreground">{message.time}</span>
-                    <p className="font-medium">{message.sender}</p>
-                  </div>
-                  <p className="text-base mb-1">{message.message}</p>
-                </div>
-              </div>
-              
-              {/* Simulated previous thread if it exists */}
-              {message.id % 2 === 0 && (
-                <>
-                  <div className="flex justify-end">
-                    <div className="bg-primary/10 p-4 rounded-lg max-w-[85%]">
-                      <div className="flex justify-between items-center mb-2">
-                        <span className="text-xs text-muted-foreground">09:46</span>
-                        <p className="font-medium">אתה</p>
-                      </div>
-                      <p className="text-base">תודה שפנית אלינו! איך נוכל לעזור?</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex gap-3 items-start">
-                    <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 border-2 border-primary/20">
-                      <img src={message.avatar} alt={message.sender} className="w-full h-full object-cover" />
-                    </div>
-                    <div className="bg-muted/30 p-4 rounded-lg flex-1">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-xs text-muted-foreground">{message.time}</span>
-                        <p className="font-medium">{message.sender}</p>
-                      </div>
-                      <p className="text-base">{message.message}</p>
-                    </div>
-                  </div>
-                </>
-              )}
-            </div>
-          </ScrollArea>
-          
-          <div className="border rounded-lg bg-card shadow-sm">
-            <Textarea 
-              placeholder="הקלד את התגובה שלך כאן..." 
-              className="min-h-[100px] text-base p-3 border-0 focus-visible:ring-0 resize-none"
-              value={reply}
-              onChange={(e) => setReply(e.target.value)}
-            />
-            
-            <div className="flex items-center justify-between p-2 border-t">
-              <div className="flex gap-1">
-                <Button type="button" variant="ghost" size="sm" className="rounded-full w-8 h-8 p-0">
-                  <Image size={16} />
-                  <span className="sr-only">צרף תמונה</span>
-                </Button>
-                <Button type="button" variant="ghost" size="sm" className="rounded-full w-8 h-8 p-0">
-                  <FileText size={16} />
-                  <span className="sr-only">צרף קובץ</span>
-                </Button>
-                <Button type="button" variant="ghost" size="sm" className="rounded-full w-8 h-8 p-0">
-                  <Smile size={16} />
-                  <span className="sr-only">הוסף אימוג'י</span>
-                </Button>
-              </div>
-              <Button 
-                onClick={handleSendReply}
-                disabled={sending || !reply.trim()}
-                size="sm"
-                className="gap-1.5"
-              >
-                <Send size={14} />
-                {sending ? "שולח..." : "שלח"}
-              </Button>
+        <div className="space-y-4">
+          <div className="flex items-center gap-3 p-3 bg-muted/20 rounded-lg">
+            <div className="flex items-center gap-1">
+              {getPlatformIcon(message.platform)}
+              <span className="font-medium">{message.sender_name}</span>
             </div>
           </div>
+          
+          <div className="bg-muted/10 p-3 rounded-lg">
+            <p className="text-sm">{message.message_text}</p>
+            <span className="text-xs text-muted-foreground mt-1 block">
+              {new Date(message.received_at).toLocaleString('he-IL')}
+            </span>
+          </div>
+          
+          <div className="space-y-2">
+            <label className="text-sm font-medium">התגובה שלך:</label>
+            <Textarea
+              value={replyText}
+              onChange={(e) => setReplyText(e.target.value)}
+              placeholder="כתוב את תגובתך כאן..."
+              className="min-h-[100px]"
+            />
+          </div>
+          
+          <div className="flex gap-2 justify-end">
+            <Button variant="outline" onClick={() => onOpenChange(false)}>
+              ביטול
+            </Button>
+            <Button 
+              onClick={handleSend}
+              disabled={!replyText.trim()}
+              className="flex items-center gap-2"
+            >
+              <Send size={16} />
+              שלח תגובה
+            </Button>
+          </div>
         </div>
-        
-        <DialogFooter className="pt-2 mt-auto">
-          <Button 
-            onClick={() => onOpenChange(false)} 
-            variant="outline"
-            className={`${isMobile ? 'flex-1' : ''}`}
-          >
-            סגור
-          </Button>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
 };
+
+const TikTokIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-black">
+    <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.31-4.64 2.93 2.93 0 01.88.13V9.4a6.84 6.84 0 00-.88-.05A6.33 6.33 0 005 20.1a6.34 6.34 0 0010.86-4.43v-7a8.16 8.16 0 004.77 1.52v-3.4a4.85 4.85 0 01-1.04-.1z" fill="currentColor"/>
+  </svg>
+);
 
 export default ReplyModal;
