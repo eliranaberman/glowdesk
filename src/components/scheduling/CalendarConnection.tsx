@@ -10,7 +10,9 @@ import {
   CheckCircle, 
   Download,
   Apple,
-  Smartphone
+  Smartphone,
+  Loader2,
+  RefreshCw
 } from 'lucide-react';
 import { 
   getUserCalendarConnections, 
@@ -43,26 +45,67 @@ const CalendarConnection = () => {
 
   useEffect(() => {
     loadConnections();
-  }, []);
+
+    // Listen for OAuth callback messages
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data.type === 'GOOGLE_AUTH_SUCCESS') {
+        toast({
+          title: 'הצלחה!',
+          description: 'Google Calendar חובר בהצלחה',
+        });
+        loadConnections(); // Refresh connections
+        setIsConnecting(false);
+      } else if (event.data.type === 'GOOGLE_AUTH_ERROR') {
+        toast({
+          title: 'שגיאה',
+          description: 'לא ניתן להתחבר ל-Google Calendar',
+          variant: 'destructive',
+        });
+        setIsConnecting(false);
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, [toast]);
 
   const handleGoogleConnect = async () => {
     setIsConnecting(true);
     try {
       const authUrl = await initiateGoogleCalendarAuth('user@example.com');
-      window.open(authUrl, '_blank', 'width=600,height=600');
+      
+      // Open popup window for OAuth
+      const popup = window.open(
+        authUrl, 
+        'google-oauth', 
+        'width=500,height=600,scrollbars=yes,resizable=yes'
+      );
+
+      // Check if popup was blocked
+      if (!popup) {
+        throw new Error('החלון הקופץ נחסם. אנא אפשר חלונות קופצים ונסה שוב.');
+      }
       
       toast({
         title: 'חיבור ל-Google Calendar',
         description: 'נפתח חלון חדש לאישור הרשאות Google',
       });
+
+      // Monitor popup
+      const checkClosed = setInterval(() => {
+        if (popup.closed) {
+          clearInterval(checkClosed);
+          setIsConnecting(false);
+        }
+      }, 1000);
+
     } catch (error) {
       console.error('Error connecting to Google Calendar:', error);
       toast({
         title: 'שגיאה',
-        description: 'לא ניתן להתחבר ל-Google Calendar',
+        description: error instanceof Error ? error.message : 'לא ניתן להתחבר ל-Google Calendar',
         variant: 'destructive',
       });
-    } finally {
       setIsConnecting(false);
     }
   };
@@ -82,11 +125,16 @@ const CalendarConnection = () => {
     return (
       <Card>
         <CardContent className="p-4">
-          <div className="text-center py-4">טוען...</div>
+          <div className="flex items-center justify-center gap-2 py-4">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            <span>טוען...</span>
+          </div>
         </CardContent>
       </Card>
     );
   }
+
+  const googleConnection = connections.find(c => c.calendar_type === 'google');
 
   return (
     <Card>
@@ -107,19 +155,37 @@ const CalendarConnection = () => {
             <div>
               <h3 className="font-medium text-sm">Google Calendar</h3>
               <p className="text-xs text-muted-foreground">
-                סנכרון אוטומטי עם יומן Google
+                סנכרון דו-כיווני אוטומטי
               </p>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            {connections.filter(c => c.calendar_type === 'google').length > 0 ? (
-              <Badge variant="default" className="bg-green-100 text-green-800 text-xs">
-                <CheckCircle className="h-3 w-3 mr-1" />
-                מחובר
-              </Badge>
+            {googleConnection ? (
+              <div className="flex items-center gap-2">
+                <Badge variant="default" className="bg-green-100 text-green-800 text-xs">
+                  <CheckCircle className="h-3 w-3 mr-1" />
+                  מחובר
+                </Badge>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={loadConnections}
+                  disabled={isConnecting}
+                >
+                  <RefreshCw className="h-3 w-3" />
+                </Button>
+              </div>
             ) : (
-              <Button size="sm" onClick={handleGoogleConnect} disabled={isConnecting}>
-                <Plus className="h-3 w-3 mr-1" />
+              <Button 
+                size="sm" 
+                onClick={handleGoogleConnect} 
+                disabled={isConnecting}
+              >
+                {isConnecting ? (
+                  <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                ) : (
+                  <Plus className="h-3 w-3 mr-1" />
+                )}
                 התחבר
               </Button>
             )}
@@ -164,6 +230,22 @@ const CalendarConnection = () => {
             </div>
           </div>
         )}
+
+        {/* Instructions for Google Calendar */}
+        {googleConnection && (
+          <div className="pt-2 border-t">
+            <p className="text-xs text-muted-foreground">
+              ✅ <strong>Google Calendar מחובר:</strong> הפגישות יסונכרנו אוטומטיות דו-כיוונית
+            </p>
+          </div>
+        )}
+
+        {/* Instructions for Apple/Samsung */}
+        <div className="pt-2 border-t">
+          <p className="text-xs text-muted-foreground">
+            📱 <strong>Apple/Samsung:</strong> לחץ "ייצא" והוסף את הקובץ ליומן הטלפון שלך
+          </p>
+        </div>
       </CardContent>
     </Card>
   );

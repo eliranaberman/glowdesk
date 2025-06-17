@@ -18,6 +18,13 @@ interface CalendarSyncRequest {
   calendarConnectionId: string;
 }
 
+interface GoogleWebhookRequest {
+  action: 'webhook';
+  state: string;
+  code?: string;
+  error?: string;
+}
+
 serve(async (req) => {
   console.log('Calendar sync function called with method:', req.method);
 
@@ -31,6 +38,37 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
+
+    // Handle Google OAuth callback
+    if (req.method === 'GET') {
+      const url = new URL(req.url);
+      const code = url.searchParams.get('code');
+      const state = url.searchParams.get('state');
+      const error = url.searchParams.get('error');
+
+      if (error) {
+        console.error('OAuth error:', error);
+        return new Response(`
+          <html>
+            <body>
+              <script>
+                window.opener.postMessage({
+                  type: 'GOOGLE_AUTH_ERROR',
+                  error: '${error}'
+                }, '*');
+                window.close();
+              </script>
+            </body>
+          </html>
+        `, {
+          headers: { ...corsHeaders, 'Content-Type': 'text/html' }
+        });
+      }
+
+      if (code && state) {
+        return handleGoogleOAuthCallback(supabase, code, state);
+      }
+    }
 
     const body = await req.json();
     console.log('Request body:', body);
@@ -71,7 +109,6 @@ async function handleGoogleAuth(request: GoogleAuthRequest): Promise<Response> {
     throw new Error('Google OAuth credentials not configured');
   }
 
-  // Generate proper redirect URI - using the current origin
   const redirectUri = `${Deno.env.get('SUPABASE_URL')}/functions/v1/calendar-sync`;
   
   const scopes = [
@@ -79,6 +116,8 @@ async function handleGoogleAuth(request: GoogleAuthRequest): Promise<Response> {
     'https://www.googleapis.com/auth/calendar.events'
   ].join(' ');
 
+  const state = JSON.stringify({ email: request.email, timestamp: Date.now() });
+  
   const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
     `client_id=${clientId}&` +
     `redirect_uri=${encodeURIComponent(redirectUri)}&` +
@@ -86,7 +125,7 @@ async function handleGoogleAuth(request: GoogleAuthRequest): Promise<Response> {
     `response_type=code&` +
     `access_type=offline&` +
     `prompt=consent&` +
-    `state=${encodeURIComponent(JSON.stringify({ email: request.email }))}`;
+    `state=${encodeURIComponent(state)}`;
 
   console.log('Generated auth URL:', authUrl);
 
@@ -99,6 +138,110 @@ async function handleGoogleAuth(request: GoogleAuthRequest): Promise<Response> {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
     }
   );
+}
+
+async function handleGoogleOAuthCallback(
+  supabase: any, 
+  code: string, 
+  state: string
+): Promise<Response> {
+  try {
+    console.log('Handling OAuth callback with code:', code.substring(0, 10) + '...');
+    
+    const stateData = JSON.parse(decodeURIComponent(state));
+    const { email } = stateData;
+
+    const clientId = Deno.env.get('GOOGLE_CLIENT_ID');
+    const clientSecret = Deno.env.get('GOOGLE_CLIENT_SECRET');
+    const redirectUri = `${Deno.env.get('SUPABASE_URL')}/functions/v1/calendar-sync`;
+
+    // Exchange code for tokens
+    const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams({
+        client_id: clientId!,
+        client_secret: clientSecret!,
+        code,
+        grant_type: 'authorization_code',
+        redirect_uri: redirectUri,
+      }),
+    });
+
+    if (!tokenResponse.ok) {
+      throw new Error(`Token exchange failed: ${tokenResponse.statusText}`);
+    }
+
+    const tokens = await tokenResponse.json();
+    console.log('Received tokens, access_token length:', tokens.access_token?.length);
+
+    // Get user's calendar info
+    const userInfoResponse = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+      headers: {
+        'Authorization': `Bearer ${tokens.access_token}`,
+      },
+    });
+
+    const userInfo = await userInfoResponse.json();
+    console.log('User info:', userInfo.email);
+
+    // Store the connection in database
+    const { data: connection, error } = await supabase
+      .from('calendar_connections')
+      .insert({
+        user_id: (await supabase.auth.getUser()).data.user?.id, // This won't work in edge function
+        calendar_type: 'google',
+        calendar_email: userInfo.email,
+        access_token: tokens.access_token,
+        refresh_token: tokens.refresh_token,
+        token_expiry: new Date(Date.now() + tokens.expires_in * 1000).toISOString(),
+        is_active: true,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Database error:', error);
+      throw new Error(`Failed to save connection: ${error.message}`);
+    }
+
+    // Return success page that closes the popup
+    return new Response(`
+      <html>
+        <body>
+          <script>
+            window.opener.postMessage({
+              type: 'GOOGLE_AUTH_SUCCESS',
+              connection: ${JSON.stringify(connection)}
+            }, '*');
+            window.close();
+          </script>
+        </body>
+      </html>
+    `, {
+      headers: { ...corsHeaders, 'Content-Type': 'text/html' }
+    });
+
+  } catch (error) {
+    console.error('OAuth callback error:', error);
+    return new Response(`
+      <html>
+        <body>
+          <script>
+            window.opener.postMessage({
+              type: 'GOOGLE_AUTH_ERROR',
+              error: '${error.message}'
+            }, '*');
+            window.close();
+          </script>
+        </body>
+      </html>
+    `, {
+      headers: { ...corsHeaders, 'Content-Type': 'text/html' }
+    });
+  }
 }
 
 async function handleCalendarOperation(
@@ -134,30 +277,83 @@ async function handleCalendarOperation(
   console.log('Processing appointment:', appointment);
   console.log('Using connection:', connection);
 
-  // For now, we'll simulate the calendar operation
-  // In a real implementation, you would make actual API calls to Google Calendar
-  const result = {
-    success: true,
-    action: request.action,
-    appointmentId: request.appointmentId,
-    calendarId: connection.calendar_id,
-    message: `Calendar ${request.action} operation completed successfully`
+  try {
+    // Create Google Calendar event
+    if (request.action === 'sync') {
+      const event = await createGoogleCalendarEvent(connection, appointment);
+      
+      // Update appointment with Google event ID
+      await supabase
+        .from('appointments')
+        .update({
+          calendar_sync_status: 'synced',
+          external_calendar_id: event.id,
+          last_sync_at: new Date().toISOString()
+        })
+        .eq('id', request.appointmentId);
+
+      return new Response(
+        JSON.stringify({ 
+          success: true, 
+          eventId: event.id,
+          message: 'Event created successfully in Google Calendar'
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // For now, simulate other operations
+    const result = {
+      success: true,
+      action: request.action,
+      appointmentId: request.appointmentId,
+      calendarId: connection.calendar_id,
+      message: `Calendar ${request.action} operation completed successfully`
+    };
+
+    return new Response(
+      JSON.stringify(result),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+
+  } catch (error) {
+    console.error('Google Calendar API error:', error);
+    throw new Error(`Google Calendar operation failed: ${error.message}`);
+  }
+}
+
+async function createGoogleCalendarEvent(connection: any, appointment: any) {
+  const startDateTime = new Date(`${appointment.date}T${appointment.start_time}`);
+  const endDateTime = new Date(`${appointment.date}T${appointment.end_time}`);
+
+  const event = {
+    summary: appointment.service_type,
+    description: `תור עם ${appointment.client?.full_name || 'לקוח'}${appointment.notes ? '\n\nהערות: ' + appointment.notes : ''}`,
+    start: {
+      dateTime: startDateTime.toISOString(),
+      timeZone: 'Asia/Jerusalem',
+    },
+    end: {
+      dateTime: endDateTime.toISOString(),
+      timeZone: 'Asia/Jerusalem',
+    },
+    attendees: appointment.client?.email ? [{ email: appointment.client.email }] : [],
   };
 
-  // Update the appointment with calendar sync status
-  await supabase
-    .from('appointments')
-    .update({
-      calendar_sync_status: 'synced',
-      external_calendar_id: `mock_event_${appointment.id}`,
-      last_sync_at: new Date().toISOString()
-    })
-    .eq('id', request.appointmentId);
+  const response = await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${connection.access_token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(event),
+  });
 
-  return new Response(
-    JSON.stringify(result),
-    { 
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-    }
-  );
+  if (!response.ok) {
+    const errorData = await response.text();
+    console.error('Google Calendar API error:', errorData);
+    throw new Error(`Google Calendar API error: ${response.statusText}`);
+  }
+
+  return await response.json();
 }

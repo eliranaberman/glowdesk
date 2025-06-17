@@ -104,31 +104,6 @@ export const initiateGoogleCalendarAuth = async (email: string): Promise<string>
   }
 };
 
-// Generate an ICS file content for an appointment
-export const generateIcsFileContent = (appointment: any): string => {
-  const startDate = new Date(`${appointment.date}T${appointment.start_time}`);
-  const endDate = new Date(`${appointment.date}T${appointment.end_time}`);
-  
-  const formatDate = (date: Date): string => {
-    return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
-  };
-  
-  // Basic ICS format
-  return `BEGIN:VCALENDAR
-VERSION:2.0
-PRODID:-//Chen Mizrahi Salon//Booking System//EN
-CALSCALE:GREGORIAN
-BEGIN:VEVENT
-DTSTART:${formatDate(startDate)}
-DTEND:${formatDate(endDate)}
-SUMMARY:${appointment.service_type}
-DESCRIPTION:Appointment with ${appointment.customer?.full_name || 'Customer'}
-STATUS:CONFIRMED
-TRANSP:OPAQUE
-END:VEVENT
-END:VCALENDAR`;
-};
-
 // Sync appointment with external calendar
 export const syncAppointmentWithCalendar = async (appointmentId: string, calendarConnectionId: string): Promise<void> => {
   try {
@@ -199,6 +174,31 @@ export const deleteAppointmentFromCalendar = async (appointmentId: string, calen
   }
 };
 
+// Generate an ICS file content for an appointment
+export const generateIcsFileContent = (appointment: any): string => {
+  const startDate = new Date(`${appointment.date}T${appointment.start_time}`);
+  const endDate = new Date(`${appointment.date}T${appointment.end_time}`);
+  
+  const formatDate = (date: Date): string => {
+    return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+  };
+  
+  // Basic ICS format
+  return `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Chen Mizrahi Salon//Booking System//EN
+CALSCALE:GREGORIAN
+BEGIN:VEVENT
+DTSTART:${formatDate(startDate)}
+DTEND:${formatDate(endDate)}
+SUMMARY:${appointment.service_type}
+DESCRIPTION:Appointment with ${appointment.client?.full_name || 'Customer'}
+STATUS:CONFIRMED
+TRANSP:OPAQUE
+END:VEVENT
+END:VCALENDAR`;
+};
+
 // Download ICS file for an appointment
 export const downloadIcsFile = (appointment: any): void => {
   const icsContent = generateIcsFileContent(appointment);
@@ -216,16 +216,33 @@ export const downloadIcsFile = (appointment: any): void => {
   URL.revokeObjectURL(url);
 };
 
-// Handle OAuth redirect callback
-export const handleOAuthCallback = () => {
-  const urlParams = new URLSearchParams(window.location.search);
-  const authStatus = urlParams.get('auth');
-  
-  if (authStatus === 'success') {
-    return { success: true, message: 'Google Calendar connected successfully!' };
-  } else if (authStatus === 'error') {
-    return { success: false, message: 'Failed to connect Google Calendar. Please try again.' };
+// Auto-sync all appointments for a user's Google Calendar connection
+export const autoSyncAllAppointments = async (connectionId: string): Promise<void> => {
+  try {
+    // Get all upcoming appointments that aren't synced yet
+    const { data: appointments, error } = await supabase
+      .from('appointments')
+      .select('id')
+      .eq('status', 'scheduled')
+      .gte('date', new Date().toISOString().split('T')[0])
+      .is('external_calendar_id', null);
+
+    if (error) {
+      console.error('Error fetching appointments for sync:', error);
+      return;
+    }
+
+    // Sync each appointment
+    for (const appointment of appointments || []) {
+      try {
+        await syncAppointmentWithCalendar(appointment.id, connectionId);
+        console.log(`Synced appointment ${appointment.id}`);
+      } catch (error) {
+        console.error(`Failed to sync appointment ${appointment.id}:`, error);
+      }
+    }
+  } catch (error) {
+    console.error('Error in auto-sync:', error);
+    throw error;
   }
-  
-  return null;
 };
