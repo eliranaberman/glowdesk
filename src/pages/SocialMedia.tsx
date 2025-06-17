@@ -22,7 +22,7 @@ import { ConnectedAccountsMap, SocialMediaMessage } from "@/components/social-me
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { getMarketingStats } from "@/services/marketing/messageService";
-import { fetchUserMessages, getUnreadMessagesCount } from "@/services/socialMediaMessagesService";
+import { fetchUserMessages, getUnreadMessagesCount, markMessageAsRead, replyToMessage } from "@/services/socialMediaMessagesService";
 import { MarketingStats } from "@/types/marketing";
 
 const SocialMedia = () => {
@@ -117,13 +117,28 @@ const SocialMedia = () => {
   };
 
   const handleMarkAsRead = async (messageId: string) => {
-    // This will be implemented with real API calls
-    console.log("Marking message as read:", messageId);
+    const success = await markMessageAsRead(messageId);
+    if (success) {
+      setMessages(prev => prev.map(msg => 
+        msg.id === messageId ? { ...msg, is_read: true } : msg
+      ));
+      setUnreadCount(prev => Math.max(0, prev - 1));
+    }
   };
 
   const handleReply = async (messageId: string, reply: string) => {
-    // This will be implemented with real API calls
-    console.log("Replying to message:", messageId, reply);
+    const success = await replyToMessage(messageId, reply);
+    if (success) {
+      setMessages(prev => prev.map(msg => 
+        msg.id === messageId 
+          ? { ...msg, reply_text: reply, replied_at: new Date().toISOString(), is_read: true } 
+          : msg
+      ));
+      toast({
+        title: "תגובה נשלחה בהצלחה",
+        description: "התגובה שלך נשלחה ללקוח"
+      });
+    }
   };
 
   const handleButtonAction = () => {

@@ -1,62 +1,20 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Message } from "./types";
+import { SocialMediaMessage, InboxContentProps } from "./types";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Instagram, Facebook, Twitter, MessageCircle, User, Calendar, Clock, Flag, ArrowRight, Send, Image, FileText, Smile } from "lucide-react";
+import { Instagram, Facebook, MessageCircle, User, Calendar, Clock, Flag, ArrowRight, Send, Image, FileText, Smile } from "lucide-react";
 import ConnectionModal from "./ConnectionModal";
 import ReplyModal from "./ReplyModal";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useIsMobile } from "@/hooks/use-mobile";
 
-const mockedMessages: Message[] = [{
-  id: 1,
-  platform: "instagram",
-  sender: "sarah_nails_fan",
-  message: "היי, האם יש לך פנוי לפגישה ביום שלישי?",
-  time: "10:23",
-  read: false,
-  avatar: "https://picsum.photos/seed/1/64"
-}, {
-  id: 2,
-  platform: "facebook",
-  sender: "מיכל כהן",
-  message: "מחיר לבנייה מלאה + לק ג'ל?",
-  time: "08:45",
-  read: true,
-  avatar: "https://picsum.photos/seed/2/64"
-}, {
-  id: 3,
-  platform: "instagram",
-  sender: "beauty_trends",
-  message: "אהבתי את העיצוב האחרון שפרסמת! אפשר לקבוע תור?",
-  time: "יום אתמול",
-  read: true,
-  avatar: "https://picsum.photos/seed/3/64"
-}, {
-  id: 4,
-  platform: "instagram",
-  sender: "nail_inspiration",
-  message: "איזה חומרים את משתמשת ליצירת האפקט הזה?",
-  time: "יומיים",
-  read: false,
-  avatar: "https://picsum.photos/seed/4/64"
-}, {
-  id: 5,
-  platform: "facebook",
-  sender: "דנה לוי",
-  message: "שלום, אפשר מחיר לטיפול קבוע?",
-  time: "3 ימים",
-  read: true,
-  avatar: "https://picsum.photos/seed/5/64"
-}];
-
-const InboxContent = () => {
-  const [messages, setMessages] = useState(mockedMessages);
+const InboxContent = ({ messages, onMarkAsRead, onReply }: InboxContentProps) => {
   const [activePlatform, setActivePlatform] = useState<string>("all");
-  const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
+  const [selectedMessage, setSelectedMessage] = useState<SocialMediaMessage | null>(null);
   const [replyText, setReplyText] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [replyModalOpen, setReplyModalOpen] = useState(false);
@@ -68,27 +26,25 @@ const InboxContent = () => {
     ? messages 
     : messages.filter(msg => msg.platform === activePlatform);
 
-  const handleSendReply = () => {
+  const handleSendReply = async () => {
     if (!replyText.trim() || !selectedMessage) return;
 
-    setMessages(prev => prev.map(msg => msg.id === selectedMessage.id ? {
-      ...msg,
-      read: true
-    } : msg));
+    await onReply(selectedMessage.id, replyText);
+    await onMarkAsRead(selectedMessage.id);
     
     toast({
       title: "תגובה נשלחה",
-      description: `התגובה שלך ל-${selectedMessage.sender} נשלחה בהצלחה`
+      description: `התגובה שלך ל-${selectedMessage.sender_name} נשלחה בהצלחה`
     });
     
     setReplyText("");
   };
 
-  const handleMarkAllAsRead = () => {
-    setMessages(prev => prev.map(msg => ({
-      ...msg,
-      read: true
-    })));
+  const handleMarkAllAsRead = async () => {
+    const unreadMessages = messages.filter(msg => !msg.is_read);
+    for (const message of unreadMessages) {
+      await onMarkAsRead(message.id);
+    }
     
     toast({
       title: "הכל סומן כנקרא",
@@ -96,7 +52,7 @@ const InboxContent = () => {
     });
   };
 
-  const handleReply = (message: Message) => {
+  const handleReply = (message: SocialMediaMessage) => {
     setSelectedMessage(message);
     setReplyModalOpen(true);
   };
@@ -142,7 +98,7 @@ const InboxContent = () => {
       <Card className={`${isMobile && selectedMessage ? 'hidden' : 'block'} lg:col-span-1 order-first lg:order-first`}>
         <CardHeader className="flex flex-row items-center justify-between p-4">
           <CardTitle className="mx-auto text-lg">הודעות</CardTitle>
-          {messages.some(msg => !msg.read) && (
+          {messages.some(msg => !msg.is_read) && (
             <Button 
               variant="ghost" 
               size="sm" 
@@ -181,16 +137,16 @@ const InboxContent = () => {
           <>
             <CardHeader className="flex flex-row items-center justify-between p-4 border-b">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-accent">
-                  <img src={selectedMessage.avatar} alt={selectedMessage.sender} className="w-full h-full object-cover" />
+                <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-accent bg-muted flex items-center justify-center">
+                  <User size={24} className="text-muted-foreground" />
                 </div>
                 <div>
-                  <CardTitle className="text-xl">{selectedMessage.sender}</CardTitle>
+                  <CardTitle className="text-xl">{selectedMessage.sender_name}</CardTitle>
                   <div className="flex items-center gap-1 text-sm text-muted-foreground">
                     {getPlatformIcon(selectedMessage.platform)}
                     <span>{selectedMessage.platform}</span>
                     <span>•</span>
-                    <span>{selectedMessage.time}</span>
+                    <span>{new Date(selectedMessage.received_at).toLocaleDateString('he-IL')}</span>
                   </div>
                 </div>
               </div>
@@ -207,23 +163,25 @@ const InboxContent = () => {
               <div className="flex-1 overflow-y-auto p-4 space-y-6 bg-muted/10 mb-2 border rounded-lg">
                 <div className="flex gap-3 items-start max-w-[80%]">
                   <div className="bg-muted/30 p-4 rounded-lg">
-                    <p className="mb-2">{selectedMessage.message}</p>
-                    <span className="text-xs text-muted-foreground">{selectedMessage.time}</span>
+                    <p className="mb-2">{selectedMessage.message_text}</p>
+                    <span className="text-xs text-muted-foreground">
+                      {new Date(selectedMessage.received_at).toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' })}
+                    </span>
                   </div>
-                  <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
-                    <img src={selectedMessage.avatar} alt={selectedMessage.sender} className="w-full h-full object-cover" />
+                  <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 bg-muted flex items-center justify-center">
+                    <User size={16} className="text-muted-foreground" />
                   </div>
                 </div>
                 
-                {selectedMessage.id % 2 === 0 && (
-                  <>
-                    <div className="flex justify-start">
-                      <div className="bg-primary/10 p-4 rounded-lg max-w-[80%]">
-                        <p className="mb-2">תודה על פנייתך! אשמח לעזור. אפשר לתת מחיר מדויק בטלפון או כשאראה את המצב הקיים.</p>
-                        <span className="text-xs text-muted-foreground">10:30</span>
-                      </div>
+                {selectedMessage.reply_text && (
+                  <div className="flex justify-start">
+                    <div className="bg-primary/10 p-4 rounded-lg max-w-[80%]">
+                      <p className="mb-2">{selectedMessage.reply_text}</p>
+                      <span className="text-xs text-muted-foreground">
+                        {selectedMessage.replied_at && new Date(selectedMessage.replied_at).toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' })}
+                      </span>
                     </div>
-                  </>
+                  </div>
                 )}
               </div>
               
@@ -271,14 +229,13 @@ const InboxContent = () => {
         )}
       </Card>
 
-      {/* Modals - keep existing */}
+      {/* Modals */}
       <ConnectionModal 
         open={isModalOpen} 
         onOpenChange={setIsModalOpen} 
         connectedAccounts={{
           instagram: false,
           facebook: false,
-          twitter: false,
           tiktok: false
         }} 
         onConnect={() => {}} 
@@ -300,10 +257,10 @@ const InboxContent = () => {
 };
 
 type MessageListProps = {
-  messages: Message[];
-  selectedMessage: Message | null;
-  setSelectedMessage: (msg: Message) => void;
-  handleReply: (msg: Message) => void;
+  messages: SocialMediaMessage[];
+  selectedMessage: SocialMediaMessage | null;
+  setSelectedMessage: (msg: SocialMediaMessage) => void;
+  handleReply: (msg: SocialMediaMessage) => void;
   handleMarkAllAsRead: () => void;
   activePlatform: string;
   setActivePlatform: (platform: string) => void;
@@ -321,7 +278,7 @@ const MessageList = ({
   return (
     <div className="flex flex-col h-full">
       <Tabs defaultValue={activePlatform} value={activePlatform} onValueChange={setActivePlatform} className="w-full">
-        <TabsList className="w-full grid grid-cols-3 rounded-none border-b">
+        <TabsList className="w-full grid grid-cols-4 rounded-none border-b">
           <TabsTrigger value="facebook" className="rounded-none py-2 data-[state=active]:bg-accent/50">
             <Facebook className="ml-1.5" size={16} />
             פייסבוק
@@ -329,6 +286,10 @@ const MessageList = ({
           <TabsTrigger value="instagram" className="rounded-none py-2 data-[state=active]:bg-accent/50">
             <Instagram className="ml-1.5" size={16} />
             אינסטגרם
+          </TabsTrigger>
+          <TabsTrigger value="tiktok" className="rounded-none py-2 data-[state=active]:bg-accent/50">
+            <TikTokIcon />
+            טיקטוק
           </TabsTrigger>
           <TabsTrigger value="all" className="rounded-none py-2 data-[state=active]:bg-accent/50">הכל</TabsTrigger>
         </TabsList>
@@ -341,22 +302,24 @@ const MessageList = ({
             onClick={() => setSelectedMessage(msg)} 
             className={`flex justify-between p-3 border-b cursor-pointer hover:bg-muted/20 transition-colors
               ${selectedMessage?.id === msg.id ? 'bg-muted/30' : ''} 
-              ${!msg.read ? 'bg-muted/10' : ''}`
+              ${!msg.is_read ? 'bg-muted/10' : ''}`
             }
           >
             <div className="flex gap-3 items-center w-full">
-              <div className="w-12 h-12 rounded-full overflow-hidden border border-border/30">
-                <img src={msg.avatar} alt={msg.sender} className="w-full h-full object-cover" />
+              <div className="w-12 h-12 rounded-full overflow-hidden border border-border/30 bg-muted flex items-center justify-center">
+                <User size={16} className="text-muted-foreground" />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between mb-1">
                   <div className="flex items-center gap-1.5">
-                    <span className="font-medium">{msg.sender}</span>
-                    {!msg.read && <span className="w-2 h-2 bg-primary rounded-full"></span>}
+                    <span className="font-medium">{msg.sender_name}</span>
+                    {!msg.is_read && <span className="w-2 h-2 bg-primary rounded-full"></span>}
                   </div>
-                  <span className="text-xs text-muted-foreground">{msg.time}</span>
+                  <span className="text-xs text-muted-foreground">
+                    {new Date(msg.received_at).toLocaleDateString('he-IL')}
+                  </span>
                 </div>
-                <p className="text-sm text-muted-foreground truncate mb-1">{msg.message}</p>
+                <p className="text-sm text-muted-foreground truncate mb-1">{msg.message_text}</p>
                 <div className="flex items-center justify-between">
                   <span className="text-xs bg-muted/40 px-2 py-0.5 rounded-full flex items-center gap-1">
                     {getPlatformIcon(msg.platform)}
@@ -364,7 +327,7 @@ const MessageList = ({
                   </span>
                   <Button 
                     variant="ghost" 
-                    size="xs" 
+                    size="sm" 
                     className="p-1 h-6 text-xs hover:bg-transparent hover:underline text-muted-foreground"
                     onClick={(e) => {
                       e.stopPropagation();
@@ -395,7 +358,7 @@ const CustomerDetailsDialog = ({
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  customer: Message | null;
+  customer: SocialMediaMessage | null;
 }) => {
   if (!customer) return null;
   
@@ -407,10 +370,10 @@ const CustomerDetailsDialog = ({
         </DialogHeader>
         
         <div className="flex flex-col items-center">
-          <div className="w-24 h-24 rounded-full overflow-hidden mb-4 border-2 border-accent">
-            <img src={customer.avatar} alt={customer.sender} className="w-full h-full object-cover" />
+          <div className="w-24 h-24 rounded-full overflow-hidden mb-4 border-2 border-accent bg-muted flex items-center justify-center">
+            <User size={32} className="text-muted-foreground" />
           </div>
-          <h3 className="text-xl font-medium mb-1">{customer.sender}</h3>
+          <h3 className="text-xl font-medium mb-1">{customer.sender_name}</h3>
           <p className="text-muted-foreground flex items-center gap-1 mb-6">
             {getPlatformIcon(customer.platform)}
             {customer.platform}
@@ -423,38 +386,34 @@ const CustomerDetailsDialog = ({
               <User className="w-4 h-4 text-primary" />
               <span>משתמש מאז</span>
             </div>
-            <span>15/02/2025</span>
+            <span>{new Date(customer.created_at).toLocaleDateString('he-IL')}</span>
           </div>
           
           <div className="flex items-center justify-between p-3 border rounded-lg">
             <div className="flex items-center gap-2">
               <Calendar className="w-4 h-4 text-primary" />
-              <span>תורים קודמים</span>
+              <span>הודעה אחרונה</span>
             </div>
-            <span>3</span>
+            <span>{new Date(customer.received_at).toLocaleDateString('he-IL')}</span>
           </div>
           
           <div className="flex items-center justify-between p-3 border rounded-lg">
             <div className="flex items-center gap-2">
               <Clock className="w-4 h-4 text-primary" />
-              <span>זמן תגובה ממוצע</span>
+              <span>סטטוס</span>
             </div>
-            <span>2.5 שעות</span>
-          </div>
-          
-          <div className="flex items-center justify-between p-3 border rounded-lg">
-            <div className="flex items-center gap-2">
-              <Flag className="w-4 h-4 text-primary" />
-              <span>סטטוס לקוח</span>
-            </div>
-            <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">פעיל</span>
+            <span className={`px-2 py-1 rounded-full text-xs ${
+              customer.is_read ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+            }`}>
+              {customer.is_read ? 'נקרא' : 'לא נקרא'}
+            </span>
           </div>
         </div>
         
         <div className="mt-6 flex justify-center">
           <Button variant="outline" className="flex items-center gap-2 px-6" onClick={() => onOpenChange(false)}>
             <ArrowRight size={16} />
-            לפרופיל מלא
+            סגור
           </Button>
         </div>
       </DialogContent>
@@ -469,11 +428,17 @@ const getPlatformIcon = (platform: string) => {
       return <Instagram size={16} className="text-pink-500" />;
     case "facebook":
       return <Facebook size={16} className="text-blue-600" />;
-    case "twitter":
-      return <Twitter size={16} className="text-blue-400" />;
+    case "tiktok":
+      return <TikTokIcon />;
     default:
       return <MessageCircle size={16} className="text-gray-500" />;
   }
 };
+
+const TikTokIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-black">
+    <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.31-4.64 2.93 2.93 0 01.88.13V9.4a6.84 6.84 0 00-.88-.05A6.33 6.33 0 005 20.1a6.34 6.34 0 0010.86-4.43v-7a8.16 8.16 0 004.77 1.52v-3.4a4.85 4.85 0 01-1.04-.1z" fill="currentColor"/>
+  </svg>
+);
 
 export default InboxContent;

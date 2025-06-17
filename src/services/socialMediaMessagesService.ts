@@ -14,7 +14,11 @@ export const fetchUserMessages = async (): Promise<SocialMediaMessage[]> => {
       return [];
     }
 
-    return data || [];
+    // Type assertion to ensure platform field matches our type
+    return (data || []).map(message => ({
+      ...message,
+      platform: message.platform as 'facebook' | 'instagram' | 'tiktok'
+    })) as SocialMediaMessage[];
   } catch (error) {
     console.error('Failed to fetch messages:', error);
     return [];
