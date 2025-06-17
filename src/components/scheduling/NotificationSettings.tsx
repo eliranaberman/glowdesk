@@ -24,12 +24,17 @@ const NotificationSettings = () => {
         console.error('Error fetching preferences:', error);
         // Set default preferences if fetch fails
         setPreferences({
-          email_appointments: true,
-          sms_appointments: true,
-          email_reminders: true,
-          sms_reminders: false,
-          email_marketing: false,
-          sms_marketing: false,
+          id: '',
+          user_id: '',
+          whatsapp_enabled: true,
+          sms_enabled: true,
+          email_enabled: true,
+          appointment_reminders_enabled: true,
+          daily_summary_enabled: true,
+          expense_reminder_enabled: true,
+          appointment_changes_enabled: true,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
         });
       } finally {
         setLoading(false);
@@ -103,50 +108,86 @@ const NotificationSettings = () => {
       <CardContent className="space-y-4">
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <Label htmlFor="email-appointments" className="flex items-center gap-2">
+            <Label htmlFor="email-enabled" className="flex items-center gap-2">
               <Mail className="h-4 w-4" />
-              התראות אימייל לפגישות
+              התראות אימייל
             </Label>
             <Switch
-              id="email-appointments"
-              checked={preferences.email_appointments}
-              onCheckedChange={(checked) => updatePreference('email_appointments', checked)}
+              id="email-enabled"
+              checked={preferences.email_enabled}
+              onCheckedChange={(checked) => updatePreference('email_enabled', checked)}
             />
           </div>
 
           <div className="flex items-center justify-between">
-            <Label htmlFor="sms-appointments" className="flex items-center gap-2">
+            <Label htmlFor="whatsapp-enabled" className="flex items-center gap-2">
               <MessageSquare className="h-4 w-4" />
-              התראות SMS לפגישות
+              התראות WhatsApp
             </Label>
             <Switch
-              id="sms-appointments"
-              checked={preferences.sms_appointments}
-              onCheckedChange={(checked) => updatePreference('sms_appointments', checked)}
+              id="whatsapp-enabled"
+              checked={preferences.whatsapp_enabled}
+              onCheckedChange={(checked) => updatePreference('whatsapp_enabled', checked)}
             />
           </div>
 
           <div className="flex items-center justify-between">
-            <Label htmlFor="email-reminders" className="flex items-center gap-2">
-              <Mail className="h-4 w-4" />
-              תזכורות באימייל
+            <Label htmlFor="sms-enabled" className="flex items-center gap-2">
+              <Phone className="h-4 w-4" />
+              התראות SMS
             </Label>
             <Switch
-              id="email-reminders"
-              checked={preferences.email_reminders}
-              onCheckedChange={(checked) => updatePreference('email_reminders', checked)}
+              id="sms-enabled"
+              checked={preferences.sms_enabled}
+              onCheckedChange={(checked) => updatePreference('sms_enabled', checked)}
             />
           </div>
 
           <div className="flex items-center justify-between">
-            <Label htmlFor="sms-reminders" className="flex items-center gap-2">
-              <MessageSquare className="h-4 w-4" />
-              תזכורות SMS
+            <Label htmlFor="appointment-reminders" className="flex items-center gap-2">
+              <Bell className="h-4 w-4" />
+              תזכורות לפגישות
             </Label>
             <Switch
-              id="sms-reminders"
-              checked={preferences.sms_reminders}
-              onCheckedChange={(checked) => updatePreference('sms_reminders', checked)}
+              id="appointment-reminders"
+              checked={preferences.appointment_reminders_enabled}
+              onCheckedChange={(checked) => updatePreference('appointment_reminders_enabled', checked)}
+            />
+          </div>
+
+          <div className="flex items-center justify-between">
+            <Label htmlFor="daily-summary" className="flex items-center gap-2">
+              <Bell className="h-4 w-4" />
+              סיכום יומי
+            </Label>
+            <Switch
+              id="daily-summary"
+              checked={preferences.daily_summary_enabled}
+              onCheckedChange={(checked) => updatePreference('daily_summary_enabled', checked)}
+            />
+          </div>
+
+          <div className="flex items-center justify-between">
+            <Label htmlFor="expense-reminder" className="flex items-center gap-2">
+              <Bell className="h-4 w-4" />
+              תזכורות הוצאות
+            </Label>
+            <Switch
+              id="expense-reminder"
+              checked={preferences.expense_reminder_enabled}
+              onCheckedChange={(checked) => updatePreference('expense_reminder_enabled', checked)}
+            />
+          </div>
+
+          <div className="flex items-center justify-between">
+            <Label htmlFor="appointment-changes" className="flex items-center gap-2">
+              <Bell className="h-4 w-4" />
+              שינויים בפגישות
+            </Label>
+            <Switch
+              id="appointment-changes"
+              checked={preferences.appointment_changes_enabled}
+              onCheckedChange={(checked) => updatePreference('appointment_changes_enabled', checked)}
             />
           </div>
         </div>
