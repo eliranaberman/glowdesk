@@ -189,70 +189,68 @@ const ActivityForm = ({ onSubmit, isSubmitting }: ActivityFormProps) => {
   };
 
   return (
-    <Form>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="grid gap-4 py-4">
-          <div className="grid gap-2">
-            <Label htmlFor="type">סוג פעילות</Label>
-            <Select onValueChange={(value) => setType(value as import('@/types/clients').ActivityType)}>
-              <SelectTrigger>
-                <SelectValue placeholder="בחר סוג פעילות" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="call">שיחת טלפון</SelectItem>
-                <SelectItem value="message">הודעה</SelectItem>
-                <SelectItem value="purchase">רכישה</SelectItem>
-                <SelectItem value="visit">ביקור</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="grid gap-2">
-            <Label htmlFor="description">תיאור</Label>
-            <Textarea
-              id="description"
-              placeholder="תיאור הפעילות"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-            />
-          </div>
-
-          <div className="grid gap-2">
-            <Label>תאריך</Label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant={"outline"}
-                  className={
-                    "w-[240px] pl-3 text-left font-normal" +
-                    (date ? " text-foreground" : " text-muted-foreground")
-                  }
-                >
-                  {date ? (
-                    format(date, "PPP")
-                  ) : (
-                    <span>בחר תאריך</span>
-                  )}
-                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={date}
-                  onSelect={setDate}
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
-          </div>
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="grid gap-4 py-4">
+        <div className="grid gap-2">
+          <Label htmlFor="type">סוג פעילות</Label>
+          <Select onValueChange={(value) => setType(value as import('@/types/clients').ActivityType)}>
+            <SelectTrigger>
+              <SelectValue placeholder="בחר סוג פעילות" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="call">שיחת טלפון</SelectItem>
+              <SelectItem value="message">הודעה</SelectItem>
+              <SelectItem value="purchase">רכישה</SelectItem>
+              <SelectItem value="visit">ביקור</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
-        <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "יוצר..." : "צור פעילות"}
-        </Button>
-      </form>
-    </Form>
+        <div className="grid gap-2">
+          <Label htmlFor="description">תיאור</Label>
+          <Textarea
+            id="description"
+            placeholder="תיאור הפעילות"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+          />
+        </div>
+
+        <div className="grid gap-2">
+          <Label>תאריך</Label>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant={"outline"}
+                className={
+                  "w-[240px] pl-3 text-left font-normal" +
+                  (date ? " text-foreground" : " text-muted-foreground")
+                }
+              >
+                {date ? (
+                  format(date, "PPP")
+                ) : (
+                  <span>בחר תאריך</span>
+                )}
+                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                mode="single"
+                selected={date}
+                onSelect={setDate}
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
+        </div>
+      </div>
+
+      <Button type="submit" disabled={isSubmitting}>
+        {isSubmitting ? "יוצר..." : "צור פעילות"}
+      </Button>
+    </form>
   );
 };
 

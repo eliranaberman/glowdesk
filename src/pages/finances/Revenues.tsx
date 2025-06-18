@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { DollarSign, Upload, FileText, Filter, Calendar, Trash2 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -160,7 +159,6 @@ const Revenues = () => {
       description: values.description || "",
       date: format(values.date, 'yyyy-MM-dd'),
       payment_method: values.payment_method,
-      created_by: user.id,
       customer_id: values.customer_id,
       service_id: values.service_id,
     };
@@ -188,6 +186,10 @@ const Revenues = () => {
     const success = await deleteRevenue(id);
     if (success) {
       setRevenues(revenues.filter(revenue => revenue.id !== id));
+      toast({
+        title: "הכנסה נמחקה",
+        description: "ההכנסה נמחקה בהצלחה",
+      });
     }
   };
 
