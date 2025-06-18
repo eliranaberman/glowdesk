@@ -2,46 +2,45 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { Button } from '@/components/ui/button';
-import { ChevronRight, AlertCircle } from 'lucide-react';
-import { getClient, createClientActivity } from '@/services/clientService';
-import { Client } from '@/types/clients';
-import { useToast } from '@/components/ui/use-toast';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { 
-  Select, 
-  SelectContent, 
-  SelectGroup, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from '@/components/ui/select';
-import { Input } from '@/components/ui/input';
-import { useAuth } from '@/contexts/AuthContext';
+import { Calendar } from '@/components/ui/calendar';
+import { CalendarIcon } from 'lucide-react';
+import { format } from 'date-fns';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useToast } from '@/components/ui/use-toast';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import { getClient, createClientActivity } from '@/services/clientService';
 
 const NewActivityPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { user } = useAuth();
-  const [client, setClient] = useState<Client | null>(null);
+  const [client, setClient] = useState<import('@/types/clients').Client | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [formData, setFormData] = useState({
-    type: 'call',
-    description: '',
-    date: new Date().toISOString().split('T')[0],
-  });
 
   useEffect(() => {
     const fetchClient = async () => {
@@ -68,39 +67,27 @@ const NewActivityPage = () => {
     fetchClient();
   }, [id, toast]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleSelectChange = (name: string, value: string) => {
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!id || !user?.id) return;
+  const handleCreateActivity = async (activityData: {
+    type: import('@/types/clients').ActivityType;
+    description: string;
+    date?: string;
+  }) => {
+    if (!id) return;
     
     try {
       setSubmitting(true);
       
-      // Format the date with time
-      const now = new Date();
-      const dateStr = formData.date;
-      const fullDate = `${dateStr}T${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
-      
-      await createClientActivity({
+      const activity = await createClientActivity({
         client_id: id,
-        type: formData.type as any,
-        description: formData.description,
-        date: fullDate,
-        created_at: new Date().toISOString(),
-        created_by: user.id,
+        type: activityData.type,
+        description: activityData.description,
+        date: activityData.date || new Date().toISOString(),
+        created_by: '', // This will be set by the service
       });
       
       toast({
-        title: "פעילות נוספה בהצלחה",
-        description: "פעילות הלקוח נרשמה במערכת"
+        title: "פעילות נוצרה בהצלחה",
+        description: `פעילות עבור ${client?.full_name} נוספה בהצלחה`
       });
       
       navigate(`/clients/${id}`);
@@ -108,146 +95,164 @@ const NewActivityPage = () => {
       console.error('Error creating activity:', error);
       toast({
         variant: "destructive",
-        title: "שגיאה בהוספת פעילות",
-        description: error.message || "אירעה שגיאה בעת הוספת פעילות"
+        title: "שגיאה ביצירת פעילות",
+        description: error.message || "אירעה שגיאה בעת יצירת הפעילות"
       });
     } finally {
       setSubmitting(false);
     }
   };
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="flex flex-col items-center gap-2">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-r-transparent" />
+          <p className="text-muted-foreground">טוען פרטי לקוח...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-4">
+        <p className="text-red-500">Error: {error}</p>
+        <Button onClick={() => navigate(`/clients/${id}`)}>חזרה לפרטי לקוח</Button>
+      </div>
+    );
+  }
+
+  if (!client) {
+    return (
+      <div className="space-y-4">
+        <p className="text-red-500">Client not found</p>
+        <Button onClick={() => navigate('/clients')}>חזרה לרשימת לקוחות</Button>
+      </div>
+    );
+  }
+
   return (
     <div>
       <Helmet>
-        <title>הוספת פעילות ל{client?.full_name || ''} | Chen Mizrahi</title>
+        <title>יצירת פעילות חדשה עבור {client.full_name} | Chen Mizrahi</title>
       </Helmet>
 
-      <Button 
-        onClick={() => navigate(`/clients/${id}`)} 
-        variant="back" 
-        className="mb-4 flex gap-2"
-      >
-        <ChevronRight className="h-4 w-4" />
-        חזרה לפרטי הלקוח
+      <Button onClick={() => navigate(`/clients/${id}`)} variant="back" className="mb-4">
+        חזרה לפרטי לקוח
       </Button>
 
       <div className="mb-6">
-        <h1 className="text-2xl font-bold mb-1">הוספת פעילות חדשה</h1>
+        <h1 className="text-2xl font-bold mb-1">יצירת פעילות חדשה</h1>
         <p className="text-muted-foreground">
-          הוסף פעילות חדשה עבור {client?.full_name || ''}
+          יצירת פעילות חדשה עבור הלקוח {client.full_name}
         </p>
       </div>
 
-      {loading ? (
-        <div className="flex items-center justify-center min-h-[60vh]">
-          <div className="flex flex-col items-center gap-2">
-            <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-r-transparent" />
-            <p className="text-muted-foreground">טוען פרטי לקוח...</p>
+      <Card>
+        <CardHeader>
+          <CardTitle>פרטי פעילות</CardTitle>
+          <CardDescription>הזן את פרטי הפעילות החדשה</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ActivityForm
+            onSubmit={handleCreateActivity}
+            isSubmitting={submitting}
+          />
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
+interface ActivityFormProps {
+  onSubmit: (data: {
+    type: import('@/types/clients').ActivityType;
+    description: string;
+    date?: string;
+  }) => Promise<void>;
+  isSubmitting: boolean;
+}
+
+const ActivityForm = ({ onSubmit, isSubmitting }: ActivityFormProps) => {
+  const [date, setDate] = useState<Date | undefined>(new Date());
+  const [type, setType] = useState<import('@/types/clients').ActivityType>('call');
+  const [description, setDescription] = useState('');
+
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    await onSubmit({
+      type: type,
+      description: description,
+      date: date?.toISOString(),
+    });
+  };
+
+  return (
+    <Form>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="grid gap-4 py-4">
+          <div className="grid gap-2">
+            <Label htmlFor="type">סוג פעילות</Label>
+            <Select onValueChange={(value) => setType(value as import('@/types/clients').ActivityType)}>
+              <SelectTrigger>
+                <SelectValue placeholder="בחר סוג פעילות" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="call">שיחת טלפון</SelectItem>
+                <SelectItem value="message">הודעה</SelectItem>
+                <SelectItem value="purchase">רכישה</SelectItem>
+                <SelectItem value="visit">ביקור</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="description">תיאור</Label>
+            <Textarea
+              id="description"
+              placeholder="תיאור הפעילות"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+            />
+          </div>
+
+          <div className="grid gap-2">
+            <Label>תאריך</Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant={"outline"}
+                  className={
+                    "w-[240px] pl-3 text-left font-normal" +
+                    (date ? " text-foreground" : " text-muted-foreground")
+                  }
+                >
+                  {date ? (
+                    format(date, "PPP")
+                  ) : (
+                    <span>בחר תאריך</span>
+                  )}
+                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={date}
+                  onSelect={setDate}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
           </div>
         </div>
-      ) : error ? (
-        <div className="space-y-4">
-          <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
-            <AlertTitle>שגיאה בטעינת פרטי הלקוח</AlertTitle>
-            <AlertDescription>
-              {error}
-            </AlertDescription>
-          </Alert>
-          <Button 
-            onClick={() => navigate('/clients')} 
-            variant="back" 
-            className="flex gap-2"
-          >
-            <ChevronRight className="h-4 w-4" />
-            חזרה לרשימת הלקוחות
-          </Button>
-        </div>
-      ) : !client ? (
-        <div className="space-y-4">
-          <Alert>
-            <AlertCircle className="h-4 w-4" />
-            <AlertTitle>לקוח לא נמצא</AlertTitle>
-            <AlertDescription>
-              לא נמצאו פרטי הלקוח המבוקש.
-            </AlertDescription>
-          </Alert>
-          <Button 
-            onClick={() => navigate('/clients')} 
-            variant="back" 
-            className="flex gap-2"
-          >
-            <ChevronRight className="h-4 w-4" />
-            חזרה לרשימת הלקוחות
-          </Button>
-        </div>
-      ) : (
-        <form onSubmit={handleSubmit}>
-          <Card>
-            <CardHeader>
-              <CardTitle>פרטי הפעילות</CardTitle>
-              <CardDescription>הזן את פרטי הפעילות</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="type">סוג פעילות *</Label>
-                <Select
-                  name="type"
-                  value={formData.type}
-                  onValueChange={value => handleSelectChange('type', value)}
-                  required
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="בחר סוג פעילות" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      <SelectItem value="call">שיחת טלפון</SelectItem>
-                      <SelectItem value="message">הודעה</SelectItem>
-                      <SelectItem value="purchase">רכישה</SelectItem>
-                      <SelectItem value="visit">ביקור</SelectItem>
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-              </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="date">תאריך *</Label>
-                <Input
-                  id="date"
-                  name="date"
-                  type="date"
-                  dir="ltr"
-                  required
-                  value={formData.date}
-                  onChange={handleChange}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="description">תיאור הפעילות *</Label>
-                <Textarea
-                  id="description"
-                  name="description"
-                  placeholder="תאר את הפעילות..."
-                  required
-                  value={formData.description}
-                  onChange={handleChange}
-                  rows={4}
-                />
-              </div>
-            </CardContent>
-            <CardFooter>
-              <div className="flex justify-end w-full">
-                <Button type="submit" disabled={submitting}>
-                  {submitting ? 'שומר...' : 'הוסף פעילות'}
-                </Button>
-              </div>
-            </CardFooter>
-          </Card>
-        </form>
-      )}
-    </div>
+        <Button type="submit" disabled={isSubmitting}>
+          {isSubmitting ? "יוצר..." : "צור פעילות"}
+        </Button>
+      </form>
+    </Form>
   );
 };
 

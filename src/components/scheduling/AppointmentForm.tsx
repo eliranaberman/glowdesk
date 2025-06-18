@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
@@ -101,7 +100,7 @@ const AppointmentForm = ({
     date: initialDate || new Date(),
     start_time: initialTime || '09:00',
     end_time: initialTime ? calculateEndTime(initialTime, 60) : '10:00',
-    status: 'scheduled',
+    status: 'scheduled' as const,
     notes: null,
     send_confirmation: true,
     sync_with_calendar: true,
@@ -462,7 +461,7 @@ const AppointmentForm = ({
               <FormLabel className="text-right">סטטוס</FormLabel>
               <Select 
                 value={field.value}
-                onValueChange={field.onChange}
+                onValueChange={(value) => field.onChange(value as 'scheduled' | 'completed' | 'cancelled')}
                 disabled={loading}
               >
                 <FormControl>

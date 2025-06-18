@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { Tables, TablesInsert, TablesUpdate } from '@/integrations/supabase/types';
 
@@ -7,6 +6,23 @@ export type ClientInsert = TablesInsert<'clients'>;
 export type ClientUpdate = TablesUpdate<'clients'>;
 export type ClientActivity = Tables<'client_activity'>;
 export type ClientService = Tables<'client_services'>;
+
+// Helper function to safely cast database types to our TypeScript types
+const castClientActivity = (activity: any): import('@/types/clients').ClientActivity => {
+  return {
+    ...activity,
+    type: activity.type as import('@/types/clients').ActivityType,
+  };
+};
+
+const castClient = (client: any): import('@/types/clients').Client => {
+  return {
+    ...client,
+    gender: client.gender as import('@/types/clients').ClientGender,
+    status: client.status as import('@/types/clients').ClientStatus,
+    tags: typeof client.tags === 'string' ? client.tags.split(',').filter(Boolean) : (client.tags || []),
+  };
+};
 
 // Main client operations
 export const getClients = async (
@@ -46,7 +62,9 @@ export const getClients = async (
     .range((page - 1) * pageSize, page * pageSize - 1);
 
   if (error) throw error;
-  return { clients: data || [], count: count || 0 };
+  
+  const clients = (data || []).map(castClient);
+  return { clients, count: count || 0 };
 };
 
 export const getClient = async (id: string) => {
@@ -68,41 +86,51 @@ export const getClient = async (id: string) => {
     .maybeSingle();
 
   if (error) throw error;
-  return data;
+  return data ? castClient(data) : null;
 };
 
-export const createClient = async (client: Omit<ClientInsert, 'user_id'>) => {
+export const createClient = async (client: Omit<import('@/types/clients').Client, 'id' | 'created_at' | 'updated_at'>) => {
   const { data: user } = await supabase.auth.getUser();
   if (!user.user) throw new Error('User not authenticated');
 
+  // Convert tags array to string for database storage
+  const clientData = {
+    ...client,
+    tags: Array.isArray(client.tags) ? client.tags.join(',') : client.tags,
+    user_id: user.user.id,
+    assigned_rep: user.user.id
+  };
+
   const { data, error } = await supabase
     .from('clients')
-    .insert({
-      ...client,
-      user_id: user.user.id,
-      assigned_rep: user.user.id
-    })
+    .insert(clientData)
     .select()
     .single();
 
   if (error) throw error;
-  return data;
+  return castClient(data);
 };
 
-export const updateClient = async (id: string, updates: ClientUpdate) => {
+export const updateClient = async (id: string, updates: Partial<import('@/types/clients').Client>) => {
   const { data: user } = await supabase.auth.getUser();
   if (!user.user) throw new Error('User not authenticated');
 
+  // Convert tags array to string for database storage
+  const updateData = {
+    ...updates,
+    tags: Array.isArray(updates.tags) ? updates.tags.join(',') : updates.tags,
+  };
+
   const { data, error } = await supabase
     .from('clients')
-    .update(updates)
+    .update(updateData)
     .eq('id', id)
     .eq('user_id', user.user.id)
     .select()
     .single();
 
   if (error) throw error;
-  return data;
+  return castClient(data);
 };
 
 export const deleteClient = async (id: string) => {
@@ -171,24 +199,27 @@ export const getClientActivities = async (clientId: string) => {
     .order('created_at', { ascending: false });
 
   if (error) throw error;
-  return data;
+  return (data || []).map(castClientActivity);
 };
 
-export const createClientActivity = async (activity: Omit<TablesInsert<'client_activity'>, 'created_by'>) => {
+export const createClientActivity = async (activity: Omit<import('@/types/clients').ClientActivity, 'id' | 'created_at'>) => {
   const { data: user } = await supabase.auth.getUser();
   if (!user.user) throw new Error('User not authenticated');
 
   const { data, error } = await supabase
     .from('client_activity')
     .insert({
-      ...activity,
+      client_id: activity.client_id,
+      type: activity.type,
+      description: activity.description,
+      date: activity.date,
       created_by: user.user.id
     })
     .select()
     .single();
 
   if (error) throw error;
-  return data;
+  return castClientActivity(data);
 };
 
 // Keep the service object for backward compatibility

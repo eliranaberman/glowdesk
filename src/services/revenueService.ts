@@ -6,6 +6,16 @@ export type RevenueInsert = TablesInsert<'revenues'>;
 export type RevenueUpdate = TablesUpdate<'revenues'>;
 export type RevenueCreate = Omit<RevenueInsert, 'created_by'>;
 
+export interface RevenueCreate {
+  amount: number;
+  source: string;
+  date: string;
+  customer_id?: string;
+  service_id?: string;
+  payment_method?: string;
+  description?: string;
+}
+
 export const getRevenues = async () => {
   const { data: user } = await supabase.auth.getUser();
   if (!user.user) throw new Error('User not authenticated');

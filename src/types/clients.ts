@@ -1,3 +1,4 @@
+
 export type ClientGender = 'male' | 'female' | 'other';
 
 export type ClientStatus = 'active' | 'inactive' | 'lead';
