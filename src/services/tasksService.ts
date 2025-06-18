@@ -2,30 +2,30 @@
 import { supabase } from '@/integrations/supabase/client';
 import { Tables, TablesInsert, TablesUpdate } from '@/integrations/supabase/types';
 
-export type InventoryItem = Tables<'inventory_items'>;
-export type InventoryItemInsert = TablesInsert<'inventory_items'>;
-export type InventoryItemUpdate = TablesUpdate<'inventory_items'>;
+export type Task = Tables<'tasks'>;
+export type TaskInsert = TablesInsert<'tasks'>;
+export type TaskUpdate = TablesUpdate<'tasks'>;
 
-export const inventoryService = {
-  async getInventoryItems() {
+export const tasksService = {
+  async getTasks() {
     const { data: user } = await supabase.auth.getUser();
     if (!user.user) throw new Error('User not authenticated');
 
     const { data, error } = await supabase
-      .from('inventory_items')
+      .from('tasks')
       .select('*')
-      .order('entry_date', { ascending: false });
+      .order('created_at', { ascending: false });
 
     if (error) throw error;
     return data;
   },
 
-  async getInventoryItemById(id: string) {
+  async getTaskById(id: string) {
     const { data: user } = await supabase.auth.getUser();
     if (!user.user) throw new Error('User not authenticated');
 
     const { data, error } = await supabase
-      .from('inventory_items')
+      .from('tasks')
       .select('*')
       .eq('id', id)
       .maybeSingle();
@@ -34,15 +34,16 @@ export const inventoryService = {
     return data;
   },
 
-  async createInventoryItem(item: Omit<InventoryItemInsert, 'created_by'>) {
+  async createTask(task: Omit<TaskInsert, 'user_id'>) {
     const { data: user } = await supabase.auth.getUser();
     if (!user.user) throw new Error('User not authenticated');
 
     const { data, error } = await supabase
-      .from('inventory_items')
+      .from('tasks')
       .insert({
-        ...item,
-        created_by: user.user.id
+        ...task,
+        user_id: user.user.id,
+        assigned_user_id: task.assigned_user_id || user.user.id
       })
       .select()
       .single();
@@ -51,12 +52,12 @@ export const inventoryService = {
     return data;
   },
 
-  async updateInventoryItem(id: string, updates: InventoryItemUpdate) {
+  async updateTask(id: string, updates: TaskUpdate) {
     const { data: user } = await supabase.auth.getUser();
     if (!user.user) throw new Error('User not authenticated');
 
     const { data, error } = await supabase
-      .from('inventory_items')
+      .from('tasks')
       .update(updates)
       .eq('id', id)
       .select()
@@ -66,41 +67,41 @@ export const inventoryService = {
     return data;
   },
 
-  async deleteInventoryItem(id: string) {
+  async deleteTask(id: string) {
     const { data: user } = await supabase.auth.getUser();
     if (!user.user) throw new Error('User not authenticated');
 
     const { error } = await supabase
-      .from('inventory_items')
+      .from('tasks')
       .delete()
       .eq('id', id);
 
     if (error) throw error;
   },
 
-  async getInventoryItemsByCategory(category: string) {
+  async getTasksByStatus(status: string) {
     const { data: user } = await supabase.auth.getUser();
     if (!user.user) throw new Error('User not authenticated');
 
     const { data, error } = await supabase
-      .from('inventory_items')
+      .from('tasks')
       .select('*')
-      .eq('category', category)
-      .order('entry_date', { ascending: false });
+      .eq('status', status)
+      .order('created_at', { ascending: false });
 
     if (error) throw error;
     return data;
   },
 
-  async getLowStockItems(threshold: number = 5) {
+  async getTasksByPriority(priority: string) {
     const { data: user } = await supabase.auth.getUser();
     if (!user.user) throw new Error('User not authenticated');
 
     const { data, error } = await supabase
-      .from('inventory_items')
+      .from('tasks')
       .select('*')
-      .lte('quantity', threshold)
-      .order('quantity', { ascending: true });
+      .eq('priority', priority)
+      .order('created_at', { ascending: false });
 
     if (error) throw error;
     return data;

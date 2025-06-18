@@ -35,6 +35,7 @@ export type Database = {
           sms_notification_sent: boolean | null
           start_time: string
           status: string
+          user_id: string | null
           whatsapp_notification_sent: boolean | null
         }
         Insert: {
@@ -62,6 +63,7 @@ export type Database = {
           sms_notification_sent?: boolean | null
           start_time: string
           status?: string
+          user_id?: string | null
           whatsapp_notification_sent?: boolean | null
         }
         Update: {
@@ -89,6 +91,7 @@ export type Database = {
           sms_notification_sent?: boolean | null
           start_time?: string
           status?: string
+          user_id?: string | null
           whatsapp_notification_sent?: boolean | null
         }
         Relationships: []
@@ -264,6 +267,7 @@ export type Database = {
           registration_date: string | null
           status: string | null
           tags: string | null
+          user_id: string | null
         }
         Insert: {
           assigned_rep?: string | null
@@ -279,6 +283,7 @@ export type Database = {
           registration_date?: string | null
           status?: string | null
           tags?: string | null
+          user_id?: string | null
         }
         Update: {
           assigned_rep?: string | null
@@ -294,6 +299,7 @@ export type Database = {
           registration_date?: string | null
           status?: string | null
           tags?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -898,6 +904,7 @@ export type Database = {
           status: string
           title: string
           updated_at: string | null
+          user_id: string | null
         }
         Insert: {
           assigned_user_id?: string | null
@@ -909,6 +916,7 @@ export type Database = {
           status?: string
           title: string
           updated_at?: string | null
+          user_id?: string | null
         }
         Update: {
           assigned_user_id?: string | null
@@ -920,6 +928,7 @@ export type Database = {
           status?: string
           title?: string
           updated_at?: string | null
+          user_id?: string | null
         }
         Relationships: [
           {

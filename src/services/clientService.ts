@@ -1,241 +1,88 @@
-import { supabase } from '@/lib/supabase';
-import { Client, ClientActivity } from '@/types/clients';
 
-// Export the Client type for use in other services
-export type { Client } from '@/types/clients';
+import { supabase } from '@/integrations/supabase/client';
+import { Tables, TablesInsert, TablesUpdate } from '@/integrations/supabase/types';
 
-export const getClients = async (
-  search?: string,
-  status?: string,
-  sortBy: string = 'registration_date',
-  sortOrder: string = 'desc',
-  page: number = 1,
-  pageSize: number = 20
-) => {
-  try {
-    let query = supabase
+export type Client = Tables<'clients'>;
+export type ClientInsert = TablesInsert<'clients'>;
+export type ClientUpdate = TablesUpdate<'clients'>;
+
+export const clientService = {
+  async getClients() {
+    const { data: user } = await supabase.auth.getUser();
+    if (!user.user) throw new Error('User not authenticated');
+
+    const { data, error } = await supabase
       .from('clients')
-      .select('*', { count: 'exact' });
-
-    if (search) {
-      query = query.or(
-        `full_name.ilike.%${search}%,phone_number.ilike.%${search}%,email.ilike.%${search}%`
-      );
-    }
-
-    if (status) {
-      query = query.eq('status', status);
-    }
-
-    query = query.order(sortBy, { ascending: sortOrder === 'asc' });
-
-    const from = (page - 1) * pageSize;
-    query = query.range(from, from + pageSize - 1);
-
-    const { data, error, count } = await query;
+      .select('*')
+      .order('full_name', { ascending: true });
 
     if (error) throw error;
+    return data;
+  },
 
-    const clients = data as Client[];
-    const repIds = clients
-      .filter(client => client.assigned_rep)
-      .map(client => client.assigned_rep);
+  async getClientById(id: string) {
+    const { data: user } = await supabase.auth.getUser();
+    if (!user.user) throw new Error('User not authenticated');
 
-    if (repIds.length > 0) {
-      const { data: reps, error: repsError } = await supabase
-        .from('users')
-        .select('id, full_name, avatar_url')
-        .in('id', repIds);
-
-      if (repsError) {
-        console.warn('Error fetching assigned reps:', repsError);
-      } else if (reps) {
-        clients.forEach(client => {
-          if (client.assigned_rep) {
-            const rep = reps.find(r => r.id === client.assigned_rep);
-            if (rep) {
-              client.assigned_rep_user = {
-                id: rep.id,
-                full_name: rep.full_name,
-                avatar_url: rep.avatar_url
-              };
-            }
-          }
-        });
-      }
-    }
-
-    return {
-      clients,
-      count: count || 0,
-    };
-  } catch (error) {
-    console.error('Error fetching clients:', error);
-    throw error;
-  }
-};
-
-export const getClient = async (id: string) => {
-  try {
     const { data, error } = await supabase
       .from('clients')
       .select('*')
       .eq('id', id)
+      .maybeSingle();
+
+    if (error) throw error;
+    return data;
+  },
+
+  async createClient(client: Omit<ClientInsert, 'user_id'>) {
+    const { data: user } = await supabase.auth.getUser();
+    if (!user.user) throw new Error('User not authenticated');
+
+    const { data, error } = await supabase
+      .from('clients')
+      .insert({
+        ...client,
+        user_id: user.user.id,
+        assigned_rep: user.user.id
+      })
+      .select()
       .single();
 
     if (error) throw error;
+    return data;
+  },
 
-    const client = data as Client;
+  async updateClient(id: string, updates: ClientUpdate) {
+    const { data: user } = await supabase.auth.getUser();
+    if (!user.user) throw new Error('User not authenticated');
 
-    if (client.assigned_rep) {
-      const { data: repData, error: repError } = await supabase
-        .from('users')
-        .select('id, full_name, avatar_url')
-        .eq('id', client.assigned_rep)
-        .single();
-
-      if (!repError && repData) {
-        client.assigned_rep_user = {
-          id: repData.id,
-          full_name: repData.full_name,
-          avatar_url: repData.avatar_url
-        };
-      }
-    }
-
-    return client;
-  } catch (error) {
-    console.error('Error fetching client:', error);
-    throw error;
-  }
-};
-
-export const createClient = async (client: Omit<Client, 'id' | 'created_at' | 'updated_at'>) => {
-  try {
     const { data, error } = await supabase
       .from('clients')
-      .insert([client])
-      .select();
-
-    if (error) throw error;
-
-    return data[0] as Client;
-  } catch (error) {
-    console.error('Error creating client:', error);
-    throw error;
-  }
-};
-
-export const updateClient = async (id: string, client: Partial<Client>) => {
-  try {
-    const { data, error } = await supabase
-      .from('clients')
-      .update(client)
+      .update(updates)
       .eq('id', id)
-      .select();
+      .select()
+      .single();
 
     if (error) throw error;
+    return data;
+  },
 
-    return data[0] as Client;
-  } catch (error) {
-    console.error('Error updating client:', error);
-    throw error;
-  }
-};
+  async deleteClient(id: string) {
+    const { data: user } = await supabase.auth.getUser();
+    if (!user.user) throw new Error('User not authenticated');
 
-export const deleteClient = async (id: string) => {
-  try {
     const { error } = await supabase
       .from('clients')
       .delete()
       .eq('id', id);
 
     if (error) throw error;
-  } catch (error) {
-    console.error('Error deleting client:', error);
-    throw error;
-  }
-};
+  },
 
-export const getClientActivities = async (clientId: string) => {
-  try {
-    // First, let's check the table structure to understand available columns
-    const { data: tableInfo, error: tableError } = await supabase
-      .from('client_activity')
-      .select('*')
-      .limit(1);
+  async getClientServices(clientId: string) {
+    const { data: user } = await supabase.auth.getUser();
+    if (!user.user) throw new Error('User not authenticated');
 
-    if (tableError) {
-      console.error('Error checking table structure:', tableError);
-      throw tableError;
-    }
-
-    // Log table structure to help diagnose column names
-    console.log('Client activity table structure sample:', tableInfo);
-    
-    // Modified query to use created_at for ordering instead of date
-    // This assumes the table has a created_at column which is common in Supabase
-    const { data, error } = await supabase
-      .from('client_activity')
-      .select('*')
-      .eq('client_id', clientId)
-      .order('created_at', { ascending: false });
-
-    if (error) throw error;
-
-    const activities = data as ClientActivity[];
-    
-    const userIds = activities
-      .filter(activity => activity.created_by)
-      .map(activity => activity.created_by);
-    
-    if (userIds.length > 0) {
-      const { data: users, error: usersError } = await supabase
-        .from('users')
-        .select('id, full_name, avatar_url')
-        .in('id', userIds);
-
-      if (!usersError && users) {
-        activities.forEach(activity => {
-          if (activity.created_by) {
-            const user = users.find(u => u.id === activity.created_by);
-            if (user) {
-              activity.created_by_user = {
-                id: user.id,
-                full_name: user.full_name,
-                avatar_url: user.avatar_url
-              };
-            }
-          }
-        });
-      }
-    }
-
-    return activities;
-  } catch (error) {
-    console.error('Error fetching client activities:', error);
-    throw error;
-  }
-};
-
-export const createClientActivity = async (activity: Omit<ClientActivity, 'id'>) => {
-  try {
-    const { data, error } = await supabase
-      .from('client_activity')
-      .insert([activity])
-      .select();
-
-    if (error) throw error;
-
-    return data[0] as ClientActivity;
-  } catch (error) {
-    console.error('Error creating client activity:', error);
-    throw error;
-  }
-};
-
-export const getClientServices = async (clientId: string) => {
-  try {
     const { data, error } = await supabase
       .from('client_services')
       .select('*')
@@ -243,34 +90,54 @@ export const getClientServices = async (clientId: string) => {
       .order('service_date', { ascending: false });
 
     if (error) throw error;
+    return data;
+  },
 
-    return data || [];
-  } catch (error) {
-    console.error('Error fetching client services:', error);
-    throw error;
-  }
-};
+  async createClientService(service: Omit<TablesInsert<'client_services'>, 'created_by'>) {
+    const { data: user } = await supabase.auth.getUser();
+    if (!user.user) throw new Error('User not authenticated');
 
-export const createClientService = async (service: {
-  client_id: string;
-  service_date: string;
-  description: string;
-  price: number;
-}) => {
-  try {
     const { data, error } = await supabase
       .from('client_services')
-      .insert([{
+      .insert({
         ...service,
-        created_by: supabase.auth.getUser().then(res => res.data?.user?.id)
-      }])
-      .select();
+        created_by: user.user.id
+      })
+      .select()
+      .single();
 
     if (error) throw error;
+    return data;
+  },
 
-    return data[0];
-  } catch (error) {
-    console.error('Error creating client service:', error);
-    throw error;
+  async getClientActivity(clientId: string) {
+    const { data: user } = await supabase.auth.getUser();
+    if (!user.user) throw new Error('User not authenticated');
+
+    const { data, error } = await supabase
+      .from('client_activity')
+      .select('*')
+      .eq('client_id', clientId)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return data;
+  },
+
+  async createClientActivity(activity: Omit<TablesInsert<'client_activity'>, 'created_by'>) {
+    const { data: user } = await supabase.auth.getUser();
+    if (!user.user) throw new Error('User not authenticated');
+
+    const { data, error } = await supabase
+      .from('client_activity')
+      .insert({
+        ...activity,
+        created_by: user.user.id
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
   }
 };
