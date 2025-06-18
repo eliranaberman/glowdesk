@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
@@ -169,7 +170,7 @@ const AppointmentForm = ({
             date: appointmentDate,
             start_time: appointmentData.start_time,
             end_time: appointmentData.end_time,
-            status: appointmentData.status,
+            status: appointmentData.status as 'scheduled' | 'cancelled' | 'completed',
             notes: appointmentData.notes,
             send_confirmation: true,
             sync_with_calendar: true,
