@@ -1,22 +1,17 @@
-
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Search, Plus, AlertTriangle } from "lucide-react";
+import { useState, useEffect } from 'react';
+import { Plus, Package, AlertTriangle, TrendingDown } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle, 
-  DialogDescription, 
-  DialogFooter 
-} from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { toast } from "@/hooks/use-toast";
-import { useAuth } from "@/contexts/AuthContext";
-import { usePermissions } from "@/hooks/use-permissions";
+  Table, 
+  TableBody, 
+  TableCell, 
+  TableHead, 
+  TableHeader, 
+  TableRow 
+} from '@/components/ui/table';
+import { useToast } from '@/hooks/use-toast';
 import { 
   getInventoryItems,
   addInventoryItem,
@@ -24,286 +19,266 @@ import {
   deleteInventoryItem,
   getLowStockItems,
   calculateInventoryStatus,
-  type InventoryItem
-} from "@/services/inventoryService";
+  type InventoryItem 
+} from '@/services/inventoryService';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogDescription, 
+  DialogFooter, 
+  DialogHeader, 
+  DialogTitle, 
+  DialogTrigger 
+} from '@/components/ui/dialog';
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from '@/components/ui/select';
 
 const Inventory = () => {
-  const { user } = useAuth();
-  const { canWrite } = usePermissions();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [isAddItemDialogOpen, setIsAddItemDialogOpen] = useState(false);
-  const [newItem, setNewItem] = useState({
-    name: "",
-    category: "",
-    quantity: "",
-    price: ""
+  const { toast } = useToast();
+  const [items, setItems] = useState<InventoryItem[]>([]);
+  const [lowStockItems, setLowStockItems] = useState<InventoryItem[]>([]);
+  const [inventoryStatus, setInventoryStatus] = useState({
+    totalItems: 0,
+    lowStockCount: 0,
+    totalValue: 0
   });
-  const [inventoryItems, setInventoryItems] = useState<InventoryItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [canModifyInventory, setCanModifyInventory] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [formData, setFormData] = useState({
+    name: '',
+    category: '',
+    quantity: 0,
+    cost: 0,
+    status: 'תקין',
+    entry_date: new Date().toISOString().split('T')[0],
+  });
 
   useEffect(() => {
-    const loadInventoryItems = async () => {
-      setLoading(true);
-      const items = await getInventoryItems();
-      setInventoryItems(items);
-      setLoading(false);
-    };
-
-    loadInventoryItems();
+    loadInventoryData();
   }, []);
 
-  useEffect(() => {
-    const checkPermissions = async () => {
-      if (user?.id) {
-        const hasWritePermission = await canWrite('inventory');
-        setCanModifyInventory(hasWritePermission);
-      }
-    };
-
-    checkPermissions();
-  }, [user, canWrite]);
-
-  // Filter items based on search query
-  const filteredItems = inventoryItems.filter(
-    (item) =>
-      item.name.includes(searchQuery) || item.category.includes(searchQuery)
-  );
-
-  // Count low stock items
-  const lowStockCount = inventoryItems.filter(
-    (item) => item.status === "מלאי נמוך" || item.status === "אזל במלאי"
-  ).length;
+  const loadInventoryData = async () => {
+    try {
+      setLoading(true);
+      const [itemsData, lowStockData, statusData] = await Promise.all([
+        getInventoryItems(),
+        getLowStockItems(),
+        calculateInventoryStatus()
+      ]);
+      
+      setItems(itemsData);
+      setLowStockItems(lowStockData);
+      setInventoryStatus(statusData);
+    } catch (error: any) {
+      console.error('Error loading inventory:', error);
+      toast({
+        variant: "destructive",
+        title: "שגיאה בטעינת המלאי",
+        description: error.message
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleAddItem = async () => {
-    // Validate form
-    if (!newItem.name || !newItem.category || !newItem.quantity) {
+    try {
+      await addInventoryItem(formData);
       toast({
-        title: "שגיאה",
-        description: "נא למלא את כל השדות הנדרשים",
-        variant: "destructive"
+        title: "פריט נוסף בהצלחה",
+        description: `${formData.name} נוסף למלאי`
       });
-      return;
-    }
-
-    // Add new item to inventory
-    const quantity = parseInt(newItem.quantity);
-    const cost = parseFloat(newItem.price);
-    const status = calculateInventoryStatus(quantity);
-
-    const itemToAdd = {
-      name: newItem.name,
-      category: newItem.category,
-      quantity,
-      cost,
-      status,
-      entry_date: new Date().toISOString().split('T')[0]
-    };
-
-    const addedItem = await addInventoryItem(itemToAdd);
-    
-    if (addedItem) {
-      setInventoryItems([...inventoryItems, addedItem]);
-      
-      // Reset form and close dialog
-      setNewItem({ name: "", category: "", quantity: "", price: "" });
-      setIsAddItemDialogOpen(false);
+      setIsDialogOpen(false);
+      setFormData({
+        name: '',
+        category: '',
+        quantity: 0,
+        cost: 0,
+        status: 'תקין',
+        entry_date: new Date().toISOString().split('T')[0],
+      });
+      loadInventoryData();
+    } catch (error: any) {
+      console.error('Error adding item:', error);
+      toast({
+        variant: "destructive",
+        title: "שגיאה בהוספת פריט",
+        description: error.message
+      });
     }
   };
 
   return (
-    <div dir="rtl">
-      <h1 className="text-2xl font-bold mb-4">ניהול מלאי</h1>
-      <p className="text-muted-foreground mb-6">
-        מעקב אחרי מלאי המוצרים שלך וניהול הזמנות חדשות.
-      </p>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm">סך הכל פריטים</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold">{inventoryItems.length}</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm">קטגוריות</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold">
-              {new Set(inventoryItems.map((item) => item.category)).size}
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm">פריטים במלאי נמוך</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center">
-              <p className="text-2xl font-bold">{lowStockCount}</p>
-              {lowStockCount > 0 && (
-                <AlertTriangle className="mr-2 h-5 w-5 text-amber-500" />
-              )}
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold">ניהול מלאי</h1>
+          <p className="text-muted-foreground">ניהול מלאי ומוצרים</p>
+        </div>
+        
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogTrigger asChild>
+            <Button>
+              <Plus className="mr-2 h-4 w-4" />
+              הוסף פריט
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>הוסף פריט חדש למלאי</DialogTitle>
+              <DialogDescription>הזן את פרטי הפריט החדש</DialogDescription>
+            </DialogHeader>
+            
+            <div className="grid gap-4 py-4">
+              <div className="grid gap-2">
+                <Label htmlFor="name">שם הפריט</Label>
+                <Input
+                  id="name"
+                  value={formData.name}
+                  onChange={(e) => setFormData({...formData, name: e.target.value})}
+                  placeholder="שם הפריט"
+                />
+              </div>
+              
+              <div className="grid gap-2">
+                <Label htmlFor="category">קטגוריה</Label>
+                <Select
+                  value={formData.category}
+                  onValueChange={(value) => setFormData({...formData, category: value})}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="בחר קטגוריה" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="ציפורניים">ציפורניים</SelectItem>
+                    <SelectItem value="איפור">איפור</SelectItem>
+                    <SelectItem value="טיפוח">טיפוח</SelectItem>
+                    <SelectItem value="כלים">כלים</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="grid gap-2">
+                <Label htmlFor="quantity">כמות</Label>
+                <Input
+                  id="quantity"
+                  type="number"
+                  value={formData.quantity}
+                  onChange={(e) => setFormData({...formData, quantity: parseInt(e.target.value) || 0})}
+                />
+              </div>
+              
+              <div className="grid gap-2">
+                <Label htmlFor="cost">עלות</Label>
+                <Input
+                  id="cost"
+                  type="number"
+                  step="0.01"
+                  value={formData.cost}
+                  onChange={(e) => setFormData({...formData, cost: parseFloat(e.target.value) || 0})}
+                />
+              </div>
             </div>
-          </CardContent>
-        </Card>
+            
+            <DialogFooter>
+              <Button onClick={handleAddItem}>הוסף פריט</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
 
+      {/* Status Cards */}
+      <div className="grid gap-4 md:grid-cols-3">
         <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm">הזמנות בתהליך</CardTitle>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">סה"כ פריטים</CardTitle>
+            <Package className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold">2</p>
+            <div className="text-2xl font-bold">{inventoryStatus.totalItems}</div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">פריטים במלאי נמוך</CardTitle>
+            <AlertTriangle className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-destructive">{inventoryStatus.lowStockCount}</div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">ערך כולל</CardTitle>
+            <TrendingDown className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">₪{inventoryStatus.totalValue.toFixed(2)}</div>
           </CardContent>
         </Card>
       </div>
 
+      {/* Inventory Table */}
       <Card>
-        <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <CardTitle>רשימת מלאי</CardTitle>
-          <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
-            <div className="relative w-full sm:w-auto">
-              <Search className="absolute right-2 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="חיפוש מוצרים..."
-                className="pr-8 w-full sm:w-[200px]"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-            {canModifyInventory && (
-              <Button onClick={() => setIsAddItemDialogOpen(true)}>
-                <Plus className="h-4 w-4 ml-2" />
-                הוסף פריט
-              </Button>
-            )}
-          </div>
+        <CardHeader>
+          <CardTitle>פריטי מלאי</CardTitle>
+          <CardDescription>רשימת כל הפריטים במלאי</CardDescription>
         </CardHeader>
         <CardContent>
           {loading ? (
-            <div className="flex justify-center items-center p-8">
-              <div className="animate-spin h-8 w-8 border-2 border-primary rounded-full border-t-transparent"></div>
-              <span className="mr-2">טוען נתונים...</span>
+            <div className="flex justify-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
             </div>
           ) : (
-            <div className="border rounded-lg overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-secondary text-secondary-foreground">
-                    <tr>
-                      <th className="text-right py-3 px-4 font-medium">שם המוצר</th>
-                      <th className="text-right py-3 px-4 font-medium">קטגוריה</th>
-                      <th className="text-right py-3 px-4 font-medium">כמות</th>
-                      <th className="text-right py-3 px-4 font-medium">מחיר</th>
-                      <th className="text-right py-3 px-4 font-medium">סטטוס</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredItems.map((item) => (
-                      <tr
-                        key={item.id}
-                        className="border-b last:border-b-0 hover:bg-accent/50"
-                      >
-                        <td className="py-3 px-4">{item.name}</td>
-                        <td className="py-3 px-4">{item.category}</td>
-                        <td className="py-3 px-4">{item.quantity}</td>
-                        <td className="py-3 px-4">₪{item.cost}</td>
-                        <td className="py-3 px-4">
-                          <Badge
-                            variant={
-                              item.status === "תקין"
-                                ? "outline"
-                                : item.status === "מלאי נמוך"
-                                ? "secondary"
-                                : "destructive"
-                            }
-                          >
-                            {item.status}
-                          </Badge>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>שם הפריט</TableHead>
+                  <TableHead>קטגוריה</TableHead>
+                  <TableHead>כמות</TableHead>
+                  <TableHead>עלות</TableHead>
+                  <TableHead>סטטוס</TableHead>
+                  <TableHead>תאריך הכנסה</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {items.map((item) => (
+                  <TableRow key={item.id}>
+                    <TableCell className="font-medium">{item.name}</TableCell>
+                    <TableCell>{item.category}</TableCell>
+                    <TableCell>
+                      <Badge variant={item.quantity <= 5 ? "destructive" : "default"}>
+                        {item.quantity}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>₪{item.cost}</TableCell>
+                    <TableCell>
+                      <Badge variant="outline">{item.status}</Badge>
+                    </TableCell>
+                    <TableCell>{new Date(item.entry_date).toLocaleDateString('he-IL')}</TableCell>
+                  </TableRow>
+                ))}
+                {items.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                      אין פריטים במלאי
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
           )}
         </CardContent>
       </Card>
-
-      <Dialog open={isAddItemDialogOpen} onOpenChange={setIsAddItemDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]" dir="rtl">
-          <DialogHeader>
-            <DialogTitle>הוספת פריט חדש</DialogTitle>
-            <DialogDescription>
-              הוסף פריט חדש למלאי
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="item-name" className="text-right">
-                שם פריט
-              </Label>
-              <Input
-                id="item-name"
-                placeholder="שם הפריט"
-                className="col-span-3"
-                value={newItem.name}
-                onChange={(e) => setNewItem({...newItem, name: e.target.value})}
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="item-category" className="text-right">
-                קטגוריה
-              </Label>
-              <Input
-                id="item-category"
-                placeholder="קטגוריה"
-                className="col-span-3"
-                value={newItem.category}
-                onChange={(e) => setNewItem({...newItem, category: e.target.value})}
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="item-quantity" className="text-right">
-                כמות
-              </Label>
-              <Input
-                id="item-quantity"
-                type="number"
-                placeholder="כמות"
-                className="col-span-3"
-                value={newItem.quantity}
-                onChange={(e) => setNewItem({...newItem, quantity: e.target.value})}
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="item-price" className="text-right">
-                מחיר (₪)
-              </Label>
-              <Input
-                id="item-price"
-                type="number"
-                placeholder="מחיר"
-                className="col-span-3"
-                value={newItem.price}
-                onChange={(e) => setNewItem({...newItem, price: e.target.value})}
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsAddItemDialogOpen(false)}>
-              ביטול
-            </Button>
-            <Button onClick={handleAddItem}>הוסף פריט</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };

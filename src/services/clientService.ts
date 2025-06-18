@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { Tables, TablesInsert, TablesUpdate } from '@/integrations/supabase/types';
 
@@ -150,7 +151,7 @@ export const createClientService = async (service: Omit<TablesInsert<'client_ser
   return data;
 };
 
-// Client activity operations
+// Client activity operations  
 export const getClientActivities = async (clientId: string) => {
   const { data: user } = await supabase.auth.getUser();
   if (!user.user) throw new Error('User not authenticated');

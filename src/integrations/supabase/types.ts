@@ -94,7 +94,15 @@ export type Database = {
           user_id?: string | null
           whatsapp_notification_sent?: boolean | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "appointments_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       calendar_connections: {
         Row: {
@@ -185,24 +193,33 @@ export type Database = {
           client_id: string | null
           created_at: string | null
           created_by: string | null
+          date: string | null
+          description: string | null
           id: string
           notes: string | null
+          type: string | null
         }
         Insert: {
           activity_type?: string | null
           client_id?: string | null
           created_at?: string | null
           created_by?: string | null
+          date?: string | null
+          description?: string | null
           id?: string
           notes?: string | null
+          type?: string | null
         }
         Update: {
           activity_type?: string | null
           client_id?: string | null
           created_at?: string | null
           created_by?: string | null
+          date?: string | null
+          description?: string | null
           id?: string
           notes?: string | null
+          type?: string | null
         }
         Relationships: [
           {
@@ -210,6 +227,13 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_activity_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
             referencedColumns: ["id"]
           },
         ]
@@ -267,6 +291,7 @@ export type Database = {
           registration_date: string | null
           status: string | null
           tags: string | null
+          updated_at: string | null
           user_id: string | null
         }
         Insert: {
@@ -283,6 +308,7 @@ export type Database = {
           registration_date?: string | null
           status?: string | null
           tags?: string | null
+          updated_at?: string | null
           user_id?: string | null
         }
         Update: {
@@ -299,9 +325,18 @@ export type Database = {
           registration_date?: string | null
           status?: string | null
           tags?: string | null
+          updated_at?: string | null
           user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "clients_assigned_rep_fkey"
+            columns: ["assigned_rep"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       coupon_assignments: {
         Row: {
