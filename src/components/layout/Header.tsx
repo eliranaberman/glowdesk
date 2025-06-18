@@ -1,8 +1,7 @@
 
 import { useState } from 'react';
-import { Bell, Search, Menu, User, LogOut } from 'lucide-react';
+import { Bell, Menu, User, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { User as SupabaseUser } from '@supabase/supabase-js';
@@ -28,7 +27,6 @@ interface HeaderProps {
 
 const Header = ({ pageTitle, toggleMobileSidebar, handleLogout, user }: HeaderProps) => {
   const [notificationCount] = useState(3);
-  const [searchQuery, setSearchQuery] = useState('');
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -50,38 +48,6 @@ const Header = ({ pageTitle, toggleMobileSidebar, handleLogout, user }: HeaderPr
   const getDisplayName = (): string => {
     if (!user) return '';
     return user.user_metadata?.full_name || user.email || '';
-  };
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      // In a real app, this would perform an actual search
-      toast({
-        title: "חיפוש",
-        description: `מחפש: "${searchQuery}"`,
-      });
-      
-      // For demo purposes, navigate to a relevant page based on search
-      if (searchQuery.toLowerCase().includes('לקוח') || 
-          searchQuery.toLowerCase().includes('client')) {
-        navigate('/customers');
-      } else if (searchQuery.toLowerCase().includes('פגיש') || 
-                searchQuery.toLowerCase().includes('appoint')) {
-        navigate('/scheduling');
-      } else if (searchQuery.toLowerCase().includes('שיווק') || 
-                searchQuery.toLowerCase().includes('market')) {
-        navigate('/social-media');
-      } else {
-        // Default search results page could be added here
-        toast({
-          title: "תוצאות חיפוש",
-          description: "לא נמצאו תוצאות התואמות לחיפוש שלך",
-          variant: "destructive",
-        });
-      }
-      
-      setSearchQuery('');
-    }
   };
 
   // Enhanced logout with loading state
@@ -117,19 +83,6 @@ const Header = ({ pageTitle, toggleMobileSidebar, handleLogout, user }: HeaderPr
           </Button>
           <h1 className="text-xl font-semibold text-center">By Chen Mizrahi</h1>
         </div>
-
-        <form onSubmit={handleSearch} className="hidden md:flex items-center max-w-sm flex-1 mx-4">
-          <div className="relative w-full">
-            <Search className="absolute right-2 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="חיפוש..."
-              className="pr-8 rounded-full bg-secondary border-none text-right"
-              dir="rtl"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-        </form>
 
         <div className="flex items-center gap-2">
           <DropdownMenu>
