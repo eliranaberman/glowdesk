@@ -46,7 +46,7 @@ const Dashboard = () => {
     };
     
     initData();
-  }, [enhancedToast]);
+  }, []);
   
   const stats = [
     { 

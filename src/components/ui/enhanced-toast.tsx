@@ -2,6 +2,7 @@
 import { useToast } from "@/hooks/use-toast"
 import { CheckCircle, AlertCircle, Info, XCircle, Sparkles } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useCallback, useMemo } from "react"
 
 export type ToastType = 'success' | 'error' | 'warning' | 'info' | 'magic'
 
@@ -43,7 +44,7 @@ const toastConfig = {
 export function useEnhancedToast() {
   const { toast } = useToast()
 
-  const showToast = ({ type, title, description, action }: EnhancedToastProps) => {
+  const showToast = useCallback(({ type, title, description, action }: EnhancedToastProps) => {
     const config = toastConfig[type]
     const Icon = config.icon
 
@@ -60,9 +61,9 @@ export function useEnhancedToast() {
         config.className
       ),
     })
-  }
+  }, [toast])
 
-  return {
+  return useMemo(() => ({
     success: (title: string, description?: string) => 
       showToast({ type: 'success', title, description }),
     error: (title: string, description?: string) => 
@@ -73,5 +74,5 @@ export function useEnhancedToast() {
       showToast({ type: 'info', title, description }),
     magic: (title: string, description?: string) => 
       showToast({ type: 'magic', title, description }),
-  }
+  }), [showToast])
 }
