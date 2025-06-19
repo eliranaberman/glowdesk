@@ -127,6 +127,26 @@ export default {
 				'pulse-subtle': {
 					'0%, 100%': { opacity: '1' },
 					'50%': { opacity: '0.8' }
+				},
+				'shimmer': {
+					'0%': { transform: 'translateX(-100%)' },
+					'100%': { transform: 'translateX(100%)' }
+				},
+				'bounce-gentle': {
+					'0%, 100%': { transform: 'translateY(0)' },
+					'50%': { transform: 'translateY(-4px)' }
+				},
+				'scale-up': {
+					'0%': { transform: 'scale(1)' },
+					'100%': { transform: 'scale(1.05)' }
+				},
+				'wiggle': {
+					'0%, 100%': { transform: 'rotate(-3deg)' },
+					'50%': { transform: 'rotate(3deg)' }
+				},
+				'float': {
+					'0%, 100%': { transform: 'translateY(0px)' },
+					'50%': { transform: 'translateY(-10px)' }
 				}
 			},
 			animation: {
@@ -136,9 +156,18 @@ export default {
 				'fade-out': 'fade-out 0.3s ease-out',
 				'slide-in': 'slide-in 0.3s ease-out',
 				'pulse-subtle': 'pulse-subtle 2s ease-in-out infinite',
-				'button-press': 'button-press 0.2s ease-out',
-				'scale-in-out': 'scale-in-out 0.3s ease-in-out',
-				'float-in': 'float-in 0.5s ease-out',
+				'shimmer': 'shimmer 2s ease-in-out infinite',
+				'bounce-gentle': 'bounce-gentle 2s ease-in-out infinite',
+				'scale-up': 'scale-up 0.2s ease-out',
+				'wiggle': 'wiggle 1s ease-in-out infinite',
+				'float': 'float 3s ease-in-out infinite',
+				'spin-slow': 'spin 3s linear infinite',
+				'reverse': 'spin 1s linear infinite reverse',
+			},
+			animationDelay: {
+				'150': '150ms',
+				'300': '300ms',
+				'450': '450ms',
 			},
 			textAlign: {
 				'right': 'right',
@@ -152,11 +181,32 @@ export default {
 				'card': '0 8px 24px rgba(149, 157, 165, 0.1)',
 				'elevated': '0 8px 28px -2px rgba(0, 0, 0, 0.07)',
 				'hover': '0 14px 34px -4px rgba(0, 0, 0, 0.08)',
+				'glow': '0 0 20px rgba(212, 180, 153, 0.3)',
+				'glow-soft': '0 0 15px rgba(212, 180, 153, 0.2)',
 			},
 			transitionTimingFunction: {
 				'elegant': 'cubic-bezier(0.4, 0, 0.2, 1)',
+				'bounce-soft': 'cubic-bezier(0.68, -0.55, 0.265, 1.55)',
 			},
+			backdropBlur: {
+				xs: '2px',
+			}
 		}
 	},
-	plugins: [require("tailwindcss-animate")],
+	plugins: [
+		require("tailwindcss-animate"),
+		function({ addUtilities }: { addUtilities: any }) {
+			addUtilities({
+				'.animation-delay-150': {
+					'animation-delay': '150ms',
+				},
+				'.animation-delay-300': {
+					'animation-delay': '300ms',
+				},
+				'.animation-delay-450': {
+					'animation-delay': '450ms',
+				},
+			})
+		}
+	],
 } satisfies Config;

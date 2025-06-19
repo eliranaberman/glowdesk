@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect, Suspense } from 'react';
-import { CalendarClock, Users, DollarSign, TrendingUp } from 'lucide-react';
+import { CalendarClock, Users, DollarSign, TrendingUp, Plus, Calendar, UserPlus, CreditCard, Package } from 'lucide-react';
 import StatCard from '../components/dashboard/StatCard';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -10,6 +9,9 @@ import { initializeMarketingData } from '@/services/marketing';
 import { usePermissions } from '@/hooks/use-permissions';
 import PermissionGuard from '@/components/auth/PermissionGuard';
 import BusinessAnalytics from '@/components/dashboard/BusinessAnalytics';
+import { useEnhancedToast } from '@/components/ui/enhanced-toast';
+import { HelpTooltip } from '@/components/ui/enhanced-tooltip';
+import { SkeletonCard, SkeletonTable } from '@/components/ui/skeleton';
 
 const DailySummary = React.lazy(() => import('../components/dashboard/DailySummary'));
 const RecentAppointments = React.lazy(() => import('../components/dashboard/RecentAppointments'));
@@ -20,35 +22,65 @@ const MarketingMessages = React.lazy(() => import('@/components/dashboard/Market
 const InactiveClientsAlert = React.lazy(() => import('@/components/dashboard/InactiveClientsAlert'));
 const AnalyticsCharts = React.lazy(() => import('@/components/dashboard/AnalyticsCharts'));
 
-const LoadingFallback = () => (
-  <div className="animate-pulse p-6 bg-card rounded-xl shadow-soft">
-    <div className="h-8 w-48 bg-muted rounded mb-4"></div>
-    <div className="space-y-3">
-      <div className="h-4 bg-muted rounded w-full"></div>
-      <div className="h-4 bg-muted rounded w-5/6"></div>
-    </div>
-  </div>
-);
+const LoadingFallback = () => <SkeletonCard />;
 
 const Dashboard = () => {
   const { toast } = useToast();
+  const enhancedToast = useEnhancedToast();
   const isMobile = useIsMobile();
   const { isAdmin, isOwner } = usePermissions();
   const hasFinanceAccess = isAdmin || isOwner;
+  const [isLoading, setIsLoading] = useState(true);
   
   useEffect(() => {
     const initData = async () => {
-      await initializeMarketingData();
+      setIsLoading(true);
+      try {
+        await initializeMarketingData();
+        enhancedToast.success("הדשבורד נטען בהצלחה", "כל הנתונים מעודכנים");
+      } catch (error) {
+        enhancedToast.error("שגיאה בטעינת הנתונים", "אנא נסי לרענן את הדף");
+      } finally {
+        setIsLoading(false);
+      }
     };
     
     initData();
-  }, []);
+  }, [enhancedToast]);
   
   const stats = [
-    { title: 'סך הכל לקוחות', value: '176', icon: <Users className="h-5 w-5 text-primary" />, change: { value: '12%', positive: true } },
-    { title: 'פגישות חודשיות', value: '126', icon: <CalendarClock className="h-5 w-5 text-primary" />, change: { value: '5%', positive: true } },
-    { title: 'הכנסה חודשית', value: '₪15,120', icon: <DollarSign className="h-5 w-5 text-primary" />, change: { value: '8%', positive: true } },
-    { title: 'ערך ממוצע לשירות', value: '₪120', icon: <TrendingUp className="h-5 w-5 text-primary" />, change: { value: '3%', positive: false } },
+    { 
+      title: 'סך הכל לקוחות', 
+      value: '176', 
+      icon: <Users className="h-5 w-5 text-primary" />, 
+      change: { value: '12%', positive: true },
+      description: 'לקוחות פעילות בחודש האחרון',
+      onClick: () => enhancedToast.info("מעבר לרשימת הלקוחות")
+    },
+    { 
+      title: 'פגישות חודשיות', 
+      value: '126', 
+      icon: <CalendarClock className="h-5 w-5 text-primary" />, 
+      change: { value: '5%', positive: true },
+      description: 'פגישות שהושלמו החודש',
+      onClick: () => enhancedToast.info("מעבר ליומן הפגישות")
+    },
+    { 
+      title: 'הכנסה חודשית', 
+      value: '₪15,120', 
+      icon: <DollarSign className="h-5 w-5 text-primary" />, 
+      change: { value: '8%', positive: true },
+      description: 'הכנסה נטו לאחר הוצאות',
+      onClick: () => enhancedToast.info("מעבר לדוח הכנסות")
+    },
+    { 
+      title: 'ערך ממוצע לשירות', 
+      value: '₪120', 
+      icon: <TrendingUp className="h-5 w-5 text-primary" />, 
+      change: { value: '3%', positive: false },
+      description: 'ממוצע הכנסה לטיפול',
+      onClick: () => enhancedToast.info("מעבר לניתוח שירותים")
+    },
   ];
   
   const appointments = [
@@ -106,17 +138,71 @@ const Dashboard = () => {
     { name: '30', value: 4 },
   ];
 
+  const quickActions = [
+    {
+      title: "פגישה חדשה",
+      description: "תזמון פגישה ללקוח חדש",
+      icon: <Calendar className="h-5 w-5" />,
+      to: "/scheduling/new",
+      variant: "action" as const,
+      tooltip: "קביעת פגישה חדשה במערכת היומנים"
+    },
+    {
+      title: "הוספת לקוח",
+      description: "יצירת פרופיל לקוח חדש",
+      icon: <UserPlus className="h-5 w-5" />,
+      to: "/clients/new",
+      variant: "premium" as const,
+      tooltip: "הוספת לקוח חדש עם כל הפרטים הרלוונטיים"
+    },
+    {
+      title: "רישום תשלום",
+      description: "תיעוד עסקה חדשה",
+      icon: <CreditCard className="h-5 w-5" />,
+      to: "/payments/new",
+      variant: "success" as const,
+      tooltip: "רישום תשלום או הכנסה חדשה במערכת"
+    },
+    {
+      title: "עדכון מלאי",
+      description: "רישום מוצרים חדשים או חוסרים",
+      icon: <Package className="h-5 w-5" />,
+      to: "/inventory/new",
+      variant: "warm" as const,
+      tooltip: "עדכון מצב המלאי והוספת מוצרים חדשים"
+    }
+  ];
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6 md:space-y-8 animate-fade-in" dir="rtl">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <SkeletonCard key={i} />
+          ))}
+        </div>
+        <SkeletonTable />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6 md:space-y-8 animate-fade-in" dir="rtl">
+      {/* Enhanced Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         {stats.map((stat) => (
-          <StatCard
-            key={stat.title}
-            title={stat.title}
-            value={stat.value}
-            icon={stat.icon}
-            change={stat.change}
-          />
+          <HelpTooltip key={stat.title} content={stat.description || ""} variant="help">
+            <div>
+              <StatCard
+                title={stat.title}
+                value={stat.value}
+                icon={stat.icon}
+                change={stat.change}
+                onClick={stat.onClick}
+                description={stat.description}
+              />
+            </div>
+          </HelpTooltip>
         ))}
       </div>
 
@@ -174,46 +260,66 @@ const Dashboard = () => {
         </Suspense>
       </div>
       
-      <div className="border rounded-xl p-4 md:p-6 shadow-soft hover:shadow-soft-lg transition-all duration-300 bg-warmBeige/10">
+      {/* Enhanced Quick Actions */}
+      <div className="border rounded-xl p-4 md:p-6 shadow-soft hover:shadow-soft-lg transition-all duration-300 bg-gradient-to-br from-warmBeige/20 to-softRose/10">
         <h2 className="text-base md:text-lg font-display font-medium mb-4 md:mb-6 flex items-center">
-          <span className="bg-softRose/40 w-1 h-6 rounded mr-2"></span>
+          <span className="bg-gradient-to-r from-softRose to-roseGold w-1 h-6 rounded mr-2"></span>
           פעולות מהירות
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
-          <Link to="/scheduling/new" className="bg-card hover:bg-accent/20 p-4 md:p-5 rounded-xl cursor-pointer transition-all duration-300 shadow-soft hover:shadow-soft-lg flex flex-col transform hover:-translate-y-1">
-            <h3 className="font-medium text-primary mb-1">פגישה חדשה</h3>
-            <p className="text-xs md:text-sm text-muted-foreground mt-1">תזמון פגישה ללקוח חדש</p>
-          </Link>
-          <Link to="/clients/new" className="bg-card hover:bg-accent/20 p-4 md:p-5 rounded-xl cursor-pointer transition-all duration-300 shadow-soft hover:shadow-soft-lg flex flex-col transform hover:-translate-y-1">
-            <h3 className="font-medium text-primary mb-1">הוספת לקוח</h3>
-            <p className="text-xs md:text-sm text-muted-foreground mt-1">יצירת פרופיל לקוח חדש</p>
-          </Link>
-          <Link to="/payments/new" className="bg-card hover:bg-accent/20 p-4 md:p-5 rounded-xl cursor-pointer transition-all duration-300 shadow-soft hover:shadow-soft-lg flex flex-col transform hover:-translate-y-1">
-            <h3 className="font-medium text-primary mb-1">רישום תשלום</h3>
-            <p className="text-xs md:text-sm text-muted-foreground mt-1">תיעוד עסקה חדשה</p>
-          </Link>
-          <Link to="/inventory/new" className="bg-card hover:bg-accent/20 p-4 md:p-5 rounded-xl cursor-pointer transition-all duration-300 shadow-soft hover:shadow-soft-lg flex flex-col transform hover:-translate-y-1">
-            <h3 className="font-medium text-primary mb-1">עדכון מלאי</h3>
-            <p className="text-xs md:text-sm text-muted-foreground mt-1">רישום מוצרים חדשים או חוסרים</p>
-          </Link>
+          {quickActions.map((action) => (
+            <HelpTooltip key={action.title} content={action.tooltip} variant="premium">
+              <Link to={action.to} className="block group">
+                <div className="bg-card hover:bg-gradient-to-br hover:from-warmBeige/30 hover:to-softRose/20 p-4 md:p-5 rounded-xl cursor-pointer transition-all duration-500 shadow-soft hover:shadow-elevated flex flex-col transform hover:-translate-y-2 border border-transparent hover:border-softRose/20 relative overflow-hidden">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="p-2 rounded-full bg-gradient-to-br from-softRose/20 to-roseGold/20 group-hover:from-softRose/30 group-hover:to-roseGold/30 transition-all duration-300 group-hover:scale-110">
+                      {action.icon}
+                    </div>
+                    <h3 className="font-medium text-primary group-hover:text-deepNavy transition-colors duration-300">
+                      {action.title}
+                    </h3>
+                  </div>
+                  <p className="text-xs md:text-sm text-muted-foreground mt-1 group-hover:text-deepNavy/70 transition-colors duration-300">
+                    {action.description}
+                  </p>
+                  
+                  {/* Shine effect */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 ease-out" />
+                </div>
+              </Link>
+            </HelpTooltip>
+          ))}
         </div>
       </div>
 
-      <div className="bg-gradient-to-r from-warmBeige to-softRose/20 border border-softRose/20 rounded-xl p-4 md:p-6 shadow-soft">
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 md:gap-0">
+      {/* Enhanced Online Booking Section */}
+      <div className="bg-gradient-to-r from-warmBeige via-softRose/20 to-roseGold/20 border border-softRose/30 rounded-xl p-4 md:p-6 shadow-elevated hover:shadow-hover transition-all duration-500 relative overflow-hidden group">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 md:gap-0 relative z-10">
           <div className="mb-4 md:mb-0">
-            <h2 className="text-lg md:text-xl font-display font-medium text-deepNavy mb-2">מערכת קביעת פגישות אונליין</h2>
-            <p className="text-sm md:text-base text-muted-foreground max-w-2xl">
+            <h2 className="text-lg md:text-xl font-display font-medium text-deepNavy mb-2 group-hover:text-primary transition-colors duration-300">
+              מערכת קביעת פגישות אונליין
+            </h2>
+            <p className="text-sm md:text-base text-muted-foreground max-w-2xl group-hover:text-deepNavy/70 transition-colors duration-300">
               אפשרו ללקוחות שלכם לקבוע פגישות אונליין בקלות, והתראות יסונכרנו ישירות ללוח השנה שלכם.
             </p>
           </div>
           <div className="flex gap-4 w-full md:w-auto">
             <Link to="/online-booking" className="w-full md:w-auto">
-              <Button variant="warm" size={isMobile ? "default" : "lg"} className="font-display w-full md:w-auto">
+              <Button 
+                variant="premium" 
+                size={isMobile ? "touch" : "lg"} 
+                className="font-display w-full md:w-auto group-hover:scale-105 transition-transform duration-300"
+              >
+                <Calendar className="ml-2 h-5 w-5" />
                 קביעת פגישות אונליין
               </Button>
             </Link>
           </div>
+        </div>
+        
+        {/* Background pattern */}
+        <div className="absolute inset-0 opacity-5 group-hover:opacity-10 transition-opacity duration-500">
+          <div className="absolute inset-0 bg-gradient-to-br from-roseGold via-transparent to-mutedPeach" />
         </div>
       </div>
     </div>
