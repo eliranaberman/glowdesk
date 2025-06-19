@@ -9,7 +9,6 @@ import { initializeMarketingData } from '@/services/marketing';
 import { usePermissions } from '@/hooks/use-permissions';
 import PermissionGuard from '@/components/auth/PermissionGuard';
 import BusinessAnalytics from '@/components/dashboard/BusinessAnalytics';
-import { useEnhancedToast } from '@/components/ui/enhanced-toast';
 import { HelpTooltip } from '@/components/ui/enhanced-tooltip';
 import { SkeletonCard, SkeletonTable } from '@/components/ui/skeleton';
 
@@ -26,7 +25,6 @@ const LoadingFallback = () => <SkeletonCard />;
 
 const Dashboard = () => {
   const { toast } = useToast();
-  const enhancedToast = useEnhancedToast();
   const isMobile = useIsMobile();
   const { isAdmin, isOwner } = usePermissions();
   const hasFinanceAccess = isAdmin || isOwner;
@@ -37,7 +35,6 @@ const Dashboard = () => {
       setIsLoading(true);
       try {
         await initializeMarketingData();
-        enhancedToast.success("הדשבורד נטען בהצלחה", "כל הנתונים מעודכנים");
       } catch (error) {
         toast({
           title: "שגיאה בטעינת הנתונים",
@@ -59,7 +56,7 @@ const Dashboard = () => {
       icon: <Users className="h-5 w-5 text-primary" />, 
       change: { value: '12%', positive: true },
       description: 'לקוחות פעילות בחודש האחרון',
-      onClick: () => enhancedToast.info("מעבר לרשימת הלקוחות")
+      onClick: () => toast.info("מעבר לרשימת הלקוחות")
     },
     { 
       title: 'פגישות חודשיות', 
@@ -67,7 +64,7 @@ const Dashboard = () => {
       icon: <CalendarClock className="h-5 w-5 text-primary" />, 
       change: { value: '5%', positive: true },
       description: 'פגישות שהושלמו החודש',
-      onClick: () => enhancedToast.info("מעבר ליומן הפגישות")
+      onClick: () => toast.info("מעבר ליומן הפגישות")
     },
     { 
       title: 'הכנסה חודשית', 
@@ -75,7 +72,7 @@ const Dashboard = () => {
       icon: <DollarSign className="h-5 w-5 text-primary" />, 
       change: { value: '8%', positive: true },
       description: 'הכנסה נטו לאחר הוצאות',
-      onClick: () => enhancedToast.info("מעבר לדוח הכנסות")
+      onClick: () => toast.info("מעבר לדוח הכנסות")
     },
     { 
       title: 'ערך ממוצע לשירות', 
@@ -83,7 +80,7 @@ const Dashboard = () => {
       icon: <TrendingUp className="h-5 w-5 text-primary" />, 
       change: { value: '3%', positive: false },
       description: 'ממוצע הכנסה לטיפול',
-      onClick: () => enhancedToast.info("מעבר לניתוח שירותים")
+      onClick: () => toast.info("מעבר לניתוח שירותים")
     },
   ];
   
