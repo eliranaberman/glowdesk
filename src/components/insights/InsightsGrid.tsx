@@ -2,8 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Button } from '@/components/ui/button';
-import { MessageCircle, Lightbulb } from 'lucide-react';
+import { Lightbulb } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import InsightCard from './InsightCard';
 import { generateSmartInsights, SmartInsight } from '@/services/businessInsightsEngine';
@@ -39,32 +38,11 @@ const InsightsGrid = ({ period }: InsightsGridProps) => {
     }
   };
 
-  const handleWhatsAppShare = (text: string) => {
-    const encodedText = encodeURIComponent(text);
-    const whatsappUrl = `https://wa.me/?text=${encodedText}`;
-    window.open(whatsappUrl, '_blank');
-    
-    toast({
-      title: "שותף בוואטסאפ",
-      description: "התובנה נפתחת בוואטסאפ",
-    });
-  };
-
-  const handleShareAllInsights = () => {
-    const allInsightsText = insights
-      .filter(insight => insight.whatsappText)
-      .map((insight, index) => `${index + 1}. ${insight.whatsappText}`)
-      .join('\n\n');
-    
-    if (allInsightsText) {
-      handleWhatsAppShare(`התובנות העסקיות שלי להיום:\n\n${allInsightsText}`);
-    }
-  };
-
   const getFilteredInsights = () => {
     if (activeTab === 'all') return insights;
     
     const categoryMap: Record<string, string> = {
+      'smart': 'smart_insights',
       'opportunities': 'opportunities',
       'alerts': 'operational_alerts',
       'trends': 'weekly_trends',
@@ -75,7 +53,6 @@ const InsightsGrid = ({ period }: InsightsGridProps) => {
   };
 
   const filteredInsights = getFilteredInsights();
-  const hasActionableInsights = insights.some(insight => insight.actionable && insight.whatsappText);
 
   if (loading) {
     return (
@@ -102,34 +79,21 @@ const InsightsGrid = ({ period }: InsightsGridProps) => {
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center justify-between">
-          <div className="flex gap-2">
-            {hasActionableInsights && (
-              <Button
-                onClick={handleShareAllInsights}
-                className="gap-2 bg-[#25D366] hover:bg-[#128C7E] text-white"
-                size="sm"
-              >
-                <MessageCircle className="h-4 w-4" />
-                שלח הכל לוואטסאפ
-              </Button>
-            )}
-          </div>
-          <div className="text-right">
-            <CardTitle className="text-lg flex items-center justify-end gap-2">
-              <Lightbulb className="h-5 w-5 text-primary" />
-              תובנות עסקיות חכמות
-            </CardTitle>
-            <p className="text-sm text-muted-foreground">
-              המלצות והתראות מבוססות נתונים
-            </p>
-          </div>
+        <div className="text-right">
+          <CardTitle className="text-lg flex items-center justify-end gap-2">
+            <Lightbulb className="h-5 w-5 text-primary" />
+            תובנות עסקיות חכמות
+          </CardTitle>
+          <p className="text-sm text-muted-foreground">
+            המלצות והתראות מבוססות נתונים
+          </p>
         </div>
       </CardHeader>
       <CardContent>
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid grid-cols-4 mb-6 w-full">
-            <TabsTrigger value="all" className="order-4">הכל</TabsTrigger>
+          <TabsList className="grid grid-cols-5 mb-6 w-full">
+            <TabsTrigger value="all" className="order-5">הכל</TabsTrigger>
+            <TabsTrigger value="smart" className="order-4">תובנות חכמות</TabsTrigger>
             <TabsTrigger value="opportunities" className="order-3">הזדמנויות</TabsTrigger>
             <TabsTrigger value="alerts" className="order-2">התראות</TabsTrigger>
             <TabsTrigger value="trends" className="order-1">מגמות</TabsTrigger>
@@ -142,7 +106,6 @@ const InsightsGrid = ({ period }: InsightsGridProps) => {
                   <InsightCard
                     key={insight.id}
                     insight={insight}
-                    onWhatsAppShare={handleWhatsAppShare}
                   />
                 ))}
               </div>

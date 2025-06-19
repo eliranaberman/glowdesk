@@ -1,16 +1,13 @@
 
 import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { MessageCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { SmartInsight } from '@/services/businessInsightsEngine';
 
 interface InsightCardProps {
   insight: SmartInsight;
-  onWhatsAppShare?: (text: string) => void;
 }
 
-const InsightCard = ({ insight, onWhatsAppShare }: InsightCardProps) => {
+const InsightCard = ({ insight }: InsightCardProps) => {
   const getPriorityStyles = () => {
     switch (insight.priority) {
       case 'high':
@@ -32,12 +29,6 @@ const InsightCard = ({ insight, onWhatsAppShare }: InsightCardProps) => {
         return 'text-blue-600';
       default:
         return 'text-gray-600';
-    }
-  };
-
-  const handleWhatsAppClick = () => {
-    if (insight.whatsappText && onWhatsAppShare) {
-      onWhatsAppShare(insight.whatsappText);
     }
   };
 
@@ -64,16 +55,6 @@ const InsightCard = ({ insight, onWhatsAppShare }: InsightCardProps) => {
                   {insight.type === 'suggestion' && 'המלצה'}
                 </span>
               </div>
-              {insight.actionable && insight.whatsappText && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleWhatsAppClick}
-                  className="p-1 h-auto text-[#25D366] hover:text-[#128C7E] hover:bg-green-50"
-                >
-                  <MessageCircle className="h-4 w-4" />
-                </Button>
-              )}
             </div>
             <h3 className="font-semibold text-[#3A1E14] mb-2">
               {insight.title}

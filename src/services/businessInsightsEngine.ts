@@ -1,4 +1,3 @@
-
 import { supabase } from '@/lib/supabase';
 import { startOfMonth, subMonths, subWeeks, format } from 'date-fns';
 import { he } from 'date-fns/locale';
@@ -6,7 +5,7 @@ import { he } from 'date-fns/locale';
 export interface SmartInsight {
   id: string;
   type: 'opportunity' | 'alert' | 'trend' | 'suggestion';
-  category: 'opportunities' | 'operational_alerts' | 'weekly_trends' | 'monthly_insights';
+  category: 'opportunities' | 'operational_alerts' | 'weekly_trends' | 'monthly_insights' | 'smart_insights';
   title: string;
   message: string;
   icon: string;
@@ -42,6 +41,9 @@ export const generateSmartInsights = async (period: 'daily' | 'weekly' | 'monthl
     
     // Generate opportunities
     insights.push(...generateOpportunities(appointments, clients));
+
+    // Generate new smart insights
+    insights.push(...generateAdvancedSmartInsights(appointments, clients, revenues));
 
     return insights.length > 0 ? insights : getDemoInsights(period);
   } catch (error) {
@@ -84,6 +86,154 @@ const getRevenuesData = async (userId: string) => {
   return data || [];
 };
 
+const generateAdvancedSmartInsights = (appointments: any[], clients: any[], revenues: any[]): SmartInsight[] => {
+  const insights: SmartInsight[] = [];
+
+  // Instagram posting time analysis
+  const instagramInsight = generateInstagramPostingInsight(appointments);
+  if (instagramInsight) insights.push(instagramInsight);
+
+  // Client renewal reminder analysis
+  const renewalInsight = generateRenewalReminderInsight(appointments, clients);
+  if (renewalInsight) insights.push(renewalInsight);
+
+  // Most profitable time slot analysis
+  const profitableSlotInsight = generateProfitableSlotInsight(appointments, revenues);
+  if (profitableSlotInsight) insights.push(profitableSlotInsight);
+
+  return insights;
+};
+
+const generateInstagramPostingInsight = (appointments: any[]): SmartInsight | null => {
+  // Analyze appointment patterns to find peak activity times
+  const hourlyActivity = appointments.reduce((acc, apt) => {
+    const hour = parseInt(apt.start_time?.split(':')[0] || '10');
+    acc[hour] = (acc[hour] || 0) + 1;
+    return acc;
+  }, {} as Record<number, number>);
+
+  const peakHours = Object.entries(hourlyActivity)
+    .sort(([,a], [,b]) => b - a)
+    .slice(0, 2)
+    .map(([hour]) => hour);
+
+  if (peakHours.length === 0) return null;
+
+  const optimalTime = peakHours[0];
+  const timeDisplay = `${optimalTime}:00-${parseInt(optimalTime) + 2}:00`;
+
+  return {
+    id: 'instagram-posting-time',
+    type: 'suggestion',
+    category: 'smart_insights',
+    title: 'מתי כדאי לפרסם פוסט באינסטגרם?',
+    message: `הלקוחות שלך הכי פעילות בין השעות ${timeDisplay}. זה הזמן האידיאלי לפרסם תוכן באינסטגרם כדי לקבל מקסימום חשיפה ואינטרקציה.`,
+    icon: '📸',
+    priority: 'medium',
+    actionable: true
+  };
+};
+
+const generateRenewalReminderInsight = (appointments: any[], clients: any[]): SmartInsight | null => {
+  // Find clients with regular patterns who haven't booked recently
+  const clientAppointments = appointments.reduce((acc, apt) => {
+    if (!acc[apt.customer_id]) acc[apt.customer_id] = [];
+    acc[apt.customer_id].push(new Date(apt.date));
+    return acc;
+  }, {} as Record<string, Date[]>);
+
+  const potentialRenewals = [];
+  for (const [clientId, clientAppointmentDates] of Object.entries(clientAppointments)) {
+    if (clientAppointmentDates.length < 2) continue;
+    
+    // Sort dates and calculate average interval
+    const sortedDates = clientAppointmentDates.sort((a, b) => a.getTime() - b.getTime());
+    const intervals = [];
+    for (let i = 1; i < sortedDates.length; i++) {
+      const daysDiff = Math.floor((sortedDates[i].getTime() - sortedDates[i-1].getTime()) / (1000 * 60 * 60 * 24));
+      intervals.push(daysDiff);
+    }
+    
+    const avgInterval = intervals.reduce((a, b) => a + b, 0) / intervals.length;
+    const lastAppointment = sortedDates[sortedDates.length - 1];
+    const daysSinceLastAppointment = Math.floor((new Date().getTime() - lastAppointment.getTime()) / (1000 * 60 * 60 * 24));
+    
+    // If it's been longer than average interval + 7 days, suggest renewal
+    if (daysSinceLastAppointment > avgInterval + 7) {
+      const client = clients.find(c => c.id === clientId);
+      if (client) {
+        potentialRenewals.push({
+          name: client.full_name,
+          daysSince: daysSinceLastAppointment,
+          avgInterval: Math.round(avgInterval)
+        });
+      }
+    }
+  }
+
+  if (potentialRenewals.length === 0) return null;
+
+  const topRenewal = potentialRenewals.sort((a, b) => b.daysSince - a.daysSince)[0];
+
+  return {
+    id: 'renewal-reminder',
+    type: 'opportunity',
+    category: 'smart_insights',
+    title: 'לאיזו לקוחה לשלוח תזכורת לפני חידוש?',
+    message: `${topRenewal.name} בדרך כלל מגיעה כל ${topRenewal.avgInterval} ימים, אבל עברו כבר ${topRenewal.daysSince} ימים מהטיפול האחרון. זה הזמן לשלוח לה תזכורת עדינה!`,
+    icon: '💌',
+    priority: 'high',
+    actionable: true
+  };
+};
+
+const generateProfitableSlotInsight = (appointments: any[], revenues: any[]): SmartInsight | null => {
+  // Analyze revenue by time slots
+  const appointmentRevenues = appointments.map(apt => {
+    const revenue = revenues.find(r => r.customer_id === apt.customer_id && r.date === apt.date);
+    return {
+      ...apt,
+      revenue: revenue?.amount || 0,
+      hour: parseInt(apt.start_time?.split(':')[0] || '10')
+    };
+  }).filter(apt => apt.revenue > 0);
+
+  if (appointmentRevenues.length === 0) return null;
+
+  // Group by hour and calculate average revenue
+  const hourlyRevenue = appointmentRevenues.reduce((acc, apt) => {
+    if (!acc[apt.hour]) acc[apt.hour] = { total: 0, count: 0 };
+    acc[apt.hour].total += apt.revenue;
+    acc[apt.hour].count += 1;
+    return acc;
+  }, {} as Record<number, { total: number; count: number }>);
+
+  const averageRevenueByHour = Object.entries(hourlyRevenue)
+    .map(([hour, data]) => ({
+      hour: parseInt(hour),
+      avgRevenue: data.total / data.count,
+      count: data.count
+    }))
+    .filter(data => data.count >= 2) // Only consider hours with at least 2 appointments
+    .sort((a, b) => b.avgRevenue - a.avgRevenue);
+
+  if (averageRevenueByHour.length === 0) return null;
+
+  const bestSlot = averageRevenueByHour[0];
+  const timeSlot = `${bestSlot.hour}:00-${bestSlot.hour + 1}:00`;
+
+  return {
+    id: 'profitable-slot',
+    type: 'trend',
+    category: 'smart_insights',
+    title: 'מה התור הכי שווה בשבוע שלך?',
+    message: `הטיפולים בין השעות ${timeSlot} מביאים בממוצע ₪${Math.round(bestSlot.avgRevenue)} - זה ${Math.round(((bestSlot.avgRevenue / (averageRevenueByHour[averageRevenueByHour.length - 1]?.avgRevenue || bestSlot.avgRevenue)) - 1) * 100)}% יותר מהשעות הפחות רווחיות!`,
+    icon: '💎',
+    priority: 'medium',
+    actionable: true
+  };
+};
+
 const generateWeeklyInsights = (appointments: any[], revenues: any[]): SmartInsight[] => {
   const insights: SmartInsight[] = [];
   
@@ -105,8 +255,7 @@ const generateWeeklyInsights = (appointments: any[], revenues: any[]): SmartInsi
       message: `עלייה של ${Math.round(((thisWeekAppointments.length - lastWeekAppointments.length) / lastWeekAppointments.length) * 100)}% בהזמנות לעומת שבוע שעבר. המומנטום מעולה!`,
       icon: '📈',
       priority: 'medium',
-      actionable: true,
-      whatsappText: `השבוע היה מדהים! עלייה של ${Math.round(((thisWeekAppointments.length - lastWeekAppointments.length) / lastWeekAppointments.length) * 100)}% בהזמנות 🎉`
+      actionable: true
     });
   }
 
@@ -121,8 +270,7 @@ const generateWeeklyInsights = (appointments: any[], revenues: any[]): SmartInsi
       message: 'זיהינו ירידה בהזמנות לימי שני. שקלי להציע הנחה מיוחדת או מבצע ליום זה.',
       icon: '📅',
       priority: 'medium',
-      actionable: true,
-      whatsappText: 'רוצה למלא את ימי השני? יש לי רעיון למבצע מיוחד! 💡'
+      actionable: true
     });
   }
 
@@ -151,8 +299,7 @@ const generateMonthlyInsights = (clients: any[], appointments: any[]): SmartInsi
       message: `${inactiveClients.length} לקוחות לא קבעו תור בחודשיים האחרונים. שלחי להן הודעה לחזרה עם הנחה.`,
       icon: '👤',
       priority: 'high',
-      actionable: true,
-      whatsappText: `יש לי ${inactiveClients.length} לקוחות שמתגעגעות אליי... זמן להזמין אותן לחזור! 💕`
+      actionable: true
     });
   }
 
@@ -168,8 +315,7 @@ const generateMonthlyInsights = (clients: any[], appointments: any[]): SmartInsi
       message: `${holidayName} מתקרב! בשנה שעברה חלה עלייה של 35% בהזמנות לפני החג. התכונני עם תגבור זמנים.`,
       icon: '📅',
       priority: 'medium',
-      actionable: true,
-      whatsappText: `${holidayName} מתקרב! זמן להתכונן לעומס של הזמנות 🎉`
+      actionable: true
     });
   }
 
@@ -192,8 +338,7 @@ const generateOperationalAlerts = (inventory: any[]): SmartInsight[] => {
       message: `כמות ${itemName} עומדת להיגמר (נשארו ${lowStockItems[0].quantity} יחידות). מומלץ להזמין עוד השבוע.`,
       icon: '⚠️',
       priority: 'high',
-      actionable: true,
-      whatsappText: `תזכורת חשובה: צריך להזמין ${itemName} - כמעט נגמר! 🛒`
+      actionable: true
     });
   }
 
@@ -224,8 +369,7 @@ const generateOpportunities = (appointments: any[], clients: any[]): SmartInsigh
       message: `${percentage}% מהלקוחות שעושות מניקור גם מתעניינות בטיפולי פנים. שקלי להציע חבילה משולבת.`,
       icon: '💡',
       priority: 'medium',
-      actionable: true,
-      whatsappText: `יש לי רעיון מעולה לחבילה משולבת שתאהבי! 💅✨`
+      actionable: true
     });
   }
 
@@ -242,8 +386,7 @@ const getDemoInsights = (period: 'daily' | 'weekly' | 'monthly'): SmartInsight[]
       message: '85% מהלקוחות שעושות מניקור גם מתעניינות בטיפולי פנים. שקלי להציע חבילה משולבת.',
       icon: '💡',
       priority: 'medium',
-      actionable: true,
-      whatsappText: 'יש לי רעיון מעולה לחבילה משולבת שתאהבי! 💅✨'
+      actionable: true
     },
     {
       id: 'demo-alert',
@@ -253,10 +396,43 @@ const getDemoInsights = (period: 'daily' | 'weekly' | 'monthly'): SmartInsight[]
       message: 'כמות הלק השחור עומדת להיגמר. מומלץ להזמין עוד השבוע.',
       icon: '⚠️',
       priority: 'high',
-      actionable: true,
-      whatsappText: 'תזכורת: צריך להזמין לק שחור - כמעט נגמר! 🛒'
+      actionable: true
     }
   ];
+
+  // Always include smart insights in demo
+  baseInsights.push(
+    {
+      id: 'demo-instagram-time',
+      type: 'suggestion',
+      category: 'smart_insights',
+      title: 'מתי כדאי לפרסם פוסט באינסטגרם?',
+      message: 'הלקוחות שלך הכי פעילות בין השעות 16:00-18:00. זה הזמן האידיאלי לפרסם תוכן באינסטגרם כדי לקבל מקסימום חשיפה ואינטרקציה.',
+      icon: '📸',
+      priority: 'medium',
+      actionable: true
+    },
+    {
+      id: 'demo-renewal-reminder',
+      type: 'opportunity',
+      category: 'smart_insights',
+      title: 'לאיזו לקוחה לשלוח תזכורת לפני חידוש?',
+      message: 'שרה כהן בדרך כלל מגיעה כל 28 ימים, אבל עברו כבר 35 ימים מהטיפול האחרון. זה הזמן לשלוח לה תזכורת עדינה!',
+      icon: '💌',
+      priority: 'high',
+      actionable: true
+    },
+    {
+      id: 'demo-profitable-slot',
+      type: 'trend',
+      category: 'smart_insights',
+      title: 'מה התור הכי שווה בשבוע שלך?',
+      message: 'הטיפולים בין השעות 14:00-15:00 מביאים בממוצע ₪185 - זה 23% יותר מהשעות הפחות רווחיות!',
+      icon: '💎',
+      priority: 'medium',
+      actionable: true
+    }
+  );
 
   if (period === 'weekly') {
     baseInsights.push({
@@ -267,8 +443,7 @@ const getDemoInsights = (period: 'daily' | 'weekly' | 'monthly'): SmartInsight[]
       message: 'עלייה של 18% בהזמנות טיפולי אקריליק בהשוואה לשבוע שעבר. שקלי להוסיף מבצע לטיפול זה.',
       icon: '📈',
       priority: 'medium',
-      actionable: true,
-      whatsappText: 'השבוע היה מדהים! עלייה של 18% בטיפולי אקריליק 🎉'
+      actionable: true
     });
   }
 
@@ -281,8 +456,7 @@ const getDemoInsights = (period: 'daily' | 'weekly' | 'monthly'): SmartInsight[]
       message: '28 לקוחות לא קבעו תור בחודשיים האחרונים. שלחי להן הודעה לחזרה עם הנחה.',
       icon: '👤',
       priority: 'high',
-      actionable: true,
-      whatsappText: 'יש לי 28 לקוחות שמתגעגעות אליי... זמן להזמין אותן לחזור! 💕'
+      actionable: true
     });
   }
 
