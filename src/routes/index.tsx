@@ -1,36 +1,36 @@
+
 import {
   createBrowserRouter,
+  Outlet
 } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
-import Home from "@/pages/Home";
-import ProtectedRoute from "./ProtectedRoute";
+import Dashboard from "@/pages/Dashboard";
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import Revenues from "@/pages/finances/Revenues";
 import Expenses from "@/pages/Expenses";
 import CashFlow from "@/pages/finances/CashFlow";
-import Reports from "@/pages/finances/Reports";
+import Reports from "@/pages/Reports";
 import BusinessManagement from "@/pages/finances/BusinessManagement";
-import Clients from "@/pages/clients/Clients";
-import ClientDetails from "@/pages/clients/ClientDetails";
-import Scheduling from "@/pages/scheduling/Scheduling";
-import Settings from "@/pages/settings/Settings";
-import Login from "@/pages/Login";
-import Register from "@/pages/Register";
-import ForgotPassword from "@/pages/ForgotPassword";
-import ResetPassword from "@/pages/ResetPassword";
-import Insights from "@/pages/Insights";
-import DetailedInsights from "@/pages/DetailedInsights";
+import { ClientsPage } from "@/pages/clients/ClientsPage";
+import { ClientDetailPage } from "@/pages/clients/ClientDetailPage";
+import Scheduling from "@/pages/Scheduling";
+import Settings from "@/pages/Settings";
+import { Login } from "@/pages/auth/Login";
+import { Register } from "@/pages/auth/Register";
+import { ForgotPassword } from "@/pages/auth/ForgotPassword";
+import { ResetPassword } from "@/pages/auth/ResetPassword";
 import BusinessInsights from '@/pages/finances/BusinessInsights';
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <Layout />,
+    element: <Layout><Outlet /></Layout>,
     children: [
       {
         path: "/",
         element: (
           <ProtectedRoute>
-            <Home />
+            <Dashboard />
           </ProtectedRoute>
         ),
       },
@@ -78,7 +78,7 @@ const router = createBrowserRouter([
         path: "/clients",
         element: (
           <ProtectedRoute>
-            <Clients />
+            <ClientsPage />
           </ProtectedRoute>
         ),
       },
@@ -86,7 +86,7 @@ const router = createBrowserRouter([
         path: "/clients/:id",
         element: (
           <ProtectedRoute>
-            <ClientDetails />
+            <ClientDetailPage />
           </ProtectedRoute>
         ),
       },
@@ -107,26 +107,10 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: "/insights",
-        element: (
-          <ProtectedRoute>
-            <Insights />
-          </ProtectedRoute>
-        ),
-      },
-      {
         path: "/finances/business-insights",
         element: (
           <ProtectedRoute>
             <BusinessInsights />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: "/finances/detailed-insights",
-        element: (
-          <ProtectedRoute>
-            <DetailedInsights />
           </ProtectedRoute>
         ),
       },
