@@ -1,4 +1,3 @@
-
 import { supabase } from '@/lib/supabase';
 import { startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, subDays, subWeeks, subMonths } from 'date-fns';
 
@@ -45,7 +44,7 @@ export const getDateRange = (period: 'daily' | 'weekly' | 'monthly', date: Date 
   }
 };
 
-export const getBusinessMetrics = async (dateRange: DateRange): Promise<BusinessMetrics> => {
+export const getBusinessMetrics = async (dateRange: DateRange, period: 'daily' | 'weekly' | 'monthly' = 'weekly'): Promise<BusinessMetrics> => {
   try {
     const { data: user } = await supabase.auth.getUser();
     if (!user.user) throw new Error('User not authenticated');
@@ -75,7 +74,7 @@ export const getBusinessMetrics = async (dateRange: DateRange): Promise<Business
 
     // If no data exists, return demo data
     if ((!revenues || revenues.length === 0) && (!appointments || appointments.length === 0)) {
-      return getDemoMetrics();
+      return getDemoMetrics(period);
     }
 
     // Calculate metrics with safe defaults
@@ -176,28 +175,69 @@ export const getBusinessMetrics = async (dateRange: DateRange): Promise<Business
   } catch (error) {
     console.error('Error in getBusinessMetrics:', error);
     // Return demo data on error
-    return getDemoMetrics();
+    return getDemoMetrics(period);
   }
 };
 
-const getDemoMetrics = (): BusinessMetrics => {
-  return {
-    totalRevenue: 2450,
-    totalClients: 8,
-    averagePerClient: 306,
-    cancellationRate: 12.5,
-    repeatCustomers: 5,
-    peakHour: '16:00',
-    peakDay: 'רביעי',
-    treatmentDistribution: [
-      { name: 'מניקור', value: 5, count: 5 },
-      { name: 'פדיקור', value: 3, count: 3 },
-      { name: 'ג\'ל', value: 4, count: 4 },
-      { name: 'עיצוב', value: 2, count: 2 }
-    ],
-    revenueGrowth: 15.3,
-    clientGrowth: 8.7
-  };
+const getDemoMetrics = (period: 'daily' | 'weekly' | 'monthly' = 'weekly'): BusinessMetrics => {
+  switch (period) {
+    case 'daily':
+      return {
+        totalRevenue: 1440, // 8 customers * 180 avg
+        totalClients: 8,
+        averagePerClient: 180,
+        cancellationRate: 5.0,
+        repeatCustomers: 4,
+        peakHour: '14:00',
+        peakDay: 'רביעי',
+        treatmentDistribution: [
+          { name: 'מניקור', value: 3, count: 3 },
+          { name: 'פדיקור', value: 2, count: 2 },
+          { name: 'ג\'ל', value: 2, count: 2 },
+          { name: 'עיצוב', value: 1, count: 1 }
+        ],
+        revenueGrowth: 12.5,
+        clientGrowth: 6.7
+      };
+    case 'weekly':
+      return {
+        totalRevenue: 7980, // 42 customers * 190 avg
+        totalClients: 42,
+        averagePerClient: 190,
+        cancellationRate: 8.5,
+        repeatCustomers: 33,
+        peakHour: '16:00',
+        peakDay: 'רביעי',
+        treatmentDistribution: [
+          { name: 'מניקור', value: 15, count: 15 },
+          { name: 'פדיקור', value: 10, count: 10 },
+          { name: 'ג\'ל', value: 12, count: 12 },
+          { name: 'עיצוב', value: 5, count: 5 }
+        ],
+        revenueGrowth: 15.3,
+        clientGrowth: 8.7
+      };
+    case 'monthly':
+      return {
+        totalRevenue: 15120, // 126 customers * 120 avg
+        totalClients: 126,
+        averagePerClient: 120,
+        cancellationRate: 11.2,
+        repeatCustomers: 94,
+        peakHour: '15:00',
+        peakDay: 'רביעי',
+        treatmentDistribution: [
+          { name: 'מניקור', value: 45, count: 45 },
+          { name: 'פדיקור', value: 30, count: 30 },
+          { name: 'ג\'ל', value: 35, count: 35 },
+          { name: 'עיצוב', value: 16, count: 16 }
+        ],
+        revenueGrowth: 18.7,
+        clientGrowth: 14.2
+      };
+    default:
+      return getDemoMetrics('weekly');
+  }
 };
 
 const getPreviousDateRange = (currentRange: DateRange): DateRange => {
@@ -246,8 +286,10 @@ export const getMotivationalMessage = (metrics: BusinessMetrics): string => {
     ]
   };
 
-  // If it's demo data
-  if (metrics.totalRevenue === 2450 && metrics.totalClients === 8) {
+  // Check if it's demo data for any period
+  if ((metrics.totalRevenue === 1440 && metrics.totalClients === 8) ||
+      (metrics.totalRevenue === 7980 && metrics.totalClients === 42) ||
+      (metrics.totalRevenue === 15120 && metrics.totalClients === 126)) {
     return messages.demo[Math.floor(Math.random() * messages.demo.length)];
   }
 
