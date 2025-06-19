@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -24,6 +23,7 @@ import KPICard from '@/components/insights/KPICard';
 import ServiceDistributionChart from '@/components/insights/ServiceDistributionChart';
 import MotivationalMessage from '@/components/insights/MotivationalMessage';
 import BusinessInsightsEmpty from '@/components/empty-states/BusinessInsightsEmpty';
+import InsightsGrid from '@/components/insights/InsightsGrid';
 import { 
   getBusinessMetrics, 
   getDateRange, 
@@ -177,6 +177,11 @@ const BusinessInsightsPage = () => {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Demo Insights Grid */}
+            <div className="opacity-75">
+              <InsightsGrid period={activeTab} />
+            </div>
           </>
         )}
       </div>
@@ -268,6 +273,9 @@ const BusinessInsightsPage = () => {
                   icon={Clock}
                 />
               </div>
+
+              {/* Smart Insights for Daily */}
+              <InsightsGrid period="daily" />
               
               <div className="grid gap-6 lg:grid-cols-2">
                 <ServiceDistributionChart 
@@ -325,6 +333,9 @@ const BusinessInsightsPage = () => {
                   icon={CalendarIcon}
                 />
               </div>
+
+              {/* Smart Insights for Weekly */}
+              <InsightsGrid period="weekly" />
               
               <div className="grid gap-6 lg:grid-cols-2">
                 <ServiceDistributionChart 
@@ -386,6 +397,9 @@ const BusinessInsightsPage = () => {
                   icon={Repeat}
                 />
               </div>
+
+              {/* Smart Insights for Monthly */}
+              <InsightsGrid period="monthly" />
               
               <div className="grid gap-6 lg:grid-cols-2">
                 <ServiceDistributionChart 
