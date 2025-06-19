@@ -1,4 +1,3 @@
-
 import { Navigate, Outlet, Route, Routes } from 'react-router-dom';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import Layout from '@/components/layout/Layout';
@@ -41,6 +40,7 @@ import OnlineBooking from '@/pages/OnlineBooking';
 import InitialSetupPage from '@/pages/InitialSetupPage';
 import Customers from '@/pages/Customers';
 import BusinessInsightsPage from '@/pages/BusinessInsightsPage';
+import MagicToolsPage from "@/pages/MagicToolsPage";
 
 // Create a layout wrapper for protected routes
 const ProtectedLayout = () => {
@@ -128,6 +128,9 @@ export default function AppRoutes() {
       
       {/* Fallback route (404) */}
       <Route path="*" element={<NotFound />} />
+      
+      {/* Magic Tools Page */}
+      <Route path="/magic-tools" element={<MagicToolsPage />} />
     </Routes>
   );
 }
