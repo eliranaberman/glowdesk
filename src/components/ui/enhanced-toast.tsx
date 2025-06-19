@@ -48,14 +48,13 @@ export function useEnhancedToast() {
     const Icon = config.icon
 
     toast({
-      title: (
+      title: title,
+      description: (
         <div className="flex items-center gap-2">
           <Icon className={cn("h-4 w-4", config.iconClassName)} />
-          <span>{title}</span>
+          <span>{description}</span>
         </div>
       ),
-      description,
-      action,
       className: cn(
         "border shadow-lg backdrop-blur-sm transition-all duration-300",
         config.className
