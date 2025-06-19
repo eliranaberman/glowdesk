@@ -54,6 +54,7 @@ const Layout = ({ children }: LayoutProps) => {
     if (path === '/marketing/templates') return 'תבניות הודעות';
     if (path === '/portfolio') return 'גלריה';
     if (path === '/ai-assistant') return 'עוזר AI';
+    if (path === '/magic-tools') return 'כלי קסם';
 
     return 'דשבורד'; // Default
   };
@@ -113,7 +114,7 @@ const Layout = ({ children }: LayoutProps) => {
           "absolute right-0 top-0 z-50 h-full w-64 animate-slide-in bg-background",
           !mobileSidebarOpen && "transform translate-x-full"
         )}>
-          <Sidebar onLinkClick={() => setMobileSidebarOpen(false)} />
+          <Sidebar />
         </div>
       </div>
 

@@ -1,3 +1,4 @@
+
 import { Navigate, Outlet, Route, Routes } from 'react-router-dom';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import Layout from '@/components/layout/Layout';
@@ -124,13 +125,13 @@ export default function AppRoutes() {
         
         {/* Setup */}
         <Route path="/setup" element={<InitialSetupPage />} />
+        
+        {/* Magic Tools Page - Now protected */}
+        <Route path="/magic-tools" element={<MagicToolsPage />} />
       </Route>
       
       {/* Fallback route (404) */}
       <Route path="*" element={<NotFound />} />
-      
-      {/* Magic Tools Page */}
-      <Route path="/magic-tools" element={<MagicToolsPage />} />
     </Routes>
   );
 }

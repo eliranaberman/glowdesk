@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import {
   Sheet,
@@ -119,13 +120,13 @@ const Sidebar = () => {
   const [open, setOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { user, signOut } = useAuth();
   const { toast } = useToast();
   const isMobile = useIsMobile();
 
   const handleLogout = async () => {
     try {
-      await logout();
+      await signOut();
       toast({
         title: "התנתקת בהצלחה",
         description: "תודה שביקרת בגלוודסק!"
