@@ -14,6 +14,33 @@ export interface SmartInsight {
   whatsappText?: string;
 }
 
+interface AppointmentData {
+  id: string;
+  customer_id: string;
+  date: string;
+  start_time?: string;
+  service_type?: string;
+  status?: string;
+}
+
+interface ClientData {
+  id: string;
+  full_name: string;
+}
+
+interface RevenueData {
+  id: string;
+  customer_id: string;
+  amount: number;
+  date: string;
+}
+
+interface InventoryData {
+  id: string;
+  name: string;
+  quantity: number;
+}
+
 export const generateSmartInsights = async (period: 'daily' | 'weekly' | 'monthly'): Promise<SmartInsight[]> => {
   try {
     const { data: user } = await supabase.auth.getUser();
@@ -52,41 +79,41 @@ export const generateSmartInsights = async (period: 'daily' | 'weekly' | 'monthl
   }
 };
 
-const getAppointmentsData = async (userId: string) => {
+const getAppointmentsData = async (userId: string): Promise<AppointmentData[]> => {
   const { data } = await supabase
     .from('appointments')
     .select('*')
     .eq('user_id', userId)
     .gte('date', subMonths(new Date(), 3).toISOString().split('T')[0]);
-  return data || [];
+  return (data || []) as AppointmentData[];
 };
 
-const getInventoryData = async (userId: string) => {
+const getInventoryData = async (userId: string): Promise<InventoryData[]> => {
   const { data } = await supabase
     .from('inventory_items')
     .select('*')
     .eq('created_by', userId);
-  return data || [];
+  return (data || []) as InventoryData[];
 };
 
-const getClientsData = async (userId: string) => {
+const getClientsData = async (userId: string): Promise<ClientData[]> => {
   const { data } = await supabase
     .from('clients')
     .select('*')
     .eq('user_id', userId);
-  return data || [];
+  return (data || []) as ClientData[];
 };
 
-const getRevenuesData = async (userId: string) => {
+const getRevenuesData = async (userId: string): Promise<RevenueData[]> => {
   const { data } = await supabase
     .from('revenues')
     .select('*')
     .eq('created_by', userId)
     .gte('date', subMonths(new Date(), 3).toISOString().split('T')[0]);
-  return data || [];
+  return (data || []) as RevenueData[];
 };
 
-const generateAdvancedSmartInsights = (appointments: any[], clients: any[], revenues: any[]): SmartInsight[] => {
+const generateAdvancedSmartInsights = (appointments: AppointmentData[], clients: ClientData[], revenues: RevenueData[]): SmartInsight[] => {
   const insights: SmartInsight[] = [];
 
   // Instagram posting time analysis
@@ -104,9 +131,9 @@ const generateAdvancedSmartInsights = (appointments: any[], clients: any[], reve
   return insights;
 };
 
-const generateInstagramPostingInsight = (appointments: any[]): SmartInsight | null => {
+const generateInstagramPostingInsight = (appointments: AppointmentData[]): SmartInsight | null => {
   // Analyze appointment patterns to find peak activity times
-  const hourlyActivity = appointments.reduce((acc, apt) => {
+  const hourlyActivity: Record<number, number> = appointments.reduce((acc, apt) => {
     const hour = parseInt(apt.start_time?.split(':')[0] || '10');
     acc[hour] = (acc[hour] || 0) + 1;
     return acc;
@@ -134,21 +161,22 @@ const generateInstagramPostingInsight = (appointments: any[]): SmartInsight | nu
   };
 };
 
-const generateRenewalReminderInsight = (appointments: any[], clients: any[]): SmartInsight | null => {
+const generateRenewalReminderInsight = (appointments: AppointmentData[], clients: ClientData[]): SmartInsight | null => {
   // Find clients with regular patterns who haven't booked recently
-  const clientAppointments = appointments.reduce((acc, apt) => {
+  const clientAppointments: Record<string, Date[]> = appointments.reduce((acc, apt) => {
     if (!acc[apt.customer_id]) acc[apt.customer_id] = [];
     acc[apt.customer_id].push(new Date(apt.date));
     return acc;
   }, {} as Record<string, Date[]>);
 
-  const potentialRenewals = [];
+  const potentialRenewals: Array<{name: string; daysSince: number; avgInterval: number}> = [];
+  
   for (const [clientId, clientAppointmentDates] of Object.entries(clientAppointments)) {
     if (clientAppointmentDates.length < 2) continue;
     
     // Sort dates and calculate average interval
     const sortedDates = clientAppointmentDates.sort((a, b) => a.getTime() - b.getTime());
-    const intervals = [];
+    const intervals: number[] = [];
     for (let i = 1; i < sortedDates.length; i++) {
       const daysDiff = Math.floor((sortedDates[i].getTime() - sortedDates[i-1].getTime()) / (1000 * 60 * 60 * 24));
       intervals.push(daysDiff);
@@ -187,7 +215,7 @@ const generateRenewalReminderInsight = (appointments: any[], clients: any[]): Sm
   };
 };
 
-const generateProfitableSlotInsight = (appointments: any[], revenues: any[]): SmartInsight | null => {
+const generateProfitableSlotInsight = (appointments: AppointmentData[], revenues: RevenueData[]): SmartInsight | null => {
   // Analyze revenue by time slots
   const appointmentRevenues = appointments.map(apt => {
     const revenue = revenues.find(r => r.customer_id === apt.customer_id && r.date === apt.date);
@@ -201,7 +229,7 @@ const generateProfitableSlotInsight = (appointments: any[], revenues: any[]): Sm
   if (appointmentRevenues.length === 0) return null;
 
   // Group by hour and calculate average revenue
-  const hourlyRevenue = appointmentRevenues.reduce((acc, apt) => {
+  const hourlyRevenue: Record<number, { total: number; count: number }> = appointmentRevenues.reduce((acc, apt) => {
     if (!acc[apt.hour]) acc[apt.hour] = { total: 0, count: 0 };
     acc[apt.hour].total += apt.revenue;
     acc[apt.hour].count += 1;
@@ -234,7 +262,7 @@ const generateProfitableSlotInsight = (appointments: any[], revenues: any[]): Sm
   };
 };
 
-const generateWeeklyInsights = (appointments: any[], revenues: any[]): SmartInsight[] => {
+const generateWeeklyInsights = (appointments: AppointmentData[], revenues: RevenueData[]): SmartInsight[] => {
   const insights: SmartInsight[] = [];
   
   // Analyze weekly trends
@@ -277,7 +305,7 @@ const generateWeeklyInsights = (appointments: any[], revenues: any[]): SmartInsi
   return insights;
 };
 
-const generateMonthlyInsights = (clients: any[], appointments: any[]): SmartInsight[] => {
+const generateMonthlyInsights = (clients: ClientData[], appointments: AppointmentData[]): SmartInsight[] => {
   const insights: SmartInsight[] = [];
   
   // Find inactive clients
@@ -322,7 +350,7 @@ const generateMonthlyInsights = (clients: any[], appointments: any[]): SmartInsi
   return insights;
 };
 
-const generateOperationalAlerts = (inventory: any[]): SmartInsight[] => {
+const generateOperationalAlerts = (inventory: InventoryData[]): SmartInsight[] => {
   const insights: SmartInsight[] = [];
   
   // Check low stock items
@@ -345,7 +373,7 @@ const generateOperationalAlerts = (inventory: any[]): SmartInsight[] => {
   return insights;
 };
 
-const generateOpportunities = (appointments: any[], clients: any[]): SmartInsight[] => {
+const generateOpportunities = (appointments: AppointmentData[], clients: ClientData[]): SmartInsight[] => {
   const insights: SmartInsight[] = [];
   
   // Analyze service combinations
