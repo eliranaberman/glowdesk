@@ -1,4 +1,3 @@
-
 import {
   createBrowserRouter,
   Outlet
@@ -35,6 +34,14 @@ const router = createBrowserRouter([
     children: [
       {
         path: "/",
+        element: (
+          <ProtectedRoute>
+            <Dashboard />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/dashboard",
         element: (
           <ProtectedRoute>
             <Dashboard />
