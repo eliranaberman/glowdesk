@@ -23,6 +23,7 @@ import { useToast } from '@/hooks/use-toast';
 import KPICard from '@/components/insights/KPICard';
 import ServiceDistributionChart from '@/components/insights/ServiceDistributionChart';
 import MotivationalMessage from '@/components/insights/MotivationalMessage';
+import BusinessInsightsEmpty from '@/components/empty-states/BusinessInsightsEmpty';
 import { 
   getBusinessMetrics, 
   getDateRange, 
@@ -36,6 +37,7 @@ const BusinessInsightsPage = () => {
   const [datePickerOpen, setDatePickerOpen] = useState(false);
   const [metrics, setMetrics] = useState<BusinessMetrics | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showEmptyState, setShowEmptyState] = useState(false);
   const { toast } = useToast();
 
   console.log('BusinessInsightsPage rendering...', { activeTab, selectedDate });
@@ -43,10 +45,18 @@ const BusinessInsightsPage = () => {
   const loadMetrics = async () => {
     console.log('Loading metrics...', { activeTab, selectedDate });
     setLoading(true);
+    setShowEmptyState(false);
+    
     try {
       const dateRange = getDateRange(activeTab, selectedDate);
       const data = await getBusinessMetrics(dateRange);
       console.log('Metrics loaded successfully:', data);
+      
+      // Check if it's demo data
+      if (data.totalRevenue === 2450 && data.totalClients === 8) {
+        setShowEmptyState(true);
+      }
+      
       setMetrics(data);
     } catch (error) {
       console.error('Error loading metrics:', error);
@@ -55,6 +65,7 @@ const BusinessInsightsPage = () => {
         description: "לא ניתן לטעון את הנתונים כרגע",
         variant: "destructive"
       });
+      setShowEmptyState(true);
     } finally {
       setLoading(false);
     }
@@ -103,6 +114,71 @@ const BusinessInsightsPage = () => {
             </Card>
           ))}
         </div>
+      </div>
+    );
+  }
+
+  // Show empty state when no real data exists
+  if (showEmptyState) {
+    return (
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="text-right">
+            <h1 className="text-2xl font-semibold mb-1 text-[#3A1E14]">התובנות העסקיות שלך</h1>
+            <p className="text-muted-foreground">מעקב אחר הביצועים והצמיחה שלך</p>
+          </div>
+        </div>
+
+        <BusinessInsightsEmpty />
+
+        {/* Show demo data below */}
+        {metrics && (
+          <>
+            <MotivationalMessage 
+              message={getMotivationalMessage(metrics)} 
+            />
+            
+            <Card className="border-dashed border-2 border-amber-200 bg-amber-50/30">
+              <CardHeader>
+                <CardTitle className="text-center text-amber-800 flex items-center justify-center gap-2">
+                  <Lightbulb className="h-5 w-5" />
+                  תצוגת דמו - כך ייראה העמוד עם נתונים אמיתיים
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 opacity-75">
+                  <KPICard
+                    title="הכנסות השבוע"
+                    value={metrics.totalRevenue}
+                    icon={TrendingUp}
+                    variant="primary"
+                    trend={{ value: metrics.revenueGrowth, label: "לעומת שבוע קודם" }}
+                  />
+                  <KPICard
+                    title="לקוחות"
+                    value={metrics.totalClients}
+                    icon={Users}
+                    variant="secondary"
+                    trend={{ value: metrics.clientGrowth, label: "לעומת שבוע קודם" }}
+                  />
+                  <KPICard
+                    title="ממוצע ללקוחה"
+                    value={`₪${metrics.averagePerClient.toFixed(0)}`}
+                    icon={Calculator}
+                    variant="accent"
+                  />
+                  <KPICard
+                    title="לקוחות חוזרות"
+                    value={metrics.repeatCustomers}
+                    subtitle={`${((metrics.repeatCustomers / metrics.totalClients) * 100).toFixed(0)}% מהלקוחות`}
+                    icon={Repeat}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          </>
+        )}
       </div>
     );
   }
