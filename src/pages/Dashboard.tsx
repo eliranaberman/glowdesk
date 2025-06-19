@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, Suspense } from 'react';
 import { CalendarClock, Users, DollarSign, TrendingUp, Plus, Calendar, UserPlus, CreditCard, Package } from 'lucide-react';
 import StatCard from '../components/dashboard/StatCard';
@@ -145,32 +144,28 @@ const Dashboard = () => {
       description: "תזמון פגישה ללקוח חדש",
       icon: <Calendar className="h-5 w-5" />,
       to: "/scheduling/new",
-      variant: "action" as const,
-      tooltip: "קביעת פגישה חדשה במערכת היומנים"
+      variant: "action" as const
     },
     {
       title: "הוספת לקוח",
       description: "יצירת פרופיל לקוח חדש",
       icon: <UserPlus className="h-5 w-5" />,
       to: "/clients/new",
-      variant: "premium" as const,
-      tooltip: "הוספת לקוח חדש עם כל הפרטים הרלוונטיים"
+      variant: "premium" as const
     },
     {
       title: "רישום תשלום",
       description: "תיעוד עסקה חדשה",
       icon: <CreditCard className="h-5 w-5" />,
       to: "/payments/new",
-      variant: "success" as const,
-      tooltip: "רישום תשלום או הכנסה חדשה במערכת"
+      variant: "success" as const
     },
     {
       title: "עדכון מלאי",
       description: "רישום מוצרים חדשים או חוסרים",
       icon: <Package className="h-5 w-5" />,
       to: "/inventory/new",
-      variant: "warm" as const,
-      tooltip: "עדכון מצב המלאי והוספת מוצרים חדשים"
+      variant: "warm" as const
     }
   ];
 
@@ -192,19 +187,17 @@ const Dashboard = () => {
       {/* Stats Grid - Uniform and Aligned */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((stat) => (
-          <HelpTooltip key={stat.title} content={stat.description || ""} variant="help">
-            <div className="h-full">
-              <StatCard
-                title={stat.title}
-                value={stat.value}
-                icon={stat.icon}
-                change={stat.change}
-                onClick={stat.onClick}
-                description={stat.description}
-                className="h-full"
-              />
-            </div>
-          </HelpTooltip>
+          <div key={stat.title} className="h-full">
+            <StatCard
+              title={stat.title}
+              value={stat.value}
+              icon={stat.icon}
+              change={stat.change}
+              onClick={stat.onClick}
+              description={stat.description}
+              className="h-full"
+            />
+          </div>
         ))}
       </div>
 
@@ -278,26 +271,24 @@ const Dashboard = () => {
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {quickActions.map((action) => (
-            <HelpTooltip key={action.title} content={action.tooltip} variant="premium">
-              <Link to={action.to} className="block group h-full">
-                <div className="bg-card hover:bg-gradient-to-br hover:from-warmBeige/30 hover:to-softRose/20 p-6 rounded-xl cursor-pointer transition-all duration-500 shadow-soft hover:shadow-elevated flex flex-col transform hover:-translate-y-2 border border-transparent hover:border-softRose/20 relative overflow-hidden h-full">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="p-2 rounded-full bg-gradient-to-br from-softRose/20 to-roseGold/20 group-hover:from-softRose/30 group-hover:to-roseGold/30 transition-all duration-300 group-hover:scale-110">
-                      {action.icon}
-                    </div>
-                    <h3 className="font-medium text-primary group-hover:text-deepNavy transition-colors duration-300">
-                      {action.title}
-                    </h3>
+            <Link key={action.title} to={action.to} className="block group h-full">
+              <div className="bg-card hover:bg-gradient-to-br hover:from-warmBeige/30 hover:to-softRose/20 p-6 rounded-xl cursor-pointer transition-all duration-500 shadow-soft hover:shadow-elevated flex flex-col transform hover:-translate-y-2 border border-transparent hover:border-softRose/20 relative overflow-hidden h-full">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="p-2 rounded-full bg-gradient-to-br from-softRose/20 to-roseGold/20 group-hover:from-softRose/30 group-hover:to-roseGold/30 transition-all duration-300 group-hover:scale-110">
+                    {action.icon}
                   </div>
-                  <p className="text-sm text-muted-foreground group-hover:text-deepNavy/70 transition-colors duration-300 flex-1">
-                    {action.description}
-                  </p>
-                  
-                  {/* Shine effect */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 ease-out" />
+                  <h3 className="font-medium text-primary group-hover:text-deepNavy transition-colors duration-300">
+                    {action.title}
+                  </h3>
                 </div>
-              </Link>
-            </HelpTooltip>
+                <p className="text-sm text-muted-foreground group-hover:text-deepNavy/70 transition-colors duration-300 flex-1">
+                  {action.description}
+                </p>
+                
+                {/* Shine effect */}
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 ease-out" />
+              </div>
+            </Link>
           ))}
         </div>
       </div>
