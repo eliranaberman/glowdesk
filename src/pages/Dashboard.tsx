@@ -39,7 +39,11 @@ const Dashboard = () => {
         await initializeMarketingData();
         enhancedToast.success("הדשבורד נטען בהצלחה", "כל הנתונים מעודכנים");
       } catch (error) {
-        enhancedToast.error("שגיאה בטעינת הנתונים", "אנא נסי לרענן את הדף");
+        toast({
+          title: "שגיאה בטעינת הנתונים",
+          description: "אנא נסי לרענן את הדף",
+          variant: "destructive"
+        });
       } finally {
         setIsLoading(false);
       }
