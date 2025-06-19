@@ -41,7 +41,6 @@ import OnlineBooking from '@/pages/OnlineBooking';
 import InitialSetupPage from '@/pages/InitialSetupPage';
 import Customers from '@/pages/Customers';
 import BusinessInsightsPage from '@/pages/BusinessInsightsPage';
-import MagicToolsPage from "@/pages/MagicToolsPage";
 
 // Create a layout wrapper for protected routes
 const ProtectedLayout = () => {
@@ -125,9 +124,6 @@ export default function AppRoutes() {
         
         {/* Setup */}
         <Route path="/setup" element={<InitialSetupPage />} />
-        
-        {/* Magic Tools Page - Now protected */}
-        <Route path="/magic-tools" element={<MagicToolsPage />} />
       </Route>
       
       {/* Fallback route (404) */}
