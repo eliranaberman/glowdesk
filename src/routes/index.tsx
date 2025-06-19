@@ -20,11 +20,18 @@ import Register from "@/pages/auth/Register";
 import ForgotPassword from "@/pages/auth/ForgotPassword";
 import ResetPassword from "@/pages/auth/ResetPassword";
 import BusinessInsights from '@/pages/finances/BusinessInsights';
+import { AuthProvider } from '@/contexts/auth';
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <Layout><Outlet /></Layout>,
+    element: (
+      <AuthProvider>
+        <Layout>
+          <Outlet />
+        </Layout>
+      </AuthProvider>
+    ),
     children: [
       {
         path: "/",
@@ -59,7 +66,7 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: "/finances/reports",
+        path: "/finances/reports",  
         element: (
           <ProtectedRoute>
             <Reports />
@@ -118,19 +125,35 @@ const router = createBrowserRouter([
   },
   {
     path: "/login",
-    element: <Login />,
+    element: (
+      <AuthProvider>
+        <Login />
+      </AuthProvider>
+    ),
   },
   {
     path: "/register",
-    element: <Register />,
+    element: (
+      <AuthProvider>
+        <Register />
+      </AuthProvider>
+    ),
   },
   {
     path: "/forgot-password",
-    element: <ForgotPassword />,
+    element: (
+      <AuthProvider>
+        <ForgotPassword />
+      </AuthProvider>
+    ),
   },
   {
     path: "/reset-password",
-    element: <ResetPassword />,
+    element: (
+      <AuthProvider>
+        <ResetPassword />
+      </AuthProvider>
+    ),
   },
 ]);
 

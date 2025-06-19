@@ -3,7 +3,6 @@ import { useEffect, useState } from 'react';
 import { RouterProvider } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import router from './routes';
-import { AuthProvider } from '@/contexts/auth';
 import { Toaster } from '@/components/ui/toaster';
 import { initializeStorage } from '@/services/storageService';
 import { HelmetProvider } from 'react-helmet-async';
@@ -33,10 +32,8 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <HelmetProvider>
-        <AuthProvider>
-          <RouterProvider router={router} />
-          <Toaster />
-        </AuthProvider>
+        <RouterProvider router={router} />
+        <Toaster />
       </HelmetProvider>
     </QueryClientProvider>
   );
