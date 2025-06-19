@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, Suspense } from 'react';
 import { CalendarClock, Users, DollarSign, TrendingUp, Plus, Calendar, UserPlus, CreditCard, Package } from 'lucide-react';
 import StatCard from '../components/dashboard/StatCard';
@@ -175,8 +176,8 @@ const Dashboard = () => {
 
   if (isLoading) {
     return (
-      <div className="space-y-6 md:space-y-8 animate-fade-in" dir="rtl">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+      <div className="max-w-7xl mx-auto space-y-8 animate-fade-in" dir="rtl">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {Array.from({ length: 4 }).map((_, i) => (
             <SkeletonCard key={i} />
           ))}
@@ -187,12 +188,12 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="space-y-6 md:space-y-8 animate-fade-in" dir="rtl">
-      {/* Enhanced Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+    <div className="max-w-7xl mx-auto space-y-8 animate-fade-in" dir="rtl">
+      {/* Stats Grid - Uniform and Aligned */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((stat) => (
           <HelpTooltip key={stat.title} content={stat.description || ""} variant="help">
-            <div>
+            <div className="h-full">
               <StatCard
                 title={stat.title}
                 value={stat.value}
@@ -200,23 +201,25 @@ const Dashboard = () => {
                 change={stat.change}
                 onClick={stat.onClick}
                 description={stat.description}
+                className="h-full"
               />
             </div>
           </HelpTooltip>
         ))}
       </div>
 
-      {/* Business Analytics Section - Only visible to users with finance permissions */}
+      {/* Business Analytics Section */}
       {hasFinanceAccess && (
         <PermissionGuard requiredResource="finances" requiredPermission="read" showLoadingState={false}>
-          <div className="mb-8">
+          <div className="w-full">
             <BusinessAnalytics timeFrame="month" />
           </div>
         </PermissionGuard>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
-        <div className="flex flex-col gap-6 order-first">
+      {/* Main Content Grid - Uniform Layout */}
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+        <div className="space-y-8">
           <Suspense fallback={<LoadingFallback />}>
             <DailySummary 
               customers={dailyData.customers}
@@ -230,26 +233,33 @@ const Dashboard = () => {
           </Suspense>
         </div>
         
-        <div className="flex flex-col gap-6">
+        <div className="space-y-8">
           <Suspense fallback={<LoadingFallback />}>
             <BusinessInsights />
+          </Suspense>
+          <Suspense fallback={<LoadingFallback />}>
             <CashFlowForecast />
           </Suspense>
         </div>
       </div>
       
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
+      {/* Marketing & Loyalty Section */}
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
         <Suspense fallback={<LoadingFallback />}>
           <MarketingMessages />
+        </Suspense>
+        <Suspense fallback={<LoadingFallback />}>
           <LoyaltyProgram />
         </Suspense>
       </div>
       
+      {/* Inactive Clients Alert - Full Width */}
       <Suspense fallback={<LoadingFallback />}>
         <InactiveClientsAlert />
       </Suspense>
       
-      <div className="mb-6 md:mb-8">
+      {/* Analytics Charts - Full Width */}
+      <div className="w-full">
         <Suspense fallback={<LoadingFallback />}>
           <AnalyticsCharts 
             monthlyData={monthlyData}
@@ -260,18 +270,18 @@ const Dashboard = () => {
         </Suspense>
       </div>
       
-      {/* Enhanced Quick Actions */}
-      <div className="border rounded-xl p-4 md:p-6 shadow-soft hover:shadow-soft-lg transition-all duration-300 bg-gradient-to-br from-warmBeige/20 to-softRose/10">
-        <h2 className="text-base md:text-lg font-display font-medium mb-4 md:mb-6 flex items-center">
-          <span className="bg-gradient-to-r from-softRose to-roseGold w-1 h-6 rounded mr-2"></span>
+      {/* Quick Actions - Uniform Grid */}
+      <div className="border rounded-xl p-6 shadow-soft hover:shadow-soft-lg transition-all duration-300 bg-gradient-to-br from-warmBeige/20 to-softRose/10">
+        <h2 className="text-xl font-display font-medium mb-6 flex items-center">
+          <span className="bg-gradient-to-r from-softRose to-roseGold w-1 h-6 rounded ml-3"></span>
           פעולות מהירות
         </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {quickActions.map((action) => (
             <HelpTooltip key={action.title} content={action.tooltip} variant="premium">
-              <Link to={action.to} className="block group">
-                <div className="bg-card hover:bg-gradient-to-br hover:from-warmBeige/30 hover:to-softRose/20 p-4 md:p-5 rounded-xl cursor-pointer transition-all duration-500 shadow-soft hover:shadow-elevated flex flex-col transform hover:-translate-y-2 border border-transparent hover:border-softRose/20 relative overflow-hidden">
-                  <div className="flex items-center gap-3 mb-2">
+              <Link to={action.to} className="block group h-full">
+                <div className="bg-card hover:bg-gradient-to-br hover:from-warmBeige/30 hover:to-softRose/20 p-6 rounded-xl cursor-pointer transition-all duration-500 shadow-soft hover:shadow-elevated flex flex-col transform hover:-translate-y-2 border border-transparent hover:border-softRose/20 relative overflow-hidden h-full">
+                  <div className="flex items-center gap-3 mb-3">
                     <div className="p-2 rounded-full bg-gradient-to-br from-softRose/20 to-roseGold/20 group-hover:from-softRose/30 group-hover:to-roseGold/30 transition-all duration-300 group-hover:scale-110">
                       {action.icon}
                     </div>
@@ -279,7 +289,7 @@ const Dashboard = () => {
                       {action.title}
                     </h3>
                   </div>
-                  <p className="text-xs md:text-sm text-muted-foreground mt-1 group-hover:text-deepNavy/70 transition-colors duration-300">
+                  <p className="text-sm text-muted-foreground group-hover:text-deepNavy/70 transition-colors duration-300 flex-1">
                     {action.description}
                   </p>
                   
@@ -292,23 +302,23 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Enhanced Online Booking Section */}
-      <div className="bg-gradient-to-r from-warmBeige via-softRose/20 to-roseGold/20 border border-softRose/30 rounded-xl p-4 md:p-6 shadow-elevated hover:shadow-hover transition-all duration-500 relative overflow-hidden group">
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 md:gap-0 relative z-10">
-          <div className="mb-4 md:mb-0">
-            <h2 className="text-lg md:text-xl font-display font-medium text-deepNavy mb-2 group-hover:text-primary transition-colors duration-300">
+      {/* Online Booking Section - Full Width, Elegant */}
+      <div className="bg-gradient-to-r from-warmBeige via-softRose/20 to-roseGold/20 border border-softRose/30 rounded-xl p-8 shadow-elevated hover:shadow-hover transition-all duration-500 relative overflow-hidden group">
+        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 relative z-10">
+          <div className="flex-1">
+            <h2 className="text-2xl font-display font-medium text-deepNavy mb-3 group-hover:text-primary transition-colors duration-300">
               מערכת קביעת פגישות אונליין
             </h2>
-            <p className="text-sm md:text-base text-muted-foreground max-w-2xl group-hover:text-deepNavy/70 transition-colors duration-300">
+            <p className="text-base text-muted-foreground max-w-2xl group-hover:text-deepNavy/70 transition-colors duration-300 leading-relaxed">
               אפשרו ללקוחות שלכם לקבוע פגישות אונליין בקלות, והתראות יסונכרנו ישירות ללוח השנה שלכם.
             </p>
           </div>
-          <div className="flex gap-4 w-full md:w-auto">
-            <Link to="/online-booking" className="w-full md:w-auto">
+          <div className="flex-shrink-0">
+            <Link to="/online-booking">
               <Button 
                 variant="premium" 
-                size={isMobile ? "touch" : "lg"} 
-                className="font-display w-full md:w-auto group-hover:scale-105 transition-transform duration-300"
+                size="lg"
+                className="font-display group-hover:scale-105 transition-transform duration-300 px-8 py-4"
               >
                 <Calendar className="ml-2 h-5 w-5" />
                 קביעת פגישות אונליין
