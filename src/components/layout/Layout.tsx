@@ -49,6 +49,7 @@ const Layout = ({ children }: LayoutProps) => {
     if (path === '/payments/new') return 'רישום תשלום';
     if (path === '/finances/cash-flow') return 'תזרים מזומנים';
     if (path === '/finances/insights') return 'תובנות עסקיות';
+    if (path === '/insights') return 'התובנות העסקיות שלך';
     if (path === '/loyalty') return 'תוכנית נאמנות';
     if (path === '/marketing/templates') return 'תבניות הודעות';
     if (path === '/portfolio') return 'גלריה';

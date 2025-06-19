@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useLocation, Link, NavLink } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -26,7 +25,8 @@ import {
   UserCog,
   Award,
   ChevronDown,
-  ChevronRight
+  ChevronRight,
+  TrendingUp
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -156,6 +156,11 @@ const Sidebar = ({
         href: '/portfolio',
         label: 'גלריה',
         icon: ImageIcon
+      },
+      {
+        href: '/insights',
+        label: 'תובנות עסקיות',
+        icon: TrendingUp
       },
       {
         href: '/reports',

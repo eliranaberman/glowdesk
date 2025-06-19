@@ -1,4 +1,3 @@
-
 import { Navigate, Outlet, Route, Routes } from 'react-router-dom';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import Layout from '@/components/layout/Layout';
@@ -41,6 +40,7 @@ import NewPayment from '@/pages/payments/NewPayment';
 import OnlineBooking from '@/pages/OnlineBooking';
 import InitialSetupPage from '@/pages/InitialSetupPage';
 import Customers from '@/pages/Customers';
+import BusinessInsightsPage from '@/pages/BusinessInsightsPage';
 
 // Create a layout wrapper for protected routes
 const ProtectedLayout = () => {
@@ -115,6 +115,9 @@ export default function AppRoutes() {
         <Route path="/finances/insights" element={<BusinessInsights />} />
         <Route path="/finances/reports" element={<FinancialReports />} />
         <Route path="/payments/new" element={<NewPayment />} />
+        
+        {/* Business Insights - New comprehensive page */}
+        <Route path="/insights" element={<BusinessInsightsPage />} />
         
         {/* AI and notifications */}
         <Route path="/ai-assistant" element={<AIAssistant />} />
