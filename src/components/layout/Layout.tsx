@@ -48,7 +48,7 @@ const Layout = ({ children }: LayoutProps) => {
     if (path === '/online-booking') return 'קביעת פגישה אונליין';
     if (path === '/payments/new') return 'רישום תשלום';
     if (path === '/finances/cash-flow') return 'תזרים מזומנים';
-    if (path === '/finances/business-insights') return 'תובנות עסקיות';
+    if (path === '/finances/insights') return 'תובנות עסקיות';
     if (path === '/loyalty') return 'תוכנית נאמנות';
     if (path === '/marketing/templates') return 'תבניות הודעות';
     if (path === '/portfolio') return 'גלריה';
@@ -112,7 +112,7 @@ const Layout = ({ children }: LayoutProps) => {
           "absolute right-0 top-0 z-50 h-full w-64 animate-slide-in bg-background",
           !mobileSidebarOpen && "transform translate-x-full"
         )}>
-          <Sidebar />
+          <Sidebar onLinkClick={() => setMobileSidebarOpen(false)} />
         </div>
       </div>
 

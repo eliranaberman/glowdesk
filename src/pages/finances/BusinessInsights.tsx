@@ -1,248 +1,189 @@
 
-import { useState, useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Download, Loader2 } from 'lucide-react';
-import { toast } from 'sonner';
-import { DateRange } from 'react-day-picker';
-
-import BusinessKPICards from '@/components/business-insights/BusinessKPICards';
-import ServiceDistributionChart from '@/components/business-insights/ServiceDistributionChart';
-import RevenueChart from '@/components/business-insights/RevenueChart';
-import MotivationalMessage from '@/components/business-insights/MotivationalMessage';
-import DateRangePicker from '@/components/business-insights/DateRangePicker';
-
-import {
-  getBusinessKPIs,
-  getServiceDistribution,
-  getTimeSeriesData,
-  getMotivationalMessage,
-  TimeFrame,
-  BusinessKPI,
-  ServiceDistribution,
-  TimeSeriesData
-} from '@/services/businessInsightsService';
+import { Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { ArrowRight, BarChart as BarChartIcon, LineChart as LineChartIcon, Lightbulb, TrendingUp } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Progress } from '@/components/ui/progress';
 
 const BusinessInsights = () => {
-  const [activeTimeFrame, setActiveTimeFrame] = useState<TimeFrame>('daily');
-  const [dateRange, setDateRange] = useState<DateRange | undefined>();
-  const [customDateRange, setCustomDateRange] = useState(false);
+  const [activeTab, setActiveTab] = useState('goals');
+  const navigate = useNavigate();
 
-  // Queries for different data types
-  const { data: kpis, isLoading: isLoadingKPIs } = useQuery({
-    queryKey: ['business-kpis', activeTimeFrame, dateRange],
-    queryFn: () => getBusinessKPIs(activeTimeFrame),
-    refetchOnWindowFocus: false,
-  });
+  // Mock data
+  const performanceData = [
+    { month: 'ינואר', revenue: 12400, target: 12000, clients: 45 },
+    { month: 'פברואר', revenue: 13100, target: 12500, clients: 48 },
+    { month: 'מרץ', revenue: 14200, target: 13000, clients: 52 },
+    { month: 'אפריל', revenue: 13800, target: 13500, clients: 55 },
+    { month: 'מאי', revenue: 15100, target: 14000, clients: 58 },
+    { month: 'יוני', revenue: 15800, target: 14500, clients: 62 },
+  ];
 
-  const { data: serviceDistribution, isLoading: isLoadingServices } = useQuery({
-    queryKey: ['service-distribution', activeTimeFrame, dateRange],
-    queryFn: () => getServiceDistribution(activeTimeFrame),
-    refetchOnWindowFocus: false,
-  });
+  // Key insights data
+  const keyInsights = [
+    {
+      title: 'שעות שיא ביקוש',
+      description: 'בין השעות 16:00-18:00 נרשם הביקוש הגבוה ביותר לטיפולים. שקלי להוסיף תורים בשעות אלה.',
+      priority: 'high'
+    },
+    {
+      title: 'לקוחות חוזרים',
+      description: '68% מהלקוחות מגיעים לפחות פעם בחודשיים. יש מקום לשיפור בשיעור החזרה.',
+      priority: 'medium'
+    },
+    {
+      title: 'שירותים משולבים',
+      description: 'לקוחות שמזמינות מניקור+פדיקור יחד מוציאות בממוצע 35% יותר מלקוחות שמזמינות טיפול בודד.',
+      priority: 'high'
+    },
+  ];
 
-  const { data: timeSeriesData, isLoading: isLoadingTimeSeries } = useQuery({
-    queryKey: ['time-series', activeTimeFrame, dateRange],
-    queryFn: () => getTimeSeriesData(activeTimeFrame),
-    refetchOnWindowFocus: false,
-  });
+  const goalData = [
+    { name: 'הכנסה חודשית', current: 15800, target: 20000, percentage: 79 },
+    { name: 'לקוחות חדשים', current: 12, target: 20, percentage: 60 },
+    { name: 'שיעור חזרה', current: 68, target: 80, percentage: 85 },
+    { name: 'טיפולים בשבוע', current: 32, target: 40, percentage: 80 },
+  ];
 
-  const isLoading = isLoadingKPIs || isLoadingServices || isLoadingTimeSeries;
-
-  const handleExportPDF = async () => {
-    toast.info('תכונת ייצוא PDF תהיה זמינה בקרוב!');
-  };
-
-  const getPageTitle = () => {
-    switch (activeTimeFrame) {
-      case 'daily': return 'התובנות העסקיות שלך - נתוני היום';
-      case 'weekly': return 'התובנות העסקיות שלך - נתוני השבוע';
-      case 'monthly': return 'התובנות העסקיות שלך - נתוני החודש';
-    }
-  };
-
-  const getTabLabel = (timeFrame: TimeFrame) => {
-    switch (timeFrame) {
-      case 'daily': return 'יומי';
-      case 'weekly': return 'שבועי';
-      case 'monthly': return 'חודשי';
-    }
+  const handleBackClick = () => {
+    navigate(-1);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#FDF4EF] to-white p-4 md:p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div className="text-right">
-            <h1 className="text-3xl font-bold mb-2" style={{ color: '#3A1E14' }}>
-              {getPageTitle()}
-            </h1>
-            <p className="text-muted-foreground">
-              ניתוח מפורט של הביצועים העסקיים שלך עם תובנות מעמיקות ומותאמות אישית
-            </p>
-          </div>
-          
-          <div className="flex flex-col md:flex-row gap-2">
-            <DateRangePicker 
-              dateRange={dateRange}
-              onDateRangeChange={(range) => {
-                setDateRange(range);
-                setCustomDateRange(!!range);
-              }}
-            />
-            <Button
-              onClick={handleExportPDF}
-              variant="outline"
-              className="bg-white border-[#9C6B50] hover:bg-[#FDF4EF]"
-              style={{ color: '#9C6B50' }}
-            >
-              <Download className="h-4 w-4 mr-2" />
-              ייצוא PDF
-            </Button>
-          </div>
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold mb-1">תובנות עסקיות</h1>
+          <p className="text-muted-foreground">ניתוח הביצועים העסקיים שלך והצעות לשיפור</p>
         </div>
+      </div>
 
-        {/* Motivational Message */}
-        {kpis && (
-          <MotivationalMessage message={getMotivationalMessage(kpis, activeTimeFrame)} />
-        )}
-
-        {/* Time Frame Tabs */}
-        <Card className="bg-white/70 border-none shadow-soft">
-          <CardContent className="p-0">
-            <Tabs 
-              value={activeTimeFrame} 
-              onValueChange={(value) => setActiveTimeFrame(value as TimeFrame)}
-              className="w-full"
-            >
-              <TabsList className="grid w-full grid-cols-3 bg-[#F6BE9A]/20 rounded-t-lg">
-                <TabsTrigger 
-                  value="monthly"
-                  className="data-[state=active]:bg-[#9C6B50] data-[state=active]:text-white"
-                >
-                  {getTabLabel('monthly')}
+      <div className="grid gap-6">
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg">ביצועים עסקיים</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Tabs defaultValue={activeTab} value={activeTab} onValueChange={setActiveTab}>
+              <TabsList className="grid grid-cols-2 mb-6">
+                <TabsTrigger value="goals" className="flex items-center gap-2">
+                  <TrendingUp className="h-4 w-4" />
+                  יעדים
                 </TabsTrigger>
-                <TabsTrigger 
-                  value="weekly"
-                  className="data-[state=active]:bg-[#9C6B50] data-[state=active]:text-white"
-                >
-                  {getTabLabel('weekly')}
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="daily"
-                  className="data-[state=active]:bg-[#9C6B50] data-[state=active]:text-white"
-                >
-                  {getTabLabel('daily')}
+                <TabsTrigger value="performance" className="flex items-center gap-2">
+                  <BarChartIcon className="h-4 w-4" />
+                  ביצועים
                 </TabsTrigger>
               </TabsList>
-
-              {/* Loading State */}
-              {isLoading && (
-                <div className="p-8 flex items-center justify-center">
-                  <Loader2 className="h-8 w-8 animate-spin" style={{ color: '#9C6B50' }} />
-                  <span className="mr-2 text-lg" style={{ color: '#3A1E14' }}>טוען נתונים...</span>
+              
+              <TabsContent value="performance">
+                <div className="h-[300px]" dir="ltr">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart
+                      data={performanceData}
+                      margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                      <XAxis dataKey="month" />
+                      <YAxis />
+                      <Tooltip 
+                        formatter={(value: number) => [`₪${value}`, undefined]}
+                        labelFormatter={(label) => `חודש: ${label}`}
+                      />
+                      <Bar dataKey="revenue" name="הכנסה" fill="#606c38" radius={[3, 3, 0, 0]} />
+                      <Bar dataKey="target" name="יעד" fill="#ddbea9" radius={[3, 3, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
                 </div>
-              )}
-
-              {/* Content for each time frame */}
-              {!isLoading && (
-                <>
-                  <TabsContent value="daily" className="p-6 space-y-6">
-                    {kpis && <BusinessKPICards kpis={kpis} timeFrame="daily" />}
-                    
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                      {timeSeriesData && (
-                        <RevenueChart data={timeSeriesData} timeFrame="daily" />
-                      )}
-                      {serviceDistribution && (
-                        <ServiceDistributionChart data={serviceDistribution} timeFrame="daily" />
-                      )}
+              </TabsContent>
+              
+              <TabsContent value="goals">
+                <div className="space-y-6">
+                  {goalData.map((goal, i) => (
+                    <div key={i} className="space-y-1.5">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm font-medium">{goal.name}</span>
+                        <span className="text-sm text-muted-foreground">{goal.current}/{goal.target}</span>
+                      </div>
+                      <Progress value={goal.percentage} className="h-2" />
+                      <div className="flex justify-end">
+                        <span className="text-xs text-muted-foreground">{goal.percentage}%</span>
+                      </div>
                     </div>
-                  </TabsContent>
-
-                  <TabsContent value="weekly" className="p-6 space-y-6">
-                    {kpis && <BusinessKPICards kpis={kpis} timeFrame="weekly" />}
-                    
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                      {timeSeriesData && (
-                        <RevenueChart data={timeSeriesData} timeFrame="weekly" />
-                      )}
-                      {serviceDistribution && (
-                        <ServiceDistributionChart data={serviceDistribution} timeFrame="weekly" />
-                      )}
-                    </div>
-                  </TabsContent>
-
-                  <TabsContent value="monthly" className="p-6 space-y-6">
-                    {kpis && <BusinessKPICards kpis={kpis} timeFrame="monthly" />}
-                    
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                      {timeSeriesData && (
-                        <RevenueChart data={timeSeriesData} timeFrame="monthly" />
-                      )}
-                      {serviceDistribution && (
-                        <ServiceDistributionChart data={serviceDistribution} timeFrame="monthly" />
-                      )}
-                    </div>
-                  </TabsContent>
-                </>
-              )}
+                  ))}
+                </div>
+              </TabsContent>
             </Tabs>
           </CardContent>
         </Card>
 
-        {/* Additional Insights */}
-        {!isLoading && kpis && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <Card className="bg-gradient-to-br from-[#9C6B50]/10 to-[#F6BE9A]/20 border-none shadow-soft">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm text-right" style={{ color: '#3A1E14' }}>
-                  טיפ מקצועי
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground text-right">
-                  {kpis.cancellationRate > 15 
-                    ? "שיעור הביטולים גבוה - שקלי להטמיע מדיניות ביטולים חדשה"
-                    : "שיעור הביטולים נמוך - מצוין! המשיכי כך"}
-                </p>
-              </CardContent>
-            </Card>
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg flex items-center">
+              <Lightbulb className="h-5 w-5 ml-2 text-amber-500" />
+              תובנות מפתח
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {keyInsights.map((insight, i) => (
+                <div 
+                  key={i} 
+                  className={`p-4 rounded-lg border-r-4 ${
+                    insight.priority === 'high' ? 'border-r-amber-400 bg-amber-50/30' : 
+                    'border-r-blue-400 bg-blue-50/30'
+                  }`}
+                >
+                  <h3 className="font-medium mb-1">{insight.title}</h3>
+                  <p className="text-sm text-muted-foreground">{insight.description}</p>
+                </div>
+              ))}
+              
+              <div className="pt-2 flex justify-end">
+                <Link to="/finances/detailed-insights">
+                  <Button variant="outline" className="gap-1">
+                    לפרטים נוספים
+                    <ArrowRight className="h-4 w-4 mr-1" />
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
-            <Card className="bg-gradient-to-br from-[#69493F]/10 to-[#9C6B50]/20 border-none shadow-soft">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm text-right" style={{ color: '#3A1E14' }}>
-                  הזדמנות לצמיחה
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground text-right">
-                  {kpis.repeatBookings < 5 
-                    ? "הגדלת מספר הלקוחות החוזרים יכולה להכפיל את ההכנסות"
-                    : "יש לך בסיס לקוחות נאמן - זה הזמן להרחיב!"}
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-gradient-to-br from-[#F6BE9A]/20 to-[#FDF4EF] border-none shadow-soft">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm text-right" style={{ color: '#3A1E14' }}>
-                  המלצה אישית
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground text-right">
-                  {activeTimeFrame === 'daily' && kpis.peakHour
-                    ? `השעה ${kpis.peakHour} היא הכי עמוסה - שקלי להוסיף מחירון מיוחד`
-                    : "נסי להציע חבילות טיפולים משולבות להגדלת הרווחיות"}
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-        )}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg">מגמות לקוחות</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[250px]" dir="ltr">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart
+                  data={performanceData}
+                  margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                  <XAxis dataKey="month" />
+                  <YAxis />
+                  <Tooltip
+                    formatter={(value: number) => [value, 'מספר לקוחות']}
+                    labelFormatter={(label) => `חודש: ${label}`}
+                  />
+                  <Line 
+                    type="monotone" 
+                    dataKey="clients" 
+                    stroke="#8884d8" 
+                    activeDot={{ r: 8 }} 
+                    name="לקוחות" 
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
