@@ -38,11 +38,15 @@ const BusinessInsightsPage = () => {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
+  console.log('BusinessInsightsPage rendering...', { activeTab, selectedDate });
+
   const loadMetrics = async () => {
+    console.log('Loading metrics...', { activeTab, selectedDate });
     setLoading(true);
     try {
       const dateRange = getDateRange(activeTab, selectedDate);
       const data = await getBusinessMetrics(dateRange);
+      console.log('Metrics loaded successfully:', data);
       setMetrics(data);
     } catch (error) {
       console.error('Error loading metrics:', error);

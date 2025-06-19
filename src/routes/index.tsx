@@ -1,3 +1,4 @@
+
 import { Navigate, Outlet, Route, Routes } from 'react-router-dom';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import Layout from '@/components/layout/Layout';
@@ -34,7 +35,6 @@ import EditClientPage from '@/pages/clients/EditClientPage';
 import ClientDetailPage from '@/pages/clients/ClientDetailPage';
 import NewActivityPage from '@/pages/clients/NewActivityPage';
 import CashFlow from '@/pages/finances/CashFlow';
-import BusinessInsights from '@/pages/finances/BusinessInsights';
 import FinancialReports from '@/pages/finances/FinancialReports';
 import NewPayment from '@/pages/payments/NewPayment';
 import OnlineBooking from '@/pages/OnlineBooking';
@@ -112,7 +112,6 @@ export default function AppRoutes() {
         
         {/* Financial routes */}
         <Route path="/finances/cash-flow" element={<CashFlow />} />
-        <Route path="/finances/insights" element={<BusinessInsights />} />
         <Route path="/finances/reports" element={<FinancialReports />} />
         <Route path="/payments/new" element={<NewPayment />} />
         
