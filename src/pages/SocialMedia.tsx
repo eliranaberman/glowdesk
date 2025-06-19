@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -24,6 +23,7 @@ import { useToast } from "@/hooks/use-toast";
 import { getMarketingStats } from "@/services/marketing/messageService";
 import { fetchUserMessages, getUnreadMessagesCount, markMessageAsRead, replyToMessage } from "@/services/socialMediaMessagesService";
 import { MarketingStats } from "@/types/marketing";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const SocialMedia = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -39,6 +39,7 @@ const SocialMedia = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const isMobile = useIsMobile();
 
   const analyticsData = {
     followers: [
@@ -185,14 +186,15 @@ const SocialMedia = () => {
   };
 
   return (
-    <div className="space-y-6 p-6" dir="rtl">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-semibold text-center tracking-tight">מדיה חברתית ושיווק</h1>
-        <div className="flex gap-2">
+    <div className="space-y-4 sm:space-y-6 p-3 sm:p-6" dir="rtl">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+        <h1 className="text-xl sm:text-2xl font-semibold text-center sm:text-right tracking-tight">מדיה חברתית ושיווק</h1>
+        
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-2 order-first sm:order-none">
           <Button
             variant="outline"
             size="sm"
-            className="flex items-center gap-1"
+            className="flex items-center justify-center gap-2 h-10 sm:h-8 text-sm"
             onClick={() => navigate('/marketing')}
           >
             <ArrowRight size={16} />
@@ -202,44 +204,80 @@ const SocialMedia = () => {
           <Button 
             variant="secondary" 
             size="sm" 
-            className="flex items-center gap-1"
+            className="flex items-center justify-center gap-2 h-10 sm:h-8 text-sm"
             onClick={handleButtonAction}
           >
             <Plus size={16} />
             {getButtonText()}
           </Button>
         </div>
-        <div className="w-[150px]" />
       </div>
 
       <Tabs defaultValue={activeTab} value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid grid-cols-5 gap-2 w-full mb-4">
-          <TabsTrigger value="ai-tools" className="text-sm py-2.5 font-medium flex gap-2 justify-center">
-            <BrainCircuit className="h-4 w-4" />
-            <span>כלי שיווק AI</span>
+        <TabsList className={`grid gap-1 w-full mb-4 ${isMobile ? 'grid-cols-3 h-auto' : 'grid-cols-5 h-10'}`}>
+          <TabsTrigger 
+            value="dashboard" 
+            className={`text-xs sm:text-sm py-2 sm:py-2.5 font-medium flex gap-1 sm:gap-2 justify-center ${isMobile ? 'min-h-[44px] flex-col' : ''}`}
+          >
+            <LayoutDashboard className="h-4 w-4" />
+            <span className={isMobile ? 'text-xs' : ''}>דשבורד</span>
           </TabsTrigger>
-          <TabsTrigger value="analytics" className="text-sm py-2.5 font-medium flex gap-2 justify-center">
-            <BarChart3 className="h-4 w-4" />
-            <span>אנליטיקס</span>
-          </TabsTrigger>
-          <TabsTrigger value="posts" className="text-sm py-2.5 font-medium flex gap-2 justify-center">
-            <Send className="h-4 w-4" />
-            <span>פרסום פוסטים</span>
-          </TabsTrigger>
-          <TabsTrigger value="inbox" className="text-sm py-2.5 font-medium flex gap-2 justify-center relative">
+          <TabsTrigger 
+            value="inbox" 
+            className={`text-xs sm:text-sm py-2 sm:py-2.5 font-medium flex gap-1 sm:gap-2 justify-center relative ${isMobile ? 'min-h-[44px] flex-col' : ''}`}
+          >
             <MessageSquare className="h-4 w-4" />
-            <span>תיבת הודעות</span>
+            <span className={isMobile ? 'text-xs' : ''}>הודעות</span>
             {unreadCount > 0 && (
               <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
                 {unreadCount > 9 ? '9+' : unreadCount}
               </span>
             )}
           </TabsTrigger>
-          <TabsTrigger value="dashboard" className="text-sm py-2.5 font-medium flex gap-2 justify-center">
-            <LayoutDashboard className="h-4 w-4" />
-            <span>דשבורד</span>
+          <TabsTrigger 
+            value="posts" 
+            className={`text-xs sm:text-sm py-2 sm:py-2.5 font-medium flex gap-1 sm:gap-2 justify-center ${isMobile ? 'min-h-[44px] flex-col' : ''}`}
+          >
+            <Send className="h-4 w-4" />
+            <span className={isMobile ? 'text-xs' : ''}>פרסום</span>
           </TabsTrigger>
+          {!isMobile && (
+            <>
+              <TabsTrigger value="analytics" className="text-sm py-2.5 font-medium flex gap-2 justify-center">
+                <BarChart3 className="h-4 w-4" />
+                <span>אנליטיקס</span>
+              </TabsTrigger>
+              <TabsTrigger value="ai-tools" className="text-sm py-2.5 font-medium flex gap-2 justify-center">
+                <BrainCircuit className="h-4 w-4" />
+                <span>כלי שיווק AI</span>
+              </TabsTrigger>
+            </>
+          )}
         </TabsList>
+
+        {/* Mobile secondary tabs */}
+        {isMobile && (
+          <div className="flex gap-2 mb-4 overflow-x-auto pb-2">
+            <Button
+              variant={activeTab === "analytics" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setActiveTab("analytics")}
+              className="flex items-center gap-2 whitespace-nowrap min-h-[40px]"
+            >
+              <BarChart3 className="h-4 w-4" />
+              אנליטיקס
+            </Button>
+            <Button
+              variant={activeTab === "ai-tools" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setActiveTab("ai-tools")}
+              className="flex items-center gap-2 whitespace-nowrap min-h-[40px]"
+            >
+              <BrainCircuit className="h-4 w-4" />
+              כלי AI
+            </Button>
+          </div>
+        )}
 
         <TabsContent value="dashboard">
           <DashboardContent 

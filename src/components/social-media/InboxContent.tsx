@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { SocialMediaMessage, InboxContentProps } from "./types";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Instagram, Facebook, MessageCircle, User, Calendar, Clock, Flag, ArrowRight, Send, Image, FileText, Smile } from "lucide-react";
+import { Instagram, Facebook, MessageCircle, User, Calendar, Clock, Flag, ArrowLeft, Send, Image, FileText, Smile, ArrowRight } from "lucide-react";
 import ConnectionModal from "./ConnectionModal";
 import ReplyModal from "./ReplyModal";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -70,6 +70,174 @@ const InboxContent = ({ messages, onMarkAsRead, onReply }: InboxContentProps) =>
     });
   };
 
+  const handleBackToList = () => {
+    setSelectedMessage(null);
+  };
+
+  // Mobile: Show either list or conversation
+  if (isMobile) {
+    return (
+      <div className="h-[calc(100vh-200px)]">
+        {selectedMessage ? (
+          // Mobile conversation view
+          <Card className="flex flex-col h-full">
+            <CardHeader className="flex flex-row items-center justify-between p-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleBackToList}
+                className="flex items-center gap-2 min-h-[44px] px-4"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                חזור לרשימה
+              </Button>
+              <div className="flex items-center gap-3 flex-1 justify-center">
+                <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-accent bg-muted flex items-center justify-center">
+                  <User size={20} className="text-muted-foreground" />
+                </div>
+                <div className="text-center">
+                  <h2 className="font-semibold text-lg">{selectedMessage.sender_name}</h2>
+                  <div className="flex items-center justify-center gap-1 text-sm text-muted-foreground">
+                    {getPlatformIcon(selectedMessage.platform)}
+                    <span>{selectedMessage.platform}</span>
+                  </div>
+                </div>
+              </div>
+              <Button variant="outline" size="sm" onClick={handleShowDetails} className="min-h-[44px]">
+                פרטים
+              </Button>
+            </CardHeader>
+            
+            <CardContent className="flex-1 flex flex-col p-4 gap-4 overflow-hidden">
+              {/* Messages */}
+              <div className="flex-1 overflow-y-auto p-4 space-y-6 bg-muted/10 border rounded-lg">
+                <div className="flex gap-3 items-start">
+                  <div className="bg-muted/30 p-4 rounded-lg max-w-[80%]">
+                    <p className="mb-2 text-base leading-relaxed">{selectedMessage.message_text}</p>
+                    <span className="text-sm text-muted-foreground">
+                      {new Date(selectedMessage.received_at).toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                  </div>
+                  <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 bg-muted flex items-center justify-center">
+                    <User size={16} className="text-muted-foreground" />
+                  </div>
+                </div>
+                
+                {selectedMessage.reply_text && (
+                  <div className="flex justify-start">
+                    <div className="bg-primary/10 p-4 rounded-lg max-w-[80%]">
+                      <p className="mb-2 text-base leading-relaxed">{selectedMessage.reply_text}</p>
+                      <span className="text-sm text-muted-foreground">
+                        {selectedMessage.replied_at && new Date(selectedMessage.replied_at).toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' })}
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </div>
+              
+              {/* Mobile reply input */}
+              <div className="border-t pt-4">
+                <div className="space-y-3">
+                  <textarea 
+                    value={replyText} 
+                    onChange={e => setReplyText(e.target.value)}
+                    className="w-full rounded-lg border p-4 focus:outline-none focus:ring-2 focus:ring-primary/30 min-h-[100px] resize-none text-base" 
+                    placeholder="כתוב את תגובתך כאן..." 
+                  />
+                  <div className="flex justify-between items-center">
+                    <div className="flex gap-1">
+                      <Button variant="ghost" size="icon" className="rounded-full h-11 w-11">
+                        <Image size={20} />
+                      </Button>
+                      <Button variant="ghost" size="icon" className="rounded-full h-11 w-11">
+                        <FileText size={20} />
+                      </Button>
+                      <Button variant="ghost" size="icon" className="rounded-full h-11 w-11">
+                        <Smile size={20} />
+                      </Button>
+                    </div>
+                    <Button 
+                      onClick={handleSendReply} 
+                      disabled={!replyText.trim()} 
+                      className="min-h-[44px] px-6 gap-2 text-base"
+                    >
+                      <Send size={16} />
+                      שלח
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ) : (
+          // Mobile messages list
+          <Card className="h-full">
+            <CardHeader className="flex flex-row items-center justify-between p-4 border-b">
+              <h2 className="text-lg font-semibold">הודעות</h2>
+              <div className="flex gap-2">
+                {messages.some(msg => !msg.is_read) && (
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={handleMarkAllAsRead}
+                    className="min-h-[44px] px-4 text-sm"
+                  >
+                    סמן הכל כנקרא
+                  </Button>
+                )}
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => setIsModalOpen(true)}
+                  className="min-h-[44px] px-4"
+                >
+                  חבר חשבון
+                </Button>
+              </div>
+            </CardHeader>
+            
+            <CardContent className="p-0 h-full">
+              <MobileMessageList 
+                messages={filteredMessages} 
+                selectedMessage={selectedMessage} 
+                setSelectedMessage={setSelectedMessage} 
+                handleReply={handleReply} 
+                activePlatform={activePlatform}
+                setActivePlatform={setActivePlatform}
+              />
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Modals */}
+        <ConnectionModal 
+          open={isModalOpen} 
+          onOpenChange={setIsModalOpen} 
+          connectedAccounts={{
+            instagram: false,
+            facebook: false,
+            tiktok: false
+          }} 
+          onConnect={() => {}} 
+        />
+        
+        <ReplyModal 
+          open={replyModalOpen} 
+          onOpenChange={setReplyModalOpen} 
+          message={selectedMessage}
+          onSendReply={handleModalReply}
+        />
+        
+        <CustomerDetailsDialog 
+          open={detailsOpen} 
+          onOpenChange={setDetailsOpen} 
+          customer={selectedMessage} 
+        />
+      </div>
+    );
+  }
+
+  // Desktop layout (unchanged)
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 h-[calc(100vh-220px)]">
       {/* Mobile view - conversation toggle */}
@@ -266,6 +434,109 @@ const InboxContent = ({ messages, onMarkAsRead, onReply }: InboxContentProps) =>
   );
 };
 
+// Mobile-optimized message list component
+type MobileMessageListProps = {
+  messages: SocialMediaMessage[];
+  selectedMessage: SocialMediaMessage | null;
+  setSelectedMessage: (msg: SocialMediaMessage) => void;
+  handleReply: (msg: SocialMediaMessage) => void;
+  activePlatform: string;
+  setActivePlatform: (platform: string) => void;
+};
+
+const MobileMessageList = ({
+  messages,
+  selectedMessage,
+  setSelectedMessage,
+  handleReply,
+  activePlatform,
+  setActivePlatform
+}: MobileMessageListProps) => {
+  return (
+    <div className="flex flex-col h-full">
+      <Tabs defaultValue={activePlatform} value={activePlatform} onValueChange={setActivePlatform} className="w-full">
+        <TabsList className="w-full grid grid-cols-4 rounded-none border-b h-12">
+          <TabsTrigger value="facebook" className="rounded-none py-3 data-[state=active]:bg-accent/50 min-h-[48px]">
+            <div className="flex flex-col items-center gap-1">
+              <Facebook size={16} />
+              <span className="text-xs">פייסבוק</span>
+            </div>
+          </TabsTrigger>
+          <TabsTrigger value="instagram" className="rounded-none py-3 data-[state=active]:bg-accent/50 min-h-[48px]">
+            <div className="flex flex-col items-center gap-1">
+              <Instagram size={16} />
+              <span className="text-xs">אינסטגרם</span>
+            </div>
+          </TabsTrigger>
+          <TabsTrigger value="tiktok" className="rounded-none py-3 data-[state=active]:bg-accent/50 min-h-[48px]">
+            <div className="flex flex-col items-center gap-1">
+              <TikTokIcon />
+              <span className="text-xs">טיקטוק</span>
+            </div>
+          </TabsTrigger>
+          <TabsTrigger value="all" className="rounded-none py-3 data-[state=active]:bg-accent/50 min-h-[48px]">
+            <span className="text-sm">הכל</span>
+          </TabsTrigger>
+        </TabsList>
+      </Tabs>
+      
+      <div className="flex-1 overflow-y-auto">
+        {messages.length ? messages.map(msg => (
+          <div 
+            key={msg.id} 
+            onClick={() => setSelectedMessage(msg)} 
+            className={`flex justify-between p-4 border-b cursor-pointer hover:bg-muted/20 transition-colors min-h-[80px]
+              ${selectedMessage?.id === msg.id ? 'bg-muted/30' : ''} 
+              ${!msg.is_read ? 'bg-muted/10' : ''}`
+            }
+          >
+            <div className="flex gap-4 items-center w-full">
+              <div className="w-12 h-12 rounded-full overflow-hidden border border-border/30 bg-muted flex items-center justify-center flex-shrink-0">
+                <User size={20} className="text-muted-foreground" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium text-base">{msg.sender_name}</span>
+                    {!msg.is_read && <span className="w-2 h-2 bg-primary rounded-full"></span>}
+                  </div>
+                  <span className="text-sm text-muted-foreground">
+                    {new Date(msg.received_at).toLocaleDateString('he-IL')}
+                  </span>
+                </div>
+                <p className="text-sm text-muted-foreground truncate mb-2 leading-relaxed">{msg.message_text}</p>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs bg-muted/40 px-2 py-1 rounded-full flex items-center gap-1">
+                    {getPlatformIcon(msg.platform)}
+                    {msg.platform}
+                  </span>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="p-2 h-8 text-sm hover:bg-transparent hover:underline text-muted-foreground min-h-[44px]"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleReply(msg);
+                    }}
+                  >
+                    השב
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )) : (
+          <div className="flex flex-col items-center justify-center h-full p-8">
+            <MessageCircle size={48} className="text-muted-foreground mb-4" />
+            <p className="text-muted-foreground text-center">אין הודעות להצגה</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// Desktop message list (unchanged)
 type MessageListProps = {
   messages: SocialMediaMessage[];
   selectedMessage: SocialMediaMessage | null;
