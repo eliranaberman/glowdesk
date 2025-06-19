@@ -5,20 +5,20 @@ import {
 } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
 import Dashboard from "@/pages/Dashboard";
-import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import Revenues from "@/pages/finances/Revenues";
 import Expenses from "@/pages/Expenses";
 import CashFlow from "@/pages/finances/CashFlow";
 import Reports from "@/pages/Reports";
 import BusinessManagement from "@/pages/finances/BusinessManagement";
-import { ClientsPage } from "@/pages/clients/ClientsPage";
-import { ClientDetailPage } from "@/pages/clients/ClientDetailPage";
+import ClientsPage from "@/pages/clients/ClientsPage";
+import ClientDetailPage from "@/pages/clients/ClientDetailPage";
 import Scheduling from "@/pages/Scheduling";
 import Settings from "@/pages/Settings";
-import { Login } from "@/pages/auth/Login";
-import { Register } from "@/pages/auth/Register";
-import { ForgotPassword } from "@/pages/auth/ForgotPassword";
-import { ResetPassword } from "@/pages/auth/ResetPassword";
+import Login from "@/pages/auth/Login";
+import Register from "@/pages/auth/Register";
+import ForgotPassword from "@/pages/auth/ForgotPassword";
+import ResetPassword from "@/pages/auth/ResetPassword";
 import BusinessInsights from '@/pages/finances/BusinessInsights';
 
 const router = createBrowserRouter([
