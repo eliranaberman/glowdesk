@@ -5,36 +5,58 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Lightbulb } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import InsightCard from './InsightCard';
+import { LoadingState } from '@/components/ui/empty-state';
 import { generateSmartInsights, SmartInsight } from '@/services/businessInsightsEngine';
+import { BusinessMetrics } from '@/services/businessInsightsService';
 
 interface InsightsGridProps {
   period: 'daily' | 'weekly' | 'monthly';
+  preloadedMetrics?: BusinessMetrics | null;
 }
 
-const InsightsGrid = ({ period }: InsightsGridProps) => {
+const InsightsGrid = ({ period, preloadedMetrics }: InsightsGridProps) => {
   const [insights, setInsights] = useState<SmartInsight[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!preloadedMetrics);
   const [activeTab, setActiveTab] = useState('all');
   const { toast } = useToast();
 
   useEffect(() => {
     loadInsights();
-  }, [period]);
+  }, [period, preloadedMetrics]);
 
   const loadInsights = async () => {
-    setLoading(true);
-    try {
-      const data = await generateSmartInsights(period);
-      setInsights(data);
-    } catch (error) {
-      console.error('Error loading insights:', error);
-      toast({
-        title: "שגיאה בטעינת תובנות",
-        description: "לא ניתן לטעון את התובנות כרגע",
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
+    // If we have preloaded metrics, use them to avoid duplicate API calls
+    if (preloadedMetrics) {
+      try {
+        setLoading(true);
+        const data = await generateSmartInsights(period);
+        setInsights(data);
+      } catch (error) {
+        console.error('Error loading insights:', error);
+        toast({
+          title: "שגיאה בטעינת תובנות",
+          description: "לא ניתן לטעון את התובנות כרגע",
+          variant: "destructive"
+        });
+      } finally {
+        setLoading(false);
+      }
+    } else {
+      // Fallback to original loading if no preloaded metrics
+      setLoading(true);
+      try {
+        const data = await generateSmartInsights(period);
+        setInsights(data);
+      } catch (error) {
+        console.error('Error loading insights:', error);
+        toast({
+          title: "שגיאה בטעינת תובנות",
+          description: "לא ניתן לטעון את התובנות כרגע",
+          variant: "destructive"
+        });
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -64,13 +86,7 @@ const InsightsGrid = ({ period }: InsightsGridProps) => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-4 md:grid-cols-2">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="animate-pulse">
-                <div className="h-24 bg-gray-200 rounded-lg"></div>
-              </div>
-            ))}
-          </div>
+          <LoadingState title="טוען תובנות..." description="אנא המתיני רגע" />
         </CardContent>
       </Card>
     );

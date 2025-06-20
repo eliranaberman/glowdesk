@@ -1,43 +1,43 @@
 
 import { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  TrendingUp, 
-  Users, 
-  Calculator, 
-  Repeat, 
-  Clock
-} from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import KPICard from '@/components/insights/KPICard';
 import ServiceDistributionChart from '@/components/insights/ServiceDistributionChart';
 import InsightsGrid from '@/components/insights/InsightsGrid';
+import { EmptyState, LoadingState } from '@/components/ui/empty-state';
 import { 
   getBusinessMetrics, 
   getDateRange, 
   BusinessMetrics 
 } from '@/services/businessInsightsService';
+import { 
+  TrendingUp, 
+  Users, 
+  Calculator, 
+  Repeat 
+} from 'lucide-react';
 
 const BusinessInsightsPage = () => {
   const [metrics, setMetrics] = useState<BusinessMetrics | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [activePeriod, setActivePeriod] = useState<'daily' | 'weekly' | 'monthly'>('weekly');
   const { toast } = useToast();
 
-  console.log('BusinessInsightsPage rendering...');
-
   const loadMetrics = async (period: 'daily' | 'weekly' | 'monthly') => {
-    console.log('Loading metrics for period:', period);
-    setLoading(true);
-    
     try {
+      setLoading(true);
+      setError(null);
+      
       const dateRange = getDateRange(period, new Date());
       const data = await getBusinessMetrics(dateRange, period);
-      console.log('Metrics loaded successfully:', data);
+      
       setMetrics(data);
     } catch (error) {
       console.error('Error loading metrics:', error);
+      setError('לא ניתן לטעון את הנתונים כרגע');
       toast({
         title: "שגיאה בטעינת נתונים",
         description: "לא ניתן לטעון את הנתונים כרגע",
@@ -58,20 +58,32 @@ const BusinessInsightsPage = () => {
 
   if (loading) {
     return (
-      <div className="space-y-6 text-center" dir="rtl">
+      <div className="space-y-6" dir="rtl">
         <div className="text-center">
           <h1 className="text-2xl font-semibold mb-1 text-[#3A1E14]">התובנות העסקיות שלך</h1>
           <p className="text-muted-foreground">מעקב אחר הביצועים והצמיחה שלך</p>
         </div>
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <Card key={i} className="animate-pulse">
-              <CardContent className="p-6">
-                <div className="h-20 bg-gray-200 rounded"></div>
-              </CardContent>
-            </Card>
-          ))}
+        <LoadingState title="טוען נתונים..." description="אנא המתיני רגע" />
+      </div>
+    );
+  }
+
+  if (error && !metrics) {
+    return (
+      <div className="space-y-6" dir="rtl">
+        <div className="text-center">
+          <h1 className="text-2xl font-semibold mb-1 text-[#3A1E14]">התובנות העסקיות שלך</h1>
+          <p className="text-muted-foreground">מעקב אחר הביצועים והצמיחה שלך</p>
         </div>
+        <EmptyState
+          title="שגיאה בטעינת הנתונים"
+          description="אירעה שגיאה בטעינת הנתונים. אנא נסי לרענן את הדף."
+          action={{
+            label: "נסה שוב",
+            onClick: () => loadMetrics(activePeriod),
+            variant: "premium"
+          }}
+        />
       </div>
     );
   }
@@ -93,10 +105,10 @@ const BusinessInsightsPage = () => {
         </TabsList>
 
         <TabsContent value={activePeriod}>
-          {/* KPI Cards */}
           {metrics && (
             <>
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+              {/* KPI Cards */}
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6">
                 <KPICard
                   title="הכנסות"
                   value={metrics.totalRevenue}
@@ -125,18 +137,20 @@ const BusinessInsightsPage = () => {
                 />
               </div>
 
-              <InsightsGrid period={activePeriod} />
+              {/* Insights Grid - Pass metrics to avoid duplicate loading */}
+              <div className="mb-6">
+                <InsightsGrid period={activePeriod} preloadedMetrics={metrics} />
+              </div>
               
+              {/* Charts */}
               <div className="grid gap-6 lg:grid-cols-2">
                 <ServiceDistributionChart 
                   data={metrics.treatmentDistribution}
                   title="התפלגות הטיפולים"
                 />
                 <Card>
-                  <CardHeader>
-                    <CardTitle className="text-center">סיכום נוסף</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-6">
+                  <CardContent className="p-6 space-y-6">
+                    <h3 className="text-lg font-semibold text-center">סיכום נוסף</h3>
                     <div className="space-y-4">
                       <div className="flex justify-between items-center">
                         <span className="text-2xl font-bold text-[#3A1E14]">{metrics.cancellationRate.toFixed(1)}%</span>
