@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -228,7 +227,7 @@ const SocialMedia = () => {
                 <span>דשבורד</span>
               </TabsTrigger>
               
-              <TabsT rigger 
+              <TabsTrigger 
                 value="inbox" 
                 className="text-xs sm:text-sm py-2 sm:py-2.5 font-medium flex gap-1 sm:gap-2 justify-center relative"
               >
