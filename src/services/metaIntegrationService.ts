@@ -1,46 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
-
-export interface MetaAccount {
-  id: string;
-  user_id: string;
-  platform: 'facebook' | 'instagram';
-  account_id: string;
-  account_name: string;
-  page_id?: string;
-  page_name?: string;
-  instagram_account_id?: string;
-  permissions: string[];
-  is_valid: boolean;
-  last_error?: string;
-  webhook_verified: boolean;
-  access_token: string;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface SocialMessage {
-  id: string;
-  user_id: string;
-  platform: 'facebook' | 'instagram';
-  account_id: string;
-  page_id?: string;
-  sender_id: string;
-  sender_name?: string;
-  message_text?: string;
-  message_type: string;
-  external_message_id: string;
-  thread_id?: string;
-  direction: 'inbound' | 'outbound';
-  status: 'read' | 'unread' | 'replied';
-  is_read: boolean;
-  reply_text?: string;
-  replied_at?: string;
-  received_at: string;
-  created_at: string;
-  updated_at: string;
-  metadata?: any;
-}
+import { MetaAccount, SocialMessage, OAuthResponse, SendMessageResponse } from '@/types/metaIntegration';
 
 export const initiateMetaOAuth = async (): Promise<{ authUrl: string; state: string } | null> => {
   try {
@@ -73,7 +33,24 @@ export const fetchConnectedAccounts = async (): Promise<MetaAccount[]> => {
   try {
     const { data, error } = await supabase
       .from('social_media_accounts')
-      .select('*')
+      .select(`
+        id,
+        user_id,
+        platform,
+        account_id,
+        account_name,
+        page_id,
+        page_name,
+        instagram_account_id,
+        permissions,
+        is_valid,
+        last_error,
+        webhook_verified,
+        access_token,
+        token_expires_at,
+        created_at,
+        updated_at
+      `)
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -81,7 +58,25 @@ export const fetchConnectedAccounts = async (): Promise<MetaAccount[]> => {
       return [];
     }
 
-    return data as MetaAccount[];
+    // Transform database results to match MetaAccount interface
+    return (data || []).map(account => ({
+      id: account.id,
+      user_id: account.user_id,
+      platform: account.platform as 'facebook' | 'instagram',
+      account_id: account.account_id,
+      account_name: account.account_name,
+      page_id: account.page_id || undefined,
+      page_name: account.page_name || undefined,
+      instagram_account_id: account.instagram_account_id || undefined,
+      permissions: account.permissions || [],
+      is_valid: account.is_valid ?? true,
+      last_error: account.last_error || undefined,
+      webhook_verified: account.webhook_verified ?? false,
+      access_token: account.access_token,
+      token_expires_at: account.token_expires_at || undefined,
+      created_at: account.created_at,
+      updated_at: account.updated_at
+    }));
   } catch (error) {
     console.error('Failed to fetch connected accounts:', error);
     return [];
@@ -137,7 +132,29 @@ export const fetchMessages = async (filters?: {
       return [];
     }
 
-    return data as SocialMessage[];
+    // Transform database results to match SocialMessage interface
+    return (data || []).map(msg => ({
+      id: msg.id,
+      user_id: msg.user_id,
+      platform: msg.platform as 'facebook' | 'instagram',
+      account_id: msg.account_id,
+      page_id: msg.page_id || undefined,
+      sender_id: msg.sender_id,
+      sender_name: msg.sender_name || undefined,
+      message_text: msg.message_text || undefined,
+      message_type: msg.message_type,
+      external_message_id: msg.external_message_id,
+      thread_id: msg.thread_id || undefined,
+      direction: msg.direction as 'inbound' | 'outbound',
+      status: msg.status as 'read' | 'unread' | 'replied',
+      is_read: msg.is_read,
+      reply_text: msg.reply_text || undefined,
+      replied_at: msg.replied_at || undefined,
+      received_at: msg.received_at,
+      created_at: msg.created_at,
+      updated_at: msg.updated_at,
+      metadata: msg.metadata
+    }));
   } catch (error) {
     console.error('Failed to fetch messages:', error);
     return [];
@@ -149,7 +166,7 @@ export const sendMessage = async (
   accountId: string,
   recipientId: string,
   message: string
-): Promise<{ success: boolean; error?: string }> => {
+): Promise<SendMessageResponse> => {
   try {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
@@ -174,10 +191,10 @@ export const sendMessage = async (
       return { success: false, error: error.message };
     }
 
-    return { success: true };
+    return { success: true, messageId: data?.messageId };
   } catch (error) {
     console.error('Failed to send message:', error);
-    return { success: false, error: error.message };
+    return { success: false, error: (error as Error).message };
   }
 };
 
@@ -235,7 +252,31 @@ export const subscribeToMessages = (
         table: 'social_media_messages'
       },
       (payload) => {
-        onMessage(payload.new as SocialMessage);
+        const newMessage = payload.new;
+        // Transform to match SocialMessage interface
+        const socialMessage: SocialMessage = {
+          id: newMessage.id,
+          user_id: newMessage.user_id,
+          platform: newMessage.platform as 'facebook' | 'instagram',
+          account_id: newMessage.account_id,
+          page_id: newMessage.page_id || undefined,
+          sender_id: newMessage.sender_id,
+          sender_name: newMessage.sender_name || undefined,
+          message_text: newMessage.message_text || undefined,
+          message_type: newMessage.message_type,
+          external_message_id: newMessage.external_message_id,
+          thread_id: newMessage.thread_id || undefined,
+          direction: newMessage.direction as 'inbound' | 'outbound',
+          status: newMessage.status as 'read' | 'unread' | 'replied',
+          is_read: newMessage.is_read,
+          reply_text: newMessage.reply_text || undefined,
+          replied_at: newMessage.replied_at || undefined,
+          received_at: newMessage.received_at,
+          created_at: newMessage.created_at,
+          updated_at: newMessage.updated_at,
+          metadata: newMessage.metadata
+        };
+        onMessage(socialMessage);
       }
     )
     .subscribe((status) => {
