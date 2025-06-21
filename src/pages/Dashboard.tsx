@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, Suspense } from 'react';
 import { CalendarClock, Users, DollarSign, TrendingUp, Plus, Calendar, UserPlus, CreditCard, Package } from 'lucide-react';
 import StatCard from '../components/dashboard/StatCard';
@@ -6,13 +5,13 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from '@/hooks/use-mobile';
-import { initializeMarketingData } from '@/services/marketing';
 import { usePermissions } from '@/hooks/use-permissions';
 import PermissionGuard from '@/components/auth/PermissionGuard';
 import BusinessAnalytics from '@/components/dashboard/BusinessAnalytics';
-import { HelpTooltip } from '@/components/ui/enhanced-tooltip';
-import { SkeletonCard, SkeletonTable } from '@/components/ui/skeleton';
+import LazyComponent from '@/components/dashboard/LazyComponent';
+import { StatsSkeleton, ChartSkeleton, GridSkeleton } from '@/components/dashboard/DashboardSkeleton';
 
+// Lazy load heavy components
 const DailySummary = React.lazy(() => import('../components/dashboard/DailySummary'));
 const RecentAppointments = React.lazy(() => import('../components/dashboard/RecentAppointments'));
 const BusinessInsights = React.lazy(() => import('../components/dashboard/BusinessInsights'));
@@ -22,32 +21,33 @@ const MarketingMessages = React.lazy(() => import('@/components/dashboard/Market
 const InactiveClientsAlert = React.lazy(() => import('@/components/dashboard/InactiveClientsAlert'));
 const AnalyticsCharts = React.lazy(() => import('@/components/dashboard/AnalyticsCharts'));
 
-const LoadingFallback = () => <SkeletonCard />;
-
 const Dashboard = () => {
   const { toast } = useToast();
   const isMobile = useIsMobile();
   const { isAdmin, isOwner } = usePermissions();
   const hasFinanceAccess = isAdmin || isOwner;
-  const [isLoading, setIsLoading] = useState(true);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
   
+  // Initialize critical data first, defer marketing data
   useEffect(() => {
-    const initData = async () => {
-      setIsLoading(true);
+    const initCriticalData = async () => {
+      setIsInitialLoading(false);
+    };
+    
+    initCriticalData();
+    
+    // Initialize marketing data in background (non-blocking)
+    const initMarketingData = async () => {
       try {
+        const { initializeMarketingData } = await import('@/services/marketing');
         await initializeMarketingData();
       } catch (error) {
-        toast({
-          title: "שגיאה בטעינת הנתונים",
-          description: "אנא נסי לרענן את הדף",
-          variant: "destructive"
-        });
-      } finally {
-        setIsLoading(false);
+        console.warn('Marketing data initialization failed:', error);
       }
     };
     
-    initData();
+    // Defer marketing data loading
+    setTimeout(initMarketingData, 1000);
   }, []);
   
   const stats = [
@@ -57,9 +57,7 @@ const Dashboard = () => {
       icon: <Users className="h-5 w-5 text-primary" />, 
       change: { value: '12%', positive: true },
       description: 'לקוחות פעילות בחודש האחרון',
-      onClick: () => toast({
-        title: "מעבר לרשימת הלקוחות"
-      })
+      onClick: () => toast({ title: "מעבר לרשימת הלקוחות" })
     },
     { 
       title: 'פגישות חודשיות', 
@@ -67,9 +65,7 @@ const Dashboard = () => {
       icon: <CalendarClock className="h-5 w-5 text-primary" />, 
       change: { value: '5%', positive: true },
       description: 'פגישות שהושלמו החודש',
-      onClick: () => toast({
-        title: "מעבר ליומן הפגישות"
-      })
+      onClick: () => toast({ title: "מעבר ליומן הפגישות" })
     },
     { 
       title: 'הכנסה חודשית', 
@@ -77,9 +73,7 @@ const Dashboard = () => {
       icon: <DollarSign className="h-5 w-5 text-primary" />, 
       change: { value: '8%', positive: true },
       description: 'הכנסה נטו לאחר הוצאות',
-      onClick: () => toast({
-        title: "מעבר לדוח הכנסות"
-      })
+      onClick: () => toast({ title: "מעבר לדוח הכנסות" })
     },
     { 
       title: 'ערך ממוצע לשירות', 
@@ -87,9 +81,7 @@ const Dashboard = () => {
       icon: <TrendingUp className="h-5 w-5 text-primary" />, 
       change: { value: '3%', positive: false },
       description: 'ממוצע הכנסה לטיפול',
-      onClick: () => toast({
-        title: "מעבר לניתוח שירותים"
-      })
+      onClick: () => toast({ title: "מעבר לניתוח שירותים" })
     },
   ];
   
@@ -179,22 +171,18 @@ const Dashboard = () => {
     }
   ];
 
-  if (isLoading) {
+  if (isInitialLoading) {
     return (
       <div className="max-w-7xl mx-auto space-y-8 animate-fade-in" dir="rtl">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <SkeletonCard key={i} />
-          ))}
-        </div>
-        <SkeletonTable />
+        <StatsSkeleton />
+        <GridSkeleton />
       </div>
     );
   }
 
   return (
     <div className="max-w-7xl mx-auto space-y-8 animate-fade-in" dir="rtl">
-      {/* Stats Grid - Uniform and Aligned */}
+      {/* Critical Stats - Load Immediately */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((stat) => (
           <div key={stat.title} className="h-full">
@@ -211,59 +199,65 @@ const Dashboard = () => {
         ))}
       </div>
 
-      {/* Business Analytics Section */}
+      {/* Business Analytics - Lazy Load */}
       {hasFinanceAccess && (
         <PermissionGuard requiredResource="finances" requiredPermission="read" showLoadingState={false}>
-          <div className="w-full">
+          <LazyComponent fallback={<ChartSkeleton />}>
             <BusinessAnalytics timeFrame="month" />
-          </div>
+          </LazyComponent>
         </PermissionGuard>
       )}
 
-      {/* Main Content Grid - Uniform Layout */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
-        <div className="space-y-8">
-          <Suspense fallback={<LoadingFallback />}>
-            <DailySummary 
-              customers={dailyData.customers}
-              hours={dailyData.hours}
-              revenue={dailyData.revenue}
-              deficiencies={dailyData.deficiencies}
-            />
+      {/* Main Content Grid - Lazy Load */}
+      <LazyComponent fallback={<GridSkeleton />}>
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+          <div className="space-y-8">
+            <Suspense fallback={<ChartSkeleton />}>
+              <DailySummary 
+                customers={dailyData.customers}
+                hours={dailyData.hours}
+                revenue={dailyData.revenue}
+                deficiencies={dailyData.deficiencies}
+              />
+            </Suspense>
+            <Suspense fallback={<ChartSkeleton />}>
+              <RecentAppointments appointments={appointments} />
+            </Suspense>
+          </div>
+          
+          <div className="space-y-8">
+            <Suspense fallback={<ChartSkeleton />}>
+              <BusinessInsights />
+            </Suspense>
+            <Suspense fallback={<ChartSkeleton />}>
+              <CashFlowForecast />
+            </Suspense>
+          </div>
+        </div>
+      </LazyComponent>
+      
+      {/* Marketing & Loyalty Section - Lazy Load */}
+      <LazyComponent fallback={<GridSkeleton />}>
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+          <Suspense fallback={<ChartSkeleton />}>
+            <MarketingMessages />
           </Suspense>
-          <Suspense fallback={<LoadingFallback />}>
-            <RecentAppointments appointments={appointments} />
+          <Suspense fallback={<ChartSkeleton />}>
+            <LoyaltyProgram />
           </Suspense>
         </div>
-        
-        <div className="space-y-8">
-          <Suspense fallback={<LoadingFallback />}>
-            <BusinessInsights />
-          </Suspense>
-          <Suspense fallback={<LoadingFallback />}>
-            <CashFlowForecast />
-          </Suspense>
-        </div>
-      </div>
+      </LazyComponent>
       
-      {/* Marketing & Loyalty Section */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
-        <Suspense fallback={<LoadingFallback />}>
-          <MarketingMessages />
+      {/* Inactive Clients Alert - Lazy Load */}
+      <LazyComponent fallback={<ChartSkeleton />}>
+        <Suspense fallback={<ChartSkeleton />}>
+          <InactiveClientsAlert />
         </Suspense>
-        <Suspense fallback={<LoadingFallback />}>
-          <LoyaltyProgram />
-        </Suspense>
-      </div>
+      </LazyComponent>
       
-      {/* Inactive Clients Alert - Full Width */}
-      <Suspense fallback={<LoadingFallback />}>
-        <InactiveClientsAlert />
-      </Suspense>
-      
-      {/* Analytics Charts - Full Width */}
-      <div className="w-full">
-        <Suspense fallback={<LoadingFallback />}>
+      {/* Analytics Charts - Lazy Load */}
+      <LazyComponent fallback={<ChartSkeleton />}>
+        <Suspense fallback={<ChartSkeleton />}>
           <AnalyticsCharts 
             monthlyData={monthlyData}
             retentionData={retentionData}
@@ -271,9 +265,9 @@ const Dashboard = () => {
             bookingsData={bookingsData}
           />
         </Suspense>
-      </div>
+      </LazyComponent>
       
-      {/* Quick Actions - Uniform Grid */}
+      {/* Quick Actions - Load Immediately (Lightweight) */}
       <div className="border rounded-xl p-6 shadow-soft hover:shadow-soft-lg transition-all duration-300 bg-gradient-to-br from-warmBeige/20 to-softRose/10">
         <h2 className="text-xl font-display font-medium mb-6 flex items-center justify-center">
           <span className="bg-gradient-to-r from-softRose to-roseGold w-1 h-6 rounded ml-3"></span>
@@ -295,7 +289,6 @@ const Dashboard = () => {
                   {action.description}
                 </p>
                 
-                {/* Shine effect */}
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 ease-out" />
               </div>
             </Link>
@@ -303,7 +296,7 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Online Booking Section - Full Width, Elegant */}
+      {/* Online Booking Section - Load Immediately (Lightweight) */}
       <div className="bg-gradient-to-r from-warmBeige via-softRose/20 to-roseGold/20 border border-softRose/30 rounded-xl p-8 shadow-elevated hover:shadow-hover transition-all duration-500 relative overflow-hidden group">
         <div className="flex flex-col items-center text-center gap-6 relative z-10">
           <div className="flex-1">
@@ -328,7 +321,6 @@ const Dashboard = () => {
           </div>
         </div>
         
-        {/* Background pattern */}
         <div className="absolute inset-0 opacity-5 group-hover:opacity-10 transition-opacity duration-500">
           <div className="absolute inset-0 bg-gradient-to-br from-roseGold via-transparent to-mutedPeach" />
         </div>
