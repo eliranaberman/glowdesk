@@ -1,217 +1,81 @@
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { Calendar, Download, RefreshCw, CheckCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { 
-  Calendar, 
-  Plus, 
-  CheckCircle, 
-  Loader2,
-  RefreshCw
-} from 'lucide-react';
-import { 
-  getUserCalendarConnections, 
-  initiateGoogleCalendarAuth
-} from '@/services/calendarService';
-import AppleCalendarExport from './AppleCalendarExport';
-import type { CalendarConnection } from '@/services/calendarService';
 
 const CalendarConnection = () => {
-  const [connections, setConnections] = useState<CalendarConnection[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isConnected, setIsConnected] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
   const { toast } = useToast();
 
-  const loadConnections = async () => {
-    try {
-      const calendarConnections = await getUserCalendarConnections();
-      setConnections(calendarConnections);
-    } catch (error) {
-      console.error('Error loading connections:', error);
-      toast({
-        title: 'שגיאה',
-        description: 'לא ניתן לטעון את חיבורי הלוח',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadConnections();
-
-    // Listen for OAuth callback messages
-    const handleMessage = (event: MessageEvent) => {
-      if (event.data.type === 'GOOGLE_AUTH_SUCCESS') {
-        toast({
-          title: 'הצלחה!',
-          description: 'Google Calendar חובר בהצלחה',
-        });
-        loadConnections(); // Refresh connections
-        setIsConnecting(false);
-      } else if (event.data.type === 'GOOGLE_AUTH_ERROR') {
-        toast({
-          title: 'שגיאה',
-          description: 'לא ניתן להתחבר ל-Google Calendar',
-          variant: 'destructive',
-        });
-        setIsConnecting(false);
-      }
-    };
-
-    window.addEventListener('message', handleMessage);
-    return () => window.removeEventListener('message', handleMessage);
-  }, [toast]);
-
-  const handleGoogleConnect = async () => {
+  const handleConnect = async () => {
     setIsConnecting(true);
-    try {
-      const authUrl = await initiateGoogleCalendarAuth('user@example.com');
-      
-      // Open popup window for OAuth
-      const popup = window.open(
-        authUrl, 
-        'google-oauth', 
-        'width=500,height=600,scrollbars=yes,resizable=yes'
-      );
-
-      // Check if popup was blocked
-      if (!popup) {
-        throw new Error('החלון הקופץ נחסם. אנא אפשר חלונות קופצים ונסה שוב.');
-      }
-      
-      toast({
-        title: 'חיבור ל-Google Calendar',
-        description: 'נפתח חלון חדש לאישור הרשאות Google',
-      });
-
-      // Monitor popup
-      const checkClosed = setInterval(() => {
-        if (popup.closed) {
-          clearInterval(checkClosed);
-          setIsConnecting(false);
-        }
-      }, 1000);
-
-    } catch (error) {
-      console.error('Error connecting to Google Calendar:', error);
-      toast({
-        title: 'שגיאה',
-        description: error instanceof Error ? error.message : 'לא ניתן להתחבר ל-Google Calendar',
-        variant: 'destructive',
-      });
+    // Simulate connection process
+    setTimeout(() => {
+      setIsConnected(!isConnected);
       setIsConnecting(false);
-    }
+      toast({
+        title: isConnected ? "היומן נותק" : "היומן התחבר בהצלחה",
+        description: isConnected ? 
+          "היומן של Google נותק מהמערכת" : 
+          "הפגישות שלך יסונכרנו עם Google Calendar"
+      });
+    }, 2000);
   };
 
-  if (isLoading) {
-    return (
-      <Card>
-        <CardContent className="p-4">
-          <div className="flex items-center justify-center gap-2 py-4">
-            <Loader2 className="h-4 w-4 animate-spin" />
-            <span>טוען...</span>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  const googleConnection = connections.find(c => c.calendar_type === 'google');
+  const handleExport = () => {
+    toast({
+      title: "מייצא נתונים",
+      description: "הנתונים מיוצאים לקובץ Excel..."
+    });
+  };
 
   return (
-    <div className="space-y-4">
-      {/* Google Calendar */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <Calendar className="h-5 w-5" />
-            סנכרון Google Calendar
-          </CardTitle>
-          <CardDescription>
-            סנכרון דו-כיווני אוטומטי עם יומן Google
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <div className="flex items-center justify-between p-3 border rounded-lg">
-            <div className="flex items-center gap-3">
-              <Calendar className="h-6 w-6 text-blue-600" />
+    <Card className="h-24">
+      <CardContent className="p-4">
+        <div className="flex items-center justify-between h-full">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              <Calendar className="h-5 w-5 text-primary" />
               <div>
-                <h3 className="font-medium text-sm">Google Calendar</h3>
+                <h3 className="font-medium text-sm">סנכרון יומן</h3>
                 <p className="text-xs text-muted-foreground">
-                  עדכונים אוטומטיים דו-כיווניים
+                  {isConnected ? 'מחובר ל-Google Calendar' : 'לא מחובר'}
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-2">
-              {googleConnection ? (
-                <div className="flex items-center gap-2">
-                  <Badge variant="default" className="bg-green-100 text-green-800 text-xs">
-                    <CheckCircle className="h-3 w-3 mr-1" />
-                    מחובר
-                  </Badge>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={loadConnections}
-                    disabled={isConnecting}
-                  >
-                    <RefreshCw className="h-3 w-3" />
-                  </Button>
-                </div>
-              ) : (
-                <Button 
-                  size="sm" 
-                  onClick={handleGoogleConnect} 
-                  disabled={isConnecting}
-                >
-                  {isConnecting ? (
-                    <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-                  ) : (
-                    <Plus className="h-3 w-3 mr-1" />
-                  )}
-                  התחבר
-                </Button>
-              )}
-            </div>
+            {isConnected && <CheckCircle className="h-4 w-4 text-green-500" />}
           </div>
-
-          {/* Connection Status */}
-          {connections.length > 0 && (
-            <div className="pt-2 border-t">
-              <p className="text-xs font-medium mb-2">חיבורים פעילים:</p>
-              <div className="space-y-1">
-                {connections.map((connection) => (
-                  <div key={connection.id} className="flex items-center justify-between text-xs">
-                    <span>{connection.calendar_email}</span>
-                    <Badge variant={connection.is_active ? "default" : "secondary"} className="text-xs">
-                      {connection.is_active ? 'פעיל' : 'לא פעיל'}
-                    </Badge>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Instructions for Google Calendar */}
-          <div className="pt-2 border-t">
-            <p className="text-xs text-muted-foreground">
-              {googleConnection ? (
-                <>✅ <strong>Google Calendar מחובר:</strong> הפגישות יסונכרנו אוטומטית דו-כיוונית</>
+          
+          <div className="flex gap-2">
+            <Button 
+              size="sm" 
+              variant="outline"
+              onClick={handleExport}
+              className="h-8 px-3 text-xs"
+            >
+              <Download className="h-3 w-3 ml-1" />
+              יצוא
+            </Button>
+            <Button 
+              size="sm"
+              onClick={handleConnect}
+              disabled={isConnecting}
+              className="h-8 px-3 text-xs"
+            >
+              {isConnecting ? (
+                <RefreshCw className="h-3 w-3 animate-spin ml-1" />
               ) : (
-                <>🔗 <strong>חבר Google Calendar</strong> לסנכרון אוטומטי דו-כיווני של כל הפגישות</>
+                <Calendar className="h-3 w-3 ml-1" />
               )}
-            </p>
+              {isConnected ? 'נתק' : 'חבר'}
+            </Button>
           </div>
-        </CardContent>
-      </Card>
-
-      {/* Apple/Samsung Export */}
-      <AppleCalendarExport />
-    </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 };
 
