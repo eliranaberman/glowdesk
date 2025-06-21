@@ -127,11 +127,11 @@ const CalendarConnection = () => {
       {/* Google Calendar */}
       <Card>
         <CardHeader className="pb-2">
-          <CardTitle className="flex items-center gap-2 text-base">
+          <CardTitle className="flex items-center justify-center gap-2 text-base">
             <Calendar className="h-4 w-4" />
             סנכרון וייצוא
           </CardTitle>
-          <CardDescription className="text-xs">
+          <CardDescription className="text-xs text-center">
             סנכרון עם יומן Google וייצוא לאפליקציות יומן
           </CardDescription>
         </CardHeader>
@@ -149,8 +149,8 @@ const CalendarConnection = () => {
             <div className="flex items-center gap-1">
               {googleConnection ? (
                 <div className="flex items-center gap-1">
-                  <Badge variant="default" className="bg-green-100 text-green-800 text-xs">
-                    <CheckCircle className="h-3 w-3 mr-1" />
+                  <Badge variant="default" className="bg-green-100 text-green-800 text-xs flex items-center gap-1">
+                    <CheckCircle className="h-3 w-3" />
                     מחובר
                   </Badge>
                   <Button
@@ -158,7 +158,7 @@ const CalendarConnection = () => {
                     variant="outline"
                     onClick={loadConnections}
                     disabled={isConnecting}
-                    className="h-6 w-6 p-0"
+                    className="h-6 w-6 p-0 flex items-center justify-center"
                   >
                     <RefreshCw className="h-3 w-3" />
                   </Button>
@@ -168,12 +168,12 @@ const CalendarConnection = () => {
                   size="sm" 
                   onClick={handleGoogleConnect} 
                   disabled={isConnecting}
-                  className="h-7 text-xs"
+                  className="h-7 text-xs flex items-center justify-center gap-1"
                 >
                   {isConnecting ? (
-                    <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                    <Loader2 className="h-3 w-3 animate-spin" />
                   ) : (
-                    <Plus className="h-3 w-3 mr-1" />
+                    <Plus className="h-3 w-3" />
                   )}
                   התחבר
                 </Button>

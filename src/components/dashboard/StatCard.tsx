@@ -35,17 +35,17 @@ const StatCard = ({ title, value, icon, change, className, onClick, description 
       <CardContent className="p-4 h-full relative z-10">
         <div className="flex items-start justify-between h-full">
           <div className="flex-1 min-w-0">
-            <p className="text-xs font-medium text-muted-foreground mb-1 transition-colors duration-300 group-hover:text-deepNavy/80 truncate">
+            <p className="text-xs font-medium text-muted-foreground mb-1 transition-colors duration-300 group-hover:text-deepNavy/80 truncate text-center">
               {title}
             </p>
-            <h3 className="text-xl font-bold mb-2 transition-all duration-300 group-hover:text-primary group-hover:scale-105 origin-left">
+            <h3 className="text-xl font-bold mb-2 transition-all duration-300 group-hover:text-primary group-hover:scale-105 origin-center text-center">
               {value}
             </h3>
             
             {change && (
-              <div className="flex items-center animate-fade-in">
+              <div className="flex items-center justify-center animate-fade-in">
                 <div className={cn(
-                  "flex items-center gap-1 px-1.5 py-0.5 rounded-full text-xs font-medium transition-all duration-300",
+                  "flex items-center justify-center gap-1 px-1.5 py-0.5 rounded-full text-xs font-medium transition-all duration-300",
                   change.positive 
                     ? "text-oliveGreen bg-oliveGreen/10 group-hover:bg-oliveGreen/20" 
                     : "text-destructive bg-destructive/10 group-hover:bg-destructive/20"
@@ -66,9 +66,10 @@ const StatCard = ({ title, value, icon, change, className, onClick, description 
               "p-2 rounded-full transition-all duration-500 transform flex-shrink-0",
               "bg-gradient-to-br from-softRose/20 to-roseGold/20",
               "group-hover:scale-110 group-hover:rotate-3 group-hover:shadow-lg",
-              "group-hover:from-softRose/30 group-hover:to-roseGold/30"
+              "group-hover:from-softRose/30 group-hover:to-roseGold/30",
+              "flex items-center justify-center"
             )}>
-              <div className="transition-all duration-300 group-hover:scale-110">
+              <div className="transition-all duration-300 group-hover:scale-110 flex items-center justify-center">
                 {icon}
               </div>
             </div>

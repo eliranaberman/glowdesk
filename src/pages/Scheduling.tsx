@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import GanttChart from '../components/scheduling/GanttChart';
 import CalendarConnection from '../components/scheduling/CalendarConnection';
@@ -126,20 +127,20 @@ const Scheduling = () => {
     <div dir="rtl">
       <div className={`flex flex-col ${isMobile ? 'gap-3 mb-4' : 'sm:flex-row sm:justify-between sm:items-center gap-4 mb-6'}`}>
         <div>
-          <h1 className={`font-bold ${isMobile ? 'text-xl' : 'text-2xl'}`}>לוח פגישות</h1>
-          <p className={`text-muted-foreground ${isMobile ? 'text-xs' : ''}`}>
+          <h1 className={`font-bold ${isMobile ? 'text-xl' : 'text-2xl'} text-center`}>לוח פגישות</h1>
+          <p className={`text-muted-foreground ${isMobile ? 'text-xs' : ''} text-center`}>
             ניהול הפגישות שלך וארגון היום בצורה יעילה.
           </p>
         </div>
         
-        <div className={`flex ${isMobile ? 'gap-2 flex-col' : 'gap-4 flex-col sm:flex-row'}`}>
+        <div className={`flex ${isMobile ? 'gap-2 flex-col' : 'gap-4 flex-col sm:flex-row'} justify-center items-center`}>
           {/* Filter buttons - in RTL direction (Day on the right, Month on the left) */}
           <div className="flex rounded-full bg-secondary/50 p-1">
             <Button
               variant={activeFilter === 'day' ? 'default' : 'ghost'}
               size={isMobile ? "sm" : "sm"}
               onClick={() => setActiveFilter('day')}
-              className="flex-1"
+              className="flex-1 flex items-center justify-center gap-1"
             >
               יום
             </Button>
@@ -147,7 +148,7 @@ const Scheduling = () => {
               variant={activeFilter === 'week' ? 'default' : 'ghost'}
               size={isMobile ? "sm" : "sm"}
               onClick={() => setActiveFilter('week')}
-              className="flex-1"
+              className="flex-1 flex items-center justify-center gap-1"
             >
               שבוע
             </Button>
@@ -155,15 +156,15 @@ const Scheduling = () => {
               variant={activeFilter === 'month' ? 'default' : 'ghost'}
               size={isMobile ? "sm" : "sm"}
               onClick={() => setActiveFilter('month')}
-              className="flex-1"
+              className="flex-1 flex items-center justify-center gap-1"
             >
               חודש
             </Button>
           </div>
 
           <Link to="/scheduling/new" className={isMobile ? 'w-full' : ''}>
-            <Button className={isMobile ? 'w-full text-sm' : ''}>
-              <CalendarPlus className={`${isMobile ? 'h-4 w-4 ml-1.5' : 'h-4 w-4 ml-2'}`} />
+            <Button className={`${isMobile ? 'w-full text-sm' : ''} flex items-center justify-center gap-1.5`}>
+              <CalendarPlus className={`${isMobile ? 'h-4 w-4' : 'h-4 w-4'}`} />
               פגישה חדשה
             </Button>
           </Link>

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, Suspense } from 'react';
 import { CalendarClock, Users, DollarSign, TrendingUp, Plus, Calendar, UserPlus, CreditCard, Package } from 'lucide-react';
 import StatCard from '../components/dashboard/StatCard';
@@ -274,7 +275,7 @@ const Dashboard = () => {
       
       {/* Quick Actions - Uniform Grid */}
       <div className="border rounded-xl p-6 shadow-soft hover:shadow-soft-lg transition-all duration-300 bg-gradient-to-br from-warmBeige/20 to-softRose/10">
-        <h2 className="text-xl font-display font-medium mb-6 flex items-center">
+        <h2 className="text-xl font-display font-medium mb-6 flex items-center justify-center">
           <span className="bg-gradient-to-r from-softRose to-roseGold w-1 h-6 rounded ml-3"></span>
           פעולות מהירות
         </h2>
@@ -282,15 +283,15 @@ const Dashboard = () => {
           {quickActions.map((action) => (
             <Link key={action.title} to={action.to} className="block group h-full">
               <div className="bg-card hover:bg-gradient-to-br hover:from-warmBeige/30 hover:to-softRose/20 p-6 rounded-xl cursor-pointer transition-all duration-500 shadow-soft hover:shadow-elevated flex flex-col transform hover:-translate-y-2 border border-transparent hover:border-softRose/20 relative overflow-hidden h-full">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="p-2 rounded-full bg-gradient-to-br from-softRose/20 to-roseGold/20 group-hover:from-softRose/30 group-hover:to-roseGold/30 transition-all duration-300 group-hover:scale-110">
+                <div className="flex items-center justify-center gap-3 mb-3">
+                  <div className="p-2 rounded-full bg-gradient-to-br from-softRose/20 to-roseGold/20 group-hover:from-softRose/30 group-hover:to-roseGold/30 transition-all duration-300 group-hover:scale-110 flex items-center justify-center">
                     {action.icon}
                   </div>
-                  <h3 className="font-medium text-primary group-hover:text-deepNavy transition-colors duration-300">
+                  <h3 className="font-medium text-primary group-hover:text-deepNavy transition-colors duration-300 text-center">
                     {action.title}
                   </h3>
                 </div>
-                <p className="text-sm text-muted-foreground group-hover:text-deepNavy/70 transition-colors duration-300 flex-1">
+                <p className="text-sm text-muted-foreground group-hover:text-deepNavy/70 transition-colors duration-300 flex-1 text-center">
                   {action.description}
                 </p>
                 
@@ -318,9 +319,9 @@ const Dashboard = () => {
               <Button 
                 variant="premium" 
                 size="lg"
-                className="font-display group-hover:scale-105 transition-transform duration-300 px-8 py-4"
+                className="font-display group-hover:scale-105 transition-transform duration-300 px-8 py-4 inline-flex items-center justify-center gap-2"
               >
-                <Calendar className="ml-2 h-5 w-5" />
+                <Calendar className="h-5 w-5" />
                 קביעת פגישות אונליין
               </Button>
             </Link>

@@ -197,7 +197,7 @@ const SocialMedia = () => {
           <Button
             variant="outline"
             size="sm"
-            className="flex items-center justify-center gap-2 h-10 sm:h-8 text-sm"
+            className="flex items-center justify-center gap-1.5 h-10 sm:h-8 text-sm"
             onClick={() => navigate('/marketing')}
           >
             <ArrowRight size={16} />
@@ -207,7 +207,7 @@ const SocialMedia = () => {
           <Button 
             variant="secondary" 
             size="sm" 
-            className="flex items-center justify-center gap-2 h-10 sm:h-8 text-sm"
+            className="flex items-center justify-center gap-1.5 h-10 sm:h-8 text-sm"
             onClick={handleButtonAction}
           >
             <Plus size={16} />
@@ -220,7 +220,7 @@ const SocialMedia = () => {
         <TabsList className={`grid gap-1 w-full mb-4 mx-auto ${isMobile ? 'grid-cols-3 h-auto' : 'grid-cols-5 h-10'}`}>
           <TabsTrigger 
             value="dashboard" 
-            className={`text-xs sm:text-sm py-2 sm:py-2.5 font-medium flex gap-1 sm:gap-2 justify-center items-center ${isMobile ? 'min-h-[44px] flex-col' : ''}`}
+            className={`text-xs sm:text-sm py-2 sm:py-2.5 font-medium flex gap-1 sm:gap-1.5 justify-center items-center ${isMobile ? 'min-h-[44px] flex-col' : ''}`}
           >
             <LayoutDashboard className="h-4 w-4" />
             <span className={isMobile ? 'text-xs' : ''}>דשבורד</span>
@@ -228,7 +228,7 @@ const SocialMedia = () => {
           
           <TabsTrigger 
             value="inbox" 
-            className={`text-xs sm:text-sm py-2 sm:py-2.5 font-medium flex gap-1 sm:gap-2 justify-center items-center relative ${isMobile ? 'min-h-[44px] flex-col' : ''}`}
+            className={`text-xs sm:text-sm py-2 sm:py-2.5 font-medium flex gap-1 sm:gap-1.5 justify-center items-center relative ${isMobile ? 'min-h-[44px] flex-col' : ''}`}
           >
             <MessageSquare className="h-4 w-4" />
             <span className={isMobile ? 'text-xs' : ''}>הודעות</span>
@@ -243,7 +243,7 @@ const SocialMedia = () => {
             <>
               <TabsTrigger 
                 value="posts" 
-                className="text-sm py-2.5 font-medium flex gap-2 justify-center items-center"
+                className="text-sm py-2.5 font-medium flex gap-1.5 justify-center items-center"
               >
                 <Send className="h-4 w-4" />
                 <span>פרסום</span>
@@ -251,7 +251,7 @@ const SocialMedia = () => {
               
               <TabsTrigger 
                 value="analytics" 
-                className="text-sm py-2.5 font-medium flex gap-2 justify-center items-center"
+                className="text-sm py-2.5 font-medium flex gap-1.5 justify-center items-center"
               >
                 <BarChart3 className="h-4 w-4" />
                 <span>אנליטיקס</span>
@@ -259,7 +259,7 @@ const SocialMedia = () => {
               
               <TabsTrigger 
                 value="ai-tools" 
-                className="text-sm py-2.5 font-medium flex gap-2 justify-center items-center"
+                className="text-sm py-2.5 font-medium flex gap-1.5 justify-center items-center"
               >
                 <BrainCircuit className="h-4 w-4" />
                 <span>כלי AI</span>
@@ -269,7 +269,7 @@ const SocialMedia = () => {
           
           <TabsTrigger 
             value="connections" 
-            className={`text-xs sm:text-sm py-2 sm:py-2.5 font-medium flex gap-1 sm:gap-2 justify-center items-center ${isMobile ? 'min-h-[44px] flex-col' : ''}`}
+            className={`text-xs sm:text-sm py-2 sm:py-2.5 font-medium flex gap-1 sm:gap-1.5 justify-center items-center ${isMobile ? 'min-h-[44px] flex-col' : ''}`}
           >
             <Settings className="h-4 w-4" />
             <span className={isMobile ? 'text-xs' : ''}>חיבורים</span>
@@ -283,7 +283,7 @@ const SocialMedia = () => {
               variant={activeTab === "posts" ? "default" : "outline"}
               size="sm"
               onClick={() => setActiveTab("posts")}
-              className="flex items-center justify-center gap-2 whitespace-nowrap min-h-[40px]"
+              className="flex items-center justify-center gap-1.5 whitespace-nowrap min-h-[40px]"
             >
               <Send className="h-4 w-4" />
               פרסום
@@ -292,7 +292,7 @@ const SocialMedia = () => {
               variant={activeTab === "analytics" ? "default" : "outline"}
               size="sm"
               onClick={() => setActiveTab("analytics")}
-              className="flex items-center justify-center gap-2 whitespace-nowrap min-h-[40px]"
+              className="flex items-center justify-center gap-1.5 whitespace-nowrap min-h-[40px]"
             >
               <BarChart3 className="h-4 w-4" />
               אנליטיקס
@@ -301,7 +301,7 @@ const SocialMedia = () => {
               variant={activeTab === "ai-tools" ? "default" : "outline"}
               size="sm"
               onClick={() => setActiveTab("ai-tools")}
-              className="flex items-center justify-center gap-2 whitespace-nowrap min-h-[40px]"
+              className="flex items-center justify-center gap-1.5 whitespace-nowrap min-h-[40px]"
             >
               <BrainCircuit className="h-4 w-4" />
               כלי AI

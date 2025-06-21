@@ -6,7 +6,7 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-medium ring-offset-background transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 shadow-button hover:shadow-elevated transform hover:-translate-y-1 active:translate-y-0 active:scale-[0.98] hover:brightness-110 relative overflow-hidden before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent before:via-white/20 before:to-transparent before:translate-x-[-100%] hover:before:translate-x-[100%] before:transition-transform before:duration-700",
+  "inline-flex items-center justify-center gap-1.5 whitespace-nowrap flex-nowrap rounded-xl text-sm font-medium ring-offset-background transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 shadow-button hover:shadow-elevated transform hover:-translate-y-1 active:translate-y-0 active:scale-[0.98] hover:brightness-110 relative overflow-hidden before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent before:via-white/20 before:to-transparent before:translate-x-[-100%] hover:before:translate-x-[100%] before:transition-transform before:duration-700",
   {
     variants: {
       variant: {
@@ -18,7 +18,7 @@ const buttonVariants = cva(
         secondary:
           "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground",
-        link: "text-primary underline-offset-4 hover:underline",
+        link: "text-primary underline-offset-4 hover:underline gap-1",
         soft: "bg-roseGold/20 text-deepNavy hover:bg-roseGold/30 hover:shadow-md",
         warm: "bg-mutedPeach/40 text-primary hover:bg-mutedPeach/60 hover:shadow-md",
         success: "bg-oliveGreen text-white hover:bg-oliveGreen/90 hover:shadow-lg",
@@ -32,9 +32,9 @@ const buttonVariants = cva(
         default: "h-10 px-5 py-2.5",
         sm: "h-9 rounded-lg px-4 py-2",
         lg: "h-12 rounded-xl px-8 py-3 text-base",
-        icon: "h-10 w-10 rounded-full",
+        icon: "h-10 w-10 rounded-full gap-0",
         xs: "h-7 text-xs px-3 py-1 rounded-lg",
-        touch: "h-12 px-6 py-3 text-base min-w-[44px]", // Mobile-optimized touch target
+        touch: "h-12 px-6 py-3 text-base min-w-[44px]",
       },
     },
     defaultVariants: {
@@ -77,7 +77,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
             <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
           </div>
         )}
-        <span className={cn("transition-opacity duration-200", loading && "opacity-0")}>
+        <span className={cn("inline-flex items-center justify-center gap-1.5 whitespace-nowrap transition-opacity duration-200", loading && "opacity-0")}>
           {children}
         </span>
         {success && (
