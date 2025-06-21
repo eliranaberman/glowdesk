@@ -1,7 +1,7 @@
-
 import { useState, useEffect } from 'react';
 import GanttChart from '../components/scheduling/GanttChart';
 import CalendarConnection from '../components/scheduling/CalendarConnection';
+import NotificationSettings from '../components/scheduling/NotificationSettings';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { CalendarPlus } from 'lucide-react';
@@ -172,6 +172,7 @@ const Scheduling = () => {
       
       <div className={`space-y-${isMobile ? '4' : '6'}`}>
         <CalendarConnection />
+        <NotificationSettings />
         
         <GanttChart
           appointments={allAppointments}
