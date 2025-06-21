@@ -190,10 +190,10 @@ const SocialMedia = () => {
 
   return (
     <div className="space-y-4 sm:space-y-6 p-3 sm:p-6" dir="rtl">
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-        <h1 className="text-xl sm:text-2xl font-semibold text-center sm:text-right tracking-tight">מדיה חברתית ושיווק</h1>
+      <div className="flex flex-col sm:flex-row sm:justify-center sm:items-center gap-4">
+        <h1 className="text-xl sm:text-2xl font-semibold text-center tracking-tight">מדיה חברתית ושיווק</h1>
         
-        <div className="flex flex-col sm:flex-row gap-2 sm:gap-2 order-first sm:order-none">
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-2 justify-center items-center">
           <Button
             variant="outline"
             size="sm"
@@ -217,10 +217,10 @@ const SocialMedia = () => {
       </div>
 
       <Tabs defaultValue={activeTab} value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className={`grid gap-1 w-full mb-4 ${isMobile ? 'grid-cols-3 h-auto' : 'grid-cols-6 h-10'}`}>
+        <TabsList className={`grid gap-1 w-full mb-4 mx-auto ${isMobile ? 'grid-cols-3 h-auto' : 'grid-cols-5 h-10'}`}>
           <TabsTrigger 
             value="dashboard" 
-            className={`text-xs sm:text-sm py-2 sm:py-2.5 font-medium flex gap-1 sm:gap-2 justify-center ${isMobile ? 'min-h-[44px] flex-col' : ''}`}
+            className={`text-xs sm:text-sm py-2 sm:py-2.5 font-medium flex gap-1 sm:gap-2 justify-center items-center ${isMobile ? 'min-h-[44px] flex-col' : ''}`}
           >
             <LayoutDashboard className="h-4 w-4" />
             <span className={isMobile ? 'text-xs' : ''}>דשבורד</span>
@@ -228,7 +228,7 @@ const SocialMedia = () => {
           
           <TabsTrigger 
             value="inbox" 
-            className={`text-xs sm:text-sm py-2 sm:py-2.5 font-medium flex gap-1 sm:gap-2 justify-center relative ${isMobile ? 'min-h-[44px] flex-col' : ''}`}
+            className={`text-xs sm:text-sm py-2 sm:py-2.5 font-medium flex gap-1 sm:gap-2 justify-center items-center relative ${isMobile ? 'min-h-[44px] flex-col' : ''}`}
           >
             <MessageSquare className="h-4 w-4" />
             <span className={isMobile ? 'text-xs' : ''}>הודעות</span>
@@ -239,40 +239,51 @@ const SocialMedia = () => {
             )}
           </TabsTrigger>
           
-          <TabsTrigger 
-            value="connections" 
-            className={`text-xs sm:text-sm py-2 sm:py-2.5 font-medium flex gap-1 sm:gap-2 justify-center ${isMobile ? 'min-h-[44px] flex-col' : ''}`}
-          >
-            <Settings className="h-4 w-4" />
-            <span className={isMobile ? 'text-xs' : ''}>חיבורים</span>
-          </TabsTrigger>
-          
           {!isMobile && (
             <>
-              <TabsTrigger value="posts" className="text-sm py-2.5 font-medium flex gap-2 justify-center">
+              <TabsTrigger 
+                value="posts" 
+                className="text-sm py-2.5 font-medium flex gap-2 justify-center items-center"
+              >
                 <Send className="h-4 w-4" />
                 <span>פרסום</span>
               </TabsTrigger>
-              <TabsTrigger value="analytics" className="text-sm py-2.5 font-medium flex gap-2 justify-center">
+              
+              <TabsTrigger 
+                value="analytics" 
+                className="text-sm py-2.5 font-medium flex gap-2 justify-center items-center"
+              >
                 <BarChart3 className="h-4 w-4" />
                 <span>אנליטיקס</span>
               </TabsTrigger>
-              <TabsTrigger value="ai-tools" className="text-sm py-2.5 font-medium flex gap-2 justify-center">
+              
+              <TabsTrigger 
+                value="ai-tools" 
+                className="text-sm py-2.5 font-medium flex gap-2 justify-center items-center"
+              >
                 <BrainCircuit className="h-4 w-4" />
                 <span>כלי AI</span>
               </TabsTrigger>
             </>
           )}
+          
+          <TabsTrigger 
+            value="connections" 
+            className={`text-xs sm:text-sm py-2 sm:py-2.5 font-medium flex gap-1 sm:gap-2 justify-center items-center ${isMobile ? 'min-h-[44px] flex-col' : ''}`}
+          >
+            <Settings className="h-4 w-4" />
+            <span className={isMobile ? 'text-xs' : ''}>חיבורים</span>
+          </TabsTrigger>
         </TabsList>
 
-        {/* Mobile secondary tabs - Fixed structure */}
+        {/* Mobile secondary tabs - Centered */}
         {isMobile && (
-          <div className="flex gap-2 mb-4 overflow-x-auto pb-2">
+          <div className="flex gap-2 mb-4 overflow-x-auto pb-2 justify-center">
             <Button
               variant={activeTab === "posts" ? "default" : "outline"}
               size="sm"
               onClick={() => setActiveTab("posts")}
-              className="flex items-center gap-2 whitespace-nowrap min-h-[40px]"
+              className="flex items-center justify-center gap-2 whitespace-nowrap min-h-[40px]"
             >
               <Send className="h-4 w-4" />
               פרסום
@@ -281,7 +292,7 @@ const SocialMedia = () => {
               variant={activeTab === "analytics" ? "default" : "outline"}
               size="sm"
               onClick={() => setActiveTab("analytics")}
-              className="flex items-center gap-2 whitespace-nowrap min-h-[40px]"
+              className="flex items-center justify-center gap-2 whitespace-nowrap min-h-[40px]"
             >
               <BarChart3 className="h-4 w-4" />
               אנליטיקס
@@ -290,7 +301,7 @@ const SocialMedia = () => {
               variant={activeTab === "ai-tools" ? "default" : "outline"}
               size="sm"
               onClick={() => setActiveTab("ai-tools")}
-              className="flex items-center gap-2 whitespace-nowrap min-h-[40px]"
+              className="flex items-center justify-center gap-2 whitespace-nowrap min-h-[40px]"
             >
               <BrainCircuit className="h-4 w-4" />
               כלי AI
