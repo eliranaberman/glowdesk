@@ -44,6 +44,8 @@ export const getClients = async (
   const { data: user } = await supabase.auth.getUser();
   if (!user.user) throw new Error('User not authenticated');
 
+  console.log('Fetching clients for user:', user.user.id);
+
   let query = supabase
     .from('clients')
     .select(`
@@ -69,7 +71,12 @@ export const getClients = async (
   const { data, error, count } = await query
     .range((page - 1) * pageSize, page * pageSize - 1);
 
-  if (error) throw error;
+  if (error) {
+    console.error('Error fetching clients:', error);
+    throw error;
+  }
+  
+  console.log('Fetched clients:', data?.length || 0, 'Total count:', count);
   
   const clients = (data || []).map(castClient);
   return { clients, count: count || 0 };
