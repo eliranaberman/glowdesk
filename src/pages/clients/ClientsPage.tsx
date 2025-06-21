@@ -1,24 +1,20 @@
 
 import { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { AlertCircle, Plus, Table2, Grid3x3 } from 'lucide-react';
+import { AlertCircle, Plus, Filter } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import ClientsAdvancedFilter, { ClientFilters } from '@/components/clients/ClientsAdvancedFilter';
 import ClientsTableView from '@/components/clients/ClientsTableView';
-import ClientCard from '@/components/clients/ClientCard';
-import { Client } from '@/types/clients';
-import { getClients } from '@/services/clientService';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Separator } from '@/components/ui/separator';
+import { cn } from '@/lib/utils';
 
 const ClientsPage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [error, setError] = useState<string | null>(null);
-  const [viewMode, setViewMode] = useState<'table' | 'cards'>('table');
+  const [showAdvancedFilter, setShowAdvancedFilter] = useState(false);
   const [filters, setFilters] = useState<ClientFilters>({
     search: '',
     status: null,
@@ -64,46 +60,39 @@ const ClientsPage = () => {
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
-            {/* View Mode Toggle */}
-            <div className="flex items-center border rounded-lg p-1 bg-card shadow-soft">
-              <Button
-                variant={viewMode === 'table' ? 'default' : 'ghost'}
-                size="sm"
-                onClick={() => setViewMode('table')}
-                className="gap-1.5 px-3"
-              >
-                <Table2 className="size-4" />
-                טבלה
-              </Button>
-              <Button
-                variant={viewMode === 'cards' ? 'default' : 'ghost'}
-                size="sm"
-                onClick={() => setViewMode('cards')}
-                className="gap-1.5 px-3"
-              >
-                <Grid3x3 className="size-4" />
-                כרטיסים
-              </Button>
-            </div>
-
-            <Separator orientation="vertical" className="h-8" />
-
-            <Button 
-              onClick={handleAddClient} 
-              className="flex gap-1.5 shadow-soft hover:shadow-soft-lg transition-all"
-            >
-              <Plus className="size-4" />
-              לקוחה חדשה
-            </Button>
-          </div>
+          <Button 
+            onClick={handleAddClient} 
+            className="flex gap-1.5 shadow-soft hover:shadow-soft-lg transition-all"
+          >
+            <Plus className="size-4" />
+            לקוחה חדשה
+          </Button>
         </div>
 
         <div className="space-y-6">
-          {/* Advanced Filter */}
-          <ClientsAdvancedFilter 
-            onFilterChange={handleFilterChange}
-          />
+          {/* Advanced Filter Toggle */}
+          <div className="flex justify-between items-center">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowAdvancedFilter(!showAdvancedFilter)}
+              className="gap-2 text-muted-foreground hover:text-foreground"
+            >
+              <Filter className="size-4" />
+              סינון מתקדם
+            </Button>
+          </div>
+
+          {/* Collapsible Advanced Filter */}
+          <div className={cn(
+            "transition-all duration-300 ease-in-out overflow-hidden",
+            showAdvancedFilter ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"
+          )}>
+            <ClientsAdvancedFilter 
+              onFilterChange={handleFilterChange}
+              className="mb-6"
+            />
+          </div>
 
           {/* Error State */}
           {error && (
@@ -123,29 +112,12 @@ const ClientsPage = () => {
             </Alert>
           )}
 
-          {/* Content */}
+          {/* Table View */}
           {!error && (
-            <>
-              {viewMode === 'table' ? (
-                <ClientsTableView 
-                  filters={filters}
-                  onError={handleError}
-                />
-              ) : (
-                <div className="grid gap-4">
-                  <div className="text-center py-8 text-muted-foreground">
-                    <p>תצוגת כרטיסים זמינה בקרוב...</p>
-                    <Button 
-                      variant="outline" 
-                      onClick={() => setViewMode('table')}
-                      className="mt-2"
-                    >
-                      חזור לתצוגת טבלה
-                    </Button>
-                  </div>
-                </div>
-              )}
-            </>
+            <ClientsTableView 
+              filters={filters}
+              onError={handleError}
+            />
           )}
         </div>
       </div>

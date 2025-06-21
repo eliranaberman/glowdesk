@@ -49,7 +49,6 @@ const ClientsTableView = ({ filters, onError }: ClientsTableViewProps) => {
         let searchTerm = filters.search;
         let statusFilter = filters.status || undefined;
         
-        // For treatment type filter, we'll need to modify the service to support it
         const { clients, count } = await getClients(
           searchTerm, 
           statusFilter, 
@@ -145,7 +144,6 @@ const ClientsTableView = ({ filters, onError }: ClientsTableViewProps) => {
 
   const formatPhoneNumber = (phone: string) => {
     if (!phone) return '';
-    // Format Israeli phone numbers (e.g., 0541234567 -> 054-123-4567)
     const cleaned = phone.replace(/\D/g, '');
     if (cleaned.length === 10 && cleaned.startsWith('05')) {
       return `${cleaned.slice(0, 3)}-${cleaned.slice(3, 6)}-${cleaned.slice(6)}`;
@@ -159,39 +157,37 @@ const ClientsTableView = ({ filters, onError }: ClientsTableViewProps) => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>לקוחה</TableHead>
-              <TableHead>טלפון</TableHead>
-              <TableHead>מייל</TableHead>
-              <TableHead>טיפול מועדף</TableHead>
-              <TableHead>תאריך הצטרפות</TableHead>
-              <TableHead>ביקורים</TableHead>
-              <TableHead>סטטוס</TableHead>
-              <TableHead>פעולות</TableHead>
+              <TableHead className="w-1/3">לקוחה</TableHead>
+              <TableHead className="w-1/6">טלפון</TableHead>
+              <TableHead className="hidden lg:table-cell w-1/6">טיפול מועדף</TableHead>
+              <TableHead className="hidden sm:table-cell w-1/8">הצטרפות</TableHead>
+              <TableHead className="hidden md:table-cell w-16 text-center">ביקורים</TableHead>
+              <TableHead className="w-20">סטטוס</TableHead>
+              <TableHead className="w-24">פעולות</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {Array(5).fill(0).map((_, i) => (
               <TableRow key={`skeleton-${i}`}>
                 <TableCell>
-                  <div className="flex items-center gap-3">
-                    <Skeleton className="h-10 w-10 rounded-full" />
+                  <div className="flex items-center gap-2">
+                    <Skeleton className="h-8 w-8 rounded-full" />
                     <div className="space-y-1">
-                      <Skeleton className="h-4 w-[140px]" />
-                      <Skeleton className="h-3 w-[100px]" />
+                      <Skeleton className="h-3 w-28" />
+                      <Skeleton className="h-2 w-20" />
                     </div>
                   </div>
                 </TableCell>
-                <TableCell><Skeleton className="h-4 w-[100px]" /></TableCell>
-                <TableCell><Skeleton className="h-4 w-[120px]" /></TableCell>
-                <TableCell><Skeleton className="h-4 w-[80px]" /></TableCell>
-                <TableCell><Skeleton className="h-4 w-[80px]" /></TableCell>
-                <TableCell><Skeleton className="h-4 w-[40px]" /></TableCell>
-                <TableCell><Skeleton className="h-6 w-[60px]" /></TableCell>
+                <TableCell><Skeleton className="h-3 w-20" /></TableCell>
+                <TableCell className="hidden lg:table-cell"><Skeleton className="h-3 w-16" /></TableCell>
+                <TableCell className="hidden sm:table-cell"><Skeleton className="h-3 w-16" /></TableCell>
+                <TableCell className="hidden md:table-cell"><Skeleton className="h-3 w-8" /></TableCell>
+                <TableCell><Skeleton className="h-5 w-12" /></TableCell>
                 <TableCell>
                   <div className="flex gap-1">
-                    <Skeleton className="h-8 w-8" />
-                    <Skeleton className="h-8 w-8" />
-                    <Skeleton className="h-8 w-8" />
+                    <Skeleton className="h-6 w-6" />
+                    <Skeleton className="h-6 w-6" />
+                    <Skeleton className="h-6 w-6" />
                   </div>
                 </TableCell>
               </TableRow>
@@ -226,103 +222,94 @@ const ClientsTableView = ({ filters, onError }: ClientsTableViewProps) => {
         <Table>
           <TableHeader>
             <TableRow className="bg-accent/5">
-              <TableHead className="font-semibold">לקוחה</TableHead>
-              <TableHead className="font-semibold">טלפון</TableHead>
-              <TableHead className="font-semibold hidden md:table-cell">מייל</TableHead>
-              <TableHead className="font-semibold hidden lg:table-cell">טיפול מועדף</TableHead>
-              <TableHead className="font-semibold hidden sm:table-cell">תאריך הצטרפות</TableHead>
-              <TableHead className="font-semibold hidden md:table-cell">ביקורים</TableHead>
-              <TableHead className="font-semibold">סטטוס</TableHead>
-              <TableHead className="font-semibold w-[120px]">פעולות</TableHead>
+              <TableHead className="font-medium text-xs w-1/3">לקוחה</TableHead>
+              <TableHead className="font-medium text-xs w-1/6">טלפון</TableHead>
+              <TableHead className="font-medium text-xs hidden lg:table-cell w-1/6">טיפול מועדף</TableHead>
+              <TableHead className="font-medium text-xs hidden sm:table-cell w-1/8">הצטרפות</TableHead>
+              <TableHead className="font-medium text-xs hidden md:table-cell w-16 text-center">ביקורים</TableHead>
+              <TableHead className="font-medium text-xs w-20">סטטוס</TableHead>
+              <TableHead className="font-medium text-xs w-24">פעולות</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {clients.map((client) => (
               <TableRow 
                 key={client.id} 
-                className="cursor-pointer hover:bg-accent/10 transition-colors"
+                className="cursor-pointer hover:bg-accent/10 transition-colors h-14"
                 onClick={() => handleViewClient(client.id)}
               >
-                <TableCell>
-                  <div className="flex items-center gap-3">
-                    <Avatar className="size-10 bg-primary/10 border-2 border-primary/20">
+                <TableCell className="py-2">
+                  <div className="flex items-center gap-2">
+                    <Avatar className="size-8 bg-primary/10 border border-primary/20">
                       <AvatarImage src={client.assigned_rep_user?.avatar_url} />
-                      <AvatarFallback className="text-primary font-medium">
+                      <AvatarFallback className="text-primary font-medium text-xs">
                         {getAvatarFallback(client)}
                       </AvatarFallback>
                     </Avatar>
-                    <div className="min-w-0">
-                      <div className="font-medium text-foreground truncate">
+                    <div className="min-w-0 flex-1">
+                      <div className="font-medium text-xs text-foreground truncate">
                         {client.full_name}
                       </div>
-                      <div className="text-sm text-muted-foreground md:hidden truncate">
+                      <div className="text-xs text-muted-foreground truncate">
                         {client.email}
                       </div>
                     </div>
                   </div>
                 </TableCell>
                 
-                <TableCell>
-                  <div dir="ltr" className="text-right font-mono text-sm">
+                <TableCell className="py-2">
+                  <div dir="ltr" className="text-right font-mono text-xs">
                     {formatPhoneNumber(client.phone_number)}
                   </div>
                 </TableCell>
                 
-                <TableCell className="hidden md:table-cell">
-                  <div className="text-sm truncate max-w-[150px]">
-                    {client.email}
-                  </div>
-                </TableCell>
-                
-                <TableCell className="hidden lg:table-cell">
-                  <div className="text-sm text-muted-foreground">
+                <TableCell className="hidden lg:table-cell py-2">
+                  <div className="text-xs text-muted-foreground truncate">
                     {client.preferred_treatment || '-'}
                   </div>
                 </TableCell>
                 
-                <TableCell className="hidden sm:table-cell">
-                  <div className="text-sm">
+                <TableCell className="hidden sm:table-cell py-2">
+                  <div className="text-xs">
                     {client.registration_date 
-                      ? format(new Date(client.registration_date), 'dd/MM/yyyy') 
+                      ? format(new Date(client.registration_date), 'dd/MM/yy')
                       : '-'
                     }
                   </div>
                 </TableCell>
                 
-                <TableCell className="hidden md:table-cell">
-                  <div className="text-center">
-                    <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary text-sm font-medium">
-                      {client.visit_count || 0}
-                    </span>
-                  </div>
+                <TableCell className="hidden md:table-cell py-2 text-center">
+                  <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-primary/10 text-primary text-xs font-medium">
+                    {client.visit_count || 0}
+                  </span>
                 </TableCell>
                 
-                <TableCell>
-                  <Badge variant={getStatusBadgeVariant(client.status)} className="font-medium">
+                <TableCell className="py-2">
+                  <Badge variant={getStatusBadgeVariant(client.status)} className="text-xs px-2 py-0.5">
                     {getStatusLabel(client.status)}
                   </Badge>
                 </TableCell>
                 
-                <TableCell>
-                  <div className="flex items-center gap-1">
+                <TableCell className="py-2">
+                  <div className="flex items-center gap-0.5">
                     <Button 
                       variant="ghost" 
                       size="icon" 
-                      className="size-9 hover:bg-blue-50 hover:text-blue-600"
+                      className="size-7 hover:bg-blue-50 hover:text-blue-600"
                       onClick={(e) => handleCall(client.phone_number, e)}
                       title="התקשר"
                     >
-                      <Phone className="size-4" />
+                      <Phone className="size-3.5" />
                     </Button>
                     
                     <Button 
                       variant="ghost" 
                       size="icon"
-                      className="size-9 hover:bg-green-50 hover:text-green-600"
+                      className="size-7 hover:bg-green-50 hover:text-green-600"
                       onClick={(e) => handleWhatsApp(client.phone_number, e)}
                       title="וואטסאפ"
                     >
-                      <MessageSquare className="size-4" />
+                      <MessageSquare className="size-3.5" />
                     </Button>
                     
                     <DropdownMenu>
@@ -330,10 +317,10 @@ const ClientsTableView = ({ filters, onError }: ClientsTableViewProps) => {
                         <Button 
                           variant="ghost" 
                           size="icon"
-                          className="size-9 hover:bg-accent"
+                          className="size-7 hover:bg-accent"
                           onClick={(e) => e.stopPropagation()}
                         >
-                          <MoreHorizontal className="size-4" />
+                          <MoreHorizontal className="size-3.5" />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
@@ -342,16 +329,16 @@ const ClientsTableView = ({ filters, onError }: ClientsTableViewProps) => {
                             e.stopPropagation();
                             handleViewClient(client.id);
                           }}
-                          className="gap-2"
+                          className="gap-2 text-xs"
                         >
-                          <Eye className="size-4" />
+                          <Eye className="size-3.5" />
                           צפייה בפרטים
                         </DropdownMenuItem>
                         <DropdownMenuItem 
                           onClick={(e) => handleEditClient(client.id, e)}
-                          className="gap-2"
+                          className="gap-2 text-xs"
                         >
-                          <Edit className="size-4" />
+                          <Edit className="size-3.5" />
                           ערוך פרטים
                         </DropdownMenuItem>
                         <DropdownMenuItem 
@@ -359,9 +346,9 @@ const ClientsTableView = ({ filters, onError }: ClientsTableViewProps) => {
                             e.stopPropagation();
                             navigate(`/clients/${client.id}/activity/new`);
                           }}
-                          className="gap-2"
+                          className="gap-2 text-xs"
                         >
-                          <UserPlus className="size-4" />
+                          <UserPlus className="size-3.5" />
                           הוסף פעילות
                         </DropdownMenuItem>
                       </DropdownMenuContent>
@@ -383,11 +370,11 @@ const ClientsTableView = ({ filters, onError }: ClientsTableViewProps) => {
               size="sm"
               disabled={currentPage === 1}
               onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-              className="hover:bg-accent"
+              className="hover:bg-accent text-xs"
             >
               הקודם
             </Button>
-            <div className="flex items-center px-4 text-sm font-medium text-muted-foreground">
+            <div className="flex items-center px-3 text-xs font-medium text-muted-foreground">
               עמוד {currentPage} מתוך {Math.ceil(totalClients / pageSize)}
             </div>
             <Button 
@@ -395,7 +382,7 @@ const ClientsTableView = ({ filters, onError }: ClientsTableViewProps) => {
               size="sm"
               disabled={currentPage >= Math.ceil(totalClients / pageSize)}
               onClick={() => setCurrentPage(prev => prev + 1)}
-              className="hover:bg-accent"
+              className="hover:bg-accent text-xs"
             >
               הבא
             </Button>
