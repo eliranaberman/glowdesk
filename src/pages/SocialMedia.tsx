@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -217,7 +216,7 @@ const SocialMedia = () => {
       </div>
 
       <Tabs defaultValue={activeTab} value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className={`grid gap-1 w-full mb-4 mx-auto ${isMobile ? 'grid-cols-3 h-auto' : 'grid-cols-5 h-10'}`}>
+        <TabsList className={`grid gap-1 w-full mb-4 mx-auto ${isMobile ? 'grid-cols-3 h-auto' : 'grid-cols-6 h-10'}`}>
           <TabsTrigger 
             value="dashboard" 
             className={`text-xs sm:text-sm py-2 sm:py-2.5 font-medium flex gap-1 sm:gap-1.5 justify-center items-center ${isMobile ? 'min-h-[44px] flex-col' : ''}`}
@@ -276,7 +275,7 @@ const SocialMedia = () => {
           </TabsTrigger>
         </TabsList>
 
-        {/* Mobile secondary tabs - Centered */}
+        {/* Mobile secondary tabs - Updated order: Posts, Analytics, AI Tools */}
         {isMobile && (
           <div className="flex gap-2 mb-4 overflow-x-auto pb-2 justify-center">
             <Button
