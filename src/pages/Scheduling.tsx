@@ -172,7 +172,6 @@ const Scheduling = () => {
       
       <div className={`space-y-${isMobile ? '4' : '6'}`}>
         <CalendarConnection />
-        <NotificationSettings />
         
         <GanttChart
           appointments={allAppointments}

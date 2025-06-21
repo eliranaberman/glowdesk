@@ -110,10 +110,10 @@ const CalendarConnection = () => {
   if (isLoading) {
     return (
       <Card>
-        <CardContent className="p-4">
-          <div className="flex items-center justify-center gap-2 py-4">
+        <CardContent className="p-3">
+          <div className="flex items-center justify-center gap-2 py-2">
             <Loader2 className="h-4 w-4 animate-spin" />
-            <span>טוען...</span>
+            <span className="text-sm">טוען...</span>
           </div>
         </CardContent>
       </Card>
@@ -123,32 +123,32 @@ const CalendarConnection = () => {
   const googleConnection = connections.find(c => c.calendar_type === 'google');
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {/* Google Calendar */}
       <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <Calendar className="h-5 w-5" />
-            סנכרון Google Calendar
+        <CardHeader className="pb-2">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Calendar className="h-4 w-4" />
+            סנכרון וייצוא
           </CardTitle>
-          <CardDescription>
-            סנכרון דו-כיווני אוטומטי עם יומן Google
+          <CardDescription className="text-xs">
+            סנכרון עם יומן Google וייצוא לאפליקציות יומן
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-3">
-          <div className="flex items-center justify-between p-3 border rounded-lg">
-            <div className="flex items-center gap-3">
-              <Calendar className="h-6 w-6 text-blue-600" />
+        <CardContent className="space-y-2">
+          <div className="flex items-center justify-between p-2 border rounded-lg">
+            <div className="flex items-center gap-2">
+              <Calendar className="h-5 w-5 text-blue-600" />
               <div>
                 <h3 className="font-medium text-sm">Google Calendar</h3>
                 <p className="text-xs text-muted-foreground">
-                  עדכונים אוטומטיים דו-כיווניים
+                  סנכרון אוטומטי
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1">
               {googleConnection ? (
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1">
                   <Badge variant="default" className="bg-green-100 text-green-800 text-xs">
                     <CheckCircle className="h-3 w-3 mr-1" />
                     מחובר
@@ -158,6 +158,7 @@ const CalendarConnection = () => {
                     variant="outline"
                     onClick={loadConnections}
                     disabled={isConnecting}
+                    className="h-6 w-6 p-0"
                   >
                     <RefreshCw className="h-3 w-3" />
                   </Button>
@@ -167,6 +168,7 @@ const CalendarConnection = () => {
                   size="sm" 
                   onClick={handleGoogleConnect} 
                   disabled={isConnecting}
+                  className="h-7 text-xs"
                 >
                   {isConnecting ? (
                     <Loader2 className="h-3 w-3 mr-1 animate-spin" />
@@ -181,12 +183,12 @@ const CalendarConnection = () => {
 
           {/* Connection Status */}
           {connections.length > 0 && (
-            <div className="pt-2 border-t">
-              <p className="text-xs font-medium mb-2">חיבורים פעילים:</p>
+            <div className="pt-1 border-t">
+              <p className="text-xs font-medium mb-1">חיבורים פעילים:</p>
               <div className="space-y-1">
                 {connections.map((connection) => (
                   <div key={connection.id} className="flex items-center justify-between text-xs">
-                    <span>{connection.calendar_email}</span>
+                    <span className="truncate">{connection.calendar_email}</span>
                     <Badge variant={connection.is_active ? "default" : "secondary"} className="text-xs">
                       {connection.is_active ? 'פעיל' : 'לא פעיל'}
                     </Badge>
@@ -197,12 +199,12 @@ const CalendarConnection = () => {
           )}
 
           {/* Instructions for Google Calendar */}
-          <div className="pt-2 border-t">
+          <div className="pt-1 border-t">
             <p className="text-xs text-muted-foreground">
               {googleConnection ? (
-                <>✅ <strong>Google Calendar מחובר:</strong> הפגישות יסונכרנו אוטומטית דו-כיוונית</>
+                <>✅ <strong>Google Calendar מחובר:</strong> הפגישות יסונכרנו אוטומטית</>
               ) : (
-                <>🔗 <strong>חבר Google Calendar</strong> לסנכרון אוטומטי דו-כיווני של כל הפגישות</>
+                <>🔗 <strong>חבר Google Calendar</strong> לסנכרון אוטומטי של כל הפגישות</>
               )}
             </p>
           </div>
