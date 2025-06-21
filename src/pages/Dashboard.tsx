@@ -304,7 +304,7 @@ const Dashboard = () => {
 
       {/* Online Booking Section - Full Width, Elegant */}
       <div className="bg-gradient-to-r from-warmBeige via-softRose/20 to-roseGold/20 border border-softRose/30 rounded-xl p-8 shadow-elevated hover:shadow-hover transition-all duration-500 relative overflow-hidden group">
-        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 relative z-10">
+        <div className="flex flex-col items-center text-center gap-6 relative z-10">
           <div className="flex-1">
             <h2 className="text-2xl font-display font-medium text-deepNavy mb-3 group-hover:text-primary transition-colors duration-300">
               מערכת קביעת פגישות אונליין
