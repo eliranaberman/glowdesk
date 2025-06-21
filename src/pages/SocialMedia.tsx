@@ -227,14 +227,6 @@ const SocialMedia = () => {
           </TabsTrigger>
           
           <TabsTrigger 
-            value="connections" 
-            className={`text-xs sm:text-sm py-2 sm:py-2.5 font-medium flex gap-1 sm:gap-2 justify-center ${isMobile ? 'min-h-[44px] flex-col' : ''}`}
-          >
-            <Settings className="h-4 w-4" />
-            <span className={isMobile ? 'text-xs' : ''}>חיבורים</span>
-          </TabsTrigger>
-          
-          <TabsTrigger 
             value="inbox" 
             className={`text-xs sm:text-sm py-2 sm:py-2.5 font-medium flex gap-1 sm:gap-2 justify-center relative ${isMobile ? 'min-h-[44px] flex-col' : ''}`}
           >
@@ -245,6 +237,14 @@ const SocialMedia = () => {
                 {unreadCount > 9 ? '9+' : unreadCount}
               </span>
             )}
+          </TabsTrigger>
+          
+          <TabsTrigger 
+            value="connections" 
+            className={`text-xs sm:text-sm py-2 sm:py-2.5 font-medium flex gap-1 sm:gap-2 justify-center ${isMobile ? 'min-h-[44px] flex-col' : ''}`}
+          >
+            <Settings className="h-4 w-4" />
+            <span className={isMobile ? 'text-xs' : ''}>חיבורים</span>
           </TabsTrigger>
           
           {!isMobile && (
@@ -265,7 +265,7 @@ const SocialMedia = () => {
           )}
         </TabsList>
 
-        {/* Mobile secondary tabs */}
+        {/* Mobile secondary tabs - Fixed structure */}
         {isMobile && (
           <div className="flex gap-2 mb-4 overflow-x-auto pb-2">
             <Button
@@ -323,7 +323,37 @@ const SocialMedia = () => {
 
         <TabsContent value="analytics">
           <AnalyticsContent 
-            analyticsData={analyticsData} 
+            analyticsData={{
+              followers: [
+                { name: "ינואר", count: 320 },
+                { name: "פברואר", count: 350 },
+                { name: "מרץ", count: 410 },
+                { name: "אפריל", count: 490 },
+                { name: "מאי", count: 550 },
+                { name: "יוני", count: 590 },
+              ],
+              engagement: [
+                { name: "ינואר", rate: 5.2 },
+                { name: "פברואר", rate: 5.8 },
+                { name: "מרץ", rate: 6.5 },
+                { name: "אפריל", rate: 7.2 },
+                { name: "מאי", rate: 8.0 },
+                { name: "יוני", rate: 8.5 },
+              ],
+              posts: [
+                { name: "ינואר", count: 10 },
+                { name: "פברואר", count: 12 },
+                { name: "מרץ", count: 14 },
+                { name: "אפריל", count: 15 },
+                { name: "מאי", count: 18 },
+                { name: "יוני", count: 16 },
+              ],
+              colors: {
+                primary: "#606c38",
+                secondary: "#e07a5f",
+                tertiary: "#ddbea9",
+              }
+            }}
             marketingStats={marketingStats}
             isLoading={isLoading}
           />
