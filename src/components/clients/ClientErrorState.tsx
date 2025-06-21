@@ -2,17 +2,19 @@
 import { AlertCircle, ChevronRight } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import { useNavigate } from 'react-router-dom';
 
 interface ClientErrorStateProps {
   error: string | null;
+  onBack?: () => void;
 }
 
-const ClientErrorState = ({ error }: ClientErrorStateProps) => {
-  const navigate = useNavigate();
-
+const ClientErrorState = ({ error, onBack }: ClientErrorStateProps) => {
   const handleBackClick = () => {
-    navigate('/clients');
+    if (onBack) {
+      onBack();
+    } else {
+      window.history.back();
+    }
   };
 
   return (
@@ -24,7 +26,7 @@ const ClientErrorState = ({ error }: ClientErrorStateProps) => {
           {error}
         </AlertDescription>
       </Alert>
-      <Button onClick={handleBackClick} variant="back" className="flex gap-2">
+      <Button onClick={handleBackClick} variant="back" className="flex gap-1.5">
         <ChevronRight className="h-4 w-4" />
         חזרה לרשימת הלקוחות
       </Button>

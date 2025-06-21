@@ -24,6 +24,12 @@ const castClient = (client: any): import('@/types/clients').Client => {
   };
 };
 
+// UUID validation function
+const isValidUUID = (uuid: string): boolean => {
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  return uuidRegex.test(uuid);
+};
+
 // Main client operations
 export const getClients = async (
   search?: string,
@@ -71,6 +77,13 @@ export const getClient = async (id: string) => {
   const { data: user } = await supabase.auth.getUser();
   if (!user.user) throw new Error('User not authenticated');
 
+  // Validate UUID format before making the request
+  if (!isValidUUID(id)) {
+    throw new Error('Invalid client ID format');
+  }
+
+  console.log('Fetching client from database with ID:', id);
+
   const { data, error } = await supabase
     .from('clients')
     .select(`
@@ -85,8 +98,18 @@ export const getClient = async (id: string) => {
     .eq('user_id', user.user.id)
     .maybeSingle();
 
-  if (error) throw error;
-  return data ? castClient(data) : null;
+  if (error) {
+    console.error('Supabase error:', error);
+    throw error;
+  }
+  
+  if (!data) {
+    console.log('No client found with ID:', id);
+    return null;
+  }
+
+  console.log('Client found:', data.full_name);
+  return castClient(data);
 };
 
 export const createClient = async (client: Omit<import('@/types/clients').Client, 'id' | 'created_at' | 'updated_at'>) => {
@@ -115,6 +138,11 @@ export const updateClient = async (id: string, updates: Partial<import('@/types/
   const { data: user } = await supabase.auth.getUser();
   if (!user.user) throw new Error('User not authenticated');
 
+  // Validate UUID format
+  if (!isValidUUID(id)) {
+    throw new Error('Invalid client ID format');
+  }
+
   // Convert tags array to string for database storage
   const updateData = {
     ...updates,
@@ -137,6 +165,11 @@ export const deleteClient = async (id: string) => {
   const { data: user } = await supabase.auth.getUser();
   if (!user.user) throw new Error('User not authenticated');
 
+  // Validate UUID format
+  if (!isValidUUID(id)) {
+    throw new Error('Invalid client ID format');
+  }
+
   const { error } = await supabase
     .from('clients')
     .delete()
@@ -150,6 +183,11 @@ export const deleteClient = async (id: string) => {
 export const getClientServices = async (clientId: string) => {
   const { data: user } = await supabase.auth.getUser();
   if (!user.user) throw new Error('User not authenticated');
+
+  // Validate UUID format
+  if (!isValidUUID(clientId)) {
+    throw new Error('Invalid client ID format');
+  }
 
   const { data, error } = await supabase
     .from('client_services')
@@ -183,6 +221,11 @@ export const createClientService = async (service: Omit<TablesInsert<'client_ser
 export const getClientActivities = async (clientId: string) => {
   const { data: user } = await supabase.auth.getUser();
   if (!user.user) throw new Error('User not authenticated');
+
+  // Validate UUID format
+  if (!isValidUUID(clientId)) {
+    throw new Error('Invalid client ID format');
+  }
 
   const { data, error } = await supabase
     .from('client_activity')

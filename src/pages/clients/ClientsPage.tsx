@@ -1,6 +1,7 @@
+
 import { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { AlertCircle, Database, Plus, Search } from 'lucide-react';
+import { AlertCircle, Plus } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
@@ -10,8 +11,6 @@ import ClientCard from '@/components/clients/ClientCard';
 import { Client } from '@/types/clients';
 import { getClients } from '@/services/clientService';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Input } from '@/components/ui/input';
-import { sampleClients } from '@/utils/sampleClients';
 
 const ClientsPage = () => {
   const navigate = useNavigate();
@@ -33,21 +32,32 @@ const ClientsPage = () => {
     const fetchClients = async () => {
       try {
         setLoading(true);
-        // For demo purposes, we'll use the sample clients
-        setTimeout(() => {
-          setClients(sampleClients as Client[]);
-          setTotalClients(sampleClients.length);
-          setLoading(false);
-        }, 1000);
+        const { clients: fetchedClients, count } = await getClients(
+          search, 
+          status || undefined, 
+          sortBy, 
+          sortOrder, 
+          currentPage, 
+          pageSize
+        );
+        setClients(fetchedClients);
+        setTotalClients(count);
+        setError(null);
       } catch (error: any) {
         console.error('Error loading clients:', error.message);
         setError(error.message);
+        toast({
+          variant: "destructive",
+          title: "שגיאה בטעינת לקוחות",
+          description: error.message,
+        });
+      } finally {
         setLoading(false);
       }
     };
 
     fetchClients();
-  }, [search, status, sortBy, sortOrder, currentPage]);
+  }, [search, status, sortBy, sortOrder, currentPage, toast]);
 
   const handleAddClient = () => {
     navigate('/clients/new');
@@ -78,7 +88,7 @@ const ClientsPage = () => {
             </p>
           </div>
 
-          <Button onClick={handleAddClient} className="flex gap-2 shadow-soft hover:shadow-soft-lg transition-all">
+          <Button onClick={handleAddClient} className="flex gap-1.5 shadow-soft hover:shadow-soft-lg transition-all">
             <Plus className="size-4" />
             לקוחה חדשה
           </Button>
@@ -96,7 +106,16 @@ const ClientsPage = () => {
             <Alert variant="destructive" className="shadow-soft">
               <AlertCircle className="h-4 w-4" />
               <AlertTitle>שגיאה בטעינת לקוחות</AlertTitle>
-              <AlertDescription>{error}</AlertDescription>
+              <AlertDescription>
+                {isTableMissingError ? (
+                  <>
+                    <p>טבלת הלקוחות לא קיימת במסד הנתונים.</p>
+                    <p className="mt-2">אנא פנה למפתח המערכת ליצירת הטבלה הנדרשת.</p>
+                  </>
+                ) : (
+                  error
+                )}
+              </AlertDescription>
             </Alert>
           ) : loading ? (
             <div className="space-y-4">
