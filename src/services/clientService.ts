@@ -21,6 +21,8 @@ const castClient = (client: any): import('@/types/clients').Client => {
     gender: client.gender as import('@/types/clients').ClientGender,
     status: client.status as import('@/types/clients').ClientStatus,
     tags: typeof client.tags === 'string' ? client.tags.split(',').filter(Boolean) : (client.tags || []),
+    preferred_treatment: client.preferred_treatment,
+    visit_count: client.visit_count || 0,
   };
 };
 
@@ -51,7 +53,7 @@ export const getClients = async (
         full_name,
         avatar_url
       )
-    `)
+    `, { count: 'exact' })
     .eq('user_id', user.user.id);
 
   if (search) {
@@ -121,7 +123,9 @@ export const createClient = async (client: Omit<import('@/types/clients').Client
     ...client,
     tags: Array.isArray(client.tags) ? client.tags.join(',') : client.tags,
     user_id: user.user.id,
-    assigned_rep: user.user.id
+    assigned_rep: user.user.id,
+    preferred_treatment: client.preferred_treatment,
+    visit_count: client.visit_count || 0
   };
 
   const { data, error } = await supabase
@@ -147,6 +151,8 @@ export const updateClient = async (id: string, updates: Partial<import('@/types/
   const updateData = {
     ...updates,
     tags: Array.isArray(updates.tags) ? updates.tags.join(',') : updates.tags,
+    preferred_treatment: updates.preferred_treatment,
+    visit_count: updates.visit_count
   };
 
   const { data, error } = await supabase

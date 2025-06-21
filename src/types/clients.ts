@@ -32,6 +32,8 @@ export interface Client {
     full_name: string;
     avatar_url?: string;
   };
+  preferred_treatment?: string;
+  visit_count?: number;
   created_at: string;
   updated_at: string;
 }
@@ -41,8 +43,8 @@ export interface ClientActivity {
   client_id: string;
   type: ActivityType;
   description: string;
-  date?: string;  // Made optional since it might not exist
-  created_at: string; // Added this field as it's likely to be present
+  date?: string;
+  created_at: string;
   created_by: string;
   created_by_user?: {
     id: string;

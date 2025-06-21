@@ -288,11 +288,13 @@ export type Database = {
           notes: string | null
           phone: string | null
           phone_number: string | null
+          preferred_treatment: string | null
           registration_date: string | null
           status: string | null
           tags: string | null
           updated_at: string | null
           user_id: string | null
+          visit_count: number | null
         }
         Insert: {
           assigned_rep?: string | null
@@ -305,11 +307,13 @@ export type Database = {
           notes?: string | null
           phone?: string | null
           phone_number?: string | null
+          preferred_treatment?: string | null
           registration_date?: string | null
           status?: string | null
           tags?: string | null
           updated_at?: string | null
           user_id?: string | null
+          visit_count?: number | null
         }
         Update: {
           assigned_rep?: string | null
@@ -322,11 +326,13 @@ export type Database = {
           notes?: string | null
           phone?: string | null
           phone_number?: string | null
+          preferred_treatment?: string | null
           registration_date?: string | null
           status?: string | null
           tags?: string | null
           updated_at?: string | null
           user_id?: string | null
+          visit_count?: number | null
         }
         Relationships: [
           {
