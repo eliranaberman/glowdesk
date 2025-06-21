@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { useNavigate } from 'react-router-dom';
+import { openWhatsApp } from '@/utils/whatsappUtils';
 
 interface ClientHeaderProps {
   client: Client;
@@ -118,7 +119,7 @@ const ClientHeader = ({ client }: ClientHeaderProps) => {
           <Button 
             variant="outline" 
             className="flex gap-2"
-            onClick={() => window.open(`sms:${client.phone_number}`, '_blank')}
+            onClick={() => openWhatsApp(client.phone_number)}
           >
             <MessageSquare className="size-4" />
             שלח הודעה

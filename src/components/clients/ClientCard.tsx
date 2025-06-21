@@ -9,6 +9,7 @@ import { Calendar, Mail, MessageSquare, Phone, User } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import UserBadge from './UserBadge';
+import { openWhatsApp } from '@/utils/whatsappUtils';
 
 interface ClientCardProps {
   client: Client;
@@ -100,7 +101,7 @@ const ClientCard = ({ client, className }: ClientCardProps) => {
             </Button>
             <Button variant="outline" size="sm" className="gap-1" onClick={(e) => {
               e.stopPropagation();
-              window.open(`sms:${client.phone_number}`, '_blank');
+              openWhatsApp(client.phone_number);
             }}>
               <MessageSquare className="h-3.5 w-3.5" />
               שלח הודעה

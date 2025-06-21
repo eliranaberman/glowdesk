@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -23,6 +22,7 @@ import {
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 import { Skeleton } from '@/components/ui/skeleton';
+import { openWhatsApp } from '@/utils/whatsappUtils';
 
 interface ClientsTableProps {
   onError: (error: string) => void;
@@ -200,7 +200,7 @@ const ClientsTable = ({
                       className="size-8"
                       onClick={(e) => {
                         e.stopPropagation();
-                        window.open(`sms:${client.phone_number}`, '_blank');
+                        openWhatsApp(client.phone_number);
                       }}
                     >
                       <MessageSquare className="size-4" />
