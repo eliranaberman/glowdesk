@@ -1,11 +1,11 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Facebook, Instagram, CheckCircle, AlertCircle, ExternalLink } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { initiateMetaOAuth, fetchConnectedAccounts, disconnectAccount, MetaAccount } from "@/services/metaIntegrationService";
+import { initiateMetaOAuth, fetchConnectedAccounts, disconnectAccount } from "@/services/metaIntegrationService";
+import { MetaAccount } from "@/types/metaIntegration";
 
 const MetaConnectionPanel = () => {
   const [accounts, setAccounts] = useState<MetaAccount[]>([]);

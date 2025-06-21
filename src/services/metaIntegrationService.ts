@@ -2,6 +2,9 @@
 import { supabase } from '@/integrations/supabase/client';
 import { MetaAccount, SocialMessage, OAuthResponse, SendMessageResponse } from '@/types/metaIntegration';
 
+// Re-export types for backward compatibility
+export type { MetaAccount, SocialMessage, OAuthResponse, SendMessageResponse };
+
 export const initiateMetaOAuth = async (): Promise<{ authUrl: string; state: string } | null> => {
   try {
     const { data: { session } } = await supabase.auth.getSession();
@@ -31,6 +34,7 @@ export const initiateMetaOAuth = async (): Promise<{ authUrl: string; state: str
 
 export const fetchConnectedAccounts = async (): Promise<MetaAccount[]> => {
   try {
+    // Query only the columns that definitely exist in the current table
     const { data, error } = await supabase
       .from('social_media_accounts')
       .select(`
@@ -39,13 +43,6 @@ export const fetchConnectedAccounts = async (): Promise<MetaAccount[]> => {
         platform,
         account_id,
         account_name,
-        page_id,
-        page_name,
-        instagram_account_id,
-        permissions,
-        is_valid,
-        last_error,
-        webhook_verified,
         access_token,
         token_expires_at,
         created_at,
@@ -58,20 +55,20 @@ export const fetchConnectedAccounts = async (): Promise<MetaAccount[]> => {
       return [];
     }
 
-    // Transform database results to match MetaAccount interface
+    // Transform database results to match MetaAccount interface with safe defaults
     return (data || []).map(account => ({
       id: account.id,
       user_id: account.user_id,
       platform: account.platform as 'facebook' | 'instagram',
       account_id: account.account_id,
       account_name: account.account_name,
-      page_id: account.page_id || undefined,
-      page_name: account.page_name || undefined,
-      instagram_account_id: account.instagram_account_id || undefined,
-      permissions: account.permissions || [],
-      is_valid: account.is_valid ?? true,
-      last_error: account.last_error || undefined,
-      webhook_verified: account.webhook_verified ?? false,
+      page_id: undefined, // Will be populated when columns exist
+      page_name: undefined,
+      instagram_account_id: undefined,
+      permissions: [], // Default empty array
+      is_valid: true, // Default to true
+      last_error: undefined,
+      webhook_verified: false, // Default to false
       access_token: account.access_token,
       token_expires_at: account.token_expires_at || undefined,
       created_at: account.created_at,
@@ -108,9 +105,27 @@ export const fetchMessages = async (filters?: {
   limit?: number;
 }): Promise<SocialMessage[]> => {
   try {
+    // Query only the columns that exist in the current table
     let query = supabase
       .from('social_media_messages')
-      .select('*')
+      .select(`
+        id,
+        user_id,
+        platform,
+        account_id,
+        sender_id,
+        sender_name,
+        message_text,
+        message_type,
+        external_message_id,
+        thread_id,
+        is_read,
+        reply_text,
+        replied_at,
+        received_at,
+        created_at,
+        updated_at
+      `)
       .order('received_at', { ascending: false });
 
     if (filters?.platform) {
@@ -132,28 +147,28 @@ export const fetchMessages = async (filters?: {
       return [];
     }
 
-    // Transform database results to match SocialMessage interface
+    // Transform database results to match SocialMessage interface with safe defaults
     return (data || []).map(msg => ({
       id: msg.id,
       user_id: msg.user_id,
       platform: msg.platform as 'facebook' | 'instagram',
       account_id: msg.account_id,
-      page_id: msg.page_id || undefined,
+      page_id: undefined, // Will be populated when column exists
       sender_id: msg.sender_id,
       sender_name: msg.sender_name || undefined,
       message_text: msg.message_text || undefined,
       message_type: msg.message_type,
       external_message_id: msg.external_message_id,
       thread_id: msg.thread_id || undefined,
-      direction: msg.direction as 'inbound' | 'outbound',
-      status: msg.status as 'read' | 'unread' | 'replied',
+      direction: 'inbound' as const, // Default value when column doesn't exist
+      status: msg.is_read ? 'read' as const : 'unread' as const,
       is_read: msg.is_read,
       reply_text: msg.reply_text || undefined,
       replied_at: msg.replied_at || undefined,
       received_at: msg.received_at,
       created_at: msg.created_at,
       updated_at: msg.updated_at,
-      metadata: msg.metadata
+      metadata: undefined // Will be populated when column exists
     }));
   } catch (error) {
     console.error('Failed to fetch messages:', error);
@@ -202,7 +217,7 @@ export const markMessageAsRead = async (messageId: string): Promise<boolean> => 
   try {
     const { error } = await supabase
       .from('social_media_messages')
-      .update({ is_read: true, status: 'read' })
+      .update({ is_read: true })
       .eq('id', messageId);
 
     if (error) {
@@ -222,8 +237,7 @@ export const getUnreadCount = async (): Promise<number> => {
     const { count, error } = await supabase
       .from('social_media_messages')
       .select('*', { count: 'exact', head: true })
-      .eq('is_read', false)
-      .eq('direction', 'inbound');
+      .eq('is_read', false);
 
     if (error) {
       console.error('Error getting unread count:', error);
@@ -266,8 +280,8 @@ export const subscribeToMessages = (
           message_type: newMessage.message_type,
           external_message_id: newMessage.external_message_id,
           thread_id: newMessage.thread_id || undefined,
-          direction: newMessage.direction as 'inbound' | 'outbound',
-          status: newMessage.status as 'read' | 'unread' | 'replied',
+          direction: newMessage.direction || 'inbound',
+          status: newMessage.status || (newMessage.is_read ? 'read' : 'unread'),
           is_read: newMessage.is_read,
           reply_text: newMessage.reply_text || undefined,
           replied_at: newMessage.replied_at || undefined,

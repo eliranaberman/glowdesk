@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,9 +12,9 @@ import {
   fetchMessages, 
   sendMessage, 
   markMessageAsRead, 
-  subscribeToMessages,
-  SocialMessage 
+  subscribeToMessages
 } from "@/services/metaIntegrationService";
+import { SocialMessage } from "@/types/metaIntegration";
 
 const UnifiedInbox = () => {
   const [messages, setMessages] = useState<SocialMessage[]>([]);
