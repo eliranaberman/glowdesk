@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -9,25 +10,27 @@ import {
   Send, 
   BarChart3, 
   BrainCircuit, 
-  ArrowRight 
+  ArrowRight,
+  Settings
 } from "lucide-react";
 import DashboardContent from "@/components/social-media/DashboardContent";
 import InboxContent from "@/components/social-media/InboxContent";
 import PostCreationPanel from "@/components/social-media/PostCreationPanel";
 import AnalyticsContent from "@/components/social-media/AnalyticsContent";
-import ConnectionModal from "@/components/social-media/ConnectionModal";
 import AIMarketingTools from "@/components/social-media/AIMarketingTools";
+import MetaConnectionPanel from "@/components/social-media/MetaConnectionPanel";
+import UnifiedInbox from "@/components/social-media/UnifiedInbox";
 import { ConnectedAccountsMap, SocialMediaMessage } from "@/components/social-media/types";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { getMarketingStats } from "@/services/marketing/messageService";
 import { fetchUserMessages, getUnreadMessagesCount, markMessageAsRead, replyToMessage } from "@/services/socialMediaMessagesService";
+import { getUnreadCount } from "@/services/metaIntegrationService";
 import { MarketingStats } from "@/types/marketing";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const SocialMedia = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
-  const [isConnectionModalOpen, setIsConnectionModalOpen] = useState(false);
   const [connectedAccounts, setConnectedAccounts] = useState<ConnectedAccountsMap>({
     instagram: false,
     facebook: false,
@@ -78,17 +81,13 @@ const SocialMedia = () => {
       try {
         setIsLoading(true);
         
-        // Load messages and unread count
-        const [messagesData, unreadCountData, statsData] = await Promise.all([
-          fetchUserMessages(),
-          getUnreadMessagesCount(),
-          activeTab === "dashboard" || activeTab === "analytics" ? getMarketingStats() : Promise.resolve(null)
-        ]);
+        // Load real unread count from Meta integration
+        const realUnreadCount = await getUnreadCount();
+        setUnreadCount(realUnreadCount);
         
-        setMessages(messagesData);
-        setUnreadCount(unreadCountData);
-        
-        if (statsData) {
+        // Load marketing stats if needed
+        if (activeTab === "dashboard" || activeTab === "analytics") {
+          const statsData = await getMarketingStats();
           setMarketingStats(statsData);
         }
         
@@ -145,10 +144,7 @@ const SocialMedia = () => {
   const handleButtonAction = () => {
     switch (activeTab) {
       case "dashboard":
-        toast({
-          title: "חיבור חשבונות",
-          description: "חיבור Meta API הוסר מהמערכת"
-        });
+        setActiveTab("connections");
         break;
       case "inbox":
         toast({
@@ -171,16 +167,23 @@ const SocialMedia = () => {
           description: "כלי השיווק AI יהיו זמינים בקרוב"
         });
         break;
+      case "connections":
+        toast({
+          title: "הגדרות חיבור",
+          description: "נהל את חיבורי המדיה החברתית שלך"
+        });
+        break;
     }
   };
 
   const getButtonText = () => {
     switch (activeTab) {
-      case "dashboard": return "חבר חשבון";
+      case "dashboard": return "נהל חיבורים";
       case "inbox": return "סמן הכל כנקרא";
       case "posts": return "פוסט חדש";
       case "analytics": return "דשבורד שיווק";
       case "ai-tools": return "צור תוכן עם AI";
+      case "connections": return "רענן חיבורים";
       default: return "פעולה";
     }
   };
@@ -214,7 +217,7 @@ const SocialMedia = () => {
       </div>
 
       <Tabs defaultValue={activeTab} value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className={`grid gap-1 w-full mb-4 ${isMobile ? 'grid-cols-3 h-auto' : 'grid-cols-5 h-10'}`}>
+        <TabsList className={`grid gap-1 w-full mb-4 ${isMobile ? 'grid-cols-3 h-auto' : 'grid-cols-6 h-10'}`}>
           <TabsTrigger 
             value="dashboard" 
             className={`text-xs sm:text-sm py-2 sm:py-2.5 font-medium flex gap-1 sm:gap-2 justify-center ${isMobile ? 'min-h-[44px] flex-col' : ''}`}
@@ -222,6 +225,15 @@ const SocialMedia = () => {
             <LayoutDashboard className="h-4 w-4" />
             <span className={isMobile ? 'text-xs' : ''}>דשבורד</span>
           </TabsTrigger>
+          
+          <TabsTrigger 
+            value="connections" 
+            className={`text-xs sm:text-sm py-2 sm:py-2.5 font-medium flex gap-1 sm:gap-2 justify-center ${isMobile ? 'min-h-[44px] flex-col' : ''}`}
+          >
+            <Settings className="h-4 w-4" />
+            <span className={isMobile ? 'text-xs' : ''}>חיבורים</span>
+          </TabsTrigger>
+          
           <TabsTrigger 
             value="inbox" 
             className={`text-xs sm:text-sm py-2 sm:py-2.5 font-medium flex gap-1 sm:gap-2 justify-center relative ${isMobile ? 'min-h-[44px] flex-col' : ''}`}
@@ -234,22 +246,20 @@ const SocialMedia = () => {
               </span>
             )}
           </TabsTrigger>
-          <TabsTrigger 
-            value="posts" 
-            className={`text-xs sm:text-sm py-2 sm:py-2.5 font-medium flex gap-1 sm:gap-2 justify-center ${isMobile ? 'min-h-[44px] flex-col' : ''}`}
-          >
-            <Send className="h-4 w-4" />
-            <span className={isMobile ? 'text-xs' : ''}>פרסום</span>
-          </TabsTrigger>
+          
           {!isMobile && (
             <>
+              <TabsTrigger value="posts" className="text-sm py-2.5 font-medium flex gap-2 justify-center">
+                <Send className="h-4 w-4" />
+                <span>פרסום</span>
+              </TabsTrigger>
               <TabsTrigger value="analytics" className="text-sm py-2.5 font-medium flex gap-2 justify-center">
                 <BarChart3 className="h-4 w-4" />
                 <span>אנליטיקס</span>
               </TabsTrigger>
               <TabsTrigger value="ai-tools" className="text-sm py-2.5 font-medium flex gap-2 justify-center">
                 <BrainCircuit className="h-4 w-4" />
-                <span>כלי שיווק AI</span>
+                <span>כלי AI</span>
               </TabsTrigger>
             </>
           )}
@@ -258,6 +268,15 @@ const SocialMedia = () => {
         {/* Mobile secondary tabs */}
         {isMobile && (
           <div className="flex gap-2 mb-4 overflow-x-auto pb-2">
+            <Button
+              variant={activeTab === "posts" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setActiveTab("posts")}
+              className="flex items-center gap-2 whitespace-nowrap min-h-[40px]"
+            >
+              <Send className="h-4 w-4" />
+              פרסום
+            </Button>
             <Button
               variant={activeTab === "analytics" ? "default" : "outline"}
               size="sm"
@@ -290,12 +309,12 @@ const SocialMedia = () => {
           />
         </TabsContent>
 
+        <TabsContent value="connections">
+          <MetaConnectionPanel />
+        </TabsContent>
+
         <TabsContent value="inbox">
-          <InboxContent 
-            messages={messages}
-            onMarkAsRead={handleMarkAsRead}
-            onReply={handleReply}
-          />
+          <UnifiedInbox />
         </TabsContent>
 
         <TabsContent value="posts">
