@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import GanttChart from '../components/scheduling/GanttChart';
-import CalendarConnection from '../components/scheduling/CalendarConnection';
+import CalendarSyncDropdown from '../components/scheduling/CalendarSyncDropdown';
 import NotificationSettings from '../components/scheduling/NotificationSettings';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
@@ -162,18 +162,20 @@ const Scheduling = () => {
             </Button>
           </div>
 
-          <Link to="/scheduling/new" className={isMobile ? 'w-full' : ''}>
-            <Button className={`${isMobile ? 'w-full text-sm' : ''} flex items-center justify-center gap-1.5`}>
-              <CalendarPlus className={`${isMobile ? 'h-4 w-4' : 'h-4 w-4'}`} />
-              פגישה חדשה
-            </Button>
-          </Link>
+          <div className="flex gap-2">
+            <CalendarSyncDropdown />
+            
+            <Link to="/scheduling/new" className={isMobile ? 'flex-1' : ''}>
+              <Button className={`${isMobile ? 'w-full text-sm' : ''} flex items-center justify-center gap-1.5`}>
+                <CalendarPlus className={`${isMobile ? 'h-4 w-4' : 'h-4 w-4'}`} />
+                פגישה חדשה
+              </Button>
+            </Link>
+          </div>
         </div>
       </div>
       
-      <div className={`space-y-${isMobile ? '4' : '6'}`}>
-        <CalendarConnection />
-        
+      <div className={`space-y-${isMobile ? '4' : '6'}`}>        
         <GanttChart
           appointments={allAppointments}
           date={selectedDate}
