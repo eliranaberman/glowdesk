@@ -94,14 +94,14 @@ const ClientsAdvancedFilter = ({ onFilterChange, className }: ClientsAdvancedFil
           <div className="space-y-2">
             <Label>סטטוס לקוחה</Label>
             <Select 
-              value={filters.status || ''} 
-              onValueChange={(value) => updateFilters({ status: value || null })}
+              value={filters.status || 'all'} 
+              onValueChange={(value) => updateFilters({ status: value === 'all' ? null : value })}
             >
               <SelectTrigger>
                 <SelectValue placeholder="כל הסטטוסים" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">כל הסטטוסים</SelectItem>
+                <SelectItem value="all">כל הסטטוסים</SelectItem>
                 <SelectItem value="active">פעילה</SelectItem>
                 <SelectItem value="inactive">לא פעילה</SelectItem>
                 <SelectItem value="lead">ליד</SelectItem>
@@ -113,14 +113,14 @@ const ClientsAdvancedFilter = ({ onFilterChange, className }: ClientsAdvancedFil
           <div className="space-y-2">
             <Label>סוג טיפול מועדף</Label>
             <Select 
-              value={filters.treatmentType || ''} 
-              onValueChange={(value) => updateFilters({ treatmentType: value || null })}
+              value={filters.treatmentType || 'all'} 
+              onValueChange={(value) => updateFilters({ treatmentType: value === 'all' ? null : value })}
             >
               <SelectTrigger>
                 <SelectValue placeholder="כל הטיפולים" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">כל הטיפולים</SelectItem>
+                <SelectItem value="all">כל הטיפולים</SelectItem>
                 {treatmentTypes.map((treatment) => (
                   <SelectItem key={treatment} value={treatment}>
                     {treatment}
