@@ -1,59 +1,33 @@
+
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Facebook, Instagram, Send, MessageCircle, Filter } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { 
-  fetchMessages, 
-  sendMessage, 
-  markMessageAsRead, 
-  subscribeToMessages
-} from "@/services/metaIntegrationService";
-import { SocialMessage } from "@/types/metaIntegration";
+import { SocialMediaMessage } from "./types";
 
-const UnifiedInbox = () => {
-  const [messages, setMessages] = useState<SocialMessage[]>([]);
-  const [filteredMessages, setFilteredMessages] = useState<SocialMessage[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedMessage, setSelectedMessage] = useState<SocialMessage | null>(null);
+interface UnifiedInboxProps {
+  messages: SocialMediaMessage[];
+  onMarkAsRead: (messageId: string) => void;
+  onReply: (messageId: string, reply: string) => void;
+}
+
+const UnifiedInbox = ({ messages, onMarkAsRead, onReply }: UnifiedInboxProps) => {
+  const [filteredMessages, setFilteredMessages] = useState<SocialMediaMessage[]>([]);
+  const [selectedMessage, setSelectedMessage] = useState<SocialMediaMessage | null>(null);
   const [replyText, setReplyText] = useState("");
   const [sending, setSending] = useState(false);
   
   // Filters
-  const [platformFilter, setPlatformFilter] = useState<'all' | 'facebook' | 'instagram'>('all');
+  const [platformFilter, setPlatformFilter] = useState<'all' | 'facebook' | 'instagram' | 'tiktok'>('all');
   const [statusFilter, setStatusFilter] = useState<'all' | 'unread' | 'read'>('all');
   const [searchQuery, setSearchQuery] = useState("");
   
   const { toast } = useToast();
-
-  useEffect(() => {
-    loadMessages();
-    
-    // Subscribe to real-time messages
-    const unsubscribe = subscribeToMessages(
-      (newMessage) => {
-        setMessages(prev => [newMessage, ...prev]);
-        
-        // Show toast for new inbound messages
-        if (newMessage.direction === 'inbound') {
-          toast({
-            title: "הודעה חדשה",
-            description: `מ-${newMessage.sender_name || 'משתמש'} ב${newMessage.platform === 'facebook' ? 'פייסבוק' : 'אינסטגרם'}`,
-          });
-        }
-      },
-      (error) => {
-        console.error('Real-time subscription error:', error);
-      }
-    );
-
-    return unsubscribe;
-  }, []);
 
   useEffect(() => {
     // Apply filters
@@ -76,41 +50,18 @@ const UnifiedInbox = () => {
       );
     }
 
+    // Sort by received_at descending (newest first)
+    filtered.sort((a, b) => new Date(b.received_at).getTime() - new Date(a.received_at).getTime());
+
     setFilteredMessages(filtered);
   }, [messages, platformFilter, statusFilter, searchQuery]);
 
-  const loadMessages = async () => {
-    setLoading(true);
-    try {
-      const data = await fetchMessages({ limit: 100 });
-      setMessages(data);
-    } catch (error) {
-      console.error('Error loading messages:', error);
-      toast({
-        title: "שגיאה",
-        description: "לא ניתן לטעון את ההודעות",
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleMessageClick = async (message: SocialMessage) => {
+  const handleMessageClick = async (message: SocialMediaMessage) => {
     setSelectedMessage(message);
     
     // Mark as read if unread
     if (!message.is_read) {
-      const success = await markMessageAsRead(message.id);
-      if (success) {
-        setMessages(prev => 
-          prev.map(msg => 
-            msg.id === message.id 
-              ? { ...msg, is_read: true, status: 'read' as const }
-              : msg
-          )
-        );
-      }
+      onMarkAsRead(message.id);
     }
   };
 
@@ -119,31 +70,12 @@ const UnifiedInbox = () => {
 
     setSending(true);
     try {
-      const result = await sendMessage(
-        selectedMessage.platform,
-        selectedMessage.account_id,
-        selectedMessage.sender_id,
-        replyText
-      );
-
-      if (result.success) {
-        setReplyText("");
-        toast({
-          title: "ההודעה נשלחה",
-          description: "התגובה שלך נשלחה בהצלחה",
-        });
-        
-        // Update message status
-        setMessages(prev => 
-          prev.map(msg => 
-            msg.id === selectedMessage.id 
-              ? { ...msg, status: 'replied' as const, replied_at: new Date().toISOString() }
-              : msg
-          )
-        );
-      } else {
-        throw new Error(result.error || 'Failed to send message');
-      }
+      await onReply(selectedMessage.id, replyText);
+      setReplyText("");
+      toast({
+        title: "ההודעה נשלחה",
+        description: "התגובה שלך נשלחה בהצלחה",
+      });
     } catch (error) {
       console.error('Error sending reply:', error);
       toast({
@@ -167,9 +99,9 @@ const UnifiedInbox = () => {
     }
   };
 
-  const getStatusBadge = (message: SocialMessage) => {
-    if (message.status === 'replied') {
-      return <Badge variant="success" className="text-xs">נענה</Badge>;
+  const getStatusBadge = (message: SocialMediaMessage) => {
+    if (message.reply_text) {
+      return <Badge variant="default" className="text-xs bg-green-500">נענה</Badge>;
     }
     if (message.is_read) {
       return <Badge variant="secondary" className="text-xs">נקרא</Badge>;
@@ -177,7 +109,7 @@ const UnifiedInbox = () => {
     return <Badge variant="destructive" className="text-xs">חדש</Badge>;
   };
 
-  const unreadCount = messages.filter(msg => !msg.is_read && msg.direction === 'inbound').length;
+  const unreadCount = messages.filter(msg => !msg.is_read).length;
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -195,7 +127,7 @@ const UnifiedInbox = () => {
                   </Badge>
                 )}
               </CardTitle>
-              <Button variant="ghost" size="icon" onClick={loadMessages}>
+              <Button variant="ghost" size="icon">
                 <Filter size={16} />
               </Button>
             </div>
@@ -217,6 +149,7 @@ const UnifiedInbox = () => {
                     <SelectItem value="all">כל הפלטפורמות</SelectItem>
                     <SelectItem value="facebook">פייסבוק</SelectItem>
                     <SelectItem value="instagram">אינסטגרם</SelectItem>
+                    <SelectItem value="tiktok">טיקטוק</SelectItem>
                   </SelectContent>
                 </Select>
                 <Select value={statusFilter} onValueChange={(value: any) => setStatusFilter(value)}>
@@ -234,19 +167,7 @@ const UnifiedInbox = () => {
           </CardHeader>
           
           <CardContent className="p-0">
-            {loading ? (
-              <div className="space-y-2 p-4">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <div key={i} className="flex items-start gap-3 p-3">
-                    <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse" />
-                    <div className="flex-1 space-y-2">
-                      <div className="w-full h-4 bg-gray-200 rounded animate-pulse" />
-                      <div className="w-3/4 h-3 bg-gray-200 rounded animate-pulse" />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : filteredMessages.length > 0 ? (
+            {filteredMessages.length > 0 ? (
               <div className="divide-y max-h-96 overflow-y-auto">
                 {filteredMessages.map((message) => (
                   <div
@@ -306,7 +227,8 @@ const UnifiedInbox = () => {
                     {selectedMessage.sender_name || 'משתמש אנונימי'}
                   </h3>
                   <p className="text-sm text-muted-foreground">
-                    {selectedMessage.platform === 'facebook' ? 'פייסבוק מסנג\'ר' : 'אינסטגרם ישיר'}
+                    {selectedMessage.platform === 'facebook' ? 'פייסבוק מסנג\'ר' : 
+                     selectedMessage.platform === 'instagram' ? 'אינסטגרם ישיר' : 'טיקטוק'}
                   </p>
                 </div>
                 {getStatusBadge(selectedMessage)}
