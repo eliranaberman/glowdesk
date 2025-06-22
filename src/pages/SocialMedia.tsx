@@ -251,12 +251,9 @@ const SocialMedia = () => {
     }
   };
 
-  // Updated button action handler to handle campaigns tab
+  // Updated button action handler - removed dashboard case
   const handleButtonAction = () => {
     switch (activeTab) {
-      case "dashboard":
-        setActiveTab("connections");
-        break;
       case "inbox":
         // Mark all messages as read
         setMessages(prev => prev.map(msg => ({ ...msg, is_read: true })));
@@ -292,39 +289,43 @@ const SocialMedia = () => {
     }
   };
 
-  // Updated button text function to handle campaigns tab
+  // Updated button text function - removed dashboard case
   const getButtonText = () => {
     switch (activeTab) {
-      case "dashboard": return "נהל חיבורים";
       case "inbox": return "סמן הכל כנקרא";
       case "posts": return "פוסט חדש";
       case "analytics": return "דשבורד שיווק";
       case "campaigns": return "נהל קמפיינים";
       case "ai-tools": return "צור תוכן עם AI";
       case "connections": return "רענן חיבורים";
-      default: return "פעולה";
+      default: return null; // No button for dashboard
     }
   };
+
+  const buttonText = getButtonText();
 
   return (
     <div className="space-y-4 sm:space-y-6 p-3 sm:p-6" dir="rtl">
       <div className="flex flex-col sm:flex-row sm:justify-center sm:items-center gap-4">
         <h1 className="text-xl sm:text-2xl font-semibold text-center tracking-tight">מדיה חברתית ושיווק</h1>
         
-        <div className="flex flex-col sm:flex-row gap-2 sm:gap-2 justify-center items-center">
-          <Button 
-            variant="secondary" 
-            size="sm" 
-            className="flex items-center justify-center gap-1.5 h-10 sm:h-8 text-sm"
-            onClick={handleButtonAction}
-          >
-            <Plus size={16} />
-            {getButtonText()}
-          </Button>
-        </div>
+        {buttonText && (
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-2 justify-center items-center">
+            <Button 
+              variant="secondary" 
+              size="sm" 
+              className="flex items-center justify-center gap-1.5 h-10 sm:h-8 text-sm"
+              onClick={handleButtonAction}
+            >
+              <Plus size={16} />
+              {buttonText}
+            </Button>
+          </div>
+        )}
       </div>
 
       <Tabs defaultValue={activeTab} value={activeTab} onValueChange={setActiveTab} className="w-full">
+        {/* ... keep existing code (TabsList and all TabsTrigger components) */}
         <TabsList className={`grid gap-1 w-full mb-4 mx-auto ${isMobile ? 'grid-cols-3 h-auto' : 'grid-cols-7 h-10'}`}>
           <TabsTrigger 
             value="dashboard" 
@@ -392,7 +393,7 @@ const SocialMedia = () => {
           </TabsTrigger>
         </TabsList>
 
-        {/* Mobile secondary tabs - Updated order: Posts, Analytics, Campaigns, AI Tools */}
+        {/* ... keep existing code (Mobile secondary tabs) */}
         {isMobile && (
           <div className="flex gap-2 mb-4 overflow-x-auto pb-2 justify-center">
             <Button
@@ -434,6 +435,7 @@ const SocialMedia = () => {
           </div>
         )}
 
+        {/* ... keep existing code (all TabsContent components) */}
         <TabsContent value="dashboard">
           <DashboardContent 
             connectedAccounts={connectedAccounts}
