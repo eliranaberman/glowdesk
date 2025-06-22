@@ -9,8 +9,8 @@ import {
   Send, 
   BarChart3, 
   BrainCircuit, 
-  ArrowRight,
-  Settings
+  Settings,
+  Target
 } from "lucide-react";
 import DashboardContent from "@/components/social-media/DashboardContent";
 import InboxContent from "@/components/social-media/InboxContent";
@@ -35,14 +35,69 @@ const SocialMedia = () => {
     facebook: false,
     tiktok: false,
   });
-  const [messages, setMessages] = useState<SocialMediaMessage[]>([]);
-  const [unreadCount, setUnreadCount] = useState(0);
+  
+  // Demo messages with 5 sample messages from different platforms
+  const [messages, setMessages] = useState<SocialMediaMessage[]>([
+    {
+      id: "msg_1",
+      platform: "facebook" as const,
+      sender_name: "שרה כהן",
+      message_text: "שלום! אני מעוניינת לקבוע תור למניקור ג'ל. מתי יש לך פנוי השבוע?",
+      received_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2 hours ago
+      is_read: false,
+      reply_text: null,
+      replied_at: null
+    },
+    {
+      id: "msg_2", 
+      platform: "instagram" as const,
+      sender_name: "מיכל לוי",
+      message_text: "ראיתי את התמונות שלך באינסטגרם, העבודה נראית מדהימה! כמה עולה טיפול מלא?",
+      received_at: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(), // 4 hours ago
+      is_read: false,
+      reply_text: null,
+      replied_at: null
+    },
+    {
+      id: "msg_3",
+      platform: "facebook" as const,
+      sender_name: "דנה אברהם",
+      message_text: "תודה על הטיפול הנפלא אתמול! הציפורניים נראות מושלמות. אשמח לקבוע את התור הבא.",
+      received_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
+      is_read: true,
+      reply_text: "תודה רבה דנה! אשמח לראות אותך שוב. מתי נוח לך לשבוע הבא?",
+      replied_at: new Date(Date.now() - 23 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: "msg_4",
+      platform: "instagram" as const,
+      sender_name: "יעל גולן",
+      message_text: "איך אפשר לשמור על הג'ל יותר זמן? יש לך טיפים?",
+      received_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 days ago
+      is_read: true,
+      reply_text: null,
+      replied_at: null
+    },
+    {
+      id: "msg_5",
+      platform: "tiktok" as const,
+      sender_name: "נועה ברק",
+      message_text: "ווואו! הסרטון שלך עם הטכניקות החדשות היה מעולה! איפה המכון שלך?",
+      received_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(), // 3 days ago
+      is_read: false,
+      reply_text: null,
+      replied_at: null
+    }
+  ]);
+  
+  const [unreadCount, setUnreadCount] = useState(3); // 3 unread messages from demo
   const [marketingStats, setMarketingStats] = useState<MarketingStats | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
   const isMobile = useIsMobile();
 
+  // ... keep existing code (analyticsData object)
   const analyticsData = {
     followers: [
       { name: "ינואר", count: 320 },
@@ -75,6 +130,7 @@ const SocialMedia = () => {
     }
   };
 
+  // ... keep existing code (useEffect for loadData)
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -104,6 +160,7 @@ const SocialMedia = () => {
     loadData();
   }, [activeTab, toast]);
 
+  // ... keep existing code (connectPlatform, handleOpenInbox, handleMarkAsRead, handleReply functions)
   const connectPlatform = (platform: string) => {
     setConnectedAccounts(prev => ({
       ...prev,
@@ -140,6 +197,7 @@ const SocialMedia = () => {
     }
   };
 
+  // Updated button action handler to handle campaigns tab
   const handleButtonAction = () => {
     switch (activeTab) {
       case "dashboard":
@@ -160,6 +218,9 @@ const SocialMedia = () => {
       case "analytics":
         navigate("/marketing");
         break;
+      case "campaigns":
+        navigate("/marketing");
+        break;
       case "ai-tools":
         toast({
           title: "כלי AI",
@@ -175,12 +236,14 @@ const SocialMedia = () => {
     }
   };
 
+  // Updated button text function to handle campaigns tab
   const getButtonText = () => {
     switch (activeTab) {
       case "dashboard": return "נהל חיבורים";
       case "inbox": return "סמן הכל כנקרא";
       case "posts": return "פוסט חדש";
       case "analytics": return "דשבורד שיווק";
+      case "campaigns": return "נהל קמפיינים";
       case "ai-tools": return "צור תוכן עם AI";
       case "connections": return "רענן חיבורים";
       default: return "פעולה";
@@ -193,16 +256,6 @@ const SocialMedia = () => {
         <h1 className="text-xl sm:text-2xl font-semibold text-center tracking-tight">מדיה חברתית ושיווק</h1>
         
         <div className="flex flex-col sm:flex-row gap-2 sm:gap-2 justify-center items-center">
-          <Button
-            variant="outline"
-            size="sm"
-            className="flex items-center justify-center gap-1.5 h-10 sm:h-8 text-sm"
-            onClick={() => navigate('/marketing')}
-          >
-            <ArrowRight size={16} />
-            לדשבורד קמפיינים
-          </Button>
-          
           <Button 
             variant="secondary" 
             size="sm" 
@@ -216,7 +269,7 @@ const SocialMedia = () => {
       </div>
 
       <Tabs defaultValue={activeTab} value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className={`grid gap-1 w-full mb-4 mx-auto ${isMobile ? 'grid-cols-3 h-auto' : 'grid-cols-6 h-10'}`}>
+        <TabsList className={`grid gap-1 w-full mb-4 mx-auto ${isMobile ? 'grid-cols-3 h-auto' : 'grid-cols-7 h-10'}`}>
           <TabsTrigger 
             value="dashboard" 
             className={`text-xs sm:text-sm py-2 sm:py-2.5 font-medium flex gap-1 sm:gap-1.5 justify-center items-center ${isMobile ? 'min-h-[44px] flex-col' : ''}`}
@@ -257,6 +310,14 @@ const SocialMedia = () => {
               </TabsTrigger>
               
               <TabsTrigger 
+                value="campaigns" 
+                className="text-sm py-2.5 font-medium flex gap-1.5 justify-center items-center"
+              >
+                <Target className="h-4 w-4" />
+                <span>קמפיינים</span>
+              </TabsTrigger>
+              
+              <TabsTrigger 
                 value="ai-tools" 
                 className="text-sm py-2.5 font-medium flex gap-1.5 justify-center items-center"
               >
@@ -275,7 +336,7 @@ const SocialMedia = () => {
           </TabsTrigger>
         </TabsList>
 
-        {/* Mobile secondary tabs - Updated order: Posts, Analytics, AI Tools */}
+        {/* Mobile secondary tabs - Updated order: Posts, Analytics, Campaigns, AI Tools */}
         {isMobile && (
           <div className="flex gap-2 mb-4 overflow-x-auto pb-2 justify-center">
             <Button
@@ -295,6 +356,15 @@ const SocialMedia = () => {
             >
               <BarChart3 className="h-4 w-4" />
               אנליטיקס
+            </Button>
+            <Button
+              variant={activeTab === "campaigns" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setActiveTab("campaigns")}
+              className="flex items-center justify-center gap-1.5 whitespace-nowrap min-h-[40px]"
+            >
+              <Target className="h-4 w-4" />
+              קמפיינים
             </Button>
             <Button
               variant={activeTab === "ai-tools" ? "default" : "outline"}
@@ -333,40 +403,24 @@ const SocialMedia = () => {
 
         <TabsContent value="analytics">
           <AnalyticsContent 
-            analyticsData={{
-              followers: [
-                { name: "ינואר", count: 320 },
-                { name: "פברואר", count: 350 },
-                { name: "מרץ", count: 410 },
-                { name: "אפריל", count: 490 },
-                { name: "מאי", count: 550 },
-                { name: "יוני", count: 590 },
-              ],
-              engagement: [
-                { name: "ינואר", rate: 5.2 },
-                { name: "פברואר", rate: 5.8 },
-                { name: "מרץ", rate: 6.5 },
-                { name: "אפריל", rate: 7.2 },
-                { name: "מאי", rate: 8.0 },
-                { name: "יוני", rate: 8.5 },
-              ],
-              posts: [
-                { name: "ינואר", count: 10 },
-                { name: "פברואר", count: 12 },
-                { name: "מרץ", count: 14 },
-                { name: "אפריל", count: 15 },
-                { name: "מאי", count: 18 },
-                { name: "יוני", count: 16 },
-              ],
-              colors: {
-                primary: "#606c38",
-                secondary: "#e07a5f",
-                tertiary: "#ddbea9",
-              }
-            }}
+            analyticsData={analyticsData}
             marketingStats={marketingStats}
             isLoading={isLoading}
           />
+        </TabsContent>
+        
+        <TabsContent value="campaigns">
+          <div className="flex flex-col items-center justify-center p-8 text-center space-y-4">
+            <Target className="h-16 w-16 text-muted-foreground" />
+            <h3 className="text-lg font-semibold">ניהול קמפיינים</h3>
+            <p className="text-muted-foreground max-w-md">
+              נהל את כל הקמפיינים השיווקיים שלך במקום אחד. צור, ערוך ושלח קמפיינים ללקוחות שלך.
+            </p>
+            <Button onClick={() => navigate('/marketing')} className="mt-4">
+              <Target className="h-4 w-4 mr-2" />
+              עבור לדשבורד קמפיינים
+            </Button>
+          </div>
         </TabsContent>
         
         <TabsContent value="ai-tools">
