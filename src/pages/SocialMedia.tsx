@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -36,57 +37,97 @@ const SocialMedia = () => {
     tiktok: false,
   });
   
-  // Demo messages with 5 sample messages from different platforms
+  // Demo messages with 5 sample messages from different platforms - all required fields included
   const [messages, setMessages] = useState<SocialMediaMessage[]>([
     {
       id: "msg_1",
+      user_id: "demo-user-1",
       platform: "facebook" as const,
+      account_id: "fb_account_1",
+      sender_id: "sender_1",
       sender_name: "שרה כהן",
       message_text: "שלום! אני מעוניינת לקבוע תור למניקור ג'ל. מתי יש לך פנוי השבוע?",
-      received_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2 hours ago
+      message_type: "text",
+      external_message_id: "fb_msg_1",
+      thread_id: "fb_thread_1",
       is_read: false,
+      received_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2 hours ago
+      replied_at: null,
       reply_text: null,
-      replied_at: null
+      created_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+      updated_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString()
     },
     {
-      id: "msg_2", 
+      id: "msg_2",
+      user_id: "demo-user-1", 
       platform: "instagram" as const,
+      account_id: "ig_account_1",
+      sender_id: "sender_2",
       sender_name: "מיכל לוי",
       message_text: "ראיתי את התמונות שלך באינסטגרם, העבודה נראית מדהימה! כמה עולה טיפול מלא?",
-      received_at: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(), // 4 hours ago
+      message_type: "text",
+      external_message_id: "ig_msg_1",
+      thread_id: "ig_thread_1",
       is_read: false,
+      received_at: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(), // 4 hours ago
+      replied_at: null,
       reply_text: null,
-      replied_at: null
+      created_at: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
+      updated_at: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString()
     },
     {
       id: "msg_3",
+      user_id: "demo-user-1",
       platform: "facebook" as const,
+      account_id: "fb_account_1",
+      sender_id: "sender_3",
       sender_name: "דנה אברהם",
       message_text: "תודה על הטיפול הנפלא אתמול! הציפורניים נראות מושלמות. אשמח לקבוע את התור הבא.",
-      received_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
+      message_type: "text",
+      external_message_id: "fb_msg_2",
+      thread_id: "fb_thread_2",
       is_read: true,
+      received_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
+      replied_at: new Date(Date.now() - 23 * 60 * 60 * 1000).toISOString(),
       reply_text: "תודה רבה דנה! אשמח לראות אותך שוב. מתי נוח לך לשבוע הבא?",
-      replied_at: new Date(Date.now() - 23 * 60 * 60 * 1000).toISOString()
+      created_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+      updated_at: new Date(Date.now() - 23 * 60 * 60 * 1000).toISOString()
     },
     {
       id: "msg_4",
+      user_id: "demo-user-1",
       platform: "instagram" as const,
+      account_id: "ig_account_1",
+      sender_id: "sender_4",
       sender_name: "יעל גולן",
       message_text: "איך אפשר לשמור על הג'ל יותר זמן? יש לך טיפים?",
-      received_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 days ago
+      message_type: "text",
+      external_message_id: "ig_msg_2",
+      thread_id: "ig_thread_2",
       is_read: true,
+      received_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 days ago
+      replied_at: null,
       reply_text: null,
-      replied_at: null
+      created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+      updated_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()
     },
     {
       id: "msg_5",
+      user_id: "demo-user-1",
       platform: "tiktok" as const,
+      account_id: "tiktok_account_1",
+      sender_id: "sender_5",
       sender_name: "נועה ברק",
       message_text: "ווואו! הסרטון שלך עם הטכניקות החדשות היה מעולה! איפה המכון שלך?",
-      received_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(), // 3 days ago
+      message_type: "text",
+      external_message_id: "tiktok_msg_1",
+      thread_id: "tiktok_thread_1",
       is_read: false,
+      received_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(), // 3 days ago
+      replied_at: null,
       reply_text: null,
-      replied_at: null
+      created_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+      updated_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
     }
   ]);
   
@@ -160,7 +201,6 @@ const SocialMedia = () => {
     loadData();
   }, [activeTab, toast]);
 
-  // ... keep existing code (connectPlatform, handleOpenInbox, handleMarkAsRead, handleReply functions)
   const connectPlatform = (platform: string) => {
     setConnectedAccounts(prev => ({
       ...prev,
@@ -432,3 +472,4 @@ const SocialMedia = () => {
 };
 
 export default SocialMedia;
+
