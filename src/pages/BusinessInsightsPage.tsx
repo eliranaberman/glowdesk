@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -107,14 +106,19 @@ const BusinessInsightsPage = () => {
         <TabsContent value={activePeriod}>
           {metrics && (
             <>
-              {/* KPI Cards */}
+              {/* KPI Cards - Swapped positions */}
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6">
                 <KPICard
-                  title="הכנסות"
-                  value={metrics.totalRevenue}
-                  icon={TrendingUp}
-                  variant="primary"
-                  trend={{ value: metrics.revenueGrowth, label: "צמיחה" }}
+                  title="לקוחות חוזרות"
+                  value={metrics.repeatCustomers}
+                  subtitle={`${((metrics.repeatCustomers / metrics.totalClients) * 100).toFixed(0)}% מהלקוחות`}
+                  icon={Repeat}
+                />
+                <KPICard
+                  title="ממוצע ללקוחה"
+                  value={`₪${metrics.averagePerClient.toFixed(0)}`}
+                  icon={Calculator}
+                  variant="accent"
                 />
                 <KPICard
                   title="לקוחות"
@@ -124,16 +128,11 @@ const BusinessInsightsPage = () => {
                   trend={{ value: metrics.clientGrowth, label: "צמיחה" }}
                 />
                 <KPICard
-                  title="ממוצע ללקוחה"
-                  value={`₪${metrics.averagePerClient.toFixed(0)}`}
-                  icon={Calculator}
-                  variant="accent"
-                />
-                <KPICard
-                  title="לקוחות חוזרות"
-                  value={metrics.repeatCustomers}
-                  subtitle={`${((metrics.repeatCustomers / metrics.totalClients) * 100).toFixed(0)}% מהלקוחות`}
-                  icon={Repeat}
+                  title="הכנסות"
+                  value={metrics.totalRevenue}
+                  icon={TrendingUp}
+                  variant="primary"
+                  trend={{ value: metrics.revenueGrowth, label: "צמיחה" }}
                 />
               </div>
 
