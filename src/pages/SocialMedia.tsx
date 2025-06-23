@@ -29,7 +29,7 @@ import { MarketingStats } from "@/types/marketing";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const SocialMedia = () => {
-  const [activeTab, setActiveTab] = useState("connections");
+  const [activeTab, setActiveTab] = useState("dashboard");
   const [connectedAccounts, setConnectedAccounts] = useState<ConnectedAccountsMap>({
     instagram: false,
     facebook: false,
