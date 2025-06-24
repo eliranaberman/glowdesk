@@ -1,4 +1,3 @@
-
 import { useState, useMemo, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
@@ -42,7 +41,7 @@ interface GanttChartProps {
 }
 
 const HOURS = Array.from({ length: 12 }, (_, i) => i + 8); // 8:00 to 19:00
-const CELL_HEIGHT = 60;
+const HOUR_HEIGHT = 80; // Height for each hour slot
 const DAYS_OF_WEEK = ['יום א׳', 'יום ב׳', 'יום ג׳', 'יום ד׳', 'יום ה׳', 'יום ו׳', 'שבת'];
 
 const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
@@ -53,20 +52,19 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
   const [isCurrentTimeVisible, setIsCurrentTimeVisible] = useState<boolean>(false);
   const navigate = useNavigate();
   
-  const getAppointmentPosition = (startTime: string): number => {
+  const getAppointmentVerticalPosition = (startTime: string): number => {
     const [hoursStr, minutesStr] = startTime.split(':');
     const hours = parseInt(hoursStr, 10);
     const minutes = parseInt(minutesStr, 10);
     
-    const hourPosition = hours - 8;
-    const minutePercentage = minutes / 60;
+    const hourPosition = hours - 8; // Starting from 8 AM
+    const minuteOffset = (minutes / 60) * HOUR_HEIGHT;
     
-    return (hourPosition + minutePercentage) / HOURS.length * 100;
+    return hourPosition * HOUR_HEIGHT + minuteOffset;
   };
 
-  const getAppointmentWidth = (duration: number): number => {
-    const hourWidth = 100 / HOURS.length;
-    return (duration / 60) * hourWidth;
+  const getAppointmentHeight = (duration: number): number => {
+    return (duration / 60) * HOUR_HEIGHT;
   };
 
   const viewDates = useMemo(() => {
@@ -190,14 +188,14 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
     const currentHour = now.getHours();
     const currentMinute = now.getMinutes();
     
-    if (currentHour < 8 || currentHour >= 24) {
+    if (currentHour < 8 || currentHour >= 20) {
       return -1; // Out of bounds
     }
     
     const hourPosition = currentHour - 8;
-    const minutePercentage = currentMinute / 60;
+    const minuteOffset = (currentMinute / 60) * HOUR_HEIGHT;
     
-    return (hourPosition + minutePercentage) / HOURS.length * 100;
+    return hourPosition * HOUR_HEIGHT + minuteOffset;
   };
 
   const timeToMinutes = (timeStr: string): number => {
@@ -205,51 +203,45 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
     return hours * 60 + minutes;
   };
 
-  const sortedAppointments = useMemo(() => {
-    return [...filteredAppointments].sort((a, b) => {
-      return timeToMinutes(a.startTime) - timeToMinutes(b.startTime);
+  const calculateOverlap = (appointments: Appointment[]): Appointment[] => {
+    const sortedApps = [...appointments].sort((a, b) => {
+      const timeA = parse(a.startTime, 'HH:mm', new Date()).getTime();
+      const timeB = parse(b.startTime, 'HH:mm', new Date()).getTime();
+      return timeA - timeB;
     });
-  }, [filteredAppointments]);
 
-  const calculateAppointmentSlots = (appointments: Appointment[]): Appointment[] => {
-    if (!appointments.length) return [];
+    const processed: Appointment[] = [];
+    const overlaps: { [key: string]: number } = {};
 
-    const result = [...appointments];
-    const slots: { [key: number]: number[] } = {};
-
-    result.sort((a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime));
-    
-    for (const appointment of result) {
-      const startMinutes = timeToMinutes(appointment.startTime);
-      const endMinutes = startMinutes + appointment.duration;
+    sortedApps.forEach(app => {
+      const appStart = parse(app.startTime, 'HH:mm', new Date()).getTime();
+      const appEnd = appStart + (app.duration * 60 * 1000);
       
-      let slotIndex = 0;
-      while (true) {
-        const isSlotAvailable = !slots[slotIndex]?.some(
-          occupiedMinute => 
-            occupiedMinute >= startMinutes && 
-            occupiedMinute < endMinutes
-        );
-        
-        if (isSlotAvailable) {
-          if (!slots[slotIndex]) slots[slotIndex] = [];
-          for (let min = startMinutes; min < endMinutes; min += 5) {
-            slots[slotIndex].push(min);
-          }
-          appointment.verticalPosition = slotIndex;
-          break;
-        }
-        
-        slotIndex++;
+      let column = 0;
+      
+      while (processed.some(existing => {
+        const existingStart = parse(existing.startTime, 'HH:mm', new Date()).getTime();
+        const existingEnd = existingStart + (existing.duration * 60 * 1000);
+        return appStart < existingEnd && 
+               appEnd > existingStart && 
+               overlaps[existing.id] === column;
+      })) {
+        column++;
       }
-    }
-    
-    return result;
+      
+      overlaps[app.id] = column;
+      processed.push(app);
+    });
+
+    return sortedApps.map(app => ({
+      ...app,
+      verticalPosition: overlaps[app.id]
+    }));
   };
 
-  const slottedAppointments = useMemo(() => {
-    return calculateAppointmentSlots(sortedAppointments);
-  }, [sortedAppointments]);
+  const processedAppointments = useMemo(() => {
+    return calculateOverlap(filteredAppointments);
+  }, [filteredAppointments]);
 
   const weeklyAppointmentsByDay = useMemo(() => {
     if (view !== 'week') return [];
@@ -291,76 +283,24 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
     return `${hours.padStart(2, '0')}:${minutes.padStart(2, '0')}`;
   };
 
-  const calculateOverlap = (appointments: Appointment[]): Appointment[] => {
-    const sortedApps = [...appointments].sort((a, b) => {
-      const timeA = parse(a.startTime, 'HH:mm', new Date()).getTime();
-      const timeB = parse(b.startTime, 'HH:mm', new Date()).getTime();
-      return timeA - timeB;
-    });
-
-    const processed: Appointment[] = [];
-    const overlaps: { [key: string]: number } = {};
-
-    sortedApps.forEach(app => {
-      const appStart = parse(app.startTime, 'HH:mm', new Date()).getTime();
-      const appEnd = appStart + (app.duration * 60 * 1000);
-      
-      let maxOverlap = 0;
-      let column = 0;
-      
-      processed.forEach(existing => {
-        const existingStart = parse(existing.startTime, 'HH:mm', new Date()).getTime();
-        const existingEnd = existingStart + (existing.duration * 60 * 1000);
-        
-        if (appStart < existingEnd && appEnd > existingStart) {
-          maxOverlap = Math.max(maxOverlap, (overlaps[existing.id] || 0) + 1);
-        }
-      });
-      
-      while (processed.some(existing => {
-        const existingStart = parse(existing.startTime, 'HH:mm', new Date()).getTime();
-        const existingEnd = existingStart + (existing.duration * 60 * 1000);
-        return appStart < existingEnd && 
-               appEnd > existingStart && 
-               overlaps[existing.id] === column;
-      })) {
-        column++;
-      }
-      
-      overlaps[app.id] = column;
-      processed.push(app);
-    });
-
-    return sortedApps.map(app => ({
-      ...app,
-      verticalPosition: overlaps[app.id]
-    }));
-  };
-
-  const renderAppointment = (appointment: Appointment, containerWidth: number) => {
-    const left = getAppointmentPosition(appointment.startTime);
-    const width = (appointment.duration / 60) * (100 / HOURS.length);
-    const maxOverlap = Math.max(...appointments.map(a => a.verticalPosition || 0));
-    const verticalGap = isMobile ? 0.5 : 1;
-    const cardHeight = isMobile ? 
-      (90 - (verticalGap * (maxOverlap + 1))) / (maxOverlap + 1) :
-      (80 - (verticalGap * (maxOverlap + 1))) / (maxOverlap + 1);
-    const top = appointment.verticalPosition ? 
-      (appointment.verticalPosition * (cardHeight + verticalGap)) : 0;
+  const renderDayViewAppointment = (appointment: Appointment) => {
+    const top = getAppointmentVerticalPosition(appointment.startTime);
+    const height = getAppointmentHeight(appointment.duration);
+    const maxOverlap = Math.max(...processedAppointments.map(a => a.verticalPosition || 0), 0);
+    const appointmentWidth = maxOverlap > 0 ? 90 / (maxOverlap + 1) : 90;
+    const leftOffset = (appointment.verticalPosition || 0) * (appointmentWidth + 1);
 
     return (
       <div
         key={appointment.id}
-        className="absolute rounded-xl border-0 shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-[1.02] cursor-pointer animate-fade-in backdrop-blur-sm"
+        className="absolute rounded-xl border-0 shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-[1.02] cursor-pointer animate-fade-in backdrop-blur-sm z-10"
         style={{
           backgroundColor: appointment.color || '#FEF7CD',
-          left: `${left}%`,
-          width: `${width}%`,
-          top: `${top}%`,
-          height: `${cardHeight}%`,
+          top: `${top}px`,
+          left: `${leftOffset}%`,
+          width: `${appointmentWidth}%`,
+          height: `${Math.max(height, isMobile ? 35 : 45)}px`,
           minHeight: isMobile ? '35px' : '45px',
-          minWidth: isMobile ? '80px' : '110px',
-          zIndex: appointment.verticalPosition || 1
         }}
         onClick={() => handleAppointmentClick(appointment)}
       >
@@ -384,24 +324,6 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
       </div>
     );
   };
-
-  const renderTimeGrid = () => (
-    <div className="hours-header flex border-b bg-gradient-to-r from-pink-50/30 to-purple-50/30 backdrop-blur-sm sticky top-0 z-10">
-      {HOURS.map((hour) => (
-        <div 
-          key={hour} 
-          className={`hour-cell text-center py-3 font-medium text-gray-700 ${isMobile ? 'text-[10px]' : 'text-sm'}`}
-          style={{ width: `${100 / HOURS.length}%` }}
-        >
-          {`${hour.toString().padStart(2, '0')}${isMobile ? '' : ':00'}`}
-        </div>
-      ))}
-    </div>
-  );
-
-  const processedAppointments = useMemo(() => {
-    return calculateOverlap(filteredAppointments);
-  }, [filteredAppointments]);
 
   return (
     <Card className="shadow-xl border-0 bg-gradient-to-br from-white to-pink-50/20 overflow-hidden">
@@ -502,39 +424,60 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
 
         <div className="border-t rounded-b-xl overflow-hidden bg-gradient-to-br from-white to-pink-50/10">
           {view === 'day' ? (
-            <div className="gantt-container relative overflow-x-auto min-h-[600px] bg-gradient-to-br from-white to-pink-50/20">
-              {renderTimeGrid()}
-              <div className={`relative ${isMobile ? 'h-[450px]' : 'h-[600px]'} p-3`}>
+            <div className="day-view-container flex bg-gradient-to-br from-white to-pink-50/20" dir="rtl">
+              {/* Hours column */}
+              <div className={`hours-column flex-shrink-0 bg-gradient-to-b from-pink-50/30 to-purple-50/30 border-l border-pink-100/50 ${isMobile ? 'w-16' : 'w-20'}`}>
+                {HOURS.map((hour) => (
+                  <div 
+                    key={hour}
+                    className={`hour-slot border-b border-pink-100/30 flex items-center justify-center font-medium text-gray-700 ${isMobile ? 'text-xs' : 'text-sm'}`}
+                    style={{ height: `${HOUR_HEIGHT}px` }}
+                  >
+                    {formatHour(hour)}
+                  </div>
+                ))}
+              </div>
+              
+              {/* Appointments area */}
+              <div className="appointments-area flex-1 relative overflow-hidden">
+                {/* Hour grid lines */}
                 {HOURS.map((hour, index) => (
                   <div 
-                    key={`hour-${hour}`}
-                    className="absolute border-r border-pink-100/50 h-full"
+                    key={`grid-${hour}`}
+                    className="absolute w-full border-b border-pink-100/30"
                     style={{ 
-                      left: `${(index / HOURS.length) * 100}%`,
-                      top: 0
+                      top: `${index * HOUR_HEIGHT}px`,
+                      height: `${HOUR_HEIGHT}px`
                     }}
                   />
                 ))}
                 
+                {/* Current time indicator */}
                 {isCurrentTimeVisible && (
                   <div 
                     className="absolute w-full h-0.5 bg-gradient-to-r from-red-400 to-pink-400 shadow-lg z-20 animate-pulse"
-                    style={{ left: `${currentTimePos}%`, top: '50%' }}
-                  />
+                    style={{ top: `${currentTimePos}px` }}
+                  >
+                    <div className="absolute right-0 top-0 w-3 h-3 bg-red-400 rounded-full transform -translate-y-1"></div>
+                  </div>
                 )}
                 
-                {processedAppointments.length === 0 ? (
-                  <div className={`flex justify-center items-center h-full text-gray-500 ${isMobile ? 'text-sm' : 'text-lg'}`}>
-                    <div className="text-center space-y-2">
-                      <div className="text-4xl">🌸</div>
-                      <div>אין פגישות להיום</div>
+                {/* Appointments */}
+                <div 
+                  className={`relative w-full ${isMobile ? 'px-2' : 'px-4'}`}
+                  style={{ height: `${HOURS.length * HOUR_HEIGHT}px` }}
+                >
+                  {processedAppointments.length === 0 ? (
+                    <div className={`flex justify-center items-center h-full text-gray-500 ${isMobile ? 'text-sm' : 'text-lg'}`}>
+                      <div className="text-center space-y-2">
+                        <div className="text-4xl">🌸</div>
+                        <div>אין פגישות להיום</div>
+                      </div>
                     </div>
-                  </div>
-                ) : (
-                  <div className="relative w-full h-full">
-                    {processedAppointments.map(appointment => renderAppointment(appointment, 100 / HOURS.length))}
-                  </div>
-                )}
+                  ) : (
+                    processedAppointments.map(appointment => renderDayViewAppointment(appointment))
+                  )}
+                </div>
               </div>
             </div>
           ) : view === 'week' ? (
