@@ -30,6 +30,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 
 const SocialMedia = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
+  
   const [connectedAccounts, setConnectedAccounts] = useState<ConnectedAccountsMap>({
     instagram: false,
     facebook: false,
@@ -427,26 +428,10 @@ const SocialMedia = () => {
         </TabsContent>
 
         <TabsContent value="ai-tools">
-          <UnifiedInbox 
-            messages={messages}
-            onMarkAsRead={handleMarkAsRead}
-            onReply={handleReply}
-          />
+          <AIMarketingTools />
         </TabsContent>
 
         <TabsContent value="campaigns">
-          <PostCreationPanel />
-        </TabsContent>
-
-        <TabsContent value="analytics">
-          <AnalyticsContent 
-            analyticsData={analyticsData}
-            marketingStats={marketingStats}
-            isLoading={isLoading}
-          />
-        </TabsContent>
-        
-        <TabsContent value="posts">
           <div className="flex flex-col items-center justify-center p-8 text-center space-y-4">
             <Target className="h-16 w-16 text-muted-foreground" />
             <h3 className="text-lg font-semibold">ניהול קמפיינים</h3>
@@ -459,9 +444,25 @@ const SocialMedia = () => {
             </Button>
           </div>
         </TabsContent>
+
+        <TabsContent value="analytics">
+          <AnalyticsContent 
+            analyticsData={analyticsData}
+            marketingStats={marketingStats}
+            isLoading={isLoading}
+          />
+        </TabsContent>
+        
+        <TabsContent value="posts">
+          <PostCreationPanel />
+        </TabsContent>
         
         <TabsContent value="inbox">
-          <AIMarketingTools />
+          <UnifiedInbox 
+            messages={messages}
+            onMarkAsRead={handleMarkAsRead}
+            onReply={handleReply}
+          />
         </TabsContent>
 
         <TabsContent value="dashboard">
