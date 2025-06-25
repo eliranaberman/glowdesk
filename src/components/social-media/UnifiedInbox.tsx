@@ -113,8 +113,103 @@ const UnifiedInbox = ({ messages, onMarkAsRead, onReply }: UnifiedInboxProps) =>
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      {/* Messages List */}
-      <div className="lg:col-span-1">
+      {/* Conversation Area - Left side (order-1) */}
+      <div className="lg:col-span-2 order-1">
+        {selectedMessage ? (
+          <Card>
+            <CardHeader className="border-b">
+              <div className="flex items-center gap-3">
+                {getPlatformIcon(selectedMessage.platform)}
+                <div>
+                  <h3 className="font-medium">
+                    {selectedMessage.sender_name || 'משתמש אנונימי'}
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    {selectedMessage.platform === 'facebook' ? 'פייסבוק מסנג\'ר' : 
+                     selectedMessage.platform === 'instagram' ? 'אינסטגרם ישיר' : 'טיקטוק'}
+                  </p>
+                </div>
+                {getStatusBadge(selectedMessage)}
+              </div>
+            </CardHeader>
+            
+            <CardContent className="p-6">
+              <div className="space-y-4">
+                {/* Original Message */}
+                <div className="bg-muted/50 p-4 rounded-lg">
+                  <div className="flex items-center gap-2 mb-2">
+                    <MessageCircle size={16} className="text-muted-foreground" />
+                    <span className="text-sm font-medium">הודעה נכנסת</span>
+                    <span className="text-xs text-muted-foreground">
+                      {new Date(selectedMessage.received_at).toLocaleString('he-IL')}
+                    </span>
+                  </div>
+                  <p className="text-sm">
+                    {selectedMessage.message_text || '[הודעת מדיה]'}
+                  </p>
+                </div>
+
+                {/* Previous Reply */}
+                {selectedMessage.reply_text && (
+                  <div className="bg-primary/5 p-4 rounded-lg border-r-4 border-primary">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Send size={16} className="text-primary" />
+                      <span className="text-sm font-medium">התגובה שלך</span>
+                      {selectedMessage.replied_at && (
+                        <span className="text-xs text-muted-foreground">
+                          {new Date(selectedMessage.replied_at).toLocaleString('he-IL')}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-sm">{selectedMessage.reply_text}</p>
+                  </div>
+                )}
+
+                {/* Reply Form */}
+                <div className="space-y-3">
+                  <h4 className="font-medium">שלח תגובה</h4>
+                  <Textarea
+                    placeholder="כתוב את התגובה שלך כאן..."
+                    value={replyText}
+                    onChange={(e) => setReplyText(e.target.value)}
+                    rows={3}
+                  />
+                  <div className="flex gap-2">
+                    <Button 
+                      onClick={handleSendReply}
+                      disabled={!replyText.trim() || sending}
+                      className="gap-2"
+                    >
+                      <Send size={16} />
+                      {sending ? 'שולח...' : 'שלח תגובה'}
+                    </Button>
+                    <Button 
+                      variant="outline"
+                      onClick={() => setReplyText("")}
+                      disabled={sending}
+                    >
+                      נקה
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ) : (
+          <Card>
+            <CardContent className="flex items-center justify-center h-96">
+              <div className="text-center text-muted-foreground">
+                <MessageCircle className="w-16 h-16 mx-auto mb-4 opacity-50" />
+                <h3 className="font-medium mb-2">בחר הודעה כדי להציג</h3>
+                <p className="text-sm">לחץ על הודעה מהרשימה כדי לקרוא ולהגיב</p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+      </div>
+
+      {/* Messages List - Right side (order-2) */}
+      <div className="lg:col-span-1 order-2">
         <Card>
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
@@ -213,101 +308,6 @@ const UnifiedInbox = ({ messages, onMarkAsRead, onReply }: UnifiedInboxProps) =>
             )}
           </CardContent>
         </Card>
-      </div>
-
-      {/* Message Detail & Reply */}
-      <div className="lg:col-span-2">
-        {selectedMessage ? (
-          <Card>
-            <CardHeader className="border-b">
-              <div className="flex items-center gap-3">
-                {getPlatformIcon(selectedMessage.platform)}
-                <div>
-                  <h3 className="font-medium">
-                    {selectedMessage.sender_name || 'משתמש אנונימי'}
-                  </h3>
-                  <p className="text-sm text-muted-foreground">
-                    {selectedMessage.platform === 'facebook' ? 'פייסבוק מסנג\'ר' : 
-                     selectedMessage.platform === 'instagram' ? 'אינסטגרם ישיר' : 'טיקטוק'}
-                  </p>
-                </div>
-                {getStatusBadge(selectedMessage)}
-              </div>
-            </CardHeader>
-            
-            <CardContent className="p-6">
-              <div className="space-y-4">
-                {/* Original Message */}
-                <div className="bg-muted/50 p-4 rounded-lg">
-                  <div className="flex items-center gap-2 mb-2">
-                    <MessageCircle size={16} className="text-muted-foreground" />
-                    <span className="text-sm font-medium">הודעה נכנסת</span>
-                    <span className="text-xs text-muted-foreground">
-                      {new Date(selectedMessage.received_at).toLocaleString('he-IL')}
-                    </span>
-                  </div>
-                  <p className="text-sm">
-                    {selectedMessage.message_text || '[הודעת מדיה]'}
-                  </p>
-                </div>
-
-                {/* Previous Reply */}
-                {selectedMessage.reply_text && (
-                  <div className="bg-primary/5 p-4 rounded-lg border-r-4 border-primary">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Send size={16} className="text-primary" />
-                      <span className="text-sm font-medium">התגובה שלך</span>
-                      {selectedMessage.replied_at && (
-                        <span className="text-xs text-muted-foreground">
-                          {new Date(selectedMessage.replied_at).toLocaleString('he-IL')}
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-sm">{selectedMessage.reply_text}</p>
-                  </div>
-                )}
-
-                {/* Reply Form */}
-                <div className="space-y-3">
-                  <h4 className="font-medium">שלח תגובה</h4>
-                  <Textarea
-                    placeholder="כתוב את התגובה שלך כאן..."
-                    value={replyText}
-                    onChange={(e) => setReplyText(e.target.value)}
-                    rows={3}
-                  />
-                  <div className="flex gap-2">
-                    <Button 
-                      onClick={handleSendReply}
-                      disabled={!replyText.trim() || sending}
-                      className="gap-2"
-                    >
-                      <Send size={16} />
-                      {sending ? 'שולח...' : 'שלח תגובה'}
-                    </Button>
-                    <Button 
-                      variant="outline"
-                      onClick={() => setReplyText("")}
-                      disabled={sending}
-                    >
-                      נקה
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ) : (
-          <Card>
-            <CardContent className="flex items-center justify-center h-96">
-              <div className="text-center text-muted-foreground">
-                <MessageCircle className="w-16 h-16 mx-auto mb-4 opacity-50" />
-                <h3 className="font-medium mb-2">בחר הודעה כדי להציג</h3>
-                <p className="text-sm">לחץ על הודעה מהרשימה כדי לקרוא ולהגיב</p>
-              </div>
-            </CardContent>
-          </Card>
-        )}
       </div>
     </div>
   );

@@ -13,8 +13,25 @@ const AIMarketingTools = () => {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-      {/* Input section - Right side for RTL */}
-      <div className="md:col-span-1 order-2 md:order-1">
+      {/* Content Suggestions - Left side for RTL */}
+      <div className="md:col-span-2 order-1 md:order-1">
+        <Card className="h-full shadow-soft hover:shadow-soft-lg transition-all duration-300 border-mutedPeach/30">
+          <CardHeader className="pb-3 border-b border-border/10">
+            <div className="flex items-center gap-2">
+              <MessageCircle className="text-oliveGreen h-5 w-5" />
+              <CardTitle className="text-xl font-display text-oliveGreen">הצעות לתוכן מותאם אישית</CardTitle>
+            </div>
+            <CardDescription className="mt-1">תוכן שיווקי מותאם אישית עבור העסק שלך</CardDescription>
+          </CardHeader>
+          <GeneratedContent 
+            content={generatedContent}
+            platform={platform}
+          />
+        </Card>
+      </div>
+
+      {/* Marketing Tools - Right side for RTL */}
+      <div className="md:col-span-1 order-2 md:order-2">
         <Card className="h-full shadow-soft hover:shadow-soft-lg transition-all duration-300 border-roseGold/30 bg-warmBeige/30">
           <CardHeader className="pb-3 border-b border-border/10">
             <div className="flex items-center gap-2">
@@ -30,23 +47,6 @@ const AIMarketingTools = () => {
               setIsGenerating={setIsGenerating}
             />
           </CardContent>
-        </Card>
-      </div>
-
-      {/* Output section - Left side for RTL view */}
-      <div className="md:col-span-2 order-1 md:order-2">
-        <Card className="h-full shadow-soft hover:shadow-soft-lg transition-all duration-300 border-mutedPeach/30">
-          <CardHeader className="pb-3 border-b border-border/10">
-            <div className="flex items-center gap-2">
-              <MessageCircle className="text-oliveGreen h-5 w-5" />
-              <CardTitle className="text-xl font-display text-oliveGreen">הצעות לתוכן מותאם אישית</CardTitle>
-            </div>
-            <CardDescription className="mt-1">תוכן שיווקי מותאם אישית עבור העסק שלך</CardDescription>
-          </CardHeader>
-          <GeneratedContent 
-            content={generatedContent}
-            platform={platform}
-          />
         </Card>
       </div>
       
