@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -123,13 +124,13 @@ export const TemplatesList = () => {
     <div className="space-y-4" dir="rtl">
       <Card>
         <CardContent className="p-4">
-          <div className="relative">
+          <div className="relative text-center">
             <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
             <Input
               placeholder="חיפוש תבניות..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-4 pr-10 w-full text-sm"
+              className="pl-4 pr-10 w-full text-sm text-center"
             />
           </div>
         </CardContent>
@@ -144,21 +145,23 @@ export const TemplatesList = () => {
           ) : filteredTemplates.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground text-sm">
               <p>לא נמצאו תבניות</p>
-              <Button 
-                variant="outline" 
-                className="mt-4 text-xs"
-                onClick={() => navigate('/marketing/templates/new')}
-              >
-                יצירת תבנית חדשה
-              </Button>
+              <div className="flex justify-start mt-4">
+                <Button 
+                  variant="outline" 
+                  className="text-xs"
+                  onClick={() => navigate('/marketing/templates/new')}
+                >
+                  יצירת תבנית חדשה
+                </Button>
+              </div>
             </div>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="text-right w-[200px] text-xs">שם התבנית</TableHead>
-                  <TableHead className="text-right text-xs">תוכן</TableHead>
-                  <TableHead className="text-right w-[120px] text-xs">תאריך עדכון</TableHead>
+                  <TableHead className="text-center w-[200px] text-xs">שם התבנית</TableHead>
+                  <TableHead className="text-center text-xs">תוכן</TableHead>
+                  <TableHead className="text-center w-[120px] text-xs">תאריך עדכון</TableHead>
                   <TableHead className="text-right w-[100px] text-xs">פעולות</TableHead>
                 </TableRow>
               </TableHeader>
@@ -169,11 +172,11 @@ export const TemplatesList = () => {
                     onClick={() => openPreview(template)}
                     className="cursor-pointer"
                   >
-                    <TableCell className="font-medium text-right text-xs">{template.title}</TableCell>
-                    <TableCell className="text-right text-xs truncate max-w-[300px]">
+                    <TableCell className="font-medium text-center text-xs">{template.title}</TableCell>
+                    <TableCell className="text-center text-xs truncate max-w-[300px]">
                       {template.content}
                     </TableCell>
-                    <TableCell className="text-right text-xs">
+                    <TableCell className="text-center text-xs">
                       {formatDate(template.updated_at)}
                     </TableCell>
                     <TableCell className="text-right">
@@ -235,9 +238,9 @@ export const TemplatesList = () => {
       <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
         <DialogContent className="text-sm" dir="rtl">
           <DialogHeader>
-            <DialogTitle className="text-right text-sm">{selectedTemplate?.title}</DialogTitle>
+            <DialogTitle className="text-center text-sm">{selectedTemplate?.title}</DialogTitle>
           </DialogHeader>
-          <div className="bg-accent/10 p-4 rounded-lg mt-4 text-right whitespace-pre-wrap text-xs">
+          <div className="bg-accent/10 p-4 rounded-lg mt-4 text-center whitespace-pre-wrap text-xs">
             {selectedTemplate?.content}
           </div>
           <div className="flex justify-start gap-2 mt-4">

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -87,7 +86,7 @@ const MarketingTemplates = () => {
       const created = await createTemplate({
         title: newTemplate.title,
         content: newTemplate.content,
-        created_by: 'current-user-id' // This would be replaced with the actual user ID from auth
+        created_by: 'current-user-id'
       });
       
       setTemplates([created, ...templates]);
@@ -200,13 +199,13 @@ const MarketingTemplates = () => {
           <ArrowLeft className="h-4 w-4" />
           חזרה לדשבורד שיווק
         </Button>
-        <h1 className="text-2xl font-bold">תבניות הודעות</h1>
+        <h1 className="text-2xl font-bold text-center">תבניות הודעות</h1>
         <div className="w-[100px]"></div>
       </div>
       
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center">
+          <CardTitle className="flex items-center justify-center text-center">
             <MessageSquare className="h-5 w-5 ml-2" />
             תבניות הודעות
           </CardTitle>
@@ -214,19 +213,19 @@ const MarketingTemplates = () => {
         <CardContent>
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="grid grid-cols-3 mb-6">
-              {editingTemplate && <TabsTrigger value="edit" className="text-right">עריכת תבנית</TabsTrigger>}
-              {!editingTemplate && <TabsTrigger value="create" className="text-right">יצירת תבנית חדשה</TabsTrigger>}
-              <TabsTrigger value="existing" className="text-right">תבניות קיימות</TabsTrigger>
+              {editingTemplate && <TabsTrigger value="edit" className="text-center">עריכת תבנית</TabsTrigger>}
+              {!editingTemplate && <TabsTrigger value="create" className="text-center">יצירת תבנית חדשה</TabsTrigger>}
+              <TabsTrigger value="existing" className="text-center">תבניות קיימות</TabsTrigger>
             </TabsList>
             
             <TabsContent value="existing" className="space-y-4">
-              <div className="relative mb-4">
+              <div className="relative mb-4 text-center">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                 <Input
                   placeholder="חיפוש תבניות..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pr-4 pl-10 w-full"
+                  className="pr-4 pl-10 w-full text-center"
                 />
               </div>
               
@@ -237,26 +236,21 @@ const MarketingTemplates = () => {
               ) : filteredTemplates.length === 0 ? (
                 <div className="text-center py-12 text-muted-foreground">
                   <p>לא נמצאו תבניות</p>
-                  <Button 
-                    variant="outline" 
-                    className="mt-4"
-                    onClick={() => setActiveTab('create')}
-                  >
-                    יצירת תבנית חדשה
-                  </Button>
+                  <div className="flex justify-start mt-4">
+                    <Button 
+                      variant="outline" 
+                      onClick={() => setActiveTab('create')}
+                    >
+                      יצירת תבנית חדשה
+                    </Button>
+                  </div>
                 </div>
               ) : (
                 <div className="space-y-4">
                   {filteredTemplates.map((template) => (
                     <div key={template.id} className="border rounded-xl p-4 bg-card hover:bg-accent/10">
                       <div className="flex justify-between mb-2">
-                        <h3 className="font-medium flex items-center">
-                          {template.title}
-                          <span className="text-xs text-muted-foreground mr-2">
-                            (עודכן: {formatDate(template.updated_at)})
-                          </span>
-                        </h3>
-                        <div className="flex gap-2">
+                        <div className="flex justify-start gap-2">
                           <Button 
                             variant="ghost" 
                             size="icon" 
@@ -282,9 +276,15 @@ const MarketingTemplates = () => {
                             <Trash className="h-4 w-4" />
                           </Button>
                         </div>
+                        <h3 className="font-medium flex items-center text-center">
+                          {template.title}
+                          <span className="text-xs text-muted-foreground mr-2">
+                            (עודכן: {formatDate(template.updated_at)})
+                          </span>
+                        </h3>
                       </div>
-                      <p className="text-sm my-3 border-y py-3 whitespace-pre-wrap">{template.content}</p>
-                      <div className="flex justify-end">
+                      <p className="text-sm my-3 border-y py-3 whitespace-pre-wrap text-center">{template.content}</p>
+                      <div className="flex justify-start">
                         <Button 
                           variant="soft" 
                           size="sm" 
@@ -303,7 +303,7 @@ const MarketingTemplates = () => {
             
             <TabsContent value="create" className="space-y-4">
               <div className="space-y-4">
-                <div>
+                <div className="text-center">
                   <label htmlFor="template-name" className="block text-sm font-medium mb-1">
                     שם התבנית
                   </label>
@@ -312,14 +312,15 @@ const MarketingTemplates = () => {
                     placeholder="לדוגמה: תזכורת לתור, הצעה מיוחדת" 
                     value={newTemplate.title}
                     onChange={(e) => setNewTemplate({...newTemplate, title: e.target.value})}
+                    className="text-center"
                   />
                 </div>
                 
-                <div>
+                <div className="text-center">
                   <label htmlFor="template-content" className="block text-sm font-medium mb-1">
                     תוכן ההודעה
                   </label>
-                  <p className="text-xs text-muted-foreground mb-2">
+                  <p className="text-xs text-muted-foreground mb-2 text-center">
                     השתמשי במשתנים דינמיים כמו {"{שם}"} או {"{טיפול}"} שיוחלפו אוטומטית בערכים אמיתיים
                   </p>
                   <Textarea 
@@ -328,10 +329,11 @@ const MarketingTemplates = () => {
                     rows={6}
                     value={newTemplate.content}
                     onChange={(e) => setNewTemplate({...newTemplate, content: e.target.value})}
+                    className="text-center"
                   />
                 </div>
                 
-                <div className="flex justify-end pt-4">
+                <div className="flex justify-start pt-4">
                   <Button 
                     variant="outline" 
                     className="ml-2"
@@ -353,7 +355,7 @@ const MarketingTemplates = () => {
             {editingTemplate && (
               <TabsContent value="edit" className="space-y-4">
                 <div className="space-y-4">
-                  <div>
+                  <div className="text-center">
                     <label htmlFor="edit-template-name" className="block text-sm font-medium mb-1">
                       שם התבנית
                     </label>
@@ -361,25 +363,27 @@ const MarketingTemplates = () => {
                       id="edit-template-name" 
                       value={editingTemplate.title}
                       onChange={(e) => setEditingTemplate({...editingTemplate, title: e.target.value})}
+                      className="text-center"
                     />
                   </div>
                   
-                  <div>
+                  <div className="text-center">
                     <label htmlFor="edit-template-content" className="block text-sm font-medium mb-1">
                       תוכן ההודעה
                     </label>
-                    <p className="text-xs text-muted-foreground mb-2">
-                      השתמשי במשתנים דינמיים כמו {"{שם}"} או {"{טיפול}"} שיוחלפו אוטומטית בערכים אמיתיים
+                    <p className="text-xs text-muted-foreground mb-2 text-center">
+                      השתמשי במשתנים דינמיים כמו {"{שם}"} או {"{טיפול}"} שיוחלפו אוטומatically בערכים אמיתיים
                     </p>
                     <Textarea 
                       id="edit-template-content" 
                       rows={6}
                       value={editingTemplate.content}
                       onChange={(e) => setEditingTemplate({...editingTemplate, content: e.target.value})}
+                      className="text-center"
                     />
                   </div>
                   
-                  <div className="flex justify-end pt-4">
+                  <div className="flex justify-start pt-4">
                     <Button 
                       variant="outline" 
                       className="ml-2"
