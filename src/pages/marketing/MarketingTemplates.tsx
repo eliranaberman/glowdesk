@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -212,7 +213,7 @@ const MarketingTemplates = () => {
         </CardHeader>
         <CardContent>
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid grid-cols-3 mb-6">
+            <TabsList className={`grid ${editingTemplate ? 'grid-cols-2' : 'grid-cols-2'} mb-6`}>
               {editingTemplate && <TabsTrigger value="edit" className="text-center">עריכת תבנית</TabsTrigger>}
               {!editingTemplate && <TabsTrigger value="create" className="text-center">יצירת תבנית חדשה</TabsTrigger>}
               <TabsTrigger value="existing" className="text-center">תבניות קיימות</TabsTrigger>
@@ -249,7 +250,7 @@ const MarketingTemplates = () => {
                 <div className="space-y-4">
                   {filteredTemplates.map((template) => (
                     <div key={template.id} className="border rounded-xl p-4 bg-card hover:bg-accent/10">
-                      <div className="flex justify-between mb-2">
+                      <div className="grid grid-cols-3 items-center mb-2">
                         <div className="flex justify-start gap-2">
                           <Button 
                             variant="ghost" 
@@ -276,12 +277,14 @@ const MarketingTemplates = () => {
                             <Trash className="h-4 w-4" />
                           </Button>
                         </div>
-                        <h3 className="font-medium flex items-center text-center">
+                        <h3 className="font-medium text-center">
                           {template.title}
-                          <span className="text-xs text-muted-foreground mr-2">
+                        </h3>
+                        <div className="flex justify-end">
+                          <span className="text-xs text-muted-foreground">
                             (עודכן: {formatDate(template.updated_at)})
                           </span>
-                        </h3>
+                        </div>
                       </div>
                       <p className="text-sm my-3 border-y py-3 whitespace-pre-wrap text-center">{template.content}</p>
                       <div className="flex justify-start">
