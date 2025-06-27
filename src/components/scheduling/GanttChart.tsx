@@ -337,8 +337,8 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
               className={cn(
                 "rounded-none border-0 transition-all duration-300 font-medium",
                 view === 'day' 
-                  ? 'bg-gradient-to-r from-pink-400 to-purple-400 text-white shadow-md hover:from-pink-500 hover:to-purple-500' 
-                  : 'text-gray-600 hover:bg-pink-50/50 hover:text-pink-600',
+                  ? 'bg-gradient-to-r from-roseGold to-mutedPeach text-white shadow-md hover:from-softRose hover:to-roseGold' 
+                  : 'text-gray-600 hover:bg-warmBeige/50 hover:text-oliveGreen',
                 isMobile && 'px-3 text-xs h-9'
               )}
               onClick={() => setView('day')}
@@ -351,8 +351,8 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
               className={cn(
                 "rounded-none border-0 transition-all duration-300 font-medium",
                 view === 'week' 
-                  ? 'bg-gradient-to-r from-pink-400 to-purple-400 text-white shadow-md hover:from-pink-500 hover:to-purple-500' 
-                  : 'text-gray-600 hover:bg-pink-50/50 hover:text-pink-600',
+                  ? 'bg-gradient-to-r from-roseGold to-mutedPeach text-white shadow-md hover:from-softRose hover:to-roseGold' 
+                  : 'text-gray-600 hover:bg-warmBeige/50 hover:text-oliveGreen',
                 isMobile && 'px-3 text-xs h-9'
               )}
               onClick={() => setView('week')}
@@ -365,8 +365,8 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
               className={cn(
                 "rounded-none border-0 transition-all duration-300 font-medium",
                 view === 'month' 
-                  ? 'bg-gradient-to-r from-pink-400 to-purple-400 text-white shadow-md hover:from-pink-500 hover:to-purple-500' 
-                  : 'text-gray-600 hover:bg-pink-50/50 hover:text-pink-600',
+                  ? 'bg-gradient-to-r from-roseGold to-mutedPeach text-white shadow-md hover:from-softRose hover:to-roseGold' 
+                  : 'text-gray-600 hover:bg-warmBeige/50 hover:text-oliveGreen',
                 isMobile && 'px-3 text-xs h-9'
               )}
               onClick={() => setView('month')}
