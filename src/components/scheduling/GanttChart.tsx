@@ -507,8 +507,8 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
                         className={cn(
                           "text-center mb-2 rounded-full flex items-center justify-center mx-auto cursor-pointer transition-all duration-300 hover:scale-110 font-medium",
                           isToday 
-                            ? "bg-gradient-to-r from-pink-400 to-purple-400 text-white shadow-lg" 
-                            : "hover:bg-pink-100",
+                            ? "bg-gradient-to-r from-roseGold to-mutedPeach text-white shadow-lg" 
+                            : "hover:bg-warmBeige/50",
                           isMobile ? "w-6 h-6 text-xs" : "w-8 h-8 text-sm"
                         )}
                         onClick={() => {
@@ -612,8 +612,8 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
                       <div className={cn(
                         "text-right font-medium rounded-full float-right mb-1 flex items-center justify-center transition-all duration-300 hover:scale-110",
                         isToday 
-                          ? "bg-gradient-to-r from-pink-400 to-purple-400 text-white shadow-lg" 
-                          : "hover:bg-pink-100",
+                          ? "bg-gradient-to-r from-roseGold to-mutedPeach text-white shadow-lg" 
+                          : "hover:bg-warmBeige/50",
                         isMobile ? "w-5 h-5 text-xs" : "w-7 h-7 text-sm"
                       )}>
                         {dayDate.getDate()}
