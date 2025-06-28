@@ -209,7 +209,8 @@ const SocialMedia = () => {
   };
 
   const handleOpenInbox = () => {
-    setActiveTab("ai-tools");
+    setActiveTab("inbox");
+    window.scrollTo(0, 0);
   };
 
   const handleMarkAsRead = async (messageId: string) => {
