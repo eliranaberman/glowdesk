@@ -105,8 +105,23 @@ const ClientsPage = () => {
           className="min-h-[400px]"
         >
           <ClientsTableView
-            data={filteredClients}
-            onDelete={handleDeleteClient}
+            filters={{
+              search,
+              status,
+              sortBy,
+              sortOrder,
+              treatmentType: null,
+              dateFrom: null,
+              dateTo: null
+            }}
+            onError={(error: string) => {
+              setError(error);
+              toast({
+                title: "Error",
+                description: error,
+                variant: "destructive",
+              });
+            }}
           />
         </MobileResponsiveTable>
       </div>

@@ -58,9 +58,9 @@ const ClientsTableMobile = ({ clients, onDeleteClient }: ClientsTableMobileProps
                   <Badge className={`text-xs px-2 py-1 ${getStatusColor(client.status || 'active')}`}>
                     {getStatusText(client.status || 'active')}
                   </Badge>
-                  {(client.phone_number || client.phone) && (
+                  {client.phone_number && (
                     <a 
-                      href={`tel:${client.phone_number || client.phone}`}
+                      href={`tel:${client.phone_number}`}
                       className="text-blue-600 hover:text-blue-800 p-1"
                       aria-label="התקשר"
                     >
@@ -108,10 +108,10 @@ const ClientsTableMobile = ({ clients, onDeleteClient }: ClientsTableMobileProps
 
             {/* Contact Info */}
             <div className="text-sm text-gray-600 space-y-1">
-              {(client.phone_number || client.phone) && (
+              {client.phone_number && (
                 <div className="flex items-center gap-2 text-right">
                   <Phone className="h-4 w-4 flex-shrink-0" />
-                  <span className="truncate">{client.phone_number || client.phone}</span>
+                  <span className="truncate">{client.phone_number}</span>
                 </div>
               )}
               {client.email && (
