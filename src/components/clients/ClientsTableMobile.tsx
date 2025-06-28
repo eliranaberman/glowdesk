@@ -25,7 +25,7 @@ const ClientsTableMobile = ({ clients, onDeleteClient }: ClientsTableMobileProps
     switch (status) {
       case 'active': return 'bg-green-100 text-green-800 border-green-200';
       case 'inactive': return 'bg-gray-100 text-gray-800 border-gray-200';
-      case 'pending': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'lead': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
       default: return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   };
@@ -34,7 +34,7 @@ const ClientsTableMobile = ({ clients, onDeleteClient }: ClientsTableMobileProps
     switch (status) {
       case 'active': return 'פעיל';
       case 'inactive': return 'לא פעיל';
-      case 'pending': return 'ממתין';
+      case 'lead': return 'ליד';
       default: return status;
     }
   };
@@ -52,15 +52,15 @@ const ClientsTableMobile = ({ clients, onDeleteClient }: ClientsTableMobileProps
             <div className="flex items-center justify-between mb-3">
               <div className="flex-1 min-w-0">
                 <h3 className="font-semibold text-base text-right truncate">
-                  {client.first_name} {client.last_name}
+                  {client.full_name}
                 </h3>
                 <div className="flex items-center gap-2 mt-1">
                   <Badge className={`text-xs px-2 py-1 ${getStatusColor(client.status || 'active')}`}>
                     {getStatusText(client.status || 'active')}
                   </Badge>
-                  {client.phone && (
+                  {(client.phone_number || client.phone) && (
                     <a 
-                      href={`tel:${client.phone}`}
+                      href={`tel:${client.phone_number || client.phone}`}
                       className="text-blue-600 hover:text-blue-800 p-1"
                       aria-label="התקשר"
                     >
@@ -108,10 +108,10 @@ const ClientsTableMobile = ({ clients, onDeleteClient }: ClientsTableMobileProps
 
             {/* Contact Info */}
             <div className="text-sm text-gray-600 space-y-1">
-              {client.phone && (
+              {(client.phone_number || client.phone) && (
                 <div className="flex items-center gap-2 text-right">
                   <Phone className="h-4 w-4 flex-shrink-0" />
-                  <span className="truncate">{client.phone}</span>
+                  <span className="truncate">{client.phone_number || client.phone}</span>
                 </div>
               )}
               {client.email && (

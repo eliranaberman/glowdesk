@@ -1,9 +1,10 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { UserPlus } from 'lucide-react';
 import { Client } from '@/types/clients';
-import { getAllClients, deleteClient } from '@/services/clientsService';
+import { getClients, deleteClient } from '@/services/clientService';
 import ClientsTableView from '@/components/clients/ClientsTableView';
 import ClientsFilter from '@/components/clients/ClientsFilter';
 import { useToast } from "@/hooks/use-toast";
@@ -16,15 +17,17 @@ const ClientsPage = () => {
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('');
+  const [search, setSearch] = useState('');
+  const [status, setStatus] = useState<string | null>(null);
+  const [sortBy, setSortBy] = useState('registration_date');
+  const [sortOrder, setSortOrder] = useState('desc');
   const { toast } = useToast();
 
   const fetchData = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const data = await getAllClients();
+      const { clients: data } = await getClients(search, status || undefined, sortBy, sortOrder);
       setClients(data);
     } catch (err: any) {
       setError(err.message || 'Failed to fetch clients');
@@ -36,7 +39,7 @@ const ClientsPage = () => {
     } finally {
       setLoading(false);
     }
-  }, [toast]);
+  }, [search, status, sortBy, sortOrder, toast]);
 
   useEffect(() => {
     fetchData();
@@ -61,15 +64,18 @@ const ClientsPage = () => {
   };
 
   const filteredClients = clients.filter(client => {
-    const searchRegex = new RegExp(searchTerm, 'i');
-    const nameMatch = searchRegex.test(client.first_name + ' ' + client.last_name);
-    const statusMatch = statusFilter ? client.status === statusFilter : true;
+    const searchRegex = new RegExp(search, 'i');
+    const nameMatch = searchRegex.test(client.full_name);
+    const statusMatch = status ? client.status === status : true;
 
     return nameMatch && statusMatch;
   });
 
-  const handleFilterClick = (status: string) => {
-    setStatusFilter(status);
+  const handleFilterChange = (searchTerm: string, statusFilter: string | null, sortByField: string, sortOrderField: string) => {
+    setSearch(searchTerm);
+    setStatus(statusFilter);
+    setSortBy(sortByField);
+    setSortOrder(sortOrderField);
   };
 
   return (
@@ -86,11 +92,7 @@ const ClientsPage = () => {
 
       <div className="space-y-4">
         <ClientsFilter
-          searchTerm={searchTerm}
-          onSearchChange={setSearchTerm}
-          statusFilter={statusFilter}
-          onStatusFilterChange={setStatusFilter}
-          onFilterClick={handleFilterClick}
+          onFilterChange={handleFilterChange}
         />
 
         <MobileResponsiveTable
@@ -103,8 +105,8 @@ const ClientsPage = () => {
           className="min-h-[400px]"
         >
           <ClientsTableView
-            clients={filteredClients}
-            onDeleteClient={handleDeleteClient}
+            data={filteredClients}
+            onDelete={handleDeleteClient}
           />
         </MobileResponsiveTable>
       </div>

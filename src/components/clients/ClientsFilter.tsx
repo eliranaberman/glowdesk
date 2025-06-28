@@ -21,7 +21,7 @@ import { cn } from '@/lib/utils';
 
 interface ClientsFilterProps {
   onFilterChange: (search: string, status: string | null, sortBy: string, sortOrder: string) => void;
-  className?: string; // Added className prop
+  className?: string;
 }
 
 const ClientsFilter = ({ onFilterChange, className }: ClientsFilterProps) => {
