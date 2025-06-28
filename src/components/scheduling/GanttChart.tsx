@@ -335,11 +335,11 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
               variant={view === 'day' ? 'default' : 'ghost'}
               size={isMobile ? "sm" : "sm"}
               className={cn(
-                "rounded-none border-0 transition-all duration-300 font-medium",
+                "rounded-none border-0 transition-all duration-300 font-medium min-h-[44px]",
                 view === 'day' 
                   ? 'bg-gradient-to-r from-roseGold to-mutedPeach text-white shadow-md hover:from-softRose hover:to-roseGold' 
                   : 'text-gray-600 hover:bg-warmBeige/50 hover:text-oliveGreen',
-                isMobile && 'px-3 text-xs h-9'
+                isMobile && 'px-3 text-xs'
               )}
               onClick={() => setView('day')}
             >
@@ -349,11 +349,11 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
               variant={view === 'week' ? 'default' : 'ghost'}
               size={isMobile ? "sm" : "sm"}
               className={cn(
-                "rounded-none border-0 transition-all duration-300 font-medium",
+                "rounded-none border-0 transition-all duration-300 font-medium min-h-[44px]",
                 view === 'week' 
                   ? 'bg-gradient-to-r from-roseGold to-mutedPeach text-white shadow-md hover:from-softRose hover:to-roseGold' 
                   : 'text-gray-600 hover:bg-warmBeige/50 hover:text-oliveGreen',
-                isMobile && 'px-3 text-xs h-9'
+                isMobile && 'px-3 text-xs'
               )}
               onClick={() => setView('week')}
             >
@@ -363,11 +363,11 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
               variant={view === 'month' ? 'default' : 'ghost'}
               size={isMobile ? "sm" : "sm"}
               className={cn(
-                "rounded-none border-0 transition-all duration-300 font-medium",
+                "rounded-none border-0 transition-all duration-300 font-medium min-h-[44px]",
                 view === 'month' 
                   ? 'bg-gradient-to-r from-roseGold to-mutedPeach text-white shadow-md hover:from-softRose hover:to-roseGold' 
                   : 'text-gray-600 hover:bg-warmBeige/50 hover:text-oliveGreen',
-                isMobile && 'px-3 text-xs h-9'
+                isMobile && 'px-3 text-xs'
               )}
               onClick={() => setView('month')}
             >
@@ -380,43 +380,43 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
         <div className={`flex items-center justify-between border-b bg-gradient-to-r from-pink-50/30 to-purple-50/30 backdrop-blur-sm ${isMobile ? 'p-3' : 'p-5'}`} dir="rtl">
           <div className="flex items-center gap-3">
             <Button variant="outline" size="icon" onClick={prevPeriod} className={cn(
-              "border-0 shadow-md bg-white/80 backdrop-blur-sm hover:bg-pink-50 hover:scale-105 transition-all duration-300",
-              isMobile ? "h-8 w-8" : "h-9 w-9"
+              "border-0 shadow-md bg-white/80 backdrop-blur-sm hover:bg-pink-50 hover:scale-105 transition-all duration-300 min-h-[44px] min-w-[44px]",
+              isMobile ? "h-10 w-10" : "h-9 w-9"
             )}>
-              <ChevronRight className={isMobile ? "h-3 w-3" : "h-4 w-4"} />
+              <ChevronRight className={isMobile ? "h-4 w-4" : "h-4 w-4"} />
             </Button>
             
             <Popover>
               <PopoverTrigger asChild>
                 <Button variant="outline" className={cn(
-                  "flex items-center gap-2 border-0 shadow-md bg-white/80 backdrop-blur-sm hover:bg-pink-50 hover:scale-105 transition-all duration-300",
-                  isMobile ? 'px-2 py-1.5 h-8 text-xs' : 'px-4 py-2'
+                  "flex items-center gap-2 border-0 shadow-md bg-white/80 backdrop-blur-sm hover:bg-pink-50 hover:scale-105 transition-all duration-300 min-h-[44px]",
+                  isMobile ? 'px-3 py-2 text-xs' : 'px-4 py-2'
                 )}>
-                  <CalendarIcon className={isMobile ? "h-3 w-3" : "h-4 w-4"} />
+                  <CalendarIcon className={isMobile ? "h-4 w-4" : "h-4 w-4"} />
                   <span className={`font-medium ${isMobile ? 'text-xs' : 'text-sm'}`}>{getViewTitle()}</span>
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0 border-0 shadow-xl" align="center">
+              <PopoverContent className="w-auto p-0 border-0 shadow-xl bg-white z-50" align="center">
                 <Calendar
                   mode="single"
                   selected={date}
                   onSelect={(newDate) => newDate && onDateChange(newDate)}
-                  className="pointer-events-auto bg-white/95 backdrop-blur-md rounded-xl"
+                  className="pointer-events-auto bg-white rounded-xl"
                 />
               </PopoverContent>
             </Popover>
             
             <Button variant="outline" size="icon" onClick={nextPeriod} className={cn(
-              "border-0 shadow-md bg-white/80 backdrop-blur-sm hover:bg-pink-50 hover:scale-105 transition-all duration-300",
-              isMobile ? "h-8 w-8" : "h-9 w-9"
+              "border-0 shadow-md bg-white/80 backdrop-blur-sm hover:bg-pink-50 hover:scale-105 transition-all duration-300 min-h-[44px] min-w-[44px]",
+              isMobile ? "h-10 w-10" : "h-9 w-9"
             )}>
-              <ChevronLeft className={isMobile ? "h-3 w-3" : "h-4 w-4"} />
+              <ChevronLeft className={isMobile ? "h-4 w-4" : "h-4 w-4"} />
             </Button>
           </div>
           
           <Button variant="outline" size={isMobile ? "sm" : "sm"} onClick={goToToday} className={cn(
-            "border-0 shadow-md bg-white/80 backdrop-blur-sm hover:bg-pink-50 hover:scale-105 transition-all duration-300 font-medium",
-            isMobile ? 'text-[10px] px-3 h-8' : 'text-sm px-4'
+            "border-0 shadow-md bg-white/80 backdrop-blur-sm hover:bg-pink-50 hover:scale-105 transition-all duration-300 font-medium min-h-[44px]",
+            isMobile ? 'text-xs px-3' : 'text-sm px-4'
           )}>
             🏠 היום
           </Button>
@@ -484,13 +484,13 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
             <div className="week-view bg-gradient-to-br from-white to-pink-50/10">
               <div className="grid grid-cols-7 bg-gradient-to-r from-pink-50/30 to-purple-50/30 border-b">
                 {DAYS_OF_WEEK.map((day, index) => (
-                  <div key={day} className={`text-center py-3 font-medium border-l last:border-l-0 text-gray-700 ${isMobile ? 'text-[10px]' : 'text-sm'}`}>
-                    {isMobile ? day.substring(0, 4) : day}
+                  <div key={day} className={`text-center py-3 font-medium border-l last:border-l-0 text-gray-700 ${isMobile ? 'text-xs px-1' : 'text-sm'}`}>
+                    {isMobile ? day.substring(0, 3) : day}
                   </div>
                 ))}
               </div>
 
-              <div className={`grid grid-cols-7 ${isMobile ? 'h-[450px]' : 'h-[600px]'} overflow-y-auto`}>
+              <div className={`grid grid-cols-7 overflow-y-auto ${isMobile ? 'max-h-[70vh]' : 'max-h-[600px]'}`}>
                 {weeklyAppointmentsByDay.map(({ date: dayDate, appointments: dayAppointments }) => {
                   const isToday = isSameDay(dayDate, new Date());
                   
@@ -500,7 +500,7 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
                       className={cn(
                         "min-h-full border-l last:border-l-0 transition-all duration-300",
                         isToday && "bg-gradient-to-b from-pink-50/50 to-purple-50/30",
-                        isMobile ? "p-1.5" : "p-3"
+                        isMobile ? "p-1 min-h-[200px]" : "p-3 min-h-[300px]"
                       )}
                     >
                       <div 
@@ -528,7 +528,7 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
                           dayAppointments.map(appointment => (
                             <div
                               key={appointment.id}
-                              className={`rounded-xl border-0 shadow-md hover:shadow-lg hover:scale-105 cursor-pointer text-right bg-white/90 backdrop-blur-sm animate-fade-in transition-all duration-300 ${isMobile ? 'p-1.5 mb-1' : 'p-2.5'}`}
+                              className={`rounded-xl border-0 shadow-md hover:shadow-lg hover:scale-105 cursor-pointer text-right bg-white/90 backdrop-blur-sm animate-fade-in transition-all duration-300 ${isMobile ? 'p-1.5 mb-1' : 'p-3'}`}
                               style={{
                                 backgroundColor: appointment.color || '#FEF7CD',
                               }}
@@ -560,13 +560,13 @@ const GanttChart = ({ appointments, date, onDateChange }: GanttChartProps) => {
             <div className="month-view bg-gradient-to-br from-white to-pink-50/10">
               <div className="grid grid-cols-7 bg-gradient-to-r from-pink-50/30 to-purple-50/30 border-b">
                 {DAYS_OF_WEEK.map((day) => (
-                  <div key={day} className={`text-center py-3 font-medium text-gray-700 ${isMobile ? 'text-[10px]' : 'text-sm'}`}>
-                    {isMobile ? day.substring(0, 4) : day}
+                  <div key={day} className={`text-center py-3 font-medium text-gray-700 ${isMobile ? 'text-xs px-1' : 'text-sm'}`}>
+                    {isMobile ? day.substring(0, 3) : day}
                   </div>
                 ))}
               </div>
               
-              <div className="grid grid-cols-7 auto-rows-fr">
+              <div className={`grid grid-cols-7 auto-rows-fr ${isMobile ? 'max-h-[70vh] overflow-y-auto' : ''}`}>
                 {(() => {
                   const firstDay = startOfMonth(date).getDay();
                   const prevMonthDays = [];

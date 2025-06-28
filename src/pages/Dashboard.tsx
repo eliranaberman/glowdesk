@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, Suspense } from 'react';
 import { CalendarClock, Users, DollarSign, TrendingUp, Plus, Calendar, UserPlus, CreditCard, Package } from 'lucide-react';
 import StatCard from '../components/dashboard/StatCard';
@@ -8,7 +9,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { usePermissions } from '@/hooks/use-permissions';
 import PermissionGuard from '@/components/auth/PermissionGuard';
 import BusinessAnalytics from '@/components/dashboard/BusinessAnalytics';
-import LazyComponent from '@/components/dashboard/LazyComponent';
+import LazySection from '@/components/performance/LazySection';
 import { StatsSkeleton, ChartSkeleton, GridSkeleton } from '@/components/dashboard/DashboardSkeleton';
 
 // Lazy load heavy components
@@ -173,7 +174,7 @@ const Dashboard = () => {
 
   if (isInitialLoading) {
     return (
-      <div className="max-w-7xl mx-auto space-y-8 animate-fade-in" dir="rtl">
+      <div className="max-w-7xl mx-auto space-y-8 animate-fade-in p-4" dir="rtl">
         <StatsSkeleton />
         <GridSkeleton />
       </div>
@@ -181,9 +182,9 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8 animate-fade-in" dir="rtl">
+    <div className="max-w-7xl mx-auto space-y-6 sm:space-y-8 animate-fade-in p-4" dir="rtl">
       {/* Critical Stats - Load Immediately */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         {stats.map((stat) => (
           <div key={stat.title} className="h-full">
             <StatCard
@@ -193,7 +194,7 @@ const Dashboard = () => {
               change={stat.change}
               onClick={stat.onClick}
               description={stat.description}
-              className="h-full"
+              className="h-full min-h-[120px]"
             />
           </div>
         ))}
@@ -202,16 +203,16 @@ const Dashboard = () => {
       {/* Business Analytics - Lazy Load */}
       {hasFinanceAccess && (
         <PermissionGuard requiredResource="finances" requiredPermission="read" showLoadingState={false}>
-          <LazyComponent fallback={<ChartSkeleton />}>
+          <LazySection fallback={<ChartSkeleton />} minHeight="300px">
             <BusinessAnalytics timeFrame="month" />
-          </LazyComponent>
+          </LazySection>
         </PermissionGuard>
       )}
 
       {/* Main Content Grid - Lazy Load */}
-      <LazyComponent fallback={<GridSkeleton />}>
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
-          <div className="space-y-8">
+      <LazySection fallback={<GridSkeleton />} minHeight="400px">
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 sm:gap-8">
+          <div className="space-y-6 sm:space-y-8">
             <Suspense fallback={<ChartSkeleton />}>
               <DailySummary 
                 customers={dailyData.customers}
@@ -225,7 +226,7 @@ const Dashboard = () => {
             </Suspense>
           </div>
           
-          <div className="space-y-8">
+          <div className="space-y-6 sm:space-y-8">
             <Suspense fallback={<ChartSkeleton />}>
               <BusinessInsights />
             </Suspense>
@@ -234,11 +235,11 @@ const Dashboard = () => {
             </Suspense>
           </div>
         </div>
-      </LazyComponent>
+      </LazySection>
       
       {/* Marketing & Loyalty Section - Lazy Load */}
-      <LazyComponent fallback={<GridSkeleton />}>
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+      <LazySection fallback={<GridSkeleton />} minHeight="300px">
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 sm:gap-8">
           <Suspense fallback={<ChartSkeleton />}>
             <MarketingMessages />
           </Suspense>
@@ -246,17 +247,17 @@ const Dashboard = () => {
             <LoyaltyProgram />
           </Suspense>
         </div>
-      </LazyComponent>
+      </LazySection>
       
       {/* Inactive Clients Alert - Lazy Load */}
-      <LazyComponent fallback={<ChartSkeleton />}>
+      <LazySection fallback={<ChartSkeleton />} minHeight="200px">
         <Suspense fallback={<ChartSkeleton />}>
           <InactiveClientsAlert />
         </Suspense>
-      </LazyComponent>
+      </LazySection>
       
       {/* Analytics Charts - Lazy Load */}
-      <LazyComponent fallback={<ChartSkeleton />}>
+      <LazySection fallback={<ChartSkeleton />} minHeight="400px">
         <Suspense fallback={<ChartSkeleton />}>
           <AnalyticsCharts 
             monthlyData={monthlyData}
@@ -265,27 +266,27 @@ const Dashboard = () => {
             bookingsData={bookingsData}
           />
         </Suspense>
-      </LazyComponent>
+      </LazySection>
       
       {/* Quick Actions - Load Immediately (Lightweight) */}
-      <div className="border rounded-xl p-6 shadow-soft hover:shadow-soft-lg transition-all duration-300 bg-gradient-to-br from-warmBeige/20 to-softRose/10">
-        <h2 className="text-xl font-display font-medium mb-6 flex items-center justify-center">
+      <div className="border rounded-xl p-4 sm:p-6 shadow-soft hover:shadow-soft-lg transition-all duration-300 bg-gradient-to-br from-warmBeige/20 to-softRose/10">
+        <h2 className="text-lg sm:text-xl font-display font-medium mb-4 sm:mb-6 flex items-center justify-center">
           <span className="bg-gradient-to-r from-softRose to-roseGold w-1 h-6 rounded ml-3"></span>
           פעולות מהירות
         </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           {quickActions.map((action) => (
             <Link key={action.title} to={action.to} className="block group h-full">
-              <div className="bg-card hover:bg-gradient-to-br hover:from-warmBeige/30 hover:to-softRose/20 p-6 rounded-xl cursor-pointer transition-all duration-500 shadow-soft hover:shadow-elevated flex flex-col transform hover:-translate-y-2 border border-transparent hover:border-softRose/20 relative overflow-hidden h-full">
+              <div className="bg-card hover:bg-gradient-to-br hover:from-warmBeige/30 hover:to-softRose/20 p-4 sm:p-6 rounded-xl cursor-pointer transition-all duration-500 shadow-soft hover:shadow-elevated flex flex-col transform hover:-translate-y-2 border border-transparent hover:border-softRose/20 relative overflow-hidden h-full min-h-[120px]">
                 <div className="flex items-center justify-center gap-3 mb-3">
-                  <div className="p-2 rounded-full bg-gradient-to-br from-softRose/20 to-roseGold/20 group-hover:from-softRose/30 group-hover:to-roseGold/30 transition-all duration-300 group-hover:scale-110 flex items-center justify-center">
+                  <div className="p-2 rounded-full bg-gradient-to-br from-softRose/20 to-roseGold/20 group-hover:from-softRose/30 group-hover:to-roseGold/30 transition-all duration-300 group-hover:scale-110 flex items-center justify-center min-h-[44px] min-w-[44px]">
                     {action.icon}
                   </div>
-                  <h3 className="font-medium text-primary group-hover:text-deepNavy transition-colors duration-300 text-center">
+                  <h3 className="font-medium text-primary group-hover:text-deepNavy transition-colors duration-300 text-center text-sm sm:text-base">
                     {action.title}
                   </h3>
                 </div>
-                <p className="text-sm text-muted-foreground group-hover:text-deepNavy/70 transition-colors duration-300 flex-1 text-center">
+                <p className="text-xs sm:text-sm text-muted-foreground group-hover:text-deepNavy/70 transition-colors duration-300 flex-1 text-center">
                   {action.description}
                 </p>
                 
@@ -297,13 +298,13 @@ const Dashboard = () => {
       </div>
 
       {/* Online Booking Section - Load Immediately (Lightweight) */}
-      <div className="bg-gradient-to-r from-warmBeige via-softRose/20 to-roseGold/20 border border-softRose/30 rounded-xl p-8 shadow-elevated hover:shadow-hover transition-all duration-500 relative overflow-hidden group">
-        <div className="flex flex-col items-center text-center gap-6 relative z-10">
+      <div className="bg-gradient-to-r from-warmBeige via-softRose/20 to-roseGold/20 border border-softRose/30 rounded-xl p-6 sm:p-8 shadow-elevated hover:shadow-hover transition-all duration-500 relative overflow-hidden group">
+        <div className="flex flex-col items-center text-center gap-4 sm:gap-6 relative z-10">
           <div className="flex-1">
-            <h2 className="text-2xl font-display font-medium text-deepNavy mb-3 group-hover:text-primary transition-colors duration-300">
+            <h2 className="text-xl sm:text-2xl font-display font-medium text-deepNavy mb-3 group-hover:text-primary transition-colors duration-300">
               מערכת קביעת פגישות אונליין
             </h2>
-            <p className="text-base text-muted-foreground max-w-2xl group-hover:text-deepNavy/70 transition-colors duration-300 leading-relaxed">
+            <p className="text-sm sm:text-base text-muted-foreground max-w-2xl group-hover:text-deepNavy/70 transition-colors duration-300 leading-relaxed">
               אפשרו ללקוחות שלכם לקבוע פגישות אונליין בקלות, והתראות יסונכרנו ישירות ללוח השנה שלכם.
             </p>
           </div>
@@ -312,7 +313,7 @@ const Dashboard = () => {
               <Button 
                 variant="premium" 
                 size="lg"
-                className="font-display group-hover:scale-105 transition-transform duration-300 px-8 py-4 inline-flex items-center justify-center gap-2"
+                className="font-display group-hover:scale-105 transition-transform duration-300 px-6 sm:px-8 py-3 sm:py-4 inline-flex items-center justify-center gap-2 min-h-[44px]"
               >
                 <Calendar className="h-5 w-5" />
                 קביעת פגישות אונליין

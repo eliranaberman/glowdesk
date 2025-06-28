@@ -1,125 +1,112 @@
-
-import { useState } from 'react';
-import { Helmet } from 'react-helmet-async';
-import { AlertCircle, Plus, Filter } from 'lucide-react';
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import React, { useState, useEffect, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { useNavigate } from 'react-router-dom';
-import { useToast } from '@/hooks/use-toast';
-import ClientsAdvancedFilter, { ClientFilters } from '@/components/clients/ClientsAdvancedFilter';
+import { UserPlus } from 'lucide-react';
+import { Client } from '@/types/clients';
+import { getAllClients, deleteClient } from '@/services/clientsService';
 import ClientsTableView from '@/components/clients/ClientsTableView';
-import { cn } from '@/lib/utils';
+import ClientsFilter from '@/components/clients/ClientsFilter';
+import { useToast } from "@/hooks/use-toast";
+import ClientsTableMobile from '@/components/clients/ClientsTableMobile';
+import MobileResponsiveTable from '@/components/ui/mobile-responsive-table';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const ClientsPage = () => {
-  const navigate = useNavigate();
-  const { toast } = useToast();
+  const isMobile = useIsMobile();
+  const [clients, setClients] = useState<Client[]>([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [showAdvancedFilter, setShowAdvancedFilter] = useState(false);
-  const [filters, setFilters] = useState<ClientFilters>({
-    search: '',
-    status: null,
-    treatmentType: null,
-    dateFrom: null,
-    dateTo: null,
-    sortBy: 'registration_date',
-    sortOrder: 'desc'
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string>('');
+  const { toast } = useToast();
+
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await getAllClients();
+      setClients(data);
+    } catch (err: any) {
+      setError(err.message || 'Failed to fetch clients');
+      toast({
+        title: "Error",
+        description: "Failed to load clients",
+        variant: "destructive",
+      })
+    } finally {
+      setLoading(false);
+    }
+  }, [toast]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  const handleDeleteClient = async (id: string) => {
+    try {
+      await deleteClient(id);
+      setClients(clients.filter(client => client.id !== id));
+      toast({
+        title: "Success",
+        description: "Client deleted successfully",
+      })
+    } catch (err: any) {
+      setError(err.message || 'Failed to delete client');
+      toast({
+        title: "Error",
+        description: "Failed to delete client",
+        variant: "destructive",
+      })
+    }
+  };
+
+  const filteredClients = clients.filter(client => {
+    const searchRegex = new RegExp(searchTerm, 'i');
+    const nameMatch = searchRegex.test(client.first_name + ' ' + client.last_name);
+    const statusMatch = statusFilter ? client.status === statusFilter : true;
+
+    return nameMatch && statusMatch;
   });
 
-  const handleAddClient = () => {
-    navigate('/clients/new');
+  const handleFilterClick = (status: string) => {
+    setStatusFilter(status);
   };
-
-  const handleFilterChange = (newFilters: ClientFilters) => {
-    setFilters(newFilters);
-  };
-
-  const handleError = (errorMessage: string) => {
-    setError(errorMessage);
-    toast({
-      variant: "destructive",
-      title: "שגיאה בטעינת לקוחות",
-      description: errorMessage,
-    });
-  };
-
-  const isTableMissingError = error?.includes('relation "public.clients" does not exist');
 
   return (
-    <div>
-      <Helmet>
-        <title>ניהול לקוחות | Chen Mizrahi</title>
-      </Helmet>
+    <div className="container mx-auto py-4 px-4 max-w-7xl" dir="rtl">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
+        <h1 className="text-2xl sm:text-3xl font-bold text-center sm:text-right">ניהול לקוחות</h1>
+        <Button asChild className="w-full sm:w-auto min-h-[44px]">
+          <Link to="/clients/new" className="flex items-center justify-center gap-2">
+            <UserPlus className="h-4 w-4" />
+            הוספת לקוח חדש
+          </Link>
+        </Button>
+      </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
-          <div>
-            <h1 className="text-3xl font-display font-medium text-primary mb-2">ניהול לקוחות</h1>
-            <p className="text-muted-foreground">
-              נהלי את רשימת הלקוחות שלך בקלות ובמקצועיות
-            </p>
-          </div>
+      <div className="space-y-4">
+        <ClientsFilter
+          searchTerm={searchTerm}
+          onSearchChange={setSearchTerm}
+          statusFilter={statusFilter}
+          onStatusFilterChange={setStatusFilter}
+          onFilterClick={handleFilterClick}
+        />
 
-          <Button 
-            onClick={handleAddClient} 
-            className="flex gap-1.5 shadow-soft hover:shadow-soft-lg transition-all"
-          >
-            <Plus className="size-4" />
-            לקוחה חדשה
-          </Button>
-        </div>
-
-        <div className="space-y-6">
-          {/* Advanced Filter Toggle */}
-          <div className="flex justify-between items-center">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowAdvancedFilter(!showAdvancedFilter)}
-              className="gap-2 text-muted-foreground hover:text-foreground"
-            >
-              <Filter className="size-4" />
-              סינון מתקדם
-            </Button>
-          </div>
-
-          {/* Collapsible Advanced Filter */}
-          <div className={cn(
-            "transition-all duration-300 ease-in-out overflow-hidden",
-            showAdvancedFilter ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"
-          )}>
-            <ClientsAdvancedFilter 
-              onFilterChange={handleFilterChange}
-              className="mb-6"
+        <MobileResponsiveTable
+          mobileComponent={
+            <ClientsTableMobile
+              clients={filteredClients}
+              onDeleteClient={handleDeleteClient}
             />
-          </div>
-
-          {/* Error State */}
-          {error && (
-            <Alert variant="destructive" className="shadow-soft">
-              <AlertCircle className="h-4 w-4" />
-              <AlertTitle>שגיאה בטעינת לקוחות</AlertTitle>
-              <AlertDescription>
-                {isTableMissingError ? (
-                  <>
-                    <p>טבלת הלקוחות לא קיימת במסד הנתונים.</p>
-                    <p className="mt-2">אנא פנה למפתח המערכת ליצירת הטבלה הנדרשת.</p>
-                  </>
-                ) : (
-                  error
-                )}
-              </AlertDescription>
-            </Alert>
-          )}
-
-          {/* Table View */}
-          {!error && (
-            <ClientsTableView 
-              filters={filters}
-              onError={handleError}
-            />
-          )}
-        </div>
+          }
+          className="min-h-[400px]"
+        >
+          <ClientsTableView
+            clients={filteredClients}
+            onDeleteClient={handleDeleteClient}
+          />
+        </MobileResponsiveTable>
       </div>
     </div>
   );
