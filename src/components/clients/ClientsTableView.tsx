@@ -1,5 +1,4 @@
 
-import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Table,
@@ -18,83 +17,31 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
-import { Skeleton } from '@/components/ui/skeleton';
 import { Phone, MessageSquare, MoreHorizontal, Eye, Edit, UserPlus } from 'lucide-react';
 import { Client } from '@/types/clients';
-import { getClients } from '@/services/clientService';
 import { openWhatsApp } from '@/utils/whatsappUtils';
 import { format } from 'date-fns';
-import { cn } from '@/lib/utils';
-import { ClientFilters } from './ClientsAdvancedFilter';
 
 interface ClientsTableViewProps {
-  filters: ClientFilters;
-  onError: (error: string) => void;
+  clients: Client[];
+  totalClients: number;
+  currentPage: number;
+  pageSize: number;
+  onPageChange: (page: number) => void;
+  onDeleteClient: (id: string) => void;
+  loading: boolean;
 }
 
-const ClientsTableView = ({ filters, onError }: ClientsTableViewProps) => {
+const ClientsTableView = ({ 
+  clients, 
+  totalClients, 
+  currentPage, 
+  pageSize, 
+  onPageChange, 
+  onDeleteClient,
+  loading 
+}: ClientsTableViewProps) => {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
-  const [clients, setClients] = useState<Client[]>([]);
-  const [totalClients, setTotalClients] = useState(0);
-  const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 20;
-
-  useEffect(() => {
-    const fetchClients = async () => {
-      try {
-        setLoading(true);
-        
-        // Apply filters
-        let searchTerm = filters.search;
-        let statusFilter = filters.status || undefined;
-        
-        const { clients, count } = await getClients(
-          searchTerm, 
-          statusFilter, 
-          filters.sortBy, 
-          filters.sortOrder, 
-          currentPage, 
-          pageSize
-        );
-        
-        // Client-side filtering for fields not supported by the service yet
-        let filteredClients = clients;
-        
-        if (filters.treatmentType) {
-          filteredClients = filteredClients.filter(client => 
-            client.preferred_treatment === filters.treatmentType
-          );
-        }
-        
-        if (filters.dateFrom) {
-          filteredClients = filteredClients.filter(client => {
-            if (!client.registration_date) return false;
-            const clientDate = new Date(client.registration_date);
-            return clientDate >= filters.dateFrom!;
-          });
-        }
-        
-        if (filters.dateTo) {
-          filteredClients = filteredClients.filter(client => {
-            if (!client.registration_date) return false;
-            const clientDate = new Date(client.registration_date);
-            return clientDate <= filters.dateTo!;
-          });
-        }
-        
-        setClients(filteredClients);
-        setTotalClients(count);
-        setLoading(false);
-      } catch (error: any) {
-        console.error('Error loading clients:', error.message);
-        onError(error.message);
-        setLoading(false);
-      }
-    };
-
-    fetchClients();
-  }, [filters, currentPage, onError]);
 
   const handleViewClient = (id: string) => {
     navigate(`/clients/${id}`);
@@ -151,63 +98,13 @@ const ClientsTableView = ({ filters, onError }: ClientsTableViewProps) => {
     return phone;
   };
 
-  if (loading) {
-    return (
-      <div className="rounded-lg border bg-card shadow-soft">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-1/3">לקוחה</TableHead>
-              <TableHead className="w-1/6">טלפון</TableHead>
-              <TableHead className="hidden lg:table-cell w-1/6">טיפול מועדף</TableHead>
-              <TableHead className="hidden sm:table-cell w-1/8">הצטרפות</TableHead>
-              <TableHead className="hidden md:table-cell w-16 text-center">ביקורים</TableHead>
-              <TableHead className="w-20">סטטוס</TableHead>
-              <TableHead className="w-24">פעולות</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {Array(5).fill(0).map((_, i) => (
-              <TableRow key={`skeleton-${i}`}>
-                <TableCell>
-                  <div className="flex items-center gap-2">
-                    <Skeleton className="h-8 w-8 rounded-full" />
-                    <div className="space-y-1">
-                      <Skeleton className="h-3 w-28" />
-                      <Skeleton className="h-2 w-20" />
-                    </div>
-                  </div>
-                </TableCell>
-                <TableCell><Skeleton className="h-3 w-20" /></TableCell>
-                <TableCell className="hidden lg:table-cell"><Skeleton className="h-3 w-16" /></TableCell>
-                <TableCell className="hidden sm:table-cell"><Skeleton className="h-3 w-16" /></TableCell>
-                <TableCell className="hidden md:table-cell"><Skeleton className="h-3 w-8" /></TableCell>
-                <TableCell><Skeleton className="h-5 w-12" /></TableCell>
-                <TableCell>
-                  <div className="flex gap-1">
-                    <Skeleton className="h-6 w-6" />
-                    <Skeleton className="h-6 w-6" />
-                    <Skeleton className="h-6 w-6" />
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
-    );
-  }
-
   if (clients.length === 0) {
     return (
       <div className="text-center py-16 bg-card rounded-xl border shadow-soft">
         <UserPlus className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
         <h3 className="text-lg font-medium mb-2">לא נמצאו לקוחות</h3>
         <p className="text-muted-foreground mb-4">
-          {filters.search || filters.status || filters.treatmentType 
-            ? 'נסה לשנות את הסינונים או הוסף לקוחות חדשות'
-            : 'התחילי להוסיף לקוחות למערכת'
-          }
+          התחילי להוסיף לקוחות למערכת
         </p>
         <Button onClick={() => navigate('/clients/new')} className="shadow-soft hover:shadow-soft-lg transition-all">
           הוספת לקוחה חדשה
@@ -344,12 +241,12 @@ const ClientsTableView = ({ filters, onError }: ClientsTableViewProps) => {
                         <DropdownMenuItem 
                           onClick={(e) => {
                             e.stopPropagation();
-                            navigate(`/clients/${client.id}/activity/new`);
+                            onDeleteClient(client.id);
                           }}
-                          className="gap-2 text-xs"
+                          className="gap-2 text-xs text-red-600"
                         >
                           <UserPlus className="size-3.5" />
-                          הוסף פעילות
+                          מחק לקוח
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
@@ -369,7 +266,7 @@ const ClientsTableView = ({ filters, onError }: ClientsTableViewProps) => {
               variant="ghost" 
               size="sm"
               disabled={currentPage === 1}
-              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+              onClick={() => onPageChange(Math.max(1, currentPage - 1))}
               className="hover:bg-accent text-xs"
             >
               הקודם
@@ -381,7 +278,7 @@ const ClientsTableView = ({ filters, onError }: ClientsTableViewProps) => {
               variant="ghost" 
               size="sm"
               disabled={currentPage >= Math.ceil(totalClients / pageSize)}
-              onClick={() => setCurrentPage(prev => prev + 1)}
+              onClick={() => onPageChange(currentPage + 1)}
               className="hover:bg-accent text-xs"
             >
               הבא
