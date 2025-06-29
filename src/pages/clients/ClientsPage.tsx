@@ -159,7 +159,6 @@ const ClientsPage = () => {
       <div className="space-y-4">
         <ClientsFilter onFilterChange={handleFilterChange} />
 
-        {/* Direct rendering instead of MobileResponsiveTable to debug */}
         {isMobile ? (
           <div className="mobile-table-container min-h-[400px]">
             <ClientsTableMobile
@@ -180,16 +179,6 @@ const ClientsPage = () => {
             />
           </div>
         )}
-
-        {/* Debug information */}
-        <div className="mt-4 p-4 bg-gray-100 rounded text-sm">
-          <p>Debug Info:</p>
-          <p>Clients count: {clients.length}</p>
-          <p>Total clients: {totalClients}</p>
-          <p>Is mobile: {isMobile ? 'Yes' : 'No'}</p>
-          <p>Loading: {loading ? 'Yes' : 'No'}</p>
-          <p>Error: {error || 'None'}</p>
-        </div>
       </div>
     </div>
   );
