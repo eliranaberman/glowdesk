@@ -9,7 +9,6 @@ import ClientsTableView from '@/components/clients/ClientsTableView';
 import ClientsFilter from '@/components/clients/ClientsFilter';
 import { useToast } from "@/hooks/use-toast";
 import ClientsTableMobile from '@/components/clients/ClientsTableMobile';
-import MobileResponsiveTable from '@/components/ui/mobile-responsive-table';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -29,7 +28,7 @@ const ClientsPage = () => {
   const pageSize = 20;
   const { toast } = useToast();
 
-  console.log('ClientsPage render - clients count:', clients.length);
+  console.log('ClientsPage render - clients count:', clients.length, 'loading:', loading, 'error:', error);
 
   const fetchData = useCallback(async () => {
     console.log('Fetching clients with filters:', { search, status, sortBy, sortOrder });
@@ -92,7 +91,7 @@ const ClientsPage = () => {
     setStatus(statusFilter);
     setSortBy(sortByField);
     setSortOrder(sortOrderField);
-    setCurrentPage(1); // Reset to first page when filters change
+    setCurrentPage(1);
   };
 
   const handlePageChange = (page: number) => {
@@ -123,12 +122,12 @@ const ClientsPage = () => {
       <div className="container mx-auto py-4 px-4 max-w-7xl" dir="rtl">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
           <h1 className="text-2xl sm:text-3xl font-bold text-center sm:text-right">ניהול לקוחות</h1>
-          <Button asChild className="w-full sm:w-auto min-h-[44px]">
-            <Link to="/clients/new" className="flex items-center justify-center gap-2">
+          <Link to="/clients/new">
+            <Button className="w-full sm:w-auto min-h-[44px] flex items-center justify-center gap-2">
               <UserPlus className="h-4 w-4" />
               הוספת לקוח חדש
-            </Link>
-          </Button>
+            </Button>
+          </Link>
         </div>
         
         <Alert variant="destructive">
@@ -149,36 +148,48 @@ const ClientsPage = () => {
     <div className="container mx-auto py-4 px-4 max-w-7xl" dir="rtl">
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
         <h1 className="text-2xl sm:text-3xl font-bold text-center sm:text-right">ניהול לקוחות</h1>
-        <Button asChild className="w-full sm:w-auto min-h-[44px]">
-          <Link to="/clients/new" className="flex items-center justify-center gap-2">
+        <Link to="/clients/new">
+          <Button className="w-full sm:w-auto min-h-[44px] flex items-center justify-center gap-2">
             <UserPlus className="h-4 w-4" />
             הוספת לקוח חדש
-          </Link>
-        </Button>
+          </Button>
+        </Link>
       </div>
 
       <div className="space-y-4">
         <ClientsFilter onFilterChange={handleFilterChange} />
 
-        <MobileResponsiveTable
-          mobileComponent={
+        {/* Direct rendering instead of MobileResponsiveTable to debug */}
+        {isMobile ? (
+          <div className="mobile-table-container min-h-[400px]">
             <ClientsTableMobile
               clients={clients}
               onDeleteClient={handleDeleteClient}
             />
-          }
-          className="min-h-[400px]"
-        >
-          <ClientsTableView
-            clients={clients}
-            totalClients={totalClients}
-            currentPage={currentPage}
-            pageSize={pageSize}
-            onPageChange={handlePageChange}
-            onDeleteClient={handleDeleteClient}
-            loading={false}
-          />
-        </MobileResponsiveTable>
+          </div>
+        ) : (
+          <div className="desktop-table-container min-h-[400px]">
+            <ClientsTableView
+              clients={clients}
+              totalClients={totalClients}
+              currentPage={currentPage}
+              pageSize={pageSize}
+              onPageChange={handlePageChange}
+              onDeleteClient={handleDeleteClient}
+              loading={false}
+            />
+          </div>
+        )}
+
+        {/* Debug information */}
+        <div className="mt-4 p-4 bg-gray-100 rounded text-sm">
+          <p>Debug Info:</p>
+          <p>Clients count: {clients.length}</p>
+          <p>Total clients: {totalClients}</p>
+          <p>Is mobile: {isMobile ? 'Yes' : 'No'}</p>
+          <p>Loading: {loading ? 'Yes' : 'No'}</p>
+          <p>Error: {error || 'None'}</p>
+        </div>
       </div>
     </div>
   );

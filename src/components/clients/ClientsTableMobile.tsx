@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Eye, Edit, Trash2, Phone, Mail, Calendar, MoreVertical } from 'lucide-react';
+import { Eye, Edit, Trash2, Phone, Mail, Calendar, MoreVertical, UserPlus } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import {
   DropdownMenu,
@@ -39,12 +39,31 @@ const ClientsTableMobile = ({ clients, onDeleteClient }: ClientsTableMobileProps
     }
   };
 
-  const toggleExpanded = (clientId: string) => {
-    setExpandedCard(expandedCard === clientId ? null : clientId);
-  };
+  console.log('ClientsTableMobile render - clients:', clients.length);
+
+  if (!clients || clients.length === 0) {
+    return (
+      <div className="text-center py-16 bg-card rounded-xl border shadow-soft">
+        <UserPlus className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+        <h3 className="text-lg font-medium mb-2">לא נמצאו לקוחות</h3>
+        <p className="text-muted-foreground mb-4">
+          התחילי להוסיף לקוחות למערכת
+        </p>
+        <Link to="/clients/new">
+          <Button className="shadow-soft hover:shadow-soft-lg transition-all">
+            הוספת לקוחה חדשה
+          </Button>
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-3 p-1">
+      <div className="text-sm text-muted-foreground mb-4">
+        מציג {clients.length} לקוחות
+      </div>
+      
       {clients.map((client) => (
         <Card key={client.id} className="shadow-sm hover:shadow-md transition-shadow duration-200">
           <CardContent className="p-4">
@@ -52,7 +71,7 @@ const ClientsTableMobile = ({ clients, onDeleteClient }: ClientsTableMobileProps
             <div className="flex items-center justify-between mb-3">
               <div className="flex-1 min-w-0">
                 <h3 className="font-semibold text-base text-right truncate">
-                  {client.full_name}
+                  {client.full_name || 'ללא שם'}
                 </h3>
                 <div className="flex items-center gap-2 mt-1">
                   <Badge className={`text-xs px-2 py-1 ${getStatusColor(client.status || 'active')}`}>
@@ -120,10 +139,10 @@ const ClientsTableMobile = ({ clients, onDeleteClient }: ClientsTableMobileProps
                   <span className="truncate">{client.email}</span>
                 </div>
               )}
-              {client.created_at && (
+              {client.registration_date && (
                 <div className="flex items-center gap-2 text-right">
                   <Calendar className="h-4 w-4 flex-shrink-0" />
-                  <span>נוצר: {new Date(client.created_at).toLocaleDateString('he-IL')}</span>
+                  <span>הצטרף: {new Date(client.registration_date).toLocaleDateString('he-IL')}</span>
                 </div>
               )}
             </div>
