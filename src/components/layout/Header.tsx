@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Bell, Menu, User, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -87,10 +86,10 @@ const Header = ({ pageTitle, toggleMobileSidebar, handleLogout, user }: HeaderPr
         <div className="flex items-center gap-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="relative h-10 w-10">
+              <Button variant="ghost" size="icon" className="relative h-12 w-12">
                 <Bell className="h-5 w-5" />
                 {notificationCount > 0 && (
-                  <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[11px] font-medium text-primary-foreground min-w-[20px]">
+                  <span className="absolute -top-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-primary text-[12px] font-medium text-primary-foreground min-w-[24px]">
                     {notificationCount > 9 ? '9+' : notificationCount}
                   </span>
                 )}

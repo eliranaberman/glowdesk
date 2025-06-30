@@ -26,7 +26,8 @@ import {
   Award,
   ChevronDown,
   ChevronRight,
-  TrendingUp
+  TrendingUp,
+  Package
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -151,6 +152,11 @@ const Sidebar = ({
         href: '/expenses',
         label: 'הוצאות',
         icon: Coins
+      },
+      {
+        href: '/inventory',
+        label: 'מלאי',
+        icon: Package
       },
       {
         href: '/portfolio',

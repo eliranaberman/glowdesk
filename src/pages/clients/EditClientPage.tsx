@@ -7,7 +7,7 @@ import { ChevronRight, AlertCircle } from 'lucide-react';
 import ClientForm from '@/components/clients/ClientForm';
 import { Client } from '@/types/clients';
 import { getClient, updateClient } from '@/services/clientService';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const EditClientPage = () => {
@@ -19,18 +19,34 @@ const EditClientPage = () => {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  console.log('EditClientPage - Client ID from params:', id);
+
   useEffect(() => {
     const fetchClient = async () => {
-      if (!id) return;
+      if (!id) {
+        console.error('No client ID provided');
+        setError('לא נמצא מזהה לקוח');
+        setLoading(false);
+        return;
+      }
 
       try {
         setLoading(true);
-        const clientData = await getClient(id);
-        setClient(clientData);
         setError(null);
+        console.log('Fetching client with ID:', id);
+        
+        const clientData = await getClient(id);
+        console.log('Client data received:', clientData);
+        
+        if (!clientData) {
+          setError('לקוח לא נמצא');
+          return;
+        }
+        
+        setClient(clientData);
       } catch (err: any) {
-        console.error('Error loading client:', err.message);
-        setError(err.message);
+        console.error('Error loading client:', err);
+        setError(err.message || 'שגיאה בטעינת פרטי הלקוח');
         toast({
           variant: "destructive",
           title: "שגיאה בטעינת פרטי לקוח",
@@ -49,7 +65,10 @@ const EditClientPage = () => {
     
     try {
       setSubmitting(true);
+      console.log('Updating client with data:', clientData);
+      
       const updatedClient = await updateClient(id, clientData);
+      console.log('Client updated successfully:', updatedClient);
       
       toast({
         title: "פרטי הלקוח עודכנו",
@@ -92,7 +111,7 @@ const EditClientPage = () => {
         </Alert>
         <Button 
           onClick={() => navigate('/clients')} 
-          variant="back" 
+          variant="outline" 
           className="flex gap-2"
         >
           <ChevronRight className="h-4 w-4" />
@@ -114,7 +133,7 @@ const EditClientPage = () => {
         </Alert>
         <Button 
           onClick={() => navigate('/clients')} 
-          variant="back" 
+          variant="outline" 
           className="flex gap-2"
         >
           <ChevronRight className="h-4 w-4" />
@@ -132,7 +151,7 @@ const EditClientPage = () => {
 
       <Button 
         onClick={() => navigate(`/clients/${id}`)} 
-        variant="back" 
+        variant="outline" 
         className="mb-4 flex gap-2"
       >
         <ChevronRight className="h-4 w-4" />
