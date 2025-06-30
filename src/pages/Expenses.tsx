@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,7 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { ExpenseFormTest } from '@/components/expenses/ExpenseFormTest';
-import { PlusCircle, FileText, Calculator, TrendingUp, Download } from 'lucide-react';
+import { PlusCircle, FileText, Calculator, TrendingUp, Download, Settings } from 'lucide-react';
 
 interface Expense {
   id: string;
@@ -87,10 +86,16 @@ const Expenses = () => {
             נהל וקבע הוצאות עסקיות בצורה יעילה
           </p>
         </div>
-        <Button onClick={refreshExpenses} variant="outline">
-          <Calculator className="h-4 w-4 mr-2" />
-          רענן נתונים
-        </Button>
+        <div className="flex gap-2">
+          <Button className="flex gap-2">
+            <PlusCircle className="h-4 w-4" />
+            הוספת הוצאה
+          </Button>
+          <Button onClick={refreshExpenses} variant="outline" className="flex gap-2">
+            <Settings className="h-4 w-4" />
+            בדיקת מערכת
+          </Button>
+        </div>
       </div>
 
       {/* Summary Cards */}
