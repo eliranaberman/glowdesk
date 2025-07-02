@@ -72,7 +72,7 @@ export default function AppRoutes() {
         <Route path="/clients" element={<ClientsPage />} />
         <Route path="/clients/new" element={<NewClientPage />} />
         <Route path="/clients/:id" element={<ClientDetailPage />} />
-        <Route path="/clients/:id/edit" element={<EditClientPage />} />
+        <Route path="/clients/edit/:id" element={<EditClientPage />} />
         <Route path="/clients/:id/activity/new" element={<NewActivityPage />} />
         <Route path="/customers" element={<Customers />} />
         
