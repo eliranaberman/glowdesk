@@ -12,7 +12,6 @@ export const getInventoryItems = async () => {
   const { data, error } = await supabase
     .from('inventory_items')
     .select('*')
-    .eq('created_by', user.user.id)
     .order('entry_date', { ascending: false });
 
   if (error) throw error;
