@@ -53,7 +53,7 @@ const ClientForm = ({ initialData, onSubmit, isSubmitting }: ClientFormProps) =>
     const loadUsers = async () => {
       try {
         const { data, error } = await supabase
-          .from('profiles')
+          .from('users')
           .select('id, full_name')
           .order('full_name');
 
