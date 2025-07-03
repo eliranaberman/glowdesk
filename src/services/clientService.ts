@@ -146,13 +146,19 @@ export const createClient = async (client: Omit<import('@/types/clients').Client
 };
 
 export const updateClient = async (id: string, updates: Partial<import('@/types/clients').Client>) => {
+  console.log('🔄 updateClient called with:', { id, updates });
+  
   const { data: user } = await supabase.auth.getUser();
   if (!user.user) throw new Error('User not authenticated');
+  
+  console.log('👤 Authenticated user:', user.user.id);
 
   // Validate UUID format
   if (!isValidUUID(id)) {
+    console.error('❌ Invalid UUID format:', id);
     throw new Error('Invalid client ID format');
   }
+  console.log('✅ Valid UUID format:', id);
 
   // Convert tags array to string for database storage
   const updateData = {
@@ -161,6 +167,8 @@ export const updateClient = async (id: string, updates: Partial<import('@/types/
     preferred_treatment: updates.preferred_treatment,
     visit_count: updates.visit_count
   };
+  
+  console.log('📝 Update data prepared:', updateData);
 
   const { data, error } = await supabase
     .from('clients')
@@ -170,7 +178,19 @@ export const updateClient = async (id: string, updates: Partial<import('@/types/
     .select()
     .single();
 
-  if (error) throw error;
+  console.log('🔍 Supabase response:', { data, error });
+
+  if (error) {
+    console.error('❌ Supabase error details:', {
+      message: error.message,
+      details: error.details,
+      hint: error.hint,
+      code: error.code
+    });
+    throw error;
+  }
+  
+  console.log('✅ Client updated successfully:', data);
   return castClient(data);
 };
 
