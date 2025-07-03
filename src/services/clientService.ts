@@ -160,12 +160,15 @@ export const updateClient = async (id: string, updates: Partial<import('@/types/
   }
   console.log('✅ Valid UUID format:', id);
 
+  // Filter out computed fields and system fields that shouldn't be updated
+  const { assigned_rep_user, created_at, updated_at, id: clientId, ...filteredUpdates } = updates;
+  
   // Convert tags array to string for database storage
   const updateData = {
-    ...updates,
-    tags: Array.isArray(updates.tags) ? updates.tags.join(',') : updates.tags,
-    preferred_treatment: updates.preferred_treatment,
-    visit_count: updates.visit_count
+    ...filteredUpdates,
+    tags: Array.isArray(filteredUpdates.tags) ? filteredUpdates.tags.join(',') : filteredUpdates.tags,
+    preferred_treatment: filteredUpdates.preferred_treatment,
+    visit_count: filteredUpdates.visit_count
   };
   
   console.log('📝 Update data prepared:', updateData);
