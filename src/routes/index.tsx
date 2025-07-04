@@ -20,6 +20,7 @@ import Reports from '@/pages/Reports';
 import Settings from '@/pages/Settings';
 import LoyaltyPage from '@/pages/LoyaltyPage';
 import SocialMedia from '@/pages/SocialMedia';
+import WhatsAppSettings from '@/pages/WhatsAppSettings';
 import AIAssistant from '@/pages/AIAssistant';
 import Notifications from '@/pages/Notifications';
 import PortfolioPage from '@/pages/PortfolioPage';
@@ -94,6 +95,7 @@ export default function AppRoutes() {
         
         {/* Settings - Single unified settings page */}
         <Route path="/settings" element={<Settings />} />
+        <Route path="/whatsapp-settings" element={<WhatsAppSettings />} />
         
         {/* Social media and marketing */}
         <Route path="/loyalty" element={<LoyaltyPage />} />

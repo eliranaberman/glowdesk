@@ -1130,6 +1130,51 @@ export type Database = {
         }
         Relationships: []
       }
+      user_whatsapp_settings: {
+        Row: {
+          auto_reminders_enabled: boolean | null
+          business_address: string | null
+          business_name: string
+          business_whatsapp_number: string
+          confirmation_required: boolean | null
+          created_at: string
+          id: string
+          preferred_send_time: string | null
+          reminder_hours_before: number | null
+          timezone: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          auto_reminders_enabled?: boolean | null
+          business_address?: string | null
+          business_name: string
+          business_whatsapp_number: string
+          confirmation_required?: boolean | null
+          created_at?: string
+          id?: string
+          preferred_send_time?: string | null
+          reminder_hours_before?: number | null
+          timezone?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          auto_reminders_enabled?: boolean | null
+          business_address?: string | null
+          business_name?: string
+          business_whatsapp_number?: string
+          confirmation_required?: boolean | null
+          created_at?: string
+          id?: string
+          preferred_send_time?: string | null
+          reminder_hours_before?: number | null
+          timezone?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       users: {
         Row: {
           avatar_url: string | null
