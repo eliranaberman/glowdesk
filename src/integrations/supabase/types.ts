@@ -17,6 +17,9 @@ export type Database = {
           calendar_sync_status: string | null
           cancel_reason: string | null
           cancelled_at: string | null
+          confirmation_response: string | null
+          confirmation_status: string | null
+          confirmed_at: string | null
           created_at: string | null
           customer_id: string
           date: string
@@ -31,6 +34,7 @@ export type Database = {
           payment_required: boolean | null
           reminder_24h_sent: boolean | null
           reminder_3h_sent: boolean | null
+          reminder_sent_at: string | null
           service_type: string
           sms_notification_sent: boolean | null
           start_time: string
@@ -45,6 +49,9 @@ export type Database = {
           calendar_sync_status?: string | null
           cancel_reason?: string | null
           cancelled_at?: string | null
+          confirmation_response?: string | null
+          confirmation_status?: string | null
+          confirmed_at?: string | null
           created_at?: string | null
           customer_id: string
           date: string
@@ -59,6 +66,7 @@ export type Database = {
           payment_required?: boolean | null
           reminder_24h_sent?: boolean | null
           reminder_3h_sent?: boolean | null
+          reminder_sent_at?: string | null
           service_type: string
           sms_notification_sent?: boolean | null
           start_time: string
@@ -73,6 +81,9 @@ export type Database = {
           calendar_sync_status?: string | null
           cancel_reason?: string | null
           cancelled_at?: string | null
+          confirmation_response?: string | null
+          confirmation_status?: string | null
+          confirmed_at?: string | null
           created_at?: string | null
           customer_id?: string
           date?: string
@@ -87,6 +98,7 @@ export type Database = {
           payment_required?: boolean | null
           reminder_24h_sent?: boolean | null
           reminder_3h_sent?: boolean | null
+          reminder_sent_at?: string | null
           service_type?: string
           sms_notification_sent?: boolean | null
           start_time?: string
@@ -600,6 +612,98 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      message_templates: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          is_default: boolean | null
+          template_name: string
+          template_type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          is_default?: boolean | null
+          template_name: string
+          template_type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          is_default?: boolean | null
+          template_name?: string
+          template_type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      notification_logs: {
+        Row: {
+          appointment_id: string | null
+          channel: string
+          created_at: string
+          delivered_at: string | null
+          error_message: string | null
+          external_message_id: string | null
+          id: string
+          message_content: string
+          notification_type: string
+          phone_number: string | null
+          read_at: string | null
+          sent_at: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          appointment_id?: string | null
+          channel: string
+          created_at?: string
+          delivered_at?: string | null
+          error_message?: string | null
+          external_message_id?: string | null
+          id?: string
+          message_content: string
+          notification_type: string
+          phone_number?: string | null
+          read_at?: string | null
+          sent_at?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          appointment_id?: string | null
+          channel?: string
+          created_at?: string
+          delivered_at?: string | null
+          error_message?: string | null
+          external_message_id?: string | null
+          id?: string
+          message_content?: string
+          notification_type?: string
+          phone_number?: string | null
+          read_at?: string | null
+          sent_at?: string | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_logs_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       notification_preferences: {
         Row: {
