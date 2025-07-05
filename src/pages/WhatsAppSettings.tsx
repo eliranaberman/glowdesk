@@ -171,15 +171,15 @@ const WhatsAppSettings = () => {
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto p-4 sm:p-6 max-w-5xl">
-        {/* Header Section - RTL Optimized */}
-        <div className="mb-8 text-right">
-          <div className="flex items-center justify-end gap-3 mb-3">
-            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
-              הגדרות WhatsApp
-            </h1>
+        {/* Header Section - Centered */}
+        <div className="mb-8 text-center">
+          <div className="flex items-center justify-center gap-3 mb-3">
             <div className="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-primary/10 rounded-xl">
               <MessageSquare className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
             </div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
+              הגדרות WhatsApp
+            </h1>
           </div>
           <p className="text-muted-foreground text-sm sm:text-base leading-relaxed">
             נהלי את הגדרות WhatsApp של העסק שלך ותבניות ההודעות בצורה מותאמת ונוחה
@@ -215,45 +215,45 @@ const WhatsAppSettings = () => {
           <TabsContent value="settings" className="space-y-6">
             {/* Business Details Card */}
             <Card className="shadow-sm border-border/50">
-              <CardHeader className="text-right pb-4">
-                <CardTitle className="flex items-center justify-end gap-2 text-lg font-semibold">
-                  פרטי העסק
+              <CardHeader className="text-center pb-4">
+                <CardTitle className="flex items-center justify-center gap-2 text-lg font-semibold">
                   <Settings className="h-5 w-5 text-primary" />
+                  פרטי העסק
                 </CardTitle>
-                <CardDescription className="text-right">
+                <CardDescription className="text-center">
                   הגדרי את פרטי העסק שלך עבור הודעות WhatsApp
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                {/* Business Name & WhatsApp Number - RTL Layout */}
+                {/* Business Name & WhatsApp Number - Centered Layout */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-                  {/* Business Name - Right Side */}
-                  <div className="space-y-2 order-1">
-                    <Label htmlFor="business_name" className="flex items-center justify-end gap-2 text-sm font-medium">
-                      שם העסק
+                  {/* Business Name */}
+                  <div className="space-y-2">
+                    <Label htmlFor="business_name" className="flex items-center justify-center gap-2 text-sm font-medium">
                       <Settings className="h-4 w-4 text-muted-foreground" />
+                      שם העסק
                     </Label>
                     <Input
                       id="business_name"
                       value={settings.business_name}
                       onChange={(e) => setSettings({...settings, business_name: e.target.value})}
                       placeholder="לדוגמה: סלון יופי רחל"
-                      className="text-right h-11 bg-background border-border/70 focus:border-primary transition-colors"
+                      className="text-center h-11 bg-background border-border/70 focus:border-primary transition-colors"
                     />
                   </div>
                   
-                  {/* WhatsApp Number - Left Side */}
-                  <div className="space-y-2 order-2 md:order-2">
-                    <Label htmlFor="business_whatsapp_number" className="flex items-center justify-end gap-2 text-sm font-medium">
-                      מספר WhatsApp של העסק
+                  {/* WhatsApp Number */}
+                  <div className="space-y-2">
+                    <Label htmlFor="business_whatsapp_number" className="flex items-center justify-center gap-2 text-sm font-medium">
                       <Phone className="h-4 w-4 text-muted-foreground" />
+                      מספר WhatsApp של העסק
                     </Label>
                     <Input
                       id="business_whatsapp_number"
                       value={settings.business_whatsapp_number}
                       onChange={(e) => setSettings({...settings, business_whatsapp_number: e.target.value})}
                       placeholder="לדוגמה: 0501234567"
-                      className="text-right h-11 bg-background border-border/70 focus:border-primary transition-colors"
+                      className="text-center h-11 bg-background border-border/70 focus:border-primary transition-colors"
                       dir="ltr"
                     />
                   </div>
@@ -261,25 +261,25 @@ const WhatsAppSettings = () => {
                 
                 {/* Business Address - Full Width */}
                 <div className="space-y-2">
-                  <Label htmlFor="business_address" className="flex items-center justify-end gap-2 text-sm font-medium">
-                    כתובת העסק
+                  <Label htmlFor="business_address" className="flex items-center justify-center gap-2 text-sm font-medium">
                     <MapPin className="h-4 w-4 text-muted-foreground" />
+                    כתובת העסק
                   </Label>
                   <Input
                     id="business_address"
                     value={settings.business_address}
                     onChange={(e) => setSettings({...settings, business_address: e.target.value})}
                     placeholder="לדוגמה: רחוב הרצל 1, תל אביב"
-                    className="text-right h-11 bg-background border-border/70 focus:border-primary transition-colors"
+                    className="text-center h-11 bg-background border-border/70 focus:border-primary transition-colors"
                   />
                 </div>
 
                 {/* Time Settings */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div className="space-y-2">
-                    <Label htmlFor="preferred_send_time" className="flex items-center justify-end gap-2 text-sm font-medium">
-                      שעת שליחה מועדפת
+                    <Label htmlFor="preferred_send_time" className="flex items-center justify-center gap-2 text-sm font-medium">
                       <Clock className="h-4 w-4 text-muted-foreground" />
+                      שעת שליחה מועדפת
                     </Label>
                     <Input
                       id="preferred_send_time"
@@ -290,9 +290,9 @@ const WhatsAppSettings = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="reminder_hours_before" className="flex items-center justify-end gap-2 text-sm font-medium">
-                      שעות לפני התור לתזכורת
+                    <Label htmlFor="reminder_hours_before" className="flex items-center justify-center gap-2 text-sm font-medium">
                       <AlertCircle className="h-4 w-4 text-muted-foreground" />
+                      שעות לפני התור לתזכורת
                     </Label>
                     <Input
                       id="reminder_hours_before"
@@ -306,41 +306,43 @@ const WhatsAppSettings = () => {
                   </div>
                 </div>
 
-                {/* Toggle Settings - RTL Layout */}
+                {/* Toggle Settings - Centered Layout */}
                 <div className="space-y-4 pt-4 border-t border-border/50">
                   {/* Auto Reminders Toggle */}
-                  <div className="flex items-center justify-between p-4 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
-                    <Switch
-                      checked={settings.auto_reminders_enabled}
-                      onCheckedChange={(checked) => setSettings({...settings, auto_reminders_enabled: checked})}
-                      className="ml-auto"
-                    />
-                    <div className="flex-1 text-right mr-4">
-                      <div className="flex items-center justify-end gap-2 mb-1">
-                        <Label className="text-sm font-medium cursor-pointer">תזכורות אוטומטיות</Label>
-                        <Bell className="h-4 w-4 text-primary" />
+                  <div className="flex items-center justify-center p-4 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
+                    <div className="flex items-center gap-4">
+                      <div className="text-center">
+                        <div className="flex items-center justify-center gap-2 mb-1">
+                          <Bell className="h-4 w-4 text-primary" />
+                          <Label className="text-sm font-medium cursor-pointer">תזכורות אוטומטיות</Label>
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          שלח תזכורות אוטומטיות ללקוחות לפני התורים
+                        </p>
                       </div>
-                      <p className="text-xs text-muted-foreground">
-                        שלח תזכורות אוטומטיות ללקוחות לפני התורים
-                      </p>
+                      <Switch
+                        checked={settings.auto_reminders_enabled}
+                        onCheckedChange={(checked) => setSettings({...settings, auto_reminders_enabled: checked})}
+                      />
                     </div>
                   </div>
 
                   {/* Confirmation Required Toggle */}
-                  <div className="flex items-center justify-between p-4 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
-                    <Switch
-                      checked={settings.confirmation_required}
-                      onCheckedChange={(checked) => setSettings({...settings, confirmation_required: checked})}
-                      className="ml-auto"
-                    />
-                    <div className="flex-1 text-right mr-4">
-                      <div className="flex items-center justify-end gap-2 mb-1">
-                        <Label className="text-sm font-medium cursor-pointer">דרישת אישור</Label>
-                        <CheckCircle2 className="h-4 w-4 text-primary" />
+                  <div className="flex items-center justify-center p-4 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
+                    <div className="flex items-center gap-4">
+                      <div className="text-center">
+                        <div className="flex items-center justify-center gap-2 mb-1">
+                          <CheckCircle2 className="h-4 w-4 text-primary" />
+                          <Label className="text-sm font-medium cursor-pointer">דרישת אישור</Label>
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          בקש מהלקוחות לאשר את התור בהודעת התזכורת
+                        </p>
                       </div>
-                      <p className="text-xs text-muted-foreground">
-                        בקש מהלקוחות לאשר את התור בהודעת התזכורת
-                      </p>
+                      <Switch
+                        checked={settings.confirmation_required}
+                        onCheckedChange={(checked) => setSettings({...settings, confirmation_required: checked})}
+                      />
                     </div>
                   </div>
                 </div>
@@ -351,12 +353,12 @@ const WhatsAppSettings = () => {
           <TabsContent value="templates" className="space-y-6">
             {/* Message Templates Card */}
             <Card className="shadow-sm border-border/50">
-              <CardHeader className="text-right pb-4">
-                <CardTitle className="flex items-center justify-end gap-2 text-lg font-semibold">
-                  תבניות הודעות
+              <CardHeader className="text-center pb-4">
+                <CardTitle className="flex items-center justify-center gap-2 text-lg font-semibold">
                   <FileText className="h-5 w-5 text-primary" />
+                  תבניות הודעות
                 </CardTitle>
-                <CardDescription className="text-right">
+                <CardDescription className="text-center">
                   נהלי את תבניות ההודעות שלך עבור תזכורות ואישורים
                 </CardDescription>
               </CardHeader>
@@ -378,7 +380,18 @@ const WhatsAppSettings = () => {
                     
                     return (
                       <div key={type} className="border border-border/50 rounded-xl p-4 hover:bg-muted/30 transition-colors">
-                        <div className="flex justify-between items-center mb-3">
+                        <div className="flex justify-center items-center mb-3">
+                          <div className="flex items-center gap-2 text-center">
+                            <IconComponent className="h-5 w-5 text-primary" />
+                            <h3 className="font-medium text-foreground">{typeNames[type as keyof typeof typeNames]}</h3>
+                          </div>
+                        </div>
+                        <div className="text-center mb-3">
+                          <p className="text-sm text-muted-foreground leading-relaxed">
+                            {template?.content ? `${template.content.substring(0, 80)}...` : 'לא הוגדרה תבנית עדיין'}
+                          </p>
+                        </div>
+                        <div className="flex justify-center">
                           <Button
                             variant="outline"
                             size="sm"
@@ -392,15 +405,6 @@ const WhatsAppSettings = () => {
                           >
                             עריכה
                           </Button>
-                          <div className="flex items-center gap-2 text-right">
-                            <h3 className="font-medium text-foreground">{typeNames[type as keyof typeof typeNames]}</h3>
-                            <IconComponent className="h-5 w-5 text-primary" />
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-sm text-muted-foreground leading-relaxed">
-                            {template?.content ? `${template.content.substring(0, 80)}...` : 'לא הוגדרה תבנית עדיין'}
-                          </p>
                         </div>
                       </div>
                     );
@@ -412,17 +416,17 @@ const WhatsAppSettings = () => {
             {/* Template Editor Modal */}
             {selectedTemplate && (
               <Card className="shadow-lg border-primary/20 bg-gradient-to-br from-background to-muted/30">
-                <CardHeader className="text-right pb-4 border-b border-border/50">
-                  <CardTitle className="flex items-center justify-end gap-2 text-lg font-semibold">
-                    עריכת תבנית
+                <CardHeader className="text-center pb-4 border-b border-border/50">
+                  <CardTitle className="flex items-center justify-center gap-2 text-lg font-semibold">
                     <FileText className="h-5 w-5 text-primary" />
+                    עריכת תבנית
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6 pt-6">
                   <div className="space-y-2">
-                    <Label htmlFor="template_name" className="flex items-center justify-end gap-2 text-sm font-medium">
-                      שם התבנית
+                    <Label htmlFor="template_name" className="flex items-center justify-center gap-2 text-sm font-medium">
                       <Settings className="h-4 w-4 text-muted-foreground" />
+                      שם התבנית
                     </Label>
                     <Input
                       id="template_name"
@@ -431,14 +435,14 @@ const WhatsAppSettings = () => {
                         ...selectedTemplate,
                         template_name: e.target.value
                       })}
-                      className="text-right h-11 bg-background border-border/70 focus:border-primary transition-colors"
+                      className="text-center h-11 bg-background border-border/70 focus:border-primary transition-colors"
                     />
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="template_content" className="flex items-center justify-end gap-2 text-sm font-medium">
-                      תוכן ההודעה
+                    <Label htmlFor="template_content" className="flex items-center justify-center gap-2 text-sm font-medium">
                       <MessageSquare className="h-4 w-4 text-muted-foreground" />
+                      תוכן ההודעה
                     </Label>
                     <Textarea
                       id="template_content"
@@ -449,12 +453,12 @@ const WhatsAppSettings = () => {
                       })}
                       rows={6}
                       placeholder="השתמשי במשתנים כמו {customer_name}, {date}, {time}, {service}, {address}"
-                      className="text-right resize-none bg-background border-border/70 focus:border-primary transition-colors"
+                      className="text-center resize-none bg-background border-border/70 focus:border-primary transition-colors"
                     />
                   </div>
                   
                   {/* Variables Guide */}
-                  <div className="p-4 rounded-lg bg-muted/40 border border-border/30 text-right">
+                  <div className="p-4 rounded-lg bg-muted/40 border border-border/30 text-center">
                     <p className="font-medium text-sm mb-3 text-foreground">משתנים זמינים:</p>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-muted-foreground">
                       <p>• <code className="bg-background px-1 py-0.5 rounded text-foreground">{'{customer_name}'}</code> - שם הלקוח</p>
@@ -466,18 +470,18 @@ const WhatsAppSettings = () => {
                     </div>
                   </div>
                   
-                  {/* Action Buttons */}
-                  <div className="flex gap-3 pt-4">
+                  {/* Action Buttons - Centered */}
+                  <div className="flex justify-center gap-3 pt-4">
                     <Button 
                       variant="outline" 
                       onClick={() => setSelectedTemplate(null)}
-                      className="flex-1 h-11 bg-background border-border/70 hover:bg-muted hover:border-primary transition-all"
+                      className="h-11 px-6 bg-background border-border/70 hover:bg-muted hover:border-primary transition-all"
                     >
                       ביטול
                     </Button>
                     <Button 
                       onClick={() => saveTemplate(selectedTemplate)}
-                      className="flex-1 h-11 bg-primary hover:bg-primary/90 text-primary-foreground font-medium transition-all shadow-sm hover:shadow-md"
+                      className="h-11 px-6 bg-primary hover:bg-primary/90 text-primary-foreground font-medium transition-all shadow-sm hover:shadow-md"
                     >
                       שמור תבנית
                     </Button>
@@ -490,12 +494,12 @@ const WhatsAppSettings = () => {
           <TabsContent value="notifications" className="space-y-6">
             {/* Notifications Log Card */}
             <Card className="shadow-sm border-border/50">
-              <CardHeader className="text-right pb-4">
-                <CardTitle className="flex items-center justify-end gap-2 text-lg font-semibold">
-                  יומן התראות
+              <CardHeader className="text-center pb-4">
+                <CardTitle className="flex items-center justify-center gap-2 text-lg font-semibold">
                   <Bell className="h-5 w-5 text-primary" />
+                  יומן התראות
                 </CardTitle>
-                <CardDescription className="text-right">
+                <CardDescription className="text-center">
                   עקבי אחר ההודעות שנשלחו והתגובות שהתקבלו
                 </CardDescription>
               </CardHeader>
