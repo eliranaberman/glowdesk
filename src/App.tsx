@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import AppRoutes from './routes';
 import { AuthProvider } from '@/contexts/auth';
 import { Toaster } from '@/components/ui/toaster';
+import { Toaster as SonnerToaster } from '@/components/ui/sonner';
 import { initializeStorage } from '@/services/storageService';
 import { HelmetProvider } from 'react-helmet-async';
 import './App.css';
@@ -37,6 +38,7 @@ function App() {
           <AuthProvider>
             <AppRoutes />
             <Toaster />
+            <SonnerToaster />
           </AuthProvider>
         </Router>
       </HelmetProvider>

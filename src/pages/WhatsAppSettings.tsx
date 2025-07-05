@@ -49,6 +49,8 @@ const WhatsAppSettings = () => {
   const [selectedTemplate, setSelectedTemplate] = useState<MessageTemplate | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [savingTemplate, setSavingTemplate] = useState(false);
+  const [templateDirty, setTemplateDirty] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -131,27 +133,47 @@ const WhatsAppSettings = () => {
   };
 
   const saveTemplate = async (template: MessageTemplate) => {
+    if (!template.template_name.trim()) {
+      toast.error('שם התבנית לא יכול להיות רק');
+      return;
+    }
+    
+    if (!template.content.trim()) {
+      toast.error('תוכן התבנית לא יכול להיות רק');
+      return;
+    }
+
+    setSavingTemplate(true);
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('message_templates')
         .upsert({
           ...template,
           user_id: user!.id,
           updated_at: new Date().toISOString()
-        });
+        })
+        .select();
 
       if (error) {
         console.error('Error saving template:', error);
-        toast.error('שגיאה בשמירת התבנית');
+        toast.error('שמירת התבנית נכשלה, אנא נסה שנית');
+        return;
+      }
+
+      if (!data || data.length === 0) {
+        toast.error('שמירת התבנית נכשלה, אנא נסה שנית');
         return;
       }
 
       toast.success('התבנית נשמרה בהצלחה');
-      loadTemplates();
+      await loadTemplates();
       setSelectedTemplate(null);
+      setTemplateDirty(false);
     } catch (error) {
       console.error('Error saving template:', error);
-      toast.error('שגיאה בשמירת התבנית');
+      toast.error('שמירת התבנית נכשלה, אנא נסה שנית');
+    } finally {
+      setSavingTemplate(false);
     }
   };
 
@@ -428,15 +450,18 @@ const WhatsAppSettings = () => {
                       <Settings className="h-4 w-4 text-muted-foreground" />
                       שם התבנית
                     </Label>
-                    <Input
-                      id="template_name"
-                      value={selectedTemplate.template_name}
-                      onChange={(e) => setSelectedTemplate({
-                        ...selectedTemplate,
-                        template_name: e.target.value
-                      })}
-                      className="text-center h-11 bg-background border-border/70 focus:border-primary transition-colors"
-                    />
+                     <Input
+                       id="template_name"
+                       value={selectedTemplate.template_name}
+                       onChange={(e) => {
+                         setSelectedTemplate({
+                           ...selectedTemplate,
+                           template_name: e.target.value
+                         });
+                         setTemplateDirty(true);
+                       }}
+                       className="text-center h-11 bg-background border-border/70 focus:border-primary transition-colors"
+                     />
                   </div>
                   
                   <div className="space-y-2">
@@ -444,17 +469,20 @@ const WhatsAppSettings = () => {
                       <MessageSquare className="h-4 w-4 text-muted-foreground" />
                       תוכן ההודעה
                     </Label>
-                    <Textarea
-                      id="template_content"
-                      value={selectedTemplate.content}
-                      onChange={(e) => setSelectedTemplate({
-                        ...selectedTemplate,
-                        content: e.target.value
-                      })}
-                      rows={6}
-                      placeholder="השתמשי במשתנים כמו {customer_name}, {date}, {time}, {service}, {address}"
-                      className="text-center resize-none bg-background border-border/70 focus:border-primary transition-colors"
-                    />
+                     <Textarea
+                       id="template_content"
+                       value={selectedTemplate.content}
+                       onChange={(e) => {
+                         setSelectedTemplate({
+                           ...selectedTemplate,
+                           content: e.target.value
+                         });
+                         setTemplateDirty(true);
+                       }}
+                       rows={6}
+                       placeholder="השתמשי במשתנים כמו {customer_name}, {date}, {time}, {service}, {address}"
+                       className="text-center resize-none bg-background border-border/70 focus:border-primary transition-colors"
+                     />
                   </div>
                   
                   {/* Variables Guide */}
@@ -470,22 +498,37 @@ const WhatsAppSettings = () => {
                     </div>
                   </div>
                   
-                  {/* Action Buttons - Centered */}
-                  <div className="flex justify-center gap-3 pt-4">
-                    <Button 
-                      variant="outline" 
-                      onClick={() => setSelectedTemplate(null)}
-                      className="h-11 px-6 bg-background border-border/70 hover:bg-muted hover:border-primary transition-all"
-                    >
-                      ביטול
-                    </Button>
-                    <Button 
-                      onClick={() => saveTemplate(selectedTemplate)}
-                      className="h-11 px-6 bg-primary hover:bg-primary/90 text-primary-foreground font-medium transition-all shadow-sm hover:shadow-md"
-                    >
-                      שמור תבנית
-                    </Button>
-                  </div>
+                   {/* Action Buttons - Centered */}
+                   <div className="flex justify-center gap-3 pt-4">
+                     <Button 
+                       variant="outline" 
+                       onClick={() => {
+                         setSelectedTemplate(null);
+                         setTemplateDirty(false);
+                       }}
+                       className="h-11 px-6 bg-background border-border/70 hover:bg-muted hover:border-primary transition-all"
+                     >
+                       ביטול
+                     </Button>
+                     <Button 
+                       onClick={() => saveTemplate(selectedTemplate)}
+                       disabled={savingTemplate}
+                       className="h-11 px-6 bg-primary hover:bg-primary/90 text-primary-foreground font-medium transition-all shadow-sm hover:shadow-md disabled:opacity-50"
+                     >
+                       {savingTemplate ? (
+                         <div className="flex items-center gap-2">
+                           <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
+                           שומר תבנית...
+                         </div>
+                       ) : (
+                         <div className="flex items-center gap-2">
+                           <CheckCircle2 className="h-4 w-4" />
+                           שמור תבנית
+                           {templateDirty && <span className="text-xs opacity-75">(לא נשמר)</span>}
+                         </div>
+                       )}
+                     </Button>
+                   </div>
                 </CardContent>
               </Card>
             )}
