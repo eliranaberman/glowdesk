@@ -179,6 +179,11 @@ const Sidebar = ({
         icon: Bell
       },
       {
+        href: '/whatsapp-settings',
+        label: 'הגדרות WhatsApp',
+        icon: MessageSquare
+      },
+      {
         href: '/settings',
         label: 'הגדרות',
         icon: Settings
