@@ -261,10 +261,10 @@ const Sidebar = ({
     )}>
       <div className="flex-1 overflow-hidden px-3 py-4">
         <Link to="/dashboard" className="flex items-center justify-end pl-1.5 font-semibold mb-4">
-          <span className={cn("whitespace-nowrap text-center", isCollapsed && "hidden")}>by.chen.mizrahi</span>
+          <span className={cn("whitespace-nowrap text-center", isCollapsed && "hidden")}>GlowDesk</span>
           <Avatar className="ml-2 h-8 w-8">
-            <AvatarImage alt="Brand Logo" src="/lovable-uploads/9359e539-3bc2-4c89-abd8-c495b1f4754c.png" />
-            <AvatarFallback>CM</AvatarFallback>
+            <AvatarImage alt="GlowDesk Logo" src="/lovable-uploads/0e4258ab-3f33-4509-9612-764b036bb407.png" />
+            <AvatarFallback>GD</AvatarFallback>
           </Avatar>
         </Link>
         <ScrollArea className="flex-1 space-y-2 pt-2 h-[calc(100vh-120px)] text-right">
