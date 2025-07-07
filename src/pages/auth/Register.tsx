@@ -14,7 +14,9 @@ import { Eye, EyeOff, LogIn, UserPlus } from 'lucide-react';
 // Define form schema
 const registerSchema = z.object({
   fullName: z.string().min(2, { message: 'שם מלא חייב להכיל לפחות 2 תווים' }),
+  businessName: z.string().min(2, { message: 'שם העסק חייב להכיל לפחות 2 תווים' }),
   email: z.string().email({ message: 'נא להזין כתובת מייל תקינה' }),
+  phone: z.string().min(9, { message: 'מספר טלפון חייב להכיל לפחות 9 ספרות' }),
   password: z.string().min(6, { message: 'סיסמה חייבת להכיל לפחות 6 תווים' }),
   confirmPassword: z.string()
 }).refine((data) => data.password === data.confirmPassword, {
@@ -37,7 +39,9 @@ const Register = () => {
     resolver: zodResolver(registerSchema),
     defaultValues: {
       fullName: '',
+      businessName: '',
       email: '',
+      phone: '',
       password: '',
       confirmPassword: '',
     },
@@ -51,7 +55,9 @@ const Register = () => {
       const { success, error } = await signUp(
         values.email, 
         values.password,
-        values.fullName
+        values.fullName,
+        values.businessName,
+        values.phone
       );
       
       if (success) {
@@ -120,6 +126,24 @@ const Register = () => {
               
               <FormField
                 control={form.control}
+                name="businessName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>שם העסק</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="סטודיו יופי שלי"
+                        disabled={isLoading}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
                 name="email"
                 render={({ field }) => (
                   <FormItem>
@@ -129,6 +153,25 @@ const Register = () => {
                         placeholder="name@example.com"
                         type="email"
                         autoComplete="email"
+                        disabled={isLoading}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="phone"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>מספר טלפון</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="050-1234567"
+                        type="tel"
                         disabled={isLoading}
                         {...field}
                       />

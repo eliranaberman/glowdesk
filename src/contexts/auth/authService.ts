@@ -9,6 +9,8 @@ export const signUpUser = async (
   email: string, 
   password: string, 
   fullName: string,
+  businessName: string,
+  phone: string,
   toast: Toast
 ) => {
   try {
@@ -20,6 +22,8 @@ export const signUpUser = async (
       options: {
         data: {
           full_name: fullName,
+          business_name: businessName,
+          phone: phone,
         },
       },
     });
@@ -30,6 +34,24 @@ export const signUpUser = async (
     }
 
     console.log("✅ User signed up successfully:", data);
+
+    // Send welcome email
+    if (data.user) {
+      try {
+        const { supabase } = await import('@/lib/supabase');
+        await supabase.functions.invoke('send-welcome-email', {
+          body: {
+            email,
+            businessName,
+            fullName
+          }
+        });
+        console.log("✅ Welcome email sent");
+      } catch (emailError) {
+        console.error("Failed to send welcome email:", emailError);
+        // Don't fail the registration if email fails
+      }
+    }
     
     toast({
       title: "נרשמתם בהצלחה",

@@ -7,10 +7,13 @@ import { Button } from '@/components/ui/button';
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from '@/hooks/use-mobile';
 import { usePermissions } from '@/hooks/use-permissions';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/lib/supabase';
 import PermissionGuard from '@/components/auth/PermissionGuard';
 import BusinessAnalytics from '@/components/dashboard/BusinessAnalytics';
 import LazySection from '@/components/performance/LazySection';
 import { StatsSkeleton, ChartSkeleton, GridSkeleton } from '@/components/dashboard/DashboardSkeleton';
+import NewUserDashboard from '@/components/dashboard/NewUserDashboard';
 
 // Lazy load heavy components
 const DailySummary = React.lazy(() => import('../components/dashboard/DailySummary'));
@@ -24,20 +27,43 @@ const AnalyticsCharts = React.lazy(() => import('@/components/dashboard/Analytic
 
 const Dashboard = () => {
   const { toast } = useToast();
+  const { user } = useAuth();
   const isMobile = useIsMobile();
   const { isAdmin, isOwner } = usePermissions();
   const hasFinanceAccess = isAdmin || isOwner;
   const [isInitialLoading, setIsInitialLoading] = useState(true);
+  const [isNewUser, setIsNewUser] = useState(false);
+  const [hasData, setHasData] = useState(false);
   
-  // Initialize critical data first, defer marketing data
+  // Check if user is new and has data
   useEffect(() => {
-    const initCriticalData = async () => {
-      setIsInitialLoading(false);
+    const checkUserStatus = async () => {
+      if (!user) return;
+
+      try {
+        // Check if user has any clients, appointments, or expenses
+        const [clientsResult, appointmentsResult, expensesResult] = await Promise.all([
+          supabase.from('clients').select('id').eq('user_id', user.id).limit(1),
+          supabase.from('appointments').select('id').eq('user_id', user.id).limit(1),
+          supabase.from('expenses').select('id').eq('created_by', user.id).limit(1)
+        ]);
+
+        const hasClients = clientsResult.data && clientsResult.data.length > 0;
+        const hasAppointments = appointmentsResult.data && appointmentsResult.data.length > 0;
+        const hasExpenses = expensesResult.data && expensesResult.data.length > 0;
+
+        setHasData(hasClients || hasAppointments || hasExpenses);
+        setIsNewUser(!hasClients && !hasAppointments && !hasExpenses);
+      } catch (error) {
+        console.error('Error checking user status:', error);
+      } finally {
+        setIsInitialLoading(false);
+      }
     };
-    
-    initCriticalData();
-    
-    // Initialize marketing data in background (non-blocking)
+
+    checkUserStatus();
+
+    // Initialize marketing data in background (non-blocking) 
     const initMarketingData = async () => {
       try {
         const { initializeMarketingData } = await import('@/services/marketing');
@@ -49,7 +75,7 @@ const Dashboard = () => {
     
     // Defer marketing data loading
     setTimeout(initMarketingData, 1000);
-  }, []);
+  }, [user]);
   
   const stats = [
     { 
@@ -179,6 +205,11 @@ const Dashboard = () => {
         <GridSkeleton />
       </div>
     );
+  }
+
+  // Show new user dashboard if user is new
+  if (isNewUser) {
+    return <NewUserDashboard />;
   }
 
   return (

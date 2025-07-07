@@ -107,8 +107,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, [navigate, toast, location.pathname]);
 
   // Auth methods wrapper
-  const signUp = async (email: string, password: string, fullName: string) => {
-    return await signUpUser(email, password, fullName, toast);
+  const signUp = async (email: string, password: string, fullName: string, businessName?: string, phone?: string) => {
+    return await signUpUser(email, password, fullName, businessName || '', phone || '', toast);
   };
 
   const signIn = async (email: string, password: string, rememberMe = false) => {

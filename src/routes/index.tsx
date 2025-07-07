@@ -40,6 +40,7 @@ import FinancialReports from '@/pages/finances/FinancialReports';
 import NewPayment from '@/pages/payments/NewPayment';
 import OnlineBooking from '@/pages/OnlineBooking';
 import InitialSetupPage from '@/pages/InitialSetupPage';
+import SetupPage from '@/pages/SetupPage';
 import Customers from '@/pages/Customers';
 import BusinessInsightsPage from '@/pages/BusinessInsightsPage';
 
@@ -63,6 +64,7 @@ export default function AppRoutes() {
       <Route path="/register" element={<Register />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/setup" element={<SetupPage />} />
       <Route path="/" element={<Index />} />
 
       {/* Protected routes with layout */}

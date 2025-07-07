@@ -6,7 +6,7 @@ export type AuthContextType = {
   session: Session | null;
   isLoading: boolean;
   isAdmin: boolean;
-  signUp: (email: string, password: string, fullName: string) => Promise<{
+  signUp: (email: string, password: string, fullName: string, businessName?: string, phone?: string) => Promise<{
     success: boolean;
     error: string | null;
   }>;
